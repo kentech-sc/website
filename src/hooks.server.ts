@@ -55,6 +55,9 @@ const authorizationHandle: Handle = async ({ event, resolve }) => {
 
 	if (session?.user?.email) {
 		// Authorized
+		if (event.url.pathname.startsWith('/signin')) {
+			redirect(303, '/');
+		}
 
 		const user = await getUser(session?.user?.email);
 		event.locals.user = user;
