@@ -1,0 +1,38 @@
+.hidden {
+	display: none;
+}
+
+.external-link {
+	color: green;
+}
+
+.nonexistent-link {
+	color: red;
+}
+
+.container {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.container-col {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-direction: column;
+}
+
+.module {
+	margin: 1rem;
+	padding: 1rem;
+	border: solid grey 0.1rem;
+	background-color: white;
+}
+
+.warn-btn {
+	background-color: var(--color-error-back);
+	&:hover {
+		background-color: var(--color-error-hover);
+	}
+}

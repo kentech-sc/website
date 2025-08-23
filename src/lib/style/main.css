@@ -1,0 +1,58 @@
+@import './base.scss';
+@import './components.scss';
+
+@font-face {
+	font-family: 'NanumGothic';
+	font-weight: 700;
+	src: url('/fonts/nanum-gothic-700.woff2') format('woff2');
+	/* unicode-range: U+AC00-D7A3, U+0021-007E; */
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'NanumGothic';
+	font-weight: 400;
+	src: url('/fonts/nanum-gothic-400.woff2') format('woff2');
+	/* unicode-range: U+AC00-D7A3, U+0021-007E; */
+	font-display: swap;
+}
+
+/* @font-face {
+	font-family: 'NanumBarunpen';
+	font-weight: 400;
+	src: url('/fonts/NanumBarunpenR.woff2') format('woff2');
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'NanumBarunpen';
+	font-weight: 700;
+	src: url('/fonts/NanumBarunpenB.woff2') format('woff2');
+	font-display: swap;
+} */
+
+/* @font-face {
+	font-family: 'Arial';
+	src: local('Arial');
+	unicode-range: U+005C;
+} */
+
+:root {
+	--color-primary-1: rgb(100, 50, 250);
+	--color-primary-2: rgb(50, 100, 200);
+	--color-primary-3: rgb(100, 200, 250);
+	--color-error: rgb(255, 50, 50);
+	--color-error-back: rgb(255, 240, 240);
+	--color-error-hover: rgb(255, 220, 220);
+	--color-warn: rgb(255, 200, 50);
+	--color-warn-back: rgb(255, 245, 220);
+	--color-success: rgb(50, 255, 50);
+	--color-success-back: rgb(245, 255, 245);
+	--color-info: rgb(40, 220, 240);
+	--color-info-back: rgb(245, 255, 255);
+	--color-info-hover: rgb(230, 255, 255);
+	--color-gray-1: rgb(250, 250, 250);
+	--color-gray-2: rgb(245, 245, 245);
+	--color-gray-3: rgb(230, 230, 230);
+	--color-gray-4: rgb(220, 220, 220);
+}
