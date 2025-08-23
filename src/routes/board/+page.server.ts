@@ -15,6 +15,7 @@ export const actions = {
 		if (!title || !content) return fail(400, { message: 'title, content are required' });
 
 		const post = await BoardManager.createPostByBoardId('main', title, content, locals.user._id);
+		post.userName = locals.user.name;
 		return { post: JSON.stringify(post) };
 	}
 };

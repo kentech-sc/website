@@ -26,10 +26,11 @@ export const actions = {
 
 		if (!score || !comment) return fail(400, { message: 'score, comment are required' });
 
+		const review = await CourseReviewManager.createReviewByCourseId(courseId, locals.user._id, score, comment);
+		review.userName = locals.user.name;
+
 		return {
-			review: JSON.stringify(
-				await CourseReviewManager.createReviewByCourseId(courseId, locals.user._id, score, comment)
-			)
+			review: JSON.stringify(review)
 		};
 	},
 	deleteCourse: async ({ request }) => {
