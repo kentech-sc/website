@@ -1,17 +1,21 @@
 <script lang="ts">
 	import '$lib/style/main.css';
-	import favicon from '$lib/assets/favicon.svg';
+	import favicon from '$lib/assets/kentech.ico';
 	import { signOut } from '@auth/sveltekit/client';
+	import { page } from '$app/state';
 
 	let { children } = $props();
+
+	const user = $derived(JSON.parse(page.data.user ?? '{}'));
 </script>
 
 <svelte:head>
+	<title>켄텍 학생회</title>
 	<link rel="icon" href={favicon} />
 </svelte:head>
 
 <header class="container module">
-	<img src="" alt="logo" />
+	<img src={favicon} alt="logo" />
 	<nav>
 		<a href="/">Home</a>
 		|
@@ -20,8 +24,8 @@
 		<a href="/review">강의평가</a>
 	</nav>
 	<div>
-		<input type="text" placeholder="검색" />
-		<button>Search</button>
+		<input type="text" placeholder="검색(장식임)" />
+		<button>검색</button>
 	</div>
 </header>
 
@@ -32,7 +36,12 @@
 		</aside>
 		<aside class="module">
 			<h2>프로필</h2>
-			<button onclick={() => signOut()}>Sign out</button>
+			{#if user?.email}
+				<hr />
+				<!-- <p>{user.email}</p> -->
+				<p>{user.name}</p>
+				<button onclick={() => signOut()}>로그아웃</button>
+			{/if}
 		</aside>
 		<aside class="module" id="shortcut-aside">
 			<h2>바로가기</h2>
@@ -64,6 +73,10 @@
 
 	aside {
 		margin: 1rem;
+	}
+
+	img {
+		width: 1.5rem;
 	}
 
 	header {
