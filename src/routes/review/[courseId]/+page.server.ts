@@ -26,7 +26,12 @@ export const actions = {
 
 		if (!score || !comment) return fail(400, { message: 'score, comment are required' });
 
-		const review = await CourseReviewManager.createReviewByCourseId(courseId, locals.user._id, score, comment);
+		const review = await CourseReviewManager.createReviewByCourseId(
+			courseId,
+			locals.user._id,
+			score,
+			comment
+		);
 		review.userName = locals.user.name;
 
 		return {

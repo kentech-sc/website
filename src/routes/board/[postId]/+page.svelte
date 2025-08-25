@@ -66,25 +66,29 @@
 	</section>
 
 	<section class="container-col module">
-		{#each commentArr as comment (comment._id)}
-			<div class="container comment-div">
-				<p><b>[{comment.userName}]</b> {comment.content}</p>
-				<div class="container">
-					<p>{GeneralUtils.parseDate(comment.createdAt)}</p>
-					{#if comment.userId === user._id}
-						<form
-							method="post"
-							action="?/deleteComment"
-							data-sveltekit-replacestate
-							use:enhance={handleEnhance}
-						>
-							<input type="hidden" name="comment-id" value={comment._id} />
-							<button type="submit">삭제</button>
-						</form>
-					{/if}
+		{#if commentArr.length === 0}
+			<p>작성된 댓글이 없습니다.</p>
+		{:else}
+			{#each commentArr as comment (comment._id)}
+				<div class="container comment-div">
+					<p><b>[{comment.userName}]</b> {comment.content}</p>
+					<div class="container">
+						<p>{GeneralUtils.parseDate(comment.createdAt)}</p>
+						{#if comment.userId === user._id}
+							<form
+								method="post"
+								action="?/deleteComment"
+								data-sveltekit-replacestate
+								use:enhance={handleEnhance}
+							>
+								<input type="hidden" name="comment-id" value={comment._id} />
+								<button type="submit">삭제</button>
+							</form>
+						{/if}
+					</div>
 				</div>
-			</div>
-		{/each}
+			{/each}
+		{/if}
 
 		<form
 			id="comment-form"
@@ -95,7 +99,7 @@
 			use:enhance={handleEnhance}
 		>
 			<span><b>[{user.name}]</b></span>&nbsp;
-			<input type="text" name="content" autocomplete="off"/>
+			<input type="text" name="content" autocomplete="off" />
 			<button type="submit">작성</button>
 		</form>
 
@@ -130,11 +134,11 @@
 	.comment-div {
 		width: 100%;
 		justify-content: space-between;
-		padding: .25rem;
-		border-bottom: solid gray .1rem;
+		padding: 0.25rem;
+		border-bottom: solid gray 0.1rem;
 
 		button {
-			margin-left: .5rem;
+			margin-left: 0.5rem;
 		}
 	}
 
@@ -142,16 +146,16 @@
 		justify-content: space-between;
 		width: 100%;
 		margin-top: 1rem;
-		padding: .25rem;
+		padding: 0.25rem;
 		input {
-			padding: .5rem;
+			padding: 0.5rem;
 			font-size: 1rem;
 			width: stretch;
 		}
 
 		button {
 			word-break: keep-all;
-			margin-left: .5rem;
+			margin-left: 0.5rem;
 		}
 	}
 

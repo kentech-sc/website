@@ -49,7 +49,6 @@
 </footer>
 
 <style lang="scss">
-
 	#layout {
 		align-items: flex-start;
 	}
@@ -67,8 +66,8 @@
 		margin: 1rem;
 	}
 
-	header{
-		padding: .5rem;
+	header {
+		padding: 0.5rem;
 		justify-content: space-between;
 		position: sticky;
 		top: 0;
@@ -79,7 +78,7 @@
 	// }
 
 	main {
-		margin: .5rem;
+		margin: 0.5rem;
 		flex: 1;
 		max-width: 70vw;
 	}

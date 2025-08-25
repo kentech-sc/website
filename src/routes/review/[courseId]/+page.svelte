@@ -44,67 +44,114 @@
 	}
 </script>
 
-<h1>Course Review</h1>
+<div id="layout" class="container-col">
+	<header class="container module">
+		<h1>강의 평가</h1>
+		<a href="/review">목록</a>
+	</header>
 
-<div class="container-col">
-	<h2>{course.title}</h2>
-	<p>Content: {course.content}</p>
-	<p>Professor: {course.professor}</p>
-	<p>Score: {course.totalScore}</p>
-	<p>Review Count: {course.reviewCnt}</p>
-	<!-- {#if course.userId === user._id}
+	<section class="container-col module">
+		<h2>{course.title}</h2>
+		<p>강의 내용: {course.content}</p>
+		<p>교수님: {course.professor}</p>
+		<p>리뷰 수: {course.reviewCnt}</p>
+		<p>평균 점수: {Math.round((course.totalScore / course.reviewCnt) * 100) / 100}/10</p>
+		<!-- {#if course.userId === user._id}
 		<form method="post" action="?/deletePost">
 			<input type="hidden" name="post-id" value={post._id} />
 			<button type="submit">Delete</button>
 		</form>
 	{/if} -->
+	</section>
+
+	<section class="container-col module">
+		{#if reviewArr.length === 0}
+			<p>작성된 리뷰가 없습니다.</p>
+		{:else}
+			{#each reviewArr as review (review._id)}
+				<div class="container review-div">
+					<p><strong>[{review.userName}] ({review.score}/10)</strong></p>
+					<p>{review.comment}</p>
+					<div class="container">
+						<p>{GeneralUtils.parseDate(review.createdAt)}</p>
+						{#if review.userId === user._id}
+							<form
+								method="post"
+								action="?/deleteReview"
+								data-sveltekit-replacestate
+								use:enhance={handleEnhance}
+							>
+								<input type="hidden" name="review-id" value={review._id} />
+								<button type="submit">삭제</button>
+							</form>
+						{/if}
+					</div>
+				</div>
+			{/each}
+		{/if}
+	</section>
+
+	<section class="container-col module" id="new-review-section">
+		<h2>리뷰 남기기</h2>
+		<form
+			method="post"
+			action="?/createReview"
+			class="container"
+			data-sveltekit-replacestate
+			use:enhance={handleEnhance}
+		>
+			<label for="score">점수 (0~10정수):&nbsp;</label>
+			<input type="number" id="score" name="score" />
+			<label for="comment">한줄평:&nbsp;</label>
+			<input type="text" id="comment" name="comment" />
+			<button type="submit">작성</button>
+		</form>
+
+		{#if errorMsg}
+			<p>{errorMsg}</p>
+		{/if}
+	</section>
 </div>
 
-<hr />
+<style lang="scss">
+	#layout {
+		width: 100%;
+	}
 
-{#each reviewArr as review (review._id)}
-	<div class="container">
-		<p>Score: {review.score}</p>
-		<p>Comment: {review.comment}</p>
-		<p>UserName: {review.userName}</p>
-		<p>Date: {GeneralUtils.parseDate(review.createdAt)}</p>
-		{#if review.userId === user._id}
-			<form
-				method="post"
-				action="?/deleteReview"
-				data-sveltekit-replacestate
-				use:enhance={handleEnhance}
-			>
-				<input type="hidden" name="review-id" value={review._id} />
-				<button type="submit">Delete</button>
-			</form>
-		{/if}
-	</div>
-{/each}
+	header {
+		width: 100%;
+		margin: 0.5rem;
+		justify-content: space-between;
+	}
 
-<hr />
+	section {
+		width: 100%;
+		margin: 0.5rem;
+	}
 
-<h2>리뷰 남기기</h2>
-<form
-	method="post"
-	action="?/createReview"
-	class="container"
-	data-sveltekit-replacestate
-	use:enhance={handleEnhance}
->
-	<label for="score">Score (0~10정수)</label>
-	<input type="number" name="score" />
-	<label for="comment">Comment</label>
-	<input type="text" name="comment" />
-	<button type="submit">Submit</button>
-</form>
+	.review-div {
+		width: 100%;
+		justify-content: space-between;
 
-{#if errorMsg}
-	<p>{errorMsg}</p>
-{/if}
+		button {
+			margin-left: 0.5rem;
+		}
+	}
 
-<style>
-	div {
-		display: flex;
+	#new-review-section form {
+		width: 100%;
+		word-break: keep-all;
+		white-space: nowrap;
+		input {
+			margin-right: 1rem;
+		}
+
+		input:nth-child(2) {
+			width: 10%;
+		}
+
+		input:nth-child(4) {
+			width: stretch;
+		}
 	}
 </style>

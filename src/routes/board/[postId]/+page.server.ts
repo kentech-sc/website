@@ -19,7 +19,11 @@ export const actions = {
 
 		if (!content) return fail(400, { message: 'content is required' });
 
-		const comment = await BoardManager.createCommentByPostId(postId as PostId, content, locals.user._id)
+		const comment = await BoardManager.createCommentByPostId(
+			postId as PostId,
+			content,
+			locals.user._id
+		);
 		comment.userName = locals.user.name;
 		return {
 			comment: JSON.stringify(comment)
