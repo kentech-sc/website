@@ -40,62 +40,124 @@
 	}
 </script>
 
-<h1>Board</h1>
+<div id="layout" class="container-col">
+	<header class="container module">
+		<h1>자유게시판</h1>
+		<a href="/board">목록</a>
+	</header>
 
-<div class="container-col">
-	<h2>{post.title}</h2>
-	<p>{post.content}</p>
-	<p>{post.userName}</p>
-	<p>{GeneralUtils.parseDate(post.createdAt)}</p>
-	{#if post.userId === user._id}
-		<form method="post" action="?/deletePost">
-			<input type="hidden" name="post-id" value={post._id} />
-			<button type="submit">Delete</button>
+	<section class="container-col module">
+		<article>
+			<header class="container">
+				<div class="container-col">
+					<h2>{post.title}</h2>
+					<p>{post.userName} | {GeneralUtils.parseDate(post.createdAt)}</p>
+				</div>
+				{#if post.userId === user._id}
+					<form method="post" action="?/deletePost">
+						<input type="hidden" name="post-id" value={post._id} />
+						<button type="submit">삭제</button>
+					</form>
+				{/if}
+			</header>
+			<hr />
+			<pre>{post.content}</pre>
+		</article>
+	</section>
+
+	<section class="container-col module">
+		{#each commentArr as comment (comment._id)}
+			<div class="container comment-div">
+				<p><b>[{comment.userName}]</b> {comment.content}</p>
+				<div class="container">
+					<p>{GeneralUtils.parseDate(comment.createdAt)}</p>
+					{#if comment.userId === user._id}
+						<form
+							method="post"
+							action="?/deleteComment"
+							data-sveltekit-replacestate
+							use:enhance={handleEnhance}
+						>
+							<input type="hidden" name="comment-id" value={comment._id} />
+							<button type="submit">삭제</button>
+						</form>
+					{/if}
+				</div>
+			</div>
+		{/each}
+
+		<form
+			id="comment-form"
+			method="post"
+			action="?/createComment"
+			class="container"
+			data-sveltekit-replacestate
+			use:enhance={handleEnhance}
+		>
+			<span><b>[{user.name}]</b></span>&nbsp;
+			<input type="text" name="content" autocomplete="off"/>
+			<button type="submit">작성</button>
 		</form>
-	{/if}
+
+		{#if errorMsg}
+			<p>{errorMsg}</p>
+		{/if}
+	</section>
 </div>
 
-<hr />
-
-{#each commentArr as comment (comment._id)}
-	<div class="container">
-		<p>{comment.content}</p>
-		<p>{comment.userName}</p>
-		<p>{GeneralUtils.parseDate(comment.createdAt)}</p>
-		{#if comment.userId === user._id}
-			<form
-				method="post"
-				action="?/deleteComment"
-				data-sveltekit-replacestate
-				use:enhance={handleEnhance}
-			>
-				<input type="hidden" name="comment-id" value={comment._id} />
-				<button type="submit">Delete</button>
-			</form>
-		{/if}
-	</div>
-{/each}
-
-<hr />
-
-<form
-	method="post"
-	action="?/createComment"
-	class="container"
-	data-sveltekit-replacestate
-	use:enhance={handleEnhance}
->
-	<label for="content">Comment</label>
-	<input type="text" name="content" />
-	<button type="submit">Submit</button>
-</form>
-
-{#if errorMsg}
-	<p>{errorMsg}</p>
-{/if}
-
 <style>
-	div {
-		display: flex;
+	#layout {
+		width: 100%;
+	}
+
+	section {
+		width: 100%;
+		margin: 0.5rem;
+	}
+
+	article {
+		width: stretch;
+
+		header > div {
+			align-items: flex-start;
+		}
+
+		pre {
+			margin: 0.5rem;
+		}
+	}
+
+	.comment-div {
+		width: 100%;
+		justify-content: space-between;
+		padding: .25rem;
+		border-bottom: solid gray .1rem;
+
+		button {
+			margin-left: .5rem;
+		}
+	}
+
+	#comment-form {
+		justify-content: space-between;
+		width: 100%;
+		margin-top: 1rem;
+		padding: .25rem;
+		input {
+			padding: .5rem;
+			font-size: 1rem;
+			width: stretch;
+		}
+
+		button {
+			word-break: keep-all;
+			margin-left: .5rem;
+		}
+	}
+
+	header {
+		width: 100%;
+		margin: 0.5rem;
+		justify-content: space-between;
 	}
 </style>

@@ -1,11 +1,63 @@
 <script lang="ts">
-	import { signOut } from '@auth/sveltekit/client';
 </script>
 
-<h1>Welcome</h1>
-<p>여기는 켄텍 총학생회 웹사이트여</p>
+<div class="module" id="banner-div">
+<p>(대충 배너)</p>
+</div>
 
-<a href="/board">자유게시판</a>
-<a href="/review">강의평가</a>
+<div class="module" id="calendar-div">
+<p>(대충 달력)</p>
+</div>
 
-<button onclick={() => signOut()}>Sign out</button>
+<div class="module" id="photo-div">
+<p>(대충 사진)</p>
+</div>
+
+<div id="layout">
+<section class="module">
+    <h2>공지사항</h2>
+    <p>작성된 공지사항이 없습니다.</p>
+</section>
+<section class="module">
+    <h2>청원</h2>
+    <p>작성된 글이 없습니다.</p>
+</section>
+<section class="module">
+    <h2>자유게시판</h2>
+    <p>작성된 글이 없습니다.</p>
+</section>
+<section class="module">
+    <h2>강의평가</h2>
+    <p>작성된 리뷰가 없습니다.</p>
+</section>
+</div>
+
+<style lang="scss">
+
+    div {
+        margin: .5rem;
+    }
+
+    #banner-div {
+        width: 100%;
+    }
+
+    #calendar-div {
+        width: 100%;
+    }
+
+    #photo-div {
+        width: 100%;
+    }
+
+    #layout {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+    }
+
+    section {
+        display: flex;
+        flex-direction: column;
+    }
+</style>
