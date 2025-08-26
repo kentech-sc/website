@@ -3,8 +3,8 @@ import type { Handle, ServerInit } from '@sveltejs/kit';
 import { redirect } from '@sveltejs/kit';
 import { sequence } from '@sveltejs/kit/hooks';
 
-// import { WIKI_MONGO_URI, AWS_BUCKET_NAME, AWS_ID, AWS_SECRET } from '$env/static/private';
-import { WIKI_MONGO_URI } from '$env/static/private';
+// import { AWS_BUCKET_NAME, AWS_ID, AWS_SECRET } from '$env/static/private';
+import { MONGO_URI } from '$env/static/private';
 
 import { handle as authenticationHandle } from './auth.js';
 import DBManager from '$lib/general/db.js';
@@ -28,8 +28,8 @@ function checkEnv() {
 	// if (PUBLIC_REQUIRE_LOGIN !== 'true' && PUBLIC_REQUIRE_LOGIN !== 'false') {
 	// 	throw new Error('"PUBLIC_REQUIRE_LOGIN" must be "true" or "false"!');
 	// }
-	if (WIKI_MONGO_URI === undefined) {
-		throw new Error('Please set "WIKI_MONGO_URI" in the .env file!');
+	if (MONGO_URI === undefined) {
+		throw new Error('Please set "MONGO_URI" in the .env file!');
 	}
 	// if (AWS_BUCKET_NAME === undefined) {
 	// 	throw new Error('Please set "AWS_BUCKET_NAME" in the .env file!');
@@ -45,9 +45,9 @@ function checkEnv() {
 export const init: ServerInit = async () => {
 	checkEnv();
 
-	await DBManager.init(WIKI_MONGO_URI);
+	await DBManager.init(MONGO_URI);
 
-	console.log('[Wiki Is Ready]');
+	console.log('[Server Is Ready]');
 };
 
 const authorizationHandle: Handle = async ({ event, resolve }) => {

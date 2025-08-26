@@ -135,5 +135,3 @@ export default class GeneralUtils {
 	//     return b;
 	// }
 }
-
-// export class WikiComparator {}
