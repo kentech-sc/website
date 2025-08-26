@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Course } from '$lib/courseReview/type';
+	import type { Course } from '$lib/courseReview/types.js';
 
 	let { data } = $props();
 	const courseArr = $state<Course[]>(JSON.parse(data?.courseArr || '[]'));

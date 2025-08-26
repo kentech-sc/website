@@ -1,5 +1,5 @@
-import type { UserId } from '$lib/user/type';
-import type { Types } from 'mongoose';
+import type { UserId } from '$lib/user/types';
+import type { UpdateQuery, Types } from 'mongoose';
 
 export type ReviewId = Types.ObjectId;
 export type CourseId = Types.ObjectId;
@@ -19,7 +19,7 @@ export interface Course extends CourseBase {
 }
 
 export type CourseCreate = CourseBase;
-export type CourseUpdate = Partial<Pick<CourseBase, 'title' | 'content' | 'professor'>>;
+export type CourseUpdate = UpdateQuery<Pick<CourseBase, 'title' | 'content' | 'professor'>>;
 
 export interface ReviewBase {
 	courseId: CourseId;
@@ -36,4 +36,4 @@ export interface Review extends ReviewBase {
 }
 
 export type ReviewCreate = ReviewBase;
-export type ReviewUpdate = Partial<Pick<ReviewBase, 'score' | 'comment'>>;
+export type ReviewUpdate = UpdateQuery<Pick<ReviewBase, 'score' | 'comment'>>;

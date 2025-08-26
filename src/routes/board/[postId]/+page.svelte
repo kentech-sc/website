@@ -2,8 +2,8 @@
 	import { page } from '$app/state';
 	import { enhance } from '$app/forms';
 	import type { ActionResult } from '@sveltejs/kit';
-	import type { Comment } from '$lib/board/type';
-	import GeneralUtils from '$lib/utils/general';
+	import type { Comment } from '$lib/board/types.js';
+	import GeneralUtils from '$lib/general/utils.js';
 
 	let { data } = $props();
 

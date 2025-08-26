@@ -7,12 +7,12 @@ import type {
 	ReviewCreate,
 	ReviewUpdate,
 	ReviewId
-} from './type.js';
+} from './types.js';
 import { ReviewModel, CourseModel } from './model.js';
-import type { UserId } from '$lib/user/type.js';
+import type { UserId } from '$lib/user/types.js';
 
 export class CourseController {
-	static async setCourse(course: CourseCreate): Promise<Course> {
+	static async createCourse(course: CourseCreate): Promise<Course> {
 		return (await CourseModel.create(course)).toObject();
 	}
 
@@ -24,8 +24,11 @@ export class CourseController {
 		return await CourseModel.find().sort({ createdAt: -1 }).lean();
 	}
 
-	static async updateCourseByCourseId(courseId: CourseId, course: CourseUpdate): Promise<void> {
-		await CourseModel.updateOne({ _id: courseId }, course);
+	static async updateCourseByCourseId(
+		courseId: CourseId,
+		course: CourseUpdate
+	): Promise<Course | null> {
+		return await CourseModel.findOneAndUpdate({ _id: courseId }, course, { new: true }).lean();
 	}
 
 	static async deleteCourseByCourseId(courseId: CourseId): Promise<void> {
@@ -34,6 +37,21 @@ export class CourseController {
 }
 
 export class ReviewController {
+	static async createReview(review: ReviewCreate): Promise<Review> {
+		const newReview = (await ReviewModel.create(review)).toObject();
+
+		await CourseModel.updateOne(
+			{
+				_id: review.courseId
+			},
+			{
+				$inc: { totalScore: review.score, reviewCnt: 1 }
+			}
+		);
+
+		return newReview;
+	}
+
 	static async getReviewByReviewId(reviewId: ReviewId): Promise<Review | null> {
 		return await ReviewModel.findOne({ _id: reviewId }).lean();
 	}
@@ -53,21 +71,6 @@ export class ReviewController {
 		return await ReviewModel.findOne({ courseId, userId }).lean();
 	}
 
-	static async setReview(review: ReviewCreate): Promise<Review> {
-		const newReview = (await ReviewModel.create(review)).toObject();
-
-		await CourseModel.updateOne(
-			{
-				_id: review.courseId
-			},
-			{
-				$inc: { totalScore: review.score, reviewCnt: 1 }
-			}
-		);
-
-		return newReview;
-	}
-
 	static async updateReviewByReviewId(
 		reviewId: ReviewId,
 		review: ReviewUpdate
@@ -75,7 +78,7 @@ export class ReviewController {
 		const oldReview = await this.getReviewByReviewId(reviewId);
 		if (!oldReview) return null;
 		await this.deleteReviewByReviewId(reviewId);
-		await this.setReview({
+		await this.createReview({
 			courseId: oldReview.courseId,
 			userId: oldReview.userId,
 			score: review?.score ?? oldReview.score,

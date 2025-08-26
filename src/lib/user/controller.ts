@@ -1,9 +1,9 @@
-import type { User, UserCreate, UserUpdate, UserId } from './type';
+import type { User, UserCreate, UserUpdate, UserId } from './types';
 
 import UserModel from './model.js';
 
 export default class UserController {
-	static async setUser(user: UserCreate): Promise<User> {
+	static async createUser(user: UserCreate): Promise<User> {
 		return (await UserModel.create(user)).toObject();
 	}
 

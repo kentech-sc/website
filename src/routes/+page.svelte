@@ -1,7 +1,7 @@
 <script lang="ts">
-	import type { Course } from '$lib/courseReview/type.js';
-	import type { Post } from '$lib/board/type.js';
-	import GeneralUtils from '$lib/utils/general';
+	import type { Course } from '$lib/courseReview/types.js';
+	import type { Post } from '$lib/board/types.js';
+	import GeneralUtils from '$lib/general/utils.js';
 
 	let { data } = $props();
 	let courseArr = $state<Course[]>(JSON.parse(data?.courseArr || '[]'));

@@ -16,8 +16,9 @@ export const actions = {
 		if (!title || !content || !professor)
 			return fail(400, { message: 'title, content, professor are required' });
 
-		const course = await CourseReviewManager.createCourse(title, content, professor);
-		// return { course: JSON.stringify(course) };
+		const course_res = await CourseReviewManager.createCourse(title, content, professor);
+		if (!course_res.ok) return fail(400, { message: course_res.error });
+		const course = course_res.value;
 		redirect(302, '/review/' + course._id);
 	}
 };

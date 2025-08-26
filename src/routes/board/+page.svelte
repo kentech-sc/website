@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { Post } from '$lib/board/type';
-	import GeneralUtils from '$lib/utils/general';
+	import type { Post } from '$lib/board/types.js';
+	import GeneralUtils from '$lib/general/utils.js';
 
 	let { data } = $props();
 	const postArr = $state<Post[]>(JSON.parse(data?.postArr || '[]'));

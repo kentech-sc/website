@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import type { Course, Review } from './type.js';
+import type { Course, Review } from './types.js';
 
 const CourseSchema = new mongoose.Schema(
 	{

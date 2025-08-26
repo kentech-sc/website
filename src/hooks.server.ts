@@ -7,15 +7,15 @@ import { sequence } from '@sveltejs/kit/hooks';
 import { WIKI_MONGO_URI } from '$env/static/private';
 
 import { handle as authenticationHandle } from './auth.js';
-import DBManager from '$lib/db.js';
+import DBManager from '$lib/general/db.js';
 import UserManager from '$lib/user/manager.js';
-import type { User } from '$lib/user/type.js';
+import type { User } from '$lib/user/types.js';
 
 async function getUser(email: string): Promise<User> {
 	let user: User | null = await UserManager.getUserByEmail(email);
 	if (user === null) {
 		const res = await UserManager.signupUserByEmailAndName(email, email.split('@')[0]);
-		if (!res.ok) throw new Error(res.reason);
+		if (!res.ok) throw new Error(res.error);
 		user = res.value as User;
 	}
 	return user;

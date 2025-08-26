@@ -1,4 +1,4 @@
-import type { Types } from 'mongoose';
+import type { UpdateQuery, Types } from 'mongoose';
 
 export type Group = 'none' | 'any' | 'guest' | 'user' | 'dev' | 'manager' | 'blocked' | UserId;
 export type UserId = Types.ObjectId;
@@ -16,4 +16,4 @@ export interface User extends UserBase {
 }
 
 export type UserCreate = UserBase;
-export type UserUpdate = Partial<Pick<UserBase, 'name' | 'group'>>;
+export type UserUpdate = UpdateQuery<Pick<UserBase, 'name' | 'group'>>;

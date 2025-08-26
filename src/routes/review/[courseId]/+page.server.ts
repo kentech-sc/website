@@ -1,6 +1,6 @@
 import CourseReviewManager from '$lib/courseReview/manager';
-import type { CourseId, ReviewId } from '$lib/courseReview/type';
-import { fail, redirect } from '@sveltejs/kit';
+import type { CourseId, ReviewId } from '$lib/courseReview/types';
+import { error, fail, redirect } from '@sveltejs/kit';
 import { Types } from 'mongoose';
 
 export const load = async ({ params }) => {
@@ -8,8 +8,14 @@ export const load = async ({ params }) => {
 	if (!courseIdRaw || typeof courseIdRaw !== 'string')
 		return fail(400, { message: 'courseId is undefined or invalid' });
 	const courseId = new Types.ObjectId(courseIdRaw);
-	const course = await CourseReviewManager.getCourseByCourseId(courseId);
-	const reviewArr = (await CourseReviewManager.getReviewArrByCourseId(courseId)).reverse();
+
+	const course_res = await CourseReviewManager.getCourseByCourseId(courseId);
+	if (!course_res.ok) error(400, { message: course_res.error });
+	const course = course_res.value;
+
+	const review_res = await CourseReviewManager.getReviewArrByCourseId(courseId);
+	if (!review_res.ok) error(400, { message: review_res.error });
+	const reviewArr = review_res.value.reverse();
 
 	return { course: JSON.stringify(course), reviewArr: JSON.stringify(reviewArr) };
 };
@@ -26,12 +32,14 @@ export const actions = {
 
 		if (!score || !comment) return fail(400, { message: 'score, comment are required' });
 
-		const review = await CourseReviewManager.createReviewByCourseId(
+		const review_res = await CourseReviewManager.createReviewByCourseId(
 			courseId,
 			locals.user._id,
 			score,
 			comment
 		);
+		if (!review_res.ok) return fail(400, { message: review_res.error });
+		const review = review_res.value;
 		review.userName = locals.user.name;
 
 		return {
@@ -53,8 +61,9 @@ export const actions = {
 		if (!reviewIdRaw || typeof reviewIdRaw !== 'string')
 			return fail(400, { message: 'reviewId is undefined or invalid' });
 		const reviewId: ReviewId = new Types.ObjectId(reviewIdRaw);
-		const updatedCourse = await CourseReviewManager.deleteReviewByReviewId(reviewId);
-		if (!updatedCourse) return fail(400, { message: 'reviewId is undefined or invalid' });
-		return { reviewIdRaw, course: JSON.stringify(updatedCourse) };
+		const course_res = await CourseReviewManager.deleteReviewByReviewId(reviewId);
+		if (!course_res.ok) return fail(400, { message: course_res.error });
+		const course = course_res.value;
+		return { reviewIdRaw, course: JSON.stringify(course) };
 	}
 };

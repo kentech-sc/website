@@ -2,8 +2,8 @@
 	import { page } from '$app/state';
 	import { enhance } from '$app/forms';
 	import type { ActionResult } from '@sveltejs/kit';
-	import type { Course, Review } from '$lib/courseReview/type';
-	import GeneralUtils from '$lib/utils/general';
+	import type { Course, Review } from '$lib/courseReview/types.js';
+	import GeneralUtils from '$lib/general/utils.js';
 
 	let { data } = $props();
 

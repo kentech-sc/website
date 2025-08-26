@@ -1,4 +1,4 @@
-import type { UserId } from '$lib/user/type.js';
+import type { UserId } from '$lib/user/types.js';
 import UserController from '$lib/user/controller.js';
 
 export async function fillUserNames<T extends { userId: UserId }>(arr: T[]): Promise<T[]> {

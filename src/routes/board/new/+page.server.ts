@@ -14,8 +14,15 @@ export const actions = {
 
 		if (!title || !content) return fail(400, { message: 'title, content are required' });
 
-		const post = await BoardManager.createPostByBoardId('main', title, content, locals.user._id);
-		// post.userName = locals.user.name;
+		const post_res = await BoardManager.createPostByBoardId(
+			'main',
+			title,
+			content,
+			locals.user._id
+		);
+		if (!post_res.ok) return fail(400, { message: post_res.error });
+
+		const post = post_res.value;
 		redirect(302, '/board/' + post._id);
 	}
 };
