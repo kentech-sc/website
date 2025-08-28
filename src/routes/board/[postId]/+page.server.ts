@@ -3,11 +3,16 @@ import type { PostId, CommentId } from '$lib/board/types.js';
 import { error, fail, redirect } from '@sveltejs/kit';
 import { Types } from 'mongoose';
 
-export const load = async ({ params }) => {
+export const load = async ({ params, request }) => {
 	const postIdRaw = params.postId;
 	if (!postIdRaw || typeof postIdRaw !== 'string')
 		error(400, { message: 'postId is undefined or invalid' });
 	const postId: PostId = new Types.ObjectId(postIdRaw);
+
+	if (new URL(request.url).searchParams.get('x-sveltekit-invalidated') !== '11') {
+		const view_res = await BoardManager.viewPostByPostId(postId);
+		if (!view_res.ok) return error(400, { message: view_res.error });
+	}
 
 	const post_res = await BoardManager.getPostByPostId(postId);
 	if (!post_res.ok) error(400, { message: post_res.error });
@@ -16,9 +21,6 @@ export const load = async ({ params }) => {
 	const comment_res = await BoardManager.getCommentsByPostId(postId);
 	if (!comment_res.ok) error(400, { message: comment_res.error });
 	const commentArr = comment_res.value.reverse();
-
-	const view_res = await BoardManager.viewPostByPostId(postId);
-	if (!view_res.ok) error(400, { message: view_res.error });
 
 	return { post: JSON.stringify(post), commentArr: JSON.stringify(commentArr) };
 };

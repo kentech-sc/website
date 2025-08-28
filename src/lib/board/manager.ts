@@ -89,7 +89,8 @@ export default class BoardManager {
 	static async unlikePostByPostId(postId: PostId, userId: UserId): Promise<ManagerResult<Post>> {
 		const post = await PostController.getPostByPostId(postId);
 		if (!post) return { ok: false, error: '존재하지 않는 게시글입니다.' };
-		if (!post.likedBy.includes(userId)) return { ok: false, error: '이미 좋아요를 취소했습니다.' };
+		if (!post.likedBy.some((id) => id.equals(userId)))
+			return { ok: false, error: '이미 좋아요를 취소했습니다.' };
 		const updatedPost = await PostController.updatePostByPostId(postId, {
 			$inc: { likeCnt: -1 },
 			$pull: { likedBy: userId }

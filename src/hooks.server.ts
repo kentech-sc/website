@@ -61,7 +61,6 @@ const authorizationHandle: Handle = async ({ event, resolve }) => {
 
 		const user = await getUser(session?.user?.email);
 		event.locals.user = user;
-		console.log(user);
 
 		return await resolve(event);
 	} else {

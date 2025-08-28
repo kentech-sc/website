@@ -19,15 +19,19 @@
 	<section class="container-col module">
 		<table>
 			<colgroup>
-				<col style="width:60%" />
+				<col style="width:50%" />
+				<col style="width:16%" />
 				<col style="width:20%" />
-				<col style="width:20%" />
+				<col style="width:7%" />
+				<col style="width:7%" />
 			</colgroup>
 			<thead>
 				<tr>
 					<th>제목</th>
 					<th>작성자</th>
 					<th>작성일</th>
+					<th>조회수</th>
+					<th>좋아요</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -36,6 +40,8 @@
 						<td><a href={`/board/${post._id}`}>{post.title}</a></td>
 						<td>{post.userName}</td>
 						<td>{GeneralUtils.parseDate(post.createdAt)}</td>
+						<td>{post.viewCnt}</td>
+						<td>{post.likeCnt}</td>
 					</tr>
 				{/each}
 			</tbody>
@@ -67,16 +73,12 @@
 			padding: 0.5rem;
 		}
 
+		td:nth-child(n) {
+			text-align: center;
+		}
+
 		td:first-child {
 			text-align: left;
-		}
-
-		td:nth-child(2) {
-			text-align: center;
-		}
-
-		td:nth-child(3) {
-			text-align: center;
 		}
 	}
 </style>
