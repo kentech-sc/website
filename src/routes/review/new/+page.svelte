@@ -1,5 +1,11 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import type { Course, Professor } from '$lib/course/types.js';
+
+	let { data } = $props();
+	let courseArr = $state<Course[]>(JSON.parse(data?.courseArr || '[]'));
+	let professorArr = $state<Professor[]>(JSON.parse(data?.professorArr || '[]'));
+
 	let errorMsg = $state<string>('');
 </script>
 
@@ -16,17 +22,29 @@
 	<section class="container-col module">
 		<form
 			method="post"
-			action="?/createCourse"
+			action="?/createReview"
 			class="container-col"
 			data-sveltekit-replacestate
 			use:enhance
 		>
-			<label for="title">강의명</label>
-			<input type="text" id="title" name="title" />
-			<label for="professor">교수님</label>
-			<input type="text" id="professor" name="professor" />
-			<label for="content">강의 내용</label>
-			<textarea id="content" name="content"></textarea>
+			<label for="courseId">강의 코드</label>
+			<select id="courseId" name="courseId">
+				<option value="">선택</option>
+				{#each courseArr as course}
+					<option value={course._id}>[{course.code}] {course.name}</option>
+				{/each}
+			</select>
+			<label for="professorId">교수님</label>
+			<select id="professorId" name="professorId">
+				<option value="">선택</option>
+				{#each professorArr as professor}
+					<option value={professor._id}>{professor.name} 교수님</option>
+				{/each}
+			</select>
+			<label for="score">점수</label>
+			<input type="number" id="score" name="score" />
+			<label for="comment">한줄평</label>
+			<textarea id="comment" name="comment"></textarea>
 			<button type="submit">추가하기</button>
 		</form>
 

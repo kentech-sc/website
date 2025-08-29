@@ -1,32 +1,21 @@
+import type { CourseId, ProfessorId } from '$lib/course/types';
 import type { UserId } from '$lib/user/types';
 import type { UpdateQuery, Types } from 'mongoose';
+import type { DisplayType } from '$lib/user/types';
 
 export type ReviewId = Types.ObjectId;
-export type CourseId = Types.ObjectId;
-
-export interface CourseBase {
-	title: string;
-	content: string;
-	professor: string;
-	totalScore: number;
-	reviewCnt: number;
-}
-
-export interface Course extends CourseBase {
-	_id: CourseId;
-	createdAt: Date;
-	updatedAt: Date;
-}
-
-export type CourseCreate = CourseBase;
-export type CourseUpdate = UpdateQuery<Pick<CourseBase, 'title' | 'content' | 'professor'>>;
 
 export interface ReviewBase {
 	courseId: CourseId;
+	professorId: ProfessorId;
 	userId: UserId;
 	score: number;
 	comment: string;
-	userName?: string;
+	displayType?: DisplayType;
+	displayName?: string;
+	courseCode?: string;
+	courseName?: string;
+	professorName?: string;
 }
 
 export interface Review extends ReviewBase {

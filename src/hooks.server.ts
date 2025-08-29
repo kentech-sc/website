@@ -11,12 +11,15 @@ import DBManager from '$lib/general/db.js';
 import UserManager from '$lib/user/manager.js';
 import type { User } from '$lib/user/types.js';
 
-async function getUser(email: string): Promise<User> {
-	let user: User | null = await UserManager.getUserByEmail(email);
-	if (user === null) {
-		const res = await UserManager.signupUserByEmailAndName(email, email.split('@')[0]);
+async function getUser(email: string, name: string): Promise<User> {
+	let user_res = await UserManager.getUserByEmail(email);
+	if (!user_res.ok) throw new Error(user_res.error);
+	let user = user_res.value;
+
+	if (!user) {
+		const res = await UserManager.signupUserByEmailAndRealName(email, name);
 		if (!res.ok) throw new Error(res.error);
-		user = res.value as User;
+		user = res.value;
 	}
 	return user;
 }
@@ -53,13 +56,13 @@ export const init: ServerInit = async () => {
 const authorizationHandle: Handle = async ({ event, resolve }) => {
 	const session = await event.locals.auth();
 
-	if (session?.user?.email) {
+	if (session?.user?.email && session?.user?.name) {
 		// Authorized
 		if (event.url.pathname.startsWith('/signin')) {
 			redirect(303, '/');
 		}
 
-		const user = await getUser(session?.user?.email);
+		const user = await getUser(session?.user?.email, session?.user?.name?.split('/')[0]);
 		event.locals.user = user;
 
 		return await resolve(event);

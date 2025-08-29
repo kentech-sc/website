@@ -1,17 +1,24 @@
-import type { Group, User, UserId } from './types';
+import type { DisplayType, Group, User, UserId } from './types';
 
 import UserController from './controller.js';
 import type { ManagerResult } from '$lib/general/types';
 
 export default class UserManager {
-	static async getUserByEmail(email: string): Promise<User | null> {
-		return await UserController.getUserByEmail(email);
+	static async getUserByEmail(email: string): Promise<ManagerResult<User | null>> {
+		const user = await UserController.getUserByEmail(email);
+		return { ok: true, value: user };
 	}
-	static async getUserByName(name: string): Promise<User | null> {
-		return await UserController.getUserByName(name);
+	static async getUserByRealName(realName: string): Promise<ManagerResult<User | null>> {
+		const user = await UserController.getUserByRealName(realName);
+		return { ok: true, value: user };
 	}
-	static async getUserByUserId(userId: UserId): Promise<User | null> {
-		return await UserController.getUserByUserId(userId);
+	static async getUserByNickname(nickname: string): Promise<ManagerResult<User | null>> {
+		const user = await UserController.getUserByNickname(nickname);
+		return { ok: true, value: user };
+	}
+	static async getUserByUserId(userId: UserId): Promise<ManagerResult<User | null>> {
+		const user = await UserController.getUserByUserId(userId);
+		return { ok: true, value: user };
 	}
 
 	static isGroup(group: string): boolean {
@@ -49,33 +56,37 @@ export default class UserManager {
 		return { ok: true, value: user };
 	}
 
-	static async signupUserByEmailAndName(email: string, name: string): Promise<ManagerResult<User>> {
+	static async signupUserByEmailAndRealName(
+		email: string,
+		realName: string
+	): Promise<ManagerResult<User>> {
 		let user = await UserController.getUserByEmail(email);
 		if (user) return { ok: false, error: '이미 가입된 사용자입니다.' };
 
-		user = await UserController.getUserByName(name);
+		let nickname = realName;
+		user = await UserController.getUserByNickname(nickname);
 		while (user) {
-			name = name + '_';
-			user = await UserController.getUserByName(name);
+			nickname = nickname + '_';
+			user = await UserController.getUserByNickname(nickname);
 		}
 
-		user = await UserController.createUser({ email, name, group: 'user' });
+		user = await UserController.createUser({ email, realName, nickname, group: 'user' });
 
 		return { ok: true, value: user };
 	}
 
-	static async changeNameByName(
-		userName: string,
-		newName: string,
+	static async changeNicknameByEmail(
+		email: string,
+		newNickname: string,
 		operator: User
 	): Promise<ManagerResult<void>> {
-		const user = await UserController.getUserByName(userName);
+		const user = await UserController.getUserByEmail(email);
 		if (!user) return { ok: false, error: '존재하지 않는 사용자입니다.' };
 
 		const res = this.canChangeName(user, operator.email, operator.group);
 		if (!res.ok) return res;
 
-		await UserController.updateUserByUserId(user._id, { name: newName });
+		await UserController.updateUserByUserId(user._id, { nickname: newNickname });
 
 		return { ok: true };
 	}
@@ -93,14 +104,14 @@ export default class UserManager {
 		return { ok: true };
 	}
 
-	static async changeGroupByName(
-		userName: string,
+	static async changeGroupByEmail(
+		email: string,
 		group: Group,
 		operator: User
 	): Promise<ManagerResult<void>> {
 		if (!(['user', 'manager'] as Group[]).includes(group))
 			return { ok: false, error: "The group of user can only be 'user' or 'manager'!" };
-		const user = await UserController.getUserByName(userName);
+		const user = await UserController.getUserByEmail(email);
 		const res = await this.#changeGroupByUser(user, group, operator);
 		return res;
 	}
@@ -124,5 +135,75 @@ export default class UserManager {
 		await UserController.deleteUserByUserEmail(email);
 
 		return { ok: true };
+	}
+
+	static async #createUserIdAndIdxMap<T extends { userId: UserId }>(arr: T[]) {
+		const userIdArr = arr.map((item) => item.userId);
+		const userArr = await UserController.getUsersByUserIdArr(userIdArr);
+		const userIdMap = new Map<string, User>();
+		const userIdxMap = new Map<string, number>();
+
+		let idx = 1;
+		for (const user of userArr) {
+			if (!user) continue;
+			if (userIdMap.has(user._id.toString())) continue;
+			userIdMap.set(user._id.toString(), user);
+			userIdxMap.set(user._id.toString(), idx++);
+		}
+
+		return { userIdMap, userIdxMap };
+	}
+
+	static async fillDisplayNamesByDisplayType<T extends { userId: UserId }>(
+		arr: T[],
+		displayType: DisplayType
+	): Promise<T[]> {
+		const { userIdMap, userIdxMap } = await this.#createUserIdAndIdxMap(arr);
+		return arr.map((item) => {
+			const user = userIdMap.get(item.userId.toString());
+
+			let displayName = '???';
+
+			if (!user) {
+				displayName = '???';
+			} else if (displayType === 'anonymous') {
+				displayName = `익명의 켄텍인 ${userIdxMap.get(item.userId.toString())}`;
+			} else {
+				displayName = user[displayType];
+			}
+
+			return {
+				...item,
+				displayName
+			};
+		});
+	}
+
+	static async fillDisplayNames<T extends { userId: UserId; displayType: DisplayType }>(
+		arr: T[],
+		no_idx_for_anon = false
+	): Promise<T[]> {
+		const { userIdMap, userIdxMap } = await this.#createUserIdAndIdxMap(arr);
+
+		return arr.map((item) => {
+			const user = userIdMap.get(item.userId.toString());
+
+			let displayName = '???';
+
+			if (!user) {
+				displayName = '???';
+			} else if (item.displayType === 'anonymous') {
+				displayName = no_idx_for_anon
+					? '익명의 켄텍인'
+					: `익명의 켄텍인 ${userIdxMap.get(item.userId.toString())}`;
+			} else {
+				displayName = user[item.displayType];
+			}
+
+			return {
+				...item,
+				displayName
+			};
+		});
 	}
 }

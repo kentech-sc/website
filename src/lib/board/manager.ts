@@ -10,33 +10,34 @@ import type {
 	Comment
 } from './types';
 import { PostController, CommentController } from './controller';
-import type { User, UserId } from '$lib/user/types';
+import type { User, UserId, DisplayType } from '$lib/user/types';
 import mongoose from 'mongoose';
-import { fillUserNames } from '$lib/general/user';
+import UserManager from '$lib/user/manager';
 import type { ManagerResult } from '$lib/general/types';
 
 export default class BoardManager {
 	static async getPostByPostId(postId: PostId): Promise<ManagerResult<Post>> {
 		const post = await PostController.getPostByPostId(postId);
 		if (!post) return { ok: false, error: '존재하지 않는 게시글입니다.' };
-		return { ok: true, value: (await fillUserNames([post]))[0] };
+		return { ok: true, value: (await UserManager.fillDisplayNames([post]))[0] };
 	}
 
 	static async getPostsByBoardId(boardId: BoardId): Promise<ManagerResult<Post[]>> {
 		const postArr = await PostController.getPostsByBoardId(boardId);
-		return { ok: true, value: await fillUserNames(postArr) };
+		return { ok: true, value: await UserManager.fillDisplayNames(postArr, true) };
 	}
 
 	static async getCommentsByPostId(postId: PostId): Promise<ManagerResult<Comment[]>> {
 		const commentArr = await CommentController.getCommentsByPostId(postId);
-		return { ok: true, value: await fillUserNames(commentArr) };
+		return { ok: true, value: await UserManager.fillDisplayNames(commentArr) };
 	}
 
 	static async createPostByBoardId(
 		boardId: BoardId,
 		title: string,
 		content: string,
-		userId: UserId
+		userId: UserId,
+		displayType: DisplayType
 	): Promise<ManagerResult<Post>> {
 		const post: PostCreate = {
 			boardId,
@@ -45,15 +46,19 @@ export default class BoardManager {
 			userId,
 			likeCnt: 0,
 			likedBy: [],
-			viewCnt: 0
+			viewCnt: 0,
+			displayType
 		};
-		return { ok: true, value: await PostController.createPost(post) };
+		return {
+			ok: true,
+			value: (await UserManager.fillDisplayNames([await PostController.createPost(post)]))[0]
+		};
 	}
 
 	static async updatePostByPostId(postId: PostId, post: PostUpdate): Promise<ManagerResult<Post>> {
 		const updatedPost = await PostController.updatePostByPostId(postId, post);
 		if (!updatedPost) return { ok: false, error: '존재하지 않는 게시글입니다.' };
-		return { ok: true, value: updatedPost };
+		return { ok: true, value: (await UserManager.fillDisplayNames([updatedPost]))[0] };
 	}
 
 	static async deletePostByPostId(postId: PostId, user: User): Promise<ManagerResult<void>> {
@@ -71,7 +76,7 @@ export default class BoardManager {
 	static async viewPostByPostId(postId: PostId): Promise<ManagerResult<Post>> {
 		const updatedPost = await PostController.updatePostByPostId(postId, { $inc: { viewCnt: 1 } });
 		if (!updatedPost) return { ok: false, error: '존재하지 않는 게시글입니다.' };
-		return { ok: true, value: updatedPost };
+		return { ok: true, value: (await UserManager.fillDisplayNames([updatedPost]))[0] };
 	}
 
 	static async likePostByPostId(postId: PostId, userId: UserId): Promise<ManagerResult<Post>> {
@@ -83,7 +88,7 @@ export default class BoardManager {
 			$push: { likedBy: userId }
 		});
 		if (!updatedPost) return { ok: false, error: '존재하지 않는 게시글입니다.' };
-		return { ok: true, value: updatedPost };
+		return { ok: true, value: (await UserManager.fillDisplayNames([updatedPost]))[0] };
 	}
 
 	static async unlikePostByPostId(postId: PostId, userId: UserId): Promise<ManagerResult<Post>> {
@@ -96,22 +101,29 @@ export default class BoardManager {
 			$pull: { likedBy: userId }
 		});
 		if (!updatedPost) return { ok: false, error: '존재하지 않는 게시글입니다.' };
-		return { ok: true, value: updatedPost };
+		return { ok: true, value: (await UserManager.fillDisplayNames([updatedPost]))[0] };
 	}
 
 	static async createCommentByPostId(
 		postId: PostId,
 		content: string,
-		userId: UserId
+		userId: UserId,
+		displayType: DisplayType
 	): Promise<ManagerResult<Comment>> {
 		const comment: CommentCreate = {
 			postId,
 			content,
 			userId,
 			likeCnt: 0,
-			likedBy: []
+			likedBy: [],
+			displayType
 		};
-		return { ok: true, value: await CommentController.createComment(comment) };
+		return {
+			ok: true,
+			value: (
+				await UserManager.fillDisplayNames([await CommentController.createComment(comment)])
+			)[0]
+		};
 	}
 
 	static async updateCommentByCommentId(
@@ -120,7 +132,7 @@ export default class BoardManager {
 	): Promise<ManagerResult<Comment>> {
 		const updatedComment = await CommentController.updateCommentByCommentId(commentId, comment);
 		if (!updatedComment) return { ok: false, error: '존재하지 않는 댓글입니다.' };
-		return { ok: true, value: updatedComment };
+		return { ok: true, value: (await UserManager.fillDisplayNames([updatedComment]))[0] };
 	}
 
 	static async deleteCommentByCommentId(
@@ -149,7 +161,7 @@ export default class BoardManager {
 			$push: { likedBy: userId }
 		});
 		if (!updatedComment) return { ok: false, error: '존재하지 않는 댓글입니다.' };
-		return { ok: true, value: updatedComment };
+		return { ok: true, value: (await UserManager.fillDisplayNames([updatedComment]))[0] };
 	}
 
 	static async unlikeCommentByCommentId(
@@ -165,6 +177,6 @@ export default class BoardManager {
 			$pull: { likedBy: userId }
 		});
 		if (!updatedComment) return { ok: false, error: '존재하지 않는 댓글입니다.' };
-		return { ok: true, value: updatedComment };
+		return { ok: true, value: (await UserManager.fillDisplayNames([updatedComment]))[0] };
 	}
 }

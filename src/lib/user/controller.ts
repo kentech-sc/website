@@ -15,8 +15,12 @@ export default class UserController {
 		return await UserModel.findOne({ email }).lean();
 	}
 
-	static async getUserByName(name: string): Promise<User | null> {
-		return await UserModel.findOne({ name }).lean();
+	static async getUserByRealName(realName: string): Promise<User | null> {
+		return await UserModel.findOne({ realName }).lean();
+	}
+
+	static async getUserByNickname(nickname: string): Promise<User | null> {
+		return await UserModel.findOne({ nickname }).lean();
 	}
 
 	static async getUsersByUserIdArr(userIdArr: UserId[]): Promise<Array<User | null>> {
@@ -41,15 +45,26 @@ export default class UserController {
 		return emailArr.map((email) => userMap.get(email) ?? null);
 	}
 
-	static async getUsersByNameArr(nameArr: string[]): Promise<Array<User | null>> {
-		const userArr = await UserModel.find({ name: { $in: nameArr } }).lean();
+	static async getUsersByRealNameArr(realNameArr: string[]): Promise<Array<User | null>> {
+		const userArr = await UserModel.find({ realName: { $in: realNameArr } }).lean();
 
 		const userMap = new Map<string, User>();
 		for (const user of userArr) {
-			userMap.set(user.name, user);
+			userMap.set(user.realName, user);
 		}
 
-		return nameArr.map((name) => userMap.get(name) ?? null);
+		return realNameArr.map((realName) => userMap.get(realName) ?? null);
+	}
+
+	static async getUsersByNicknameArr(nicknameArr: string[]): Promise<Array<User | null>> {
+		const userArr = await UserModel.find({ nickname: { $in: nicknameArr } }).lean();
+
+		const userMap = new Map<string, User>();
+		for (const user of userArr) {
+			userMap.set(user.nickname, user);
+		}
+
+		return nicknameArr.map((nickname) => userMap.get(nickname) ?? null);
 	}
 
 	static async updateUserByUserId(userId: UserId, user: UserUpdate): Promise<void> {

@@ -1,10 +1,10 @@
 <script lang="ts">
-	import type { Course } from '$lib/courseReview/types.js';
+	import type { Review } from '$lib/review/types.js';
 	import type { Post } from '$lib/board/types.js';
 	import GeneralUtils from '$lib/general/utils.js';
 
 	let { data } = $props();
-	let courseArr = $state<Course[]>(JSON.parse(data?.courseArr || '[]'));
+	let reviewArr = $state<Review[]>(JSON.parse(data?.reviewArr || '[]'));
 	let postArr = $state<Post[]>(JSON.parse(data?.postArr || '[]'));
 </script>
 
@@ -48,13 +48,13 @@
 	<section class="module">
 		<h2>강의평가</h2>
 		<hr />
-		{#if courseArr.length === 0}
+		{#if reviewArr.length === 0}
 			<p>작성된 리뷰가 없습니다.</p>
 		{:else}
-			{#each courseArr as course (course._id)}
-				<a href={`/review/${course._id}`} class="container course-div">
-					<p>{course.title}</p>
-					<p>{GeneralUtils.parseDate(course.updatedAt, 'date')}</p>
+			{#each reviewArr as review (review._id)}
+				<a href={`/review/${review._id}`} class="container course-div">
+					<p>{review.courseName}</p>
+					<p>{GeneralUtils.parseDate(review.updatedAt, 'date')}</p>
 				</a>
 			{/each}
 		{/if}

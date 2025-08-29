@@ -1,24 +1,51 @@
-import CourseReviewManager from '$lib/courseReview/manager';
-import { fail, redirect } from '@sveltejs/kit';
+import { CourseManager, ProfessorManager } from '$lib/course/manager';
+import ReviewManager from '$lib/review/manager';
+import { error, fail, redirect } from '@sveltejs/kit';
+import { Types } from 'mongoose';
+import type { CourseId, ProfessorId } from '$lib/course/types';
 
-// export const load = async () => {
-// 	const courseArr = await CourseReviewManager.getCourseArr();
-// 	return { courseArr: JSON.stringify(courseArr) };
-// };
+export const load = async () => {
+	const course_res = await CourseManager.getAllCourseArr();
+	if (!course_res.ok) error(400, { message: course_res.error });
+	const courseArr = course_res.value;
+
+	const professor_res = await ProfessorManager.getAllProfessorArr();
+	if (!professor_res.ok) error(400, { message: professor_res.error });
+	const professorArr = professor_res.value;
+
+	return { courseArr: JSON.stringify(courseArr), professorArr: JSON.stringify(professorArr) };
+};
 
 export const actions = {
-	createCourse: async ({ request }) => {
+	createReview: async ({ request, locals }) => {
 		const formData = await request.formData();
-		const title = (formData.get('title') ?? '').toString();
-		const content = (formData.get('content') ?? '').toString();
-		const professor = (formData.get('professor') ?? '').toString();
 
-		if (!title || !content || !professor)
-			return fail(400, { message: 'title, content, professor are required' });
+		const courseIdRaw = (formData.get('courseId') ?? '').toString();
+		if (!courseIdRaw || typeof courseIdRaw !== 'string')
+			return fail(400, { message: 'courseId is undefined or invalid' });
+		const courseId: CourseId = new Types.ObjectId(courseIdRaw);
 
-		const course_res = await CourseReviewManager.createCourse(title, content, professor);
-		if (!course_res.ok) return fail(400, { message: course_res.error });
-		const course = course_res.value;
-		redirect(302, '/review/' + course._id);
+		const professorIdRaw = (formData.get('professorId') ?? '').toString();
+		if (!professorIdRaw || typeof professorIdRaw !== 'string')
+			return fail(400, { message: 'professorId is undefined or invalid' });
+		const professorId: ProfessorId = new Types.ObjectId(professorIdRaw);
+
+		const score = Number(formData.get('score'));
+		const comment = (formData.get('comment') ?? '').toString();
+
+		if (!courseId || !professorId || !score || !comment)
+			return fail(400, { message: 'courseId, professorId, score, comment are required' });
+
+		const review_res = await ReviewManager.createReview(
+			courseId,
+			professorId,
+			locals.user._id,
+			score,
+			comment
+		);
+		if (!review_res.ok) return fail(400, { message: review_res.error });
+
+		const review = review_res.value;
+		redirect(302, '/review/' + review._id);
 	}
 };

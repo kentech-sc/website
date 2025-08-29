@@ -18,7 +18,7 @@
 	function handleEnhance() {
 		return async ({
 			result,
-			update,
+			update
 			// action
 		}: {
 			result: ActionResult;
@@ -85,7 +85,9 @@
 			<header class="container">
 				<div class="container-col">
 					<h2>{post.title}</h2>
-					<p>{post.userName} | {GeneralUtils.parseDate(post.createdAt)} | 조회수: {post.viewCnt}</p>
+					<p>
+						{post.displayName} | {GeneralUtils.parseDate(post.createdAt)} | 조회수: {post.viewCnt}
+					</p>
 				</div>
 				{#if post.userId === user._id}
 					<form method="post" action="?/deletePost">
@@ -106,7 +108,7 @@
 		{:else}
 			{#each commentArr as comment (comment._id)}
 				<div class="container comment-div">
-					<p><b>[{comment.userName}]</b> {comment.content}</p>
+					<p><b>[{comment.displayName}]</b> {comment.content}</p>
 					<div class="container">
 						<p>{GeneralUtils.parseDate(comment.createdAt)}</p>
 						{#if comment.userId === user._id}
@@ -133,8 +135,16 @@
 			data-sveltekit-replacestate
 			use:enhance={handleEnhance}
 		>
-			<span><b>[{user.name}]</b></span>&nbsp;
+			<span><b>[{user.nickname}]</b></span>&nbsp;
 			<input type="text" name="content" autocomplete="off" />
+			<div class="container" id="radio-div">
+				<label for="anonymous">익명</label>
+				<input type="radio" id="anonymous" name="displayType" value="anonymous" checked />
+				<label for="nickname">별명</label>
+				<input type="radio" id="nickname" name="displayType" value="nickname" />
+				<label for="realName">실명</label>
+				<input type="radio" id="realName" name="displayType" value="realName" />
+			</div>
 			<button type="submit">작성</button>
 		</form>
 

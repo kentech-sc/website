@@ -1,14 +1,16 @@
 <script lang="ts">
-	import type { Course } from '$lib/courseReview/types.js';
+	import type { Review } from '$lib/review/types.js';
+	import GeneralUtils from '$lib/general/utils.js';
 
 	let { data } = $props();
-	const courseArr = $state<Course[]>(JSON.parse(data?.courseArr || '[]'));
+	const reviewArr = $state<Review[]>(JSON.parse(data?.reviewArr || '[]'));
 </script>
 
 <div id="layout" class="container-col">
 	<header class="container module">
 		<h1>강의 평가</h1>
-		<a href="/review/new">강의 추가하기</a>
+		<a href="/review/_new">강의/교수 추가하기</a>
+		<a href="/review/new">평가하기</a>
 	</header>
 
 	<section class="module">
@@ -27,17 +29,17 @@
 				<tr>
 					<th>강의명</th>
 					<th>교수님</th>
-					<th>리뷰 수</th>
-					<th>평균</th>
+					<th>작성자</th>
+					<th>작성일</th>
 				</tr>
 			</thead>
 			<tbody>
-				{#each courseArr as course (course._id)}
+				{#each reviewArr as review (review._id)}
 					<tr>
-						<td><a href={`/review/${course._id}`}>{course.title}</a></td>
-						<td>{course.professor}</td>
-						<td>{course.reviewCnt}</td>
-						<td>{Math.round((course.totalScore / course.reviewCnt) * 100) / 100}</td>
+						<td><a href={`/review/${review._id}`}>{review.courseName}</a></td>
+						<td>{review.professorName}</td>
+						<td>{review.displayName}</td>
+						<td>{GeneralUtils.parseDate(review.createdAt, 'date')}</td>
 					</tr>
 				{/each}
 			</tbody>

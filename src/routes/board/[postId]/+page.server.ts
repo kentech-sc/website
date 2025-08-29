@@ -36,12 +36,21 @@ export const actions = {
 
 		if (!content) return fail(400, { message: 'content is required' });
 
-		const res = await BoardManager.createCommentByPostId(postId, content, locals.user._id);
+		const displayType = (formData.get('displayType') ?? '').toString();
+
+		if (displayType !== 'anonymous' && displayType !== 'nickname' && displayType !== 'realName')
+			return fail(400, { message: 'displayType is invalid' });
+
+		const res = await BoardManager.createCommentByPostId(
+			postId,
+			content,
+			locals.user._id,
+			displayType
+		);
 
 		if (!res.ok) return fail(400, { message: res.error });
 
 		const comment = res.value;
-		comment.userName = locals.user.name;
 
 		return { comment: JSON.stringify(comment) };
 	},

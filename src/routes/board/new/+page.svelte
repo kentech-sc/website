@@ -22,6 +22,15 @@
 			data-sveltekit-replacestate
 			use:enhance
 		>
+			<div class="container" id="radio-div">
+				<label for="anonymous">익명</label>
+				<input type="radio" id="anonymous" name="displayType" value="anonymous" checked />
+				<label for="nickname">별명</label>
+				<input type="radio" id="nickname" name="displayType" value="nickname" />
+				<label for="realName">실명</label>
+				<input type="radio" id="realName" name="displayType" value="realName" />
+			</div>
+
 			<label for="title">제목</label>
 			<input type="text" id="title" name="title" />
 
@@ -52,10 +61,22 @@
 		justify-content: space-between;
 	}
 
+	#radio-div {
+		margin-bottom: 0.5rem;
+
+		label {
+			word-break: keep-all;
+		}
+		input {
+			margin-left: 0.25rem;
+			margin-right: 2rem;
+		}
+	}
+
 	form {
 		width: 100%;
 		align-items: flex-start;
-		input,
+		input:not([type='radio']),
 		textarea {
 			width: 100%;
 			margin-bottom: 0.5rem;

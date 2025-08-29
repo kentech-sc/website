@@ -38,7 +38,7 @@
 				{#each postArr as post (post._id)}
 					<tr>
 						<td><a href={`/board/${post._id}`}>{post.title}</a></td>
-						<td>{post.userName}</td>
+						<td>{post.displayName}</td>
 						<td>{GeneralUtils.parseDate(post.createdAt)}</td>
 						<td>{post.viewCnt}</td>
 						<td>{post.likeCnt}</td>
