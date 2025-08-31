@@ -4,8 +4,8 @@
 	import GeneralUtils from '$lib/general/utils.js';
 
 	let { data } = $props();
-	let reviewArr = $state<Review[]>(JSON.parse(data?.reviewArr || '[]'));
-	let postArr = $state<Post[]>(JSON.parse(data?.postArr || '[]'));
+	let reviews = $state<Review[]>(JSON.parse(data?.reviews || '[]'));
+	let posts = $state<Post[]>(JSON.parse(data?.posts || '[]'));
 </script>
 
 <div class="module" id="banner-div">
@@ -34,10 +34,10 @@
 	<section class="module">
 		<h2>자유게시판</h2>
 		<hr />
-		{#if postArr.length === 0}
+		{#if posts.length === 0}
 			<p>작성된 글이 없습니다.</p>
 		{:else}
-			{#each postArr as post (post._id)}
+			{#each posts as post (post._id)}
 				<a href={`/board/${post._id}`} class="container post-div">
 					<p>{post.title}</p>
 					<p>{GeneralUtils.parseDate(post.createdAt, 'date')}</p>
@@ -48,10 +48,10 @@
 	<section class="module">
 		<h2>강의평가</h2>
 		<hr />
-		{#if reviewArr.length === 0}
+		{#if reviews.length === 0}
 			<p>작성된 리뷰가 없습니다.</p>
 		{:else}
-			{#each reviewArr as review (review._id)}
+			{#each reviews as review (review._id)}
 				<a href={`/review/${review._id}`} class="container course-div">
 					<p>{review.courseName}</p>
 					<p>{GeneralUtils.parseDate(review.updatedAt, 'date')}</p>

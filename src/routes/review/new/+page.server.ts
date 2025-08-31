@@ -1,19 +1,15 @@
-import { CourseManager, ProfessorManager } from '$lib/course/manager';
+import CourseManager from '$lib/course/manager';
+import ProfessorManager from '$lib/professor/manager';
 import ReviewManager from '$lib/review/manager';
-import { error, fail, redirect } from '@sveltejs/kit';
+import { fail, redirect } from '@sveltejs/kit';
 import { Types } from 'mongoose';
 import type { CourseId, ProfessorId } from '$lib/course/types';
 
 export const load = async () => {
-	const course_res = await CourseManager.getAllCourseArr();
-	if (!course_res.ok) error(400, { message: course_res.error });
-	const courseArr = course_res.value;
+	const courses = await CourseManager.getAllCourses();
+	const professors = await ProfessorManager.getAllProfessors();
 
-	const professor_res = await ProfessorManager.getAllProfessorArr();
-	if (!professor_res.ok) error(400, { message: professor_res.error });
-	const professorArr = professor_res.value;
-
-	return { courseArr: JSON.stringify(courseArr), professorArr: JSON.stringify(professorArr) };
+	return { courses: JSON.stringify(courses), professors: JSON.stringify(professors) };
 };
 
 export const actions = {
@@ -36,16 +32,13 @@ export const actions = {
 		if (!courseId || !professorId || !score || !comment)
 			return fail(400, { message: 'courseId, professorId, score, comment are required' });
 
-		const review_res = await ReviewManager.createReview(
+		const review = await ReviewManager.createReview(
 			courseId,
 			professorId,
 			locals.user._id,
 			score,
 			comment
 		);
-		if (!review_res.ok) return fail(400, { message: review_res.error });
-
-		const review = review_res.value;
 		redirect(302, '/review/' + review._id);
 	}
 };

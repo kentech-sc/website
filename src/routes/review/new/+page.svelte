@@ -3,8 +3,8 @@
 	import type { Course, Professor } from '$lib/course/types.js';
 
 	let { data } = $props();
-	let courseArr = $state<Course[]>(JSON.parse(data?.courseArr || '[]'));
-	let professorArr = $state<Professor[]>(JSON.parse(data?.professorArr || '[]'));
+	let courses = $state<Course[]>(JSON.parse(data?.courses || '[]'));
+	let professors = $state<Professor[]>(JSON.parse(data?.professors || '[]'));
 
 	let errorMsg = $state<string>('');
 </script>
@@ -30,14 +30,14 @@
 			<label for="courseId">강의 코드</label>
 			<select id="courseId" name="courseId">
 				<option value="">선택</option>
-				{#each courseArr as course}
+				{#each courses as course (course._id)}
 					<option value={course._id}>[{course.code}] {course.name}</option>
 				{/each}
 			</select>
 			<label for="professorId">교수님</label>
 			<select id="professorId" name="professorId">
 				<option value="">선택</option>
-				{#each professorArr as professor}
+				{#each professors as professor (professor._id)}
 					<option value={professor._id}>{professor.name} 교수님</option>
 				{/each}
 			</select>

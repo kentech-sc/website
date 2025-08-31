@@ -38,8 +38,15 @@
 			<h2>프로필</h2>
 			{#if user?.email}
 				<hr />
-				<!-- <p>{user.email}</p> -->
-				<p>{user.name}</p>
+				<h3>이메일</h3>
+				<p>{user.email}</p>
+				<hr />
+				<h3>실명</h3>
+				<p>{user.realName}</p>
+				<hr />
+				<h3>별명</h3>
+				<p>{user.nickname}</p>
+				<hr />
 				<button onclick={() => signOut()}>로그아웃</button>
 			{/if}
 		</aside>

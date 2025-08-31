@@ -1,5 +1,6 @@
-import { CourseManager, ProfessorManager } from '$lib/course/manager';
-import { fail, redirect } from '@sveltejs/kit';
+import CourseManager from '$lib/course/manager';
+import ProfessorManager from '$lib/professor/manager';
+import { fail } from '@sveltejs/kit';
 
 // export const load = async () => {
 // 	const courseArr = await CourseReviewManager.getCourseArr();
@@ -16,8 +17,8 @@ export const actions = {
 		if (!code || !name || !content)
 			return fail(400, { message: 'code, name, content are required' });
 
-		const course_res = await CourseManager.createCourse({ code, name, content });
-		if (!course_res.ok) return fail(400, { message: course_res.error });
+		const course = await CourseManager.createCourse({ code, name, content });
+		if (!course) return fail(400, { message: 'course creation failed' });
 	},
 	addProfessor: async ({ request }) => {
 		const formData = await request.formData();
@@ -25,7 +26,7 @@ export const actions = {
 
 		if (!name) return fail(400, { message: 'name is required' });
 
-		const professor_res = await ProfessorManager.createProfessor({ name });
-		if (!professor_res.ok) return fail(400, { message: professor_res.error });
+		const professor = await ProfessorManager.createProfessor({ name });
+		if (!professor) return fail(400, { message: 'professor creation failed' });
 	}
 };

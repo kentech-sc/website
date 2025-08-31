@@ -16,7 +16,7 @@ export class PostController {
 		return (await PostModel.create(post)).toObject();
 	}
 
-	static async getPostByPostId(postId: PostId): Promise<Post | null> {
+	static async getPostById(postId: PostId): Promise<Post | null> {
 		return await PostModel.findOne({ _id: postId }).lean();
 	}
 
@@ -24,16 +24,16 @@ export class PostController {
 		return await PostModel.find({ boardId }).sort({ createdAt: -1 }).lean();
 	}
 
-	static async updatePostByPostId(postId: PostId, post: PostUpdate): Promise<Post | null> {
+	static async updatePostById(postId: PostId, post: PostUpdate): Promise<Post | null> {
 		return await PostModel.findOneAndUpdate({ _id: postId }, post, { new: true }).lean();
 	}
 
-	static async deletePostByPostId(postId: PostId): Promise<void> {
-		await PostModel.deleteOne({ _id: postId });
+	static async deletePostById(postId: PostId): Promise<Post | null> {
+		return await PostModel.findOneAndDelete({ _id: postId }).lean();
 	}
 
 	static async deleteAllPostsByBoardId(boardId: BoardId): Promise<void> {
-		await PostModel.deleteMany({ boardId });
+		await PostModel.deleteMany({ boardId }).lean();
 	}
 }
 
@@ -42,7 +42,7 @@ export class CommentController {
 		return (await CommentModel.create(comment)).toObject();
 	}
 
-	static async getCommentByCommentId(commentId: CommentId): Promise<Comment | null> {
+	static async getCommentById(commentId: CommentId): Promise<Comment | null> {
 		return await CommentModel.findOne({ _id: commentId }).lean();
 	}
 
@@ -50,15 +50,15 @@ export class CommentController {
 		return await CommentModel.find({ postId }).sort({ createdAt: -1 }).lean();
 	}
 
-	static async updateCommentByCommentId(
+	static async updateCommentById(
 		commentId: CommentId,
 		comment: CommentUpdate
 	): Promise<Comment | null> {
 		return await CommentModel.findOneAndUpdate({ _id: commentId }, comment, { new: true }).lean();
 	}
 
-	static async deleteCommentByCommentId(commentId: CommentId): Promise<void> {
-		await CommentModel.deleteOne({ _id: commentId });
+	static async deleteCommentById(commentId: CommentId): Promise<Comment | null> {
+		return await CommentModel.findOneAndDelete({ _id: commentId }).lean();
 	}
 
 	static async deleteAllCommentsByPostId(postId: PostId): Promise<void> {

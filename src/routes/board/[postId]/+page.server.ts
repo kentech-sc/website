@@ -1,4 +1,5 @@
 import BoardManager from '$lib/board/manager';
+import UserManager from '$lib/user/manager.js';
 import type { PostId, CommentId } from '$lib/board/types.js';
 import { error, fail, redirect } from '@sveltejs/kit';
 import { Types } from 'mongoose';
@@ -10,19 +11,16 @@ export const load = async ({ params, request }) => {
 	const postId: PostId = new Types.ObjectId(postIdRaw);
 
 	if (new URL(request.url).searchParams.get('x-sveltekit-invalidated') !== '11') {
-		const view_res = await BoardManager.viewPostByPostId(postId);
-		if (!view_res.ok) return error(400, { message: view_res.error });
+		await BoardManager.viewPostById(postId);
 	}
 
-	const post_res = await BoardManager.getPostByPostId(postId);
-	if (!post_res.ok) error(400, { message: post_res.error });
-	const post = post_res.value;
+	const postRaw = await BoardManager.getPostById(postId);
+	const post = (await UserManager.fillDisplayNames([postRaw]))[0];
 
-	const comment_res = await BoardManager.getCommentsByPostId(postId);
-	if (!comment_res.ok) error(400, { message: comment_res.error });
-	const commentArr = comment_res.value.reverse();
+	const commentsRaw = await BoardManager.getCommentsByPostId(postId);
+	const comments = await UserManager.fillDisplayNames(commentsRaw);
 
-	return { post: JSON.stringify(post), commentArr: JSON.stringify(commentArr) };
+	return { post: JSON.stringify(post), comments: JSON.stringify(comments) };
 };
 
 export const actions = {
@@ -41,16 +39,12 @@ export const actions = {
 		if (displayType !== 'anonymous' && displayType !== 'nickname' && displayType !== 'realName')
 			return fail(400, { message: 'displayType is invalid' });
 
-		const res = await BoardManager.createCommentByPostId(
+		const comment = await BoardManager.createCommentByPostId(
 			postId,
 			content,
 			locals.user._id,
 			displayType
 		);
-
-		if (!res.ok) return fail(400, { message: res.error });
-
-		const comment = res.value;
 
 		return { comment: JSON.stringify(comment) };
 	},
@@ -60,8 +54,7 @@ export const actions = {
 		if (!postIdRaw || typeof postIdRaw !== 'string')
 			return fail(400, { message: 'postId is undefined or invalid' });
 		const postId: PostId = new Types.ObjectId(postIdRaw);
-		const res = await BoardManager.deletePostByPostId(postId, locals.user);
-		if (!res.ok) return fail(400, { message: res.error });
+		await BoardManager.deletePostById(postId, locals.user);
 		redirect(302, '/board');
 	},
 	deleteComment: async ({ request, locals }) => {
@@ -70,8 +63,7 @@ export const actions = {
 		if (!commentIdRaw || typeof commentIdRaw !== 'string')
 			return fail(400, { message: 'commentId is undefined or invalid' });
 		const commentId: CommentId = new Types.ObjectId(commentIdRaw);
-		const res = await BoardManager.deleteCommentByCommentId(commentId, locals.user);
-		if (!res.ok) return fail(400, { message: res.error });
+		await BoardManager.deleteCommentById(commentId, locals.user);
 		return { commentIdRaw };
 	},
 	likePost: async ({ request, locals }) => {
@@ -80,9 +72,8 @@ export const actions = {
 		if (!postIdRaw || typeof postIdRaw !== 'string')
 			return fail(400, { message: 'postId is undefined or invalid' });
 		const postId: PostId = new Types.ObjectId(postIdRaw);
-		const res = await BoardManager.likePostByPostId(postId, locals.user._id);
-		if (!res.ok) return fail(400, { message: res.error });
-		return { post: JSON.stringify(res.value) };
+		const post = await BoardManager.likePostById(postId, locals.user._id);
+		return { post: JSON.stringify(post) };
 	},
 	unlikePost: async ({ request, locals }) => {
 		const formData = await request.formData();
@@ -90,9 +81,8 @@ export const actions = {
 		if (!postIdRaw || typeof postIdRaw !== 'string')
 			return fail(400, { message: 'postId is undefined or invalid' });
 		const postId: PostId = new Types.ObjectId(postIdRaw);
-		const res = await BoardManager.unlikePostByPostId(postId, locals.user._id);
-		if (!res.ok) return fail(400, { message: res.error });
-		return { post: JSON.stringify(res.value) };
+		const post = await BoardManager.unlikePostById(postId, locals.user._id);
+		return { post: JSON.stringify(post) };
 	},
 	likeComment: async ({ request, locals }) => {
 		const formData = await request.formData();
@@ -100,9 +90,8 @@ export const actions = {
 		if (!commentIdRaw || typeof commentIdRaw !== 'string')
 			return fail(400, { message: 'commentId is undefined or invalid' });
 		const commentId: CommentId = new Types.ObjectId(commentIdRaw);
-		const res = await BoardManager.likeCommentByCommentId(commentId, locals.user._id);
-		if (!res.ok) return fail(400, { message: res.error });
-		return { comment: JSON.stringify(res.value) };
+		const comment = await BoardManager.likeCommentById(commentId, locals.user._id);
+		return { comment: JSON.stringify(comment) };
 	},
 	unlikeComment: async ({ request, locals }) => {
 		const formData = await request.formData();
@@ -110,8 +99,7 @@ export const actions = {
 		if (!commentIdRaw || typeof commentIdRaw !== 'string')
 			return fail(400, { message: 'commentId is undefined or invalid' });
 		const commentId: CommentId = new Types.ObjectId(commentIdRaw);
-		const res = await BoardManager.unlikeCommentByCommentId(commentId, locals.user._id);
-		if (!res.ok) return fail(400, { message: res.error });
-		return { comment: JSON.stringify(res.value) };
+		const comment = await BoardManager.unlikeCommentById(commentId, locals.user._id);
+		return { comment: JSON.stringify(comment) };
 	}
 };

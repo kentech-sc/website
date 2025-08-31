@@ -3,7 +3,7 @@
 	import GeneralUtils from '$lib/general/utils.js';
 
 	let { data } = $props();
-	const reviewArr = $state<Review[]>(JSON.parse(data?.reviewArr || '[]'));
+	const reviews = $state<Review[]>(JSON.parse(data?.reviews || '[]'));
 </script>
 
 <div id="layout" class="container-col">
@@ -34,7 +34,7 @@
 				</tr>
 			</thead>
 			<tbody>
-				{#each reviewArr as review (review._id)}
+				{#each reviews as review (review._id)}
 					<tr>
 						<td><a href={`/review/${review._id}`}>{review.courseName}</a></td>
 						<td>{review.professorName}</td>

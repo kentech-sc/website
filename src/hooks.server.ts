@@ -12,16 +12,13 @@ import UserManager from '$lib/user/manager.js';
 import type { User } from '$lib/user/types.js';
 
 async function getUser(email: string, name: string): Promise<User> {
-	let user_res = await UserManager.getUserByEmail(email);
-	if (!user_res.ok) throw new Error(user_res.error);
-	let user = user_res.value;
+	const user = await UserManager.getUserOrNullByEmail(email);
 
 	if (!user) {
-		const res = await UserManager.signupUserByEmailAndRealName(email, name);
-		if (!res.ok) throw new Error(res.error);
-		user = res.value;
+		return await UserManager.signupUserByEmailAndRealName(email, name);
+	} else {
+		return user;
 	}
-	return user;
 }
 
 function checkEnv() {

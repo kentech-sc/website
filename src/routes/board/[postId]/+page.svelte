@@ -10,7 +10,7 @@
 	let { data } = $props();
 
 	let post = $derived<Post>(JSON.parse(data?.post || '{}'));
-	let commentArr = $derived<Comment[]>(JSON.parse(data?.commentArr || '[]'));
+	let comments = $derived<Comment[]>(JSON.parse(data?.comments || '[]'));
 	let errorMsg = $state<string>('');
 
 	const user = JSON.parse(page.data.user);
@@ -103,10 +103,10 @@
 	</section>
 
 	<section class="container-col module">
-		{#if commentArr.length === 0}
+		{#if comments.length === 0}
 			<p>작성된 댓글이 없습니다.</p>
 		{:else}
-			{#each commentArr as comment (comment._id)}
+			{#each comments as comment (comment._id)}
 				<div class="container comment-div">
 					<p><b>[{comment.displayName}]</b> {comment.content}</p>
 					<div class="container">

@@ -1,9 +1,8 @@
 import BoardManager from '$lib/board/manager';
-import { error } from '@sveltejs/kit';
+import UserManager from '$lib/user/manager.js';
 
 export const load = async () => {
-	const post_res = await BoardManager.getPostsByBoardId('main');
-	if (!post_res.ok) error(400, { message: post_res.error });
-	const postArr = post_res.value;
-	return { postArr: JSON.stringify(postArr) };
+	const postsRaw = await BoardManager.getPostsByBoardId('main');
+	const posts = await UserManager.fillDisplayNames(postsRaw, true);
+	return { posts: JSON.stringify(posts) };
 };

@@ -5,11 +5,10 @@ import type { UserId } from '$lib/user/types.js';
 
 export default class ReviewController {
 	static async createReview(review: ReviewCreate): Promise<Review> {
-		const newReview = (await ReviewModel.create(review)).toObject();
-		return newReview;
+		return (await ReviewModel.create(review)).toObject();
 	}
 
-	static async getReviewByReviewId(reviewId: ReviewId): Promise<Review | null> {
+	static async getReviewById(reviewId: ReviewId): Promise<Review | null> {
 		return await ReviewModel.findOne({ _id: reviewId }).lean();
 	}
 
@@ -43,26 +42,12 @@ export default class ReviewController {
 		return await ReviewModel.find({ courseId, professorId }).sort({ createdAt: -1 }).lean();
 	}
 
-	static async updateReviewByReviewId(
-		reviewId: ReviewId,
-		review: ReviewUpdate
-	): Promise<Review | null> {
-		const oldReview = await this.getReviewByReviewId(reviewId);
-		if (!oldReview) return null;
-		await this.deleteReviewByReviewId(reviewId);
-		return await this.createReview({
-			courseId: oldReview.courseId,
-			professorId: oldReview.professorId,
-			userId: oldReview.userId,
-			score: review?.score ?? oldReview.score,
-			comment: review?.comment ?? oldReview.comment
-		});
+	static async updateReviewById(reviewId: ReviewId, review: ReviewUpdate): Promise<Review | null> {
+		return await ReviewModel.findOneAndUpdate({ _id: reviewId }, review, { new: true }).lean();
 	}
 
-	static async deleteReviewByReviewId(reviewId: ReviewId): Promise<Review | null> {
-		const deletedReview = await ReviewModel.findOneAndDelete({ _id: reviewId }).lean();
-		if (!deletedReview) return null;
-		return deletedReview;
+	static async deleteReviewById(reviewId: ReviewId): Promise<Review | null> {
+		return await ReviewModel.findOneAndDelete({ _id: reviewId }).lean();
 	}
 
 	static async deleteAllReviewsByCourseId(courseId: CourseId): Promise<void> {

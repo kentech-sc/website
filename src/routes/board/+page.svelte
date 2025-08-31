@@ -3,7 +3,7 @@
 	import GeneralUtils from '$lib/general/utils.js';
 
 	let { data } = $props();
-	const postArr = $state<Post[]>(JSON.parse(data?.postArr || '[]'));
+	const posts = $state<Post[]>(JSON.parse(data?.posts || '[]'));
 </script>
 
 <div id="layout" class="container-col">
@@ -35,7 +35,7 @@
 				</tr>
 			</thead>
 			<tbody>
-				{#each postArr as post (post._id)}
+				{#each posts as post (post._id)}
 					<tr>
 						<td><a href={`/board/${post._id}`}>{post.title}</a></td>
 						<td>{post.displayName}</td>
