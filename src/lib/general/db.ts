@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-export default class DBManager {
+export default class DBService {
 	static async init(MONGO_URI: string) {
 		await mongoose.connect(MONGO_URI);
 		mongoose.set('transactionAsyncLocalStorage', true);

@@ -1,9 +1,10 @@
 import type { Review, ReviewCreate, ReviewUpdate, ReviewId } from './types.js';
-import type { CourseId, ProfessorId } from '$lib/course/types.js';
+import type { CourseId } from '$lib/course/types.js';
+import type { ProfessorId } from '$lib/professor/types.js';
 import ReviewModel from './model.js';
 import type { UserId } from '$lib/user/types.js';
 
-export default class ReviewController {
+export default class ReviewRepository {
 	static async createReview(review: ReviewCreate): Promise<Review> {
 		return (await ReviewModel.create(review)).toObject();
 	}

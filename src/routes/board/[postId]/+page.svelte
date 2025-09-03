@@ -9,7 +9,7 @@
 
 	let { data } = $props();
 
-	let post = $derived<Post>(JSON.parse(data?.post || '{}'));
+	let post = $state<Post>(JSON.parse(data?.post || '{}'));
 	let comments = $derived<Comment[]>(JSON.parse(data?.comments || '[]'));
 	let errorMsg = $state<string>('');
 
@@ -18,12 +18,12 @@
 	function handleEnhance() {
 		return async ({
 			result,
-			update
-			// action
+			update,
+			action
 		}: {
 			result: ActionResult;
 			update: () => Promise<void>;
-			// action: URL;
+			action: URL;
 		}) => {
 			// if (result.type === 'success' && action.search === '?/createComment') {
 			// 	commentArr.push(JSON.parse(result.data?.comment ?? '{}'));
@@ -33,17 +33,21 @@
 			// 		(comment: Comment) => comment._id.toString() !== result.data?.commentIdRaw
 			// 	);
 			// 	await applyAction(result);
-			// } else if (result.type === 'success' && action.search === '?/likePost') {
-			// 	const updated_post = JSON.parse(result.data?.post ?? '{}');
-			// 	post.likeCnt = updated_post.likeCnt;
-			// 	post.likedBy = updated_post.likedBy;
-			// 	await applyAction(result);
-			// } else if (result.type === 'success' && action.search === '?/unlikePost') {
-			// 	const updated_post = JSON.parse(result.data?.post ?? '{}');
-			// 	post.likeCnt = updated_post.likeCnt;
-			// 	post.likedBy = updated_post.likedBy;
-			// 	await applyAction(result);
-			if (result.type === 'failure') {
+			if (result.type === 'success' && action.search === '?/likePost') {
+				const updated_post = JSON.parse(result.data?.post ?? '{}');
+				post.likeCnt = updated_post.likeCnt;
+				// post.likedBy = updated_post.likedBy;
+				// await applyAction(result);
+				// post.likeCnt += 1;
+				post.likedBy.push(user._id);
+			} else if (result.type === 'success' && action.search === '?/unlikePost') {
+				const updated_post = JSON.parse(result.data?.post ?? '{}');
+				post.likeCnt = updated_post.likeCnt;
+				// post.likedBy = updated_post.likedBy;
+				// await applyAction(result);
+				// post.likeCnt -= 1;
+				post.likedBy = post.likedBy.filter((id) => id.toString() !== user._id.toString());
+			} else if (result.type === 'failure') {
 				errorMsg = result.data?.message || '알 수 없는 오류가 발생했습니다.';
 			} else if (result.type === 'error') {
 				errorMsg = result.error?.message || '알 수 없는 오류가 발생했습니다.';

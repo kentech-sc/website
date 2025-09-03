@@ -1,13 +1,14 @@
-import CourseManager from '$lib/course/manager';
-import ProfessorManager from '$lib/professor/manager';
-import ReviewManager from '$lib/review/manager';
+import CourseService from '$lib/course/service';
+import ProfessorService from '$lib/professor/service';
+import ReviewService from '$lib/review/service';
 import { fail, redirect } from '@sveltejs/kit';
 import { Types } from 'mongoose';
-import type { CourseId, ProfessorId } from '$lib/course/types';
+import type { CourseId } from '$lib/course/types';
+import type { ProfessorId } from '$lib/professor/types';
 
 export const load = async () => {
-	const courses = await CourseManager.getAllCourses();
-	const professors = await ProfessorManager.getAllProfessors();
+	const courses = await CourseService.getAllCourses();
+	const professors = await ProfessorService.getAllProfessors();
 
 	return { courses: JSON.stringify(courses), professors: JSON.stringify(professors) };
 };
@@ -17,13 +18,9 @@ export const actions = {
 		const formData = await request.formData();
 
 		const courseIdRaw = (formData.get('courseId') ?? '').toString();
-		if (!courseIdRaw || typeof courseIdRaw !== 'string')
-			return fail(400, { message: 'courseId is undefined or invalid' });
 		const courseId: CourseId = new Types.ObjectId(courseIdRaw);
 
 		const professorIdRaw = (formData.get('professorId') ?? '').toString();
-		if (!professorIdRaw || typeof professorIdRaw !== 'string')
-			return fail(400, { message: 'professorId is undefined or invalid' });
 		const professorId: ProfessorId = new Types.ObjectId(professorIdRaw);
 
 		const score = Number(formData.get('score'));
@@ -32,7 +29,7 @@ export const actions = {
 		if (!courseId || !professorId || !score || !comment)
 			return fail(400, { message: 'courseId, professorId, score, comment are required' });
 
-		const review = await ReviewManager.createReview(
+		const review = await ReviewService.createReview(
 			courseId,
 			professorId,
 			locals.user._id,

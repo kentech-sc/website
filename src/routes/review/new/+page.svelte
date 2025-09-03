@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import type { Course, Professor } from '$lib/course/types.js';
+	import type { Course } from '$lib/course/types.js';
+	import type { Professor } from '$lib/professor/types.js';
 
 	let { data } = $props();
 	let courses = $state<Course[]>(JSON.parse(data?.courses || '[]'));

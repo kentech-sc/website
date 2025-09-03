@@ -1,4 +1,5 @@
-import type { CourseId, ProfessorId } from '$lib/course/types';
+import type { CourseId } from '$lib/course/types';
+import type { ProfessorId } from '$lib/professor/types';
 import type { UserId } from '$lib/user/types';
 import type { UpdateQuery, Types } from 'mongoose';
 import type { DisplayType } from '$lib/user/types';
@@ -12,10 +13,10 @@ export interface ReviewBase {
 	score: number;
 	comment: string;
 	displayType?: DisplayType;
-	displayName?: string;
-	courseCode?: string;
-	courseName?: string;
-	professorName?: string;
+	displayName?: string | null;
+	courseCode?: string | null;
+	courseName?: string | null;
+	professorName?: string | null;
 }
 
 export interface Review extends ReviewBase {

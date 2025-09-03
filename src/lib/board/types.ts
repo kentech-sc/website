@@ -4,7 +4,7 @@ import type { UpdateQuery } from 'mongoose';
 import type { DisplayType } from '$lib/user/types';
 
 export type PostId = Types.ObjectId;
-export type BoardId = string;
+export type BoardId = string | Types.ObjectId;
 
 export interface PostBase {
 	boardId: BoardId;
@@ -15,7 +15,7 @@ export interface PostBase {
 	likedBy: UserId[];
 	viewCnt: number;
 	displayType: DisplayType;
-	displayName?: string;
+	displayName?: string | null;
 }
 
 export interface Post extends PostBase {
@@ -35,7 +35,7 @@ export interface CommentBase {
 	likeCnt: number;
 	likedBy: UserId[];
 	displayType: DisplayType;
-	displayName?: string;
+	displayName?: string | null;
 }
 
 export interface Comment extends CommentBase {

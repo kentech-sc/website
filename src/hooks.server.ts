@@ -7,15 +7,15 @@ import { sequence } from '@sveltejs/kit/hooks';
 import { MONGO_URI } from '$env/static/private';
 
 import { handle as authenticationHandle } from './auth.js';
-import DBManager from '$lib/general/db.js';
-import UserManager from '$lib/user/manager.js';
+import DBService from '$lib/general/db.js';
+import UserService from '$lib/user/service.js';
 import type { User } from '$lib/user/types.js';
 
 async function getUser(email: string, name: string): Promise<User> {
-	const user = await UserManager.getUserOrNullByEmail(email);
+	const user = await UserService.getUserOrNullByEmail(email);
 
 	if (!user) {
-		return await UserManager.signupUserByEmailAndRealName(email, name);
+		return await UserService.signupUserByEmailAndRealName(email, name);
 	} else {
 		return user;
 	}
@@ -45,7 +45,7 @@ function checkEnv() {
 export const init: ServerInit = async () => {
 	checkEnv();
 
-	await DBManager.init(MONGO_URI);
+	await DBService.init(MONGO_URI);
 
 	console.log('[Server Is Ready]');
 };

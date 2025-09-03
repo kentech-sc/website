@@ -1,24 +1,22 @@
-import BoardManager from '$lib/board/manager';
-import UserManager from '$lib/user/manager.js';
+import BoardService from '$lib/board/service';
+import UserService from '$lib/user/service.js';
 import type { PostId, CommentId } from '$lib/board/types.js';
-import { error, fail, redirect } from '@sveltejs/kit';
+import { fail, redirect } from '@sveltejs/kit';
 import { Types } from 'mongoose';
 
 export const load = async ({ params, request }) => {
 	const postIdRaw = params.postId;
-	if (!postIdRaw || typeof postIdRaw !== 'string')
-		error(400, { message: 'postId is undefined or invalid' });
 	const postId: PostId = new Types.ObjectId(postIdRaw);
 
 	if (new URL(request.url).searchParams.get('x-sveltekit-invalidated') !== '11') {
-		await BoardManager.viewPostById(postId);
+		await BoardService.viewPostById(postId);
 	}
 
-	const postRaw = await BoardManager.getPostById(postId);
-	const post = (await UserManager.fillDisplayNames([postRaw]))[0];
+	const postRaw = await BoardService.getPostById(postId);
+	const post = (await UserService.fillDisplayNames([postRaw]))[0];
 
-	const commentsRaw = await BoardManager.getCommentsByPostId(postId);
-	const comments = await UserManager.fillDisplayNames(commentsRaw);
+	const commentsRaw = await BoardService.getCommentsByPostId(postId);
+	const comments = await UserService.fillDisplayNames(commentsRaw);
 
 	return { post: JSON.stringify(post), comments: JSON.stringify(comments) };
 };
@@ -26,8 +24,6 @@ export const load = async ({ params, request }) => {
 export const actions = {
 	createComment: async ({ request, locals, params }) => {
 		const postIdRaw = params.postId;
-		if (!postIdRaw || typeof postIdRaw !== 'string')
-			return fail(400, { message: 'postId is undefined or invalid' });
 		const postId: PostId = new Types.ObjectId(postIdRaw);
 		const formData = await request.formData();
 		const content = (formData.get('content') ?? '').toString();
@@ -39,7 +35,7 @@ export const actions = {
 		if (displayType !== 'anonymous' && displayType !== 'nickname' && displayType !== 'realName')
 			return fail(400, { message: 'displayType is invalid' });
 
-		const comment = await BoardManager.createCommentByPostId(
+		const comment = await BoardService.createCommentByPostId(
 			postId,
 			content,
 			locals.user._id,
@@ -50,56 +46,44 @@ export const actions = {
 	},
 	deletePost: async ({ request, locals }) => {
 		const formData = await request.formData();
-		const postIdRaw = formData.get('post-id');
-		if (!postIdRaw || typeof postIdRaw !== 'string')
-			return fail(400, { message: 'postId is undefined or invalid' });
+		const postIdRaw = (formData.get('post-id') ?? '').toString();
 		const postId: PostId = new Types.ObjectId(postIdRaw);
-		await BoardManager.deletePostById(postId, locals.user);
+		await BoardService.deletePostById(postId, locals.user);
 		redirect(302, '/board');
 	},
 	deleteComment: async ({ request, locals }) => {
 		const formData = await request.formData();
-		const commentIdRaw = formData.get('comment-id');
-		if (!commentIdRaw || typeof commentIdRaw !== 'string')
-			return fail(400, { message: 'commentId is undefined or invalid' });
+		const commentIdRaw = (formData.get('comment-id') ?? '').toString();
 		const commentId: CommentId = new Types.ObjectId(commentIdRaw);
-		await BoardManager.deleteCommentById(commentId, locals.user);
+		await BoardService.deleteCommentById(commentId, locals.user);
 		return { commentIdRaw };
 	},
 	likePost: async ({ request, locals }) => {
 		const formData = await request.formData();
-		const postIdRaw = formData.get('post-id');
-		if (!postIdRaw || typeof postIdRaw !== 'string')
-			return fail(400, { message: 'postId is undefined or invalid' });
+		const postIdRaw = (formData.get('post-id') ?? '').toString();
 		const postId: PostId = new Types.ObjectId(postIdRaw);
-		const post = await BoardManager.likePostById(postId, locals.user._id);
+		const post = await BoardService.likePostById(postId, locals.user._id);
 		return { post: JSON.stringify(post) };
 	},
 	unlikePost: async ({ request, locals }) => {
 		const formData = await request.formData();
-		const postIdRaw = formData.get('post-id');
-		if (!postIdRaw || typeof postIdRaw !== 'string')
-			return fail(400, { message: 'postId is undefined or invalid' });
+		const postIdRaw = (formData.get('post-id') ?? '').toString();
 		const postId: PostId = new Types.ObjectId(postIdRaw);
-		const post = await BoardManager.unlikePostById(postId, locals.user._id);
+		const post = await BoardService.unlikePostById(postId, locals.user._id);
 		return { post: JSON.stringify(post) };
-	},
-	likeComment: async ({ request, locals }) => {
-		const formData = await request.formData();
-		const commentIdRaw = formData.get('comment-id');
-		if (!commentIdRaw || typeof commentIdRaw !== 'string')
-			return fail(400, { message: 'commentId is undefined or invalid' });
-		const commentId: CommentId = new Types.ObjectId(commentIdRaw);
-		const comment = await BoardManager.likeCommentById(commentId, locals.user._id);
-		return { comment: JSON.stringify(comment) };
-	},
-	unlikeComment: async ({ request, locals }) => {
-		const formData = await request.formData();
-		const commentIdRaw = formData.get('comment-id');
-		if (!commentIdRaw || typeof commentIdRaw !== 'string')
-			return fail(400, { message: 'commentId is undefined or invalid' });
-		const commentId: CommentId = new Types.ObjectId(commentIdRaw);
-		const comment = await BoardManager.unlikeCommentById(commentId, locals.user._id);
-		return { comment: JSON.stringify(comment) };
 	}
+	// likeComment: async ({ request, locals }) => {
+	// 	const formData = await request.formData();
+	// 	const commentIdRaw = (formData.get('comment-id') ?? '').toString();
+	// 	const commentId: CommentId = new Types.ObjectId(commentIdRaw);
+	// 	await BoardService.likeCommentById(commentId, locals.user._id);
+	// 	return { commentIdRaw };
+	// },
+	// unlikeComment: async ({ request, locals }) => {
+	// 	const formData = await request.formData();
+	// 	const commentIdRaw = (formData.get('comment-id') ?? '').toString();
+	// 	const commentId: CommentId = new Types.ObjectId(commentIdRaw);
+	// 	await BoardService.unlikeCommentById(commentId, locals.user._id);
+	// 	return { commentIdRaw };
+	// }
 };

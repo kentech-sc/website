@@ -1,40 +1,39 @@
 import type { ProfessorCreate, Professor, ProfessorId, ProfessorUpdate } from './types.js';
-import ProfessorController from './controller.js';
+import ProfessorRepository from './repository.js';
 
-export default class ProfessorManager {
+export default class ProfessorService {
 	static async createProfessor(professor: ProfessorCreate): Promise<Professor> {
-		return await ProfessorController.createProfessor(professor);
+		return await ProfessorRepository.createProfessor(professor);
 	}
 
 	static async getProfessorById(professorId: ProfessorId): Promise<Professor> {
-		const professor = await ProfessorController.getProfessorById(professorId);
+		const professor = await ProfessorRepository.getProfessorById(professorId);
 		if (!professor) throw new Error('존재하지 않는 교수님입니다.');
 		return professor;
 	}
 
 	static async getAllProfessors(): Promise<Professor[]> {
-		const professors = await ProfessorController.getAllProfessors();
-		if (!professors) throw new Error('교수님이 존재하지 않습니다.');
+		const professors = await ProfessorRepository.getAllProfessors();
 		return professors;
 	}
 
 	static async getProfessorsByIdsOrNull(
 		professorIds: ProfessorId[]
 	): Promise<Array<Professor | null>> {
-		return await ProfessorController.getProfessorsByIds(professorIds);
+		return await ProfessorRepository.getProfessorsByIds(professorIds);
 	}
 
 	static async updateProfessorById(
 		professorId: ProfessorId,
 		professor: ProfessorUpdate
 	): Promise<Professor> {
-		const updatedProfessor = await ProfessorController.updateProfessorById(professorId, professor);
+		const updatedProfessor = await ProfessorRepository.updateProfessorById(professorId, professor);
 		if (!updatedProfessor) throw new Error('존재하지 않는 교수님입니다.');
 		return updatedProfessor;
 	}
 
 	static async deleteProfessorById(professorId: ProfessorId): Promise<void> {
-		const deletedProfessor = await ProfessorController.deleteProfessorById(professorId);
+		const deletedProfessor = await ProfessorRepository.deleteProfessorById(professorId);
 		if (!deletedProfessor) throw new Error('존재하지 않는 교수님입니다.');
 	}
 
@@ -42,7 +41,7 @@ export default class ProfessorManager {
 		arr: T[]
 	): Promise<Map<string, Professor>> {
 		const professorIds = arr.map((item) => item.professorId);
-		const professors = await ProfessorController.getProfessorsByIds(professorIds);
+		const professors = await ProfessorRepository.getProfessorsByIds(professorIds);
 		const professorById = new Map<string, Professor>();
 
 		for (const professor of professors) {
@@ -62,7 +61,7 @@ export default class ProfessorManager {
 			const professor = professorById.get(item.professorId.toString());
 			return {
 				...item,
-				professorName: professor?.name ?? '???'
+				professorName: professor?.name ?? null
 			};
 		});
 	}

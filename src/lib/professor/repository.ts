@@ -1,7 +1,7 @@
 import type { ProfessorId, Professor, ProfessorCreate, ProfessorUpdate } from './types.js';
 import ProfessorModel from './model.js';
 
-export default class ProfessorController {
+export default class ProfessorRepository {
 	static async createProfessor(professor: ProfessorCreate): Promise<Professor> {
 		return (await ProfessorModel.create(professor)).toObject();
 	}

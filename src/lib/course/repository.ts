@@ -1,7 +1,7 @@
 import type { CourseId, Course, CourseCreate, CourseUpdate } from './types.js';
 import CourseModel from './model.js';
 
-export default class CourseController {
+export default class CourseRepository {
 	static async createCourse(course: CourseCreate): Promise<Course> {
 		return (await CourseModel.create(course)).toObject();
 	}

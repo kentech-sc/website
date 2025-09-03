@@ -2,10 +2,12 @@
 	import type { Review } from '$lib/review/types.js';
 	import type { Post } from '$lib/board/types.js';
 	import GeneralUtils from '$lib/general/utils.js';
+	import type { Petition } from '$lib/petition/types.js';
 
 	let { data } = $props();
 	let reviews = $state<Review[]>(JSON.parse(data?.reviews || '[]'));
 	let posts = $state<Post[]>(JSON.parse(data?.posts || '[]'));
+	let petitions = $state<Petition[]>(JSON.parse(data?.petitions || '[]'));
 </script>
 
 <div class="module" id="banner-div">
@@ -29,7 +31,16 @@
 	<section class="module">
 		<h2>청원</h2>
 		<hr />
-		<p>작성된 글이 없습니다.</p>
+		{#if petitions.length === 0}
+			<p>작성된 청원이 없습니다.</p>
+		{:else}
+			{#each petitions as petition (petition._id)}
+				<a href={`/petition/${petition._id}`} class="container post-div">
+					<p>{petition.title}</p>
+					<p>{GeneralUtils.parseDate(petition.createdAt, 'date')}</p>
+				</a>
+			{/each}
+		{/if}
 	</section>
 	<section class="module">
 		<h2>자유게시판</h2>

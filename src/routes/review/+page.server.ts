@@ -1,8 +1,8 @@
-import ReviewManager from '$lib/review/manager';
-import ReviewService from '$lib/review/service.js';
+import ReviewService from '$lib/review/service';
+import ReviewApplication from '$lib/applications/review.js';
 
 export const load = async () => {
-	const reviewsRaw = await ReviewManager.getAllReviews();
-	const reviews = await ReviewService.fillReviews(reviewsRaw);
+	const reviewsRaw = await ReviewService.getAllReviews();
+	const reviews = await ReviewApplication.fillReviews(reviewsRaw);
 	return { reviews: JSON.stringify(reviews) };
 };

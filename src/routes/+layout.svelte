@@ -22,6 +22,8 @@
 		<a href="/board">자유게시판</a>
 		|
 		<a href="/review">강의평가</a>
+		|
+		<a href="/petition">청원</a>
 	</nav>
 	<div>
 		<input type="text" placeholder="검색(장식임)" />

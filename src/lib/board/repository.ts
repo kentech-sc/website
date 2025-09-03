@@ -10,8 +10,10 @@ import type {
 	Post
 } from './types';
 import { CommentModel, PostModel } from './model';
+import GeneralUtils from '$lib/general/utils';
+import type { UserId } from '$lib/user/types';
 
-export class PostController {
+export class PostRepository {
 	static async createPost(post: PostCreate): Promise<Post> {
 		return (await PostModel.create(post)).toObject();
 	}
@@ -35,9 +37,25 @@ export class PostController {
 	static async deleteAllPostsByBoardId(boardId: BoardId): Promise<void> {
 		await PostModel.deleteMany({ boardId }).lean();
 	}
+
+	static async likePostById(postId: PostId, userId: UserId): Promise<Post | null> {
+		return await PostModel.findOneAndUpdate(
+			{ _id: postId, likedBy: { $ne: userId } },
+			{ $addToSet: { likedBy: userId }, $inc: { likeCnt: 1 } },
+			{ new: true }
+		).lean();
+	}
+
+	static async unlikePostById(postId: PostId, userId: UserId): Promise<Post | null> {
+		return await PostModel.findOneAndUpdate(
+			{ _id: postId, likedBy: userId },
+			{ $pull: { likedBy: userId }, $inc: { likeCnt: -1 } },
+			{ new: true }
+		).lean();
+	}
 }
 
-export class CommentController {
+export class CommentRepository {
 	static async createComment(comment: CommentCreate): Promise<Comment> {
 		return (await CommentModel.create(comment)).toObject();
 	}
@@ -48,6 +66,17 @@ export class CommentController {
 
 	static async getCommentsByPostId(postId: PostId): Promise<Comment[]> {
 		return await CommentModel.find({ postId }).sort({ createdAt: -1 }).lean();
+	}
+
+	static async getCommentsByPostIds(postIds: PostId[]): Promise<Array<Comment[] | null>> {
+		const comments = await CommentModel.find({ postId: { $in: postIds } }).lean();
+
+		const commentsById = new Map<string, Comment[]>();
+		for (const comment of comments) {
+			GeneralUtils.addItemToArrInMap(commentsById, comment.postId.toString(), comment);
+		}
+
+		return postIds.map((postId) => commentsById.get(postId.toString()) ?? null);
 	}
 
 	static async updateCommentById(

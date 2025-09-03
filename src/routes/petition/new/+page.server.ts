@@ -1,4 +1,4 @@
-import BoardService from '$lib/board/service';
+import PetitionService from '$lib/petition/service';
 import { fail, redirect } from '@sveltejs/kit';
 
 // export const load = async () => {
@@ -7,24 +7,14 @@ import { fail, redirect } from '@sveltejs/kit';
 // };
 
 export const actions = {
-	createPost: async ({ request, locals }) => {
+	createPetition: async ({ request, locals }) => {
 		const formData = await request.formData();
 		const title = (formData.get('title') ?? '').toString();
 		const content = (formData.get('content') ?? '').toString();
-		const displayType = (formData.get('displayType') ?? '').toString();
-
-		if (displayType !== 'anonymous' && displayType !== 'nickname' && displayType !== 'realName')
-			return fail(400, { message: 'displayType is invalid' });
 
 		if (!title || !content) return fail(400, { message: 'title, content are required' });
 
-		const post = await BoardService.createPostByBoardId(
-			'main',
-			title,
-			content,
-			locals.user._id,
-			displayType
-		);
-		redirect(302, '/board/' + post._id);
+		const petition = await PetitionService.createPetition(title, content, locals.user._id);
+		redirect(302, '/petition/' + petition._id);
 	}
 };
