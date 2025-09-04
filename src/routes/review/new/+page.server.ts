@@ -23,16 +23,30 @@ export const actions = {
 		const professorIdRaw = (formData.get('professorId') ?? '').toString();
 		const professorId: ProfessorId = new Types.ObjectId(professorIdRaw);
 
-		const score = Number(formData.get('score'));
+		const year = Number(formData.get('year'));
+		const term = Number(formData.get('term'));
+		const title = (formData.get('title') ?? '').toString();
+
+		const score = {
+			assignment: Number(formData.get('assignmentScore')),
+			lecture: Number(formData.get('lectureScore')),
+			exam: Number(formData.get('examScore'))
+		};
+
 		const comment = (formData.get('comment') ?? '').toString();
 
-		if (!courseId || !professorId || !score || !comment)
-			return fail(400, { message: 'courseId, professorId, score, comment are required' });
+		if (!courseId || !professorId || !year || !term || !title || !score || !comment)
+			return fail(400, {
+				message: 'courseId, professorId, year, term, title, score, comment are required'
+			});
 
 		const review = await ReviewService.createReview(
 			courseId,
 			professorId,
 			locals.user._id,
+			year,
+			term,
+			title,
 			score,
 			comment
 		);

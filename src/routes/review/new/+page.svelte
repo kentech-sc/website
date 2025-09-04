@@ -2,6 +2,7 @@
 	import { enhance } from '$app/forms';
 	import type { Course } from '$lib/course/types.js';
 	import type { Professor } from '$lib/professor/types.js';
+	import ReviewService from '$lib/review/service.js';
 
 	let { data } = $props();
 	let courses = $state<Course[]>(JSON.parse(data?.courses || '[]'));
@@ -42,11 +43,32 @@
 					<option value={professor._id}>{professor.name} 교수님</option>
 				{/each}
 			</select>
-			<label for="score">점수</label>
-			<input type="number" id="score" name="score" />
-			<label for="comment">한줄평</label>
+			<label for="year">학년도</label>
+			<select id="year" name="year">
+				<option value="">선택</option>
+				{#each Array.from({ length: new Date().getFullYear() - 2021 }, (_, i) => 22 + i) as year (year)}
+					<option value={year}>{year}</option>
+				{/each}
+			</select>
+			<label for="term">학기</label>
+			<select id="term" name="term">
+				<option value="">선택</option>
+				<option value="1">{ReviewService.translatedTerm[1]}</option>
+				<option value="2">{ReviewService.translatedTerm[2]}</option>
+				<option value="3">{ReviewService.translatedTerm[3]}</option>
+				<option value="4">{ReviewService.translatedTerm[4]}</option>
+			</select>
+			<label for="title">한줄평</label>
+			<input type="text" id="title" name="title" />
+			<label for="assignmentScore">과제</label>
+			<input type="number" id="assignmentScore" name="assignmentScore" />
+			<label for="lectureScore">강의</label>
+			<input type="number" id="lectureScore" name="lectureScore" />
+			<label for="examScore">시험</label>
+			<input type="number" id="examScore" name="examScore" />
+			<label for="comment">기타</label>
 			<textarea id="comment" name="comment"></textarea>
-			<button type="submit">추가하기</button>
+			<button type="submit">평가하기</button>
 		</form>
 
 		{#if errorMsg}

@@ -24,12 +24,12 @@
 
 <div id="layout">
 	<section class="module">
-		<h2>공지사항</h2>
+		<h2>공지사항<a href="/">더보기</a></h2>
 		<hr />
 		<p>작성된 공지사항이 없습니다.</p>
 	</section>
 	<section class="module">
-		<h2>청원</h2>
+		<h2>청원<a href="/petition">더보기</a></h2>
 		<hr />
 		{#if petitions.length === 0}
 			<p>작성된 청원이 없습니다.</p>
@@ -43,7 +43,7 @@
 		{/if}
 	</section>
 	<section class="module">
-		<h2>자유게시판</h2>
+		<h2>자유게시판<a href="/board">더보기</a></h2>
 		<hr />
 		{#if posts.length === 0}
 			<p>작성된 글이 없습니다.</p>
@@ -57,14 +57,14 @@
 		{/if}
 	</section>
 	<section class="module">
-		<h2>강의평가</h2>
+		<h2>강의평가<a href="/review">더보기</a></h2>
 		<hr />
 		{#if reviews.length === 0}
 			<p>작성된 리뷰가 없습니다.</p>
 		{:else}
 			{#each reviews as review (review._id)}
-				<a href={`/review/${review._id}`} class="container course-div">
-					<p>{review.courseName}</p>
+				<a href={`/review/${review._id}`} class="container post-div">
+					<p>{review.title}</p>
 					<p>{GeneralUtils.parseDate(review.updatedAt, 'date')}</p>
 				</a>
 			{/each}
@@ -89,6 +89,16 @@
 		width: 100%;
 	}
 
+	h2 {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+
+		a {
+			font-size: 0.8rem;
+		}
+	}
+
 	hr {
 		margin-bottom: 0.5rem;
 	}
@@ -102,6 +112,10 @@
 	section {
 		display: flex;
 		flex-direction: column;
+
+		& > a:nth-child(2n + 1) {
+			background-color: var(--color-gray-2);
+		}
 	}
 
 	.post-div {
@@ -112,22 +126,10 @@
 		justify-content: space-between;
 
 		&:hover {
-			background-color: var(--color-gray-2);
+			background-color: var(--color-gray-3);
 			cursor: pointer;
 			text-decoration: none;
 		}
 	}
 
-	.course-div {
-		color: black;
-		width: 100%;
-		margin: 0;
-		padding: 0.25rem;
-		justify-content: space-between;
-		&:hover {
-			background-color: var(--color-gray-2);
-			cursor: pointer;
-			text-decoration: none;
-		}
-	}
 </style>

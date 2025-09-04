@@ -5,17 +5,34 @@ import type { CourseId } from '$lib/course/types.js';
 import type { ProfessorId } from '$lib/professor/types.js';
 
 export default class ReviewService {
+	static translatedTerm: Record<number, string> = {
+		1: '1',
+		3: '여름',
+		2: '2',
+		4: '겨울'
+	};
+
 	static async createReview(
 		courseId: CourseId,
 		professorId: ProfessorId,
 		userId: UserId,
-		score: number,
+		year: number,
+		term: number,
+		title: string,
+		score: {
+			assignment: number;
+			lecture: number;
+			exam: number;
+		},
 		comment: string
 	): Promise<Review> {
 		const review: ReviewCreate = {
 			courseId,
 			professorId,
 			userId,
+			year,
+			term,
+			title,
 			score,
 			comment
 		};
@@ -51,17 +68,8 @@ export default class ReviewService {
 		return reviews;
 	}
 
-	static async updateReviewById(
-		reviewId: ReviewId,
-		score: number,
-		comment: string
-	): Promise<Review> {
-		const review: ReviewUpdate = {
-			score,
-			comment
-		};
-
-		const updatedReview = await ReviewRepository.updateReviewById(reviewId, review);
+	static async updateReviewById(reviewId: ReviewId, reviewUpdate: ReviewUpdate): Promise<Review> {
+		const updatedReview = await ReviewRepository.updateReviewById(reviewId, reviewUpdate);
 		if (!updatedReview) throw new Error('존재하지 않는 리뷰입니다.');
 		return updatedReview;
 	}

@@ -42,7 +42,7 @@ export class PetitionRepository {
 
 	static async signPetitionById(petitionId: PetitionId, userId: UserId): Promise<Petition> {
 		return await PetitionModel.findOneAndUpdate(
-			{ _id: petitionId, signedBy: { $ne: userId } },
+			{ _id: petitionId, signedBy: { $ne: userId }, petitionerId: { $ne: userId } },
 			{ $push: { signedBy: userId }, $inc: { signCnt: 1 } },
 			{ new: true }
 		).lean();

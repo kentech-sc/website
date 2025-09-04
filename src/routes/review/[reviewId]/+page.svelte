@@ -3,6 +3,7 @@
 	import { enhance } from '$app/forms';
 	import type { Review } from '$lib/review/types.js';
 	import GeneralUtils from '$lib/general/utils.js';
+	import ReviewService from '$lib/review/service';
 
 	let { data } = $props();
 
@@ -23,44 +24,65 @@
 	</section>
 
 	<section class="container-col module">
-		<div class="container review-div">
-			<p><strong>[{review.displayName}] ({review.score}/10)</strong></p>
-			<p>"{review.comment}"</p>
-			<div class="container">
-				<p>{GeneralUtils.parseDate(review.createdAt)}</p>
+		<article>
+			<header class="container">
+				<div class="container-col">
+					<h2>{review.title}</h2>
+					<p>
+						{review.year}학년도 {ReviewService.translatedTerm[review.term]}학기 수강생 | {GeneralUtils.parseDate(
+							review.createdAt
+						)}
+					</p>
+				</div>
 				{#if review.userId === user._id}
 					<form method="post" action="?/deleteReview" data-sveltekit-replacestate use:enhance>
 						<input type="hidden" name="review-id" value={review._id} />
 						<button type="submit">삭제</button>
 					</form>
 				{/if}
-			</div>
-		</div>
+			</header>
+			<hr />
+			<p><b>과제:</b> {review.score.assignment}</p>
+			<hr />
+			<p><b>강의:</b> {review.score.lecture}</p>
+			<hr />
+			<p><b>시험:</b> {review.score.exam}</p>
+			<hr />
+			<pre>{review.comment}</pre>
+		</article>
 	</section>
 </div>
 
 <style lang="scss">
 	#layout {
 		width: 100%;
+
+		& > header {
+			width: 100%;
+			margin: 0.5rem;
+			justify-content: space-between;
+		}
 	}
 
-	header {
-		width: 100%;
-		margin: 0.5rem;
-		justify-content: space-between;
+	article {
+		width: stretch;
+
+		header {
+			margin: 0.5rem;
+			justify-content: space-between;
+
+			& > div {
+				align-items: flex-start;
+			}
+		}
+
+		pre {
+			margin: 0.5rem;
+		}
 	}
 
 	section {
 		width: 100%;
 		margin: 0.5rem;
-	}
-
-	.review-div {
-		width: 100%;
-		justify-content: space-between;
-
-		button {
-			margin-left: 0.5rem;
-		}
 	}
 </style>

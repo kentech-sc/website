@@ -115,7 +115,7 @@ export default class PetitionService {
 		if (petition.status === 'ongoing') {
 			if (petition.signCnt >= 30) {
 				return await this.updatePetitionById(petition._id, { status: 'pending' });
-			} else if (petition.createdAt < new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)) {
+			} else if (petition.createdAt < new Date(Date.now() - 14 * 24 * 60 * 60 * 1000)) {
 				return await this.updatePetitionById(petition._id, { status: 'expired' });
 			}
 		}

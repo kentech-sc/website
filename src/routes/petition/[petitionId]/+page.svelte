@@ -40,7 +40,17 @@
 </script>
 
 {#snippet SignBtn()}
-	{#if !petition.signedBy.includes(user._id)}
+	{#if petition.petitionerId === user._id}
+		<button
+			type="submit"
+			class="container"
+			id="like-btn"
+			onclick={() => alert('청원을 제출한 사람은 서명할 수 없습니다.')}
+		>
+			<ThumbsUp size="1.2rem" color="skyblue" />
+			<span>{petition.signCnt}</span>
+		</button>
+	{:else if !petition.signedBy.includes(user._id)}
 		<CommonForm actionName="signPetition" formName="signPetition" bind:formResult>
 			<input type="hidden" name="petition-id" value={petition._id} />
 			<button type="submit" class="container" id="like-btn">
@@ -123,13 +133,17 @@
 			</article>
 		{:else if petition.status === 'pending'}
 			{@render ReviewBtn()}
-		{:else}
+		{:else if petition.status === 'reviewing'}
 			<CommonForm formName="responseToPetition" actionName="responseToPetition" bind:formResult>
 				<input type="hidden" name="petition-id" value={petition._id} />
 				<label for="response">답변</label>
 				<textarea id="response" name="response"></textarea>
 				<button type="submit">답변하기</button>
 			</CommonForm>
+		{:else if petition.status === 'ongoing'}
+			<p>30명 이상이 동의하면 학생회가 검토 후 답변합니다.</p>
+		{:else if petition.status === 'expired'}
+			<p>청원 기간이 만료되었습니다.</p>
 		{/if}
 	</section>
 
