@@ -57,6 +57,7 @@ export class PostRepository {
 
 export class CommentRepository {
 	static async createComment(comment: CommentCreate): Promise<Comment> {
+		await PostRepository.updatePostById(comment.postId, { $inc: { commentCnt: 1 } });
 		return (await CommentModel.create(comment)).toObject();
 	}
 
@@ -87,7 +88,10 @@ export class CommentRepository {
 	}
 
 	static async deleteCommentById(commentId: CommentId): Promise<Comment | null> {
-		return await CommentModel.findOneAndDelete({ _id: commentId }).lean();
+		const comment = await CommentModel.findOneAndDelete({ _id: commentId }).lean();
+		if (!comment) return null;
+		await PostRepository.updatePostById(comment.postId, { $inc: { commentCnt: -1 } });
+		return comment;
 	}
 
 	static async deleteAllCommentsByPostId(postId: PostId): Promise<void> {

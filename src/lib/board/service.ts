@@ -56,6 +56,7 @@ export default class BoardService {
 			likeCnt: 0,
 			likedBy: [],
 			viewCnt: 0,
+			commentCnt: 0,
 			displayType
 		};
 		return await PostRepository.createPost(post);

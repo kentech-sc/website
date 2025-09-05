@@ -9,8 +9,8 @@
 
 html {
 	font-size: 16px;
-	background-color: var(--color-gray-2);
-	height: 100%;
+	background-color: var(--back-color-gray-2);
+	height: stretch;
 	// letter-spacing: 0.0rem;
 }
 
@@ -33,8 +33,8 @@ html {
 }
 
 body {
-	background-color: var(--color-gray-2);
-	height: 100%;
+	background-color: var(--back-color-gray-2);
+	height: stretch;
 
 	& > div {
 		display: flex;
@@ -45,7 +45,7 @@ body {
 
 a {
 	text-decoration-line: none;
-	color: var(--color-primary-1);
+	color: var(--text-color-primary-3);
 }
 
 a:hover {
@@ -56,7 +56,7 @@ a:hover {
 }
 
 s {
-	color: gray;
+	color: var(--text-color-gray-3);
 	text-decoration-thickness: 0.05rem;
 }
 
@@ -75,14 +75,14 @@ table {
 
 th,
 td {
-	border: solid gray 0.05rem;
-	background-color: var(--color-gray-1);
+	border: solid var(--color-gray-3) 0.05rem;
+	background-color: var(--back-color-gray-1);
 }
 
 button,
 label.button {
 	padding: 0.25rem 0.75rem;
-	border: solid gray 0.05rem;
+	border: solid var(--color-gray-3) 0.05rem;
 	background-color: white;
 	font-size: 1rem;
 	font-weight: bold;
@@ -91,7 +91,7 @@ label.button {
 button:hover,
 label.button:hover {
 	cursor: pointer;
-	background-color: var(--color-gray-2);
+	background-color: var(--hover-color-gray-2);
 }
 
 textarea,
@@ -100,5 +100,5 @@ select {
 	font-size: 0.85rem;
 	background-color: white;
 	padding: 0.25rem 0.5rem;
-	border: 0.05rem solid gray;
+	border: 0.05rem solid var(--color-gray-3);
 }

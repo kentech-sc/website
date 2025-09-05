@@ -12,7 +12,6 @@ export const load = async () => {
 	const posts = await UserService.fillDisplayNames(postsRaw);
 
 	const petitionsRaw = await PetitionService.getAllPetitions();
-	// const petitions = await PetitionApplication.fillRealNamesForPetitions(petitionsRaw);
 
 	return {
 		posts: JSON.stringify(posts),

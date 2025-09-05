@@ -10,6 +10,7 @@ const PostSchema = new mongoose.Schema(
 		content: { type: String, required: true },
 		viewCnt: { type: Number, required: true, default: 0 },
 		likeCnt: { type: Number, required: true, default: 0 },
+		commentCnt: { type: Number, required: true, default: 0 },
 		likedBy: { type: [mongoose.Schema.Types.ObjectId], required: true, default: [] }
 	},
 	{

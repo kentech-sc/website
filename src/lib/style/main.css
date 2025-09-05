@@ -38,21 +38,49 @@
 } */
 
 :root {
-	--color-primary-1: rgb(100, 50, 250);
-	--color-primary-2: rgb(50, 100, 200);
-	--color-primary-3: rgb(100, 200, 250);
+	--color-primary-1: rgb(118, 181, 72);
+	--color-primary-2: rgb(93, 154, 61);
+	--color-primary-3: rgb(66, 106, 44);
+	--color-primary-4: rgb(45, 74, 28);
+	--text-color-primary-1: rgb(118, 181, 72);
+	--text-color-primary-2: rgb(93, 154, 61);
+	--text-color-primary-3: rgb(66, 106, 44);
+	--text-color-primary-4: rgb(45, 74, 28);
+
+	--color-gray-1: lightgray;
+	--color-gray-2: darkgray;
+	--color-gray-3: gray;
+	--color-gray-4: dimgray;
+	--text-color-gray-1: lightgray;
+	--text-color-gray-2: darkgray;
+	--text-color-gray-3: gray;
+	--text-color-gray-4: dimgray;
+	--back-color-gray-1: rgb(250, 250, 250);
+	--back-color-gray-2: rgb(245, 245, 245);
+	--back-color-gray-3: rgb(230, 230, 230);
+	--back-color-gray-4: rgb(220, 220, 220);
+	--hover-color-gray-1: rgb(245, 245, 245);
+	--hover-color-gray-2: rgb(230, 230, 230);
+	--hover-color-gray-3: rgb(220, 220, 220);
+	--hover-color-gray-4: rgb(210, 210, 210);
+
 	--color-error: rgb(255, 50, 50);
-	--color-error-back: rgb(255, 240, 240);
-	--color-error-hover: rgb(255, 220, 220);
+	--text-color-error: rgb(255, 50, 50);
+	--back-color-error: rgb(255, 240, 240);
+	--hover-color-error: rgb(255, 220, 220);
+
 	--color-warn: rgb(255, 200, 50);
-	--color-warn-back: rgb(255, 245, 220);
+	--text-color-warn: rgb(255, 200, 50);
+	--back-color-warn: rgb(255, 245, 220);
+	--hover-color-warn: rgb(255, 225, 200);
+
 	--color-success: rgb(50, 255, 50);
-	--color-success-back: rgb(245, 255, 245);
+	--text-color-success: rgb(50, 255, 50);
+	--back-color-success: rgb(245, 255, 245);
+	--hover-color-success: rgb(220, 255, 220);
+
 	--color-info: rgb(40, 220, 240);
-	--color-info-back: rgb(245, 255, 255);
-	--color-info-hover: rgb(230, 255, 255);
-	--color-gray-1: rgb(250, 250, 250);
-	--color-gray-2: rgb(245, 245, 245);
-	--color-gray-3: rgb(230, 230, 230);
-	--color-gray-4: rgb(220, 220, 220);
+	--text-color-info: rgb(40, 220, 240);
+	--back-color-info: rgb(245, 255, 255);
+	--hover-color-info: rgb(230, 255, 255);
 }

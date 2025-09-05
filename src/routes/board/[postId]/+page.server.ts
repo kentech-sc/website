@@ -13,10 +13,12 @@ export const load = async ({ params, request }) => {
 	}
 
 	const postRaw = await BoardService.getPostById(postId);
-	const post = (await UserService.fillDisplayNames([postRaw]))[0];
+	const commentsRaw = (await BoardService.getCommentsByPostId(postId)).toReversed();
 
-	const commentsRaw = await BoardService.getCommentsByPostId(postId);
-	const comments = await UserService.fillDisplayNames(commentsRaw);
+	const raws = [postRaw, ...commentsRaw];
+	const filled = await UserService.fillDisplayNames(raws);
+	const post = filled[0];
+	const comments = filled.slice(1);
 
 	return { post: JSON.stringify(post), comments: JSON.stringify(comments) };
 };

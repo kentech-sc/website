@@ -13,7 +13,7 @@
 	}
 
 	section {
-		width: 100%;
+		width: stretch;
 		height: 50vh;
 	}
 </style>

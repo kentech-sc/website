@@ -14,6 +14,7 @@ export interface PostBase {
 	likeCnt: number;
 	likedBy: UserId[];
 	viewCnt: number;
+	commentCnt: number;
 	displayType: DisplayType;
 	displayName?: string | null;
 }
@@ -24,7 +25,9 @@ export interface Post extends PostBase {
 }
 
 export type PostCreate = PostBase;
-export type PostUpdate = UpdateQuery<Pick<PostBase, 'title' | 'content' | 'likeCnt' | 'viewCnt'>>;
+export type PostUpdate = UpdateQuery<
+	Pick<PostBase, 'title' | 'content' | 'likeCnt' | 'viewCnt' | 'commentCnt'>
+>;
 
 export type CommentId = Types.ObjectId;
 

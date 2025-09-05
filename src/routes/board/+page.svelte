@@ -6,16 +6,30 @@
 	const posts = $state<Post[]>(JSON.parse(data?.posts || '[]'));
 </script>
 
-<div id="layout" class="container-col">
+{#snippet HeaderModule()}
 	<header class="container module">
 		<h1>자유게시판</h1>
 		<a href="/board/new">글쓰기</a>
 	</header>
+{/snippet}
 
+{#snippet NoticeModule()}
 	<section class="module">
 		<p>(대충 주의사항)</p>
 	</section>
+{/snippet}
 
+{#snippet ListItem(post: Post)}
+	<tr>
+		<td><a href={`/board/${post._id}`}>{post.title}</a></td>
+		<td>{post.displayName}</td>
+		<td>{GeneralUtils.parseDate(post.createdAt)}</td>
+		<td>{post.viewCnt}</td>
+		<td>{post.likeCnt}</td>
+	</tr>
+{/snippet}
+
+{#snippet ListModule()}
 	<section class="container-col module">
 		<table>
 			<colgroup>
@@ -35,38 +49,30 @@
 				</tr>
 			</thead>
 			<tbody>
-				{#each posts as post (post._id)}
-					<tr>
-						<td><a href={`/board/${post._id}`}>{post.title}</a></td>
-						<td>{post.displayName}</td>
-						<td>{GeneralUtils.parseDate(post.createdAt)}</td>
-						<td>{post.viewCnt}</td>
-						<td>{post.likeCnt}</td>
-					</tr>
-				{/each}
+				{#each posts as post (post._id)}{@render ListItem(post)}{/each}
 			</tbody>
 		</table>
 	</section>
-</div>
+{/snippet}
+
+{@render HeaderModule()}
+{@render NoticeModule()}
+{@render ListModule()}
 
 <style lang="scss">
-	#layout {
-		width: 100%;
-	}
-
 	section {
-		width: 100%;
+		width: stretch;
 		margin: 0.5rem;
 	}
 
 	header {
-		width: 100%;
+		width: stretch;
 		margin: 0.5rem;
 		justify-content: space-between;
 	}
 
 	table {
-		width: 100%;
+		width: stretch;
 
 		td,
 		th {

@@ -55,6 +55,10 @@
 </div>
 
 <style lang="scss">
+	#common-form-div {
+		width: stretch;
+	}
+
 	fieldset {
 		border: none;
 		display: flex;
