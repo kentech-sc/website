@@ -37,11 +37,14 @@
 			</p>
 		</div>
 		{#if review.userId === user._id}
-			<div class="delete-form">
-				<CommonForm actionName="deleteReview" formName="deleteReview">
-					<input type="hidden" name="review-id" value={review._id} />
-					<button type="submit">삭제</button>
-				</CommonForm>
+			<div class="container">
+				<a href="{review._id}/edit" class="btn-anchor">수정</a>
+				<div class="delete-form">
+					<CommonForm actionName="deleteReview" formName="deleteReview">
+						<input type="hidden" name="review-id" value={review._id} />
+						<button type="submit">삭제</button>
+					</CommonForm>
+				</div>
 			</div>
 		{/if}
 	</header>
