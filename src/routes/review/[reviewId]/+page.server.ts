@@ -16,12 +16,12 @@ export const load = async ({ params }) => {
 };
 
 export const actions = {
-	deleteReview: async ({ request }) => {
+	deleteReview: async ({ request, locals }) => {
 		const formData = await request.formData();
 		const reviewIdRaw = (formData.get('review-id') ?? '').toString();
 		const reviewId: ReviewId = new Types.ObjectId(reviewIdRaw);
 
-		await ReviewService.deleteReviewById(reviewId);
+		await ReviewService.deleteReviewById(reviewId, locals.user);
 		redirect(302, '/review');
 	}
 };

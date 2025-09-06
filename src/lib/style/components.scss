@@ -29,8 +29,25 @@
 	background-color: white;
 }
 
+.btn-anchor {
+	color: black;
+	margin-right: 0.5rem;
+	padding: 0.25rem 0.75rem;
+	border: solid var(--color-gray-3) 0.05rem;
+	background-color: white;
+	font-size: 1rem;
+	font-weight: bold;
+
+	&:hover {
+		cursor: pointer;
+		background-color: var(--hover-color-gray-2);
+		text-decoration: none;
+	}
+}
+
 .warn-btn {
 	background-color: var(--color-error-back);
+
 	&:hover {
 		background-color: var(--color-error-hover);
 	}

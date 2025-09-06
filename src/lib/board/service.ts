@@ -62,16 +62,16 @@ export default class BoardService {
 		return await PostRepository.createPost(post);
 	}
 
-	static async updatePostById(postId: PostId, post: PostUpdate): Promise<void> {
-		await PostRepository.updatePostById(postId, post);
+	static async editPostById(postId: PostId, post: PostUpdate, user: User): Promise<Post> {
+		const updatedPost = await PostRepository.editPostById(postId, post, user._id);
+		if (!updatedPost) throw new Error('존재하지 않는 게시글이거나, 작성자가 아닙니다.');
+		return updatedPost;
 	}
 
 	static async deletePostById(postId: PostId, user: User): Promise<void> {
 		return await mongoose.connection.transaction(async () => {
-			const post = await this.getPostById(postId);
-			if (user._id.toString() !== post.userId.toString())
-				throw new Error('이 게시글을 삭제할 수 없습니다.');
-			await PostRepository.deletePostById(postId);
+			const deletedPost = await PostRepository.deletePostById(postId, user._id);
+			if (!deletedPost) throw new Error('존재하지 않는 게시글이거나, 작성자가 아닙니다.');
 			await CommentRepository.deleteAllCommentsByPostId(postId);
 		});
 	}
@@ -80,16 +80,16 @@ export default class BoardService {
 		await PostRepository.updatePostById(postId, { $inc: { viewCnt: 1 } });
 	}
 
-	static async likePostById(postId: PostId, userId: UserId): Promise<Post | null> {
-		// if (post.likedBy.some((id) => id.equals(userId)))
-		// 	throw new Error('이미 좋아요를 눌렀습니다.');
-		return await PostRepository.likePostById(postId, userId);
+	static async likePostById(postId: PostId, userId: UserId): Promise<Post> {
+		const updatedPost = await PostRepository.likePostById(postId, userId);
+		if (!updatedPost) throw new Error('존재하지 않는 게시글이거나, 이미 좋아요를 눌렀습니다.');
+		return updatedPost;
 	}
 
-	static async unlikePostById(postId: PostId, userId: UserId): Promise<Post | null> {
-		// if (!post.likedBy.some((id) => id.equals(userId)))
-		// 	throw new Error('아직 좋아요를 누르지 않았습니다.');
-		return await PostRepository.unlikePostById(postId, userId);
+	static async unlikePostById(postId: PostId, userId: UserId): Promise<Post> {
+		const updatedPost = await PostRepository.unlikePostById(postId, userId);
+		if (!updatedPost) throw new Error('존재하지 않는 게시글이거나, 이미 좋아요를 취소했습니다.');
+		return updatedPost;
 	}
 
 	static async createCommentByPostId(
@@ -109,18 +109,20 @@ export default class BoardService {
 		return await CommentRepository.createComment(comment);
 	}
 
-	static async updateCommentById(commentId: CommentId, comment: CommentUpdate): Promise<Comment> {
-		const updatedComment = await CommentRepository.updateCommentById(commentId, comment);
-		if (!updatedComment) throw new Error('존재하지 않는 댓글입니다.');
+	static async editCommentById(
+		commentId: CommentId,
+		comment: CommentUpdate,
+		user: User
+	): Promise<Comment> {
+		const updatedComment = await CommentRepository.editCommentById(commentId, comment, user._id);
+		if (!updatedComment) throw new Error('존재하지 않는 댓글이거나, 작성자가 아닙니다.');
 		return updatedComment;
 	}
 
 	static async deleteCommentById(commentId: CommentId, user: User): Promise<void> {
 		return await mongoose.connection.transaction(async () => {
-			const comment = await this.getCommentById(commentId);
-			if (user._id.toString() !== comment.userId.toString())
-				throw new Error('이 댓글을 삭제할 수 없습니다.');
-			await CommentRepository.deleteCommentById(commentId);
+			const deletedComment = await CommentRepository.deleteCommentById(commentId, user._id);
+			if (deletedComment === null) throw new Error('존재하지 않는 댓글이거나, 작성자가 아닙니다.');
 		});
 	}
 

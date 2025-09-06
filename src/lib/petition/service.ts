@@ -83,6 +83,12 @@ export default class PetitionService {
 		return await this.updatePetitionById(petitionId, { status: 'reviewing' });
 	}
 
+	static async unreviewPetitionById(petitionId: PetitionId, _userId: UserId): Promise<Petition> {
+		const petition = await this.getPetitionById(petitionId);
+		if (petition.status !== 'reviewing') throw new Error('아직 검토 중이지 않은 청원입니다.');
+		return await this.updatePetitionById(petitionId, { status: 'pending' });
+	}
+
 	static async responseToPetitionById(
 		petitionId: PetitionId,
 		responderId: UserId,
@@ -98,6 +104,21 @@ export default class PetitionService {
 		});
 	}
 
+	static async reviseResponseById(
+		petitionId: PetitionId,
+		responderId: UserId,
+		response: string
+	): Promise<Petition> {
+		const petition = await this.getPetitionById(petitionId);
+		if (!petition.responderId) throw new Error('답변이 없는 청원입니다.');
+		if (petition.responderId.toString() !== responderId.toString())
+			throw new Error('답변을 수정할 권한이 없습니다.');
+		return await this.updatePetitionById(petitionId, {
+			response,
+			answeredAt: new Date()
+		});
+	}
+
 	static async deleteResponseById(petitionId: PetitionId, responderId: UserId): Promise<Petition> {
 		const petition = await this.getPetitionById(petitionId);
 		if (!petition.responderId) throw new Error('답변이 없는 청원입니다.');
@@ -106,7 +127,7 @@ export default class PetitionService {
 		return await this.updatePetitionById(petitionId, {
 			responderId: null,
 			response: null,
-			status: 'pending',
+			status: 'reviewing',
 			answeredAt: null
 		});
 	}

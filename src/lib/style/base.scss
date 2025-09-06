@@ -102,3 +102,12 @@ select {
 	padding: 0.25rem 0.5rem;
 	border: 0.05rem solid var(--color-gray-3);
 }
+
+select {
+	height: 1.8rem;
+}
+
+hr {
+	width: stretch;
+	margin: 0.5rem 0;
+}

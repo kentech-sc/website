@@ -74,7 +74,8 @@
 
 {#snippet Footer()}
 	<footer class="container module">
-		<p>Footer</p>
+		<p>2025 KENTECH STUDENT COUNCIL</p>
+		<p>Developed by nemovim</p>
 	</footer>
 {/snippet}
 
@@ -135,5 +136,11 @@
 			flex: 1;
 			max-width: 70vw;
 		}
+	}
+
+	footer {
+		font-size: 0.75rem;
+		color: var(--text-color-gray-4);
+		justify-content: space-between;
 	}
 </style>

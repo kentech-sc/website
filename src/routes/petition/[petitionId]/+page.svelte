@@ -16,6 +16,8 @@
 	let petition = $state<Petition>(JSON.parse(data?.petition || '{}'));
 	let signersNames = $state<string[]>(JSON.parse(data?.signersNames || '[]'));
 
+	let isEditing = $state<boolean>(false);
+
 	let formResult = $state<ActionResult | null>(null);
 
 	$effect(() => {
@@ -31,8 +33,10 @@
 				petition.signedBy = petition.signedBy.filter((id) => id.toString() !== user._id.toString());
 				signersNames = signersNames.filter((name) => name !== user.realName);
 			} else {
+				isEditing = false;
 				petition.answeredAt = updatedPetition.answeredAt;
 				petition.response = updatedPetition.response;
+				petition.responderId = updatedPetition.responderId;
 				petition.responderName = updatedPetition.responderId ? user.realName : null;
 			}
 		}
@@ -120,11 +124,19 @@
 	</CommonForm>
 {/snippet}
 
+{#snippet UnreviewBtn()}
+	<CommonForm actionName="unreviewPetition" formName="unreviewPetition" bind:formResult>
+		<input type="hidden" name="petition-id" value={petition._id} />
+		<button type="submit">검토 취소하기</button>
+	</CommonForm>
+{/snippet}
+
 {#snippet ResponseForm()}
 	<CommonForm formName="responseToPetition" actionName="responseToPetition" bind:formResult>
 		<input type="hidden" name="petition-id" value={petition._id} />
 		<label for="response">답변</label>
 		<textarea id="response" name="response"></textarea>
+		<br />
 		<button type="submit">답변하기</button>
 	</CommonForm>
 {/snippet}
@@ -152,13 +164,37 @@
 	</article>
 {/snippet}
 
+{#snippet EditForm()}
+	<CommonForm formName="editResponse" actionName="editResponse" bind:formResult>
+		<input type="hidden" name="petition-id" value={petition._id} />
+		<label for="response">답변</label>
+		<textarea id="response" name="response">{petition.response}</textarea>
+		<br />
+		<button type="submit">수정하기</button>
+	</CommonForm>
+{/snippet}
+
+{#snippet EditBtn()}
+	{#if petition.responderId === user._id}
+		<button type="submit" onclick={() => (isEditing = true)}>수정하기</button>
+	{/if}
+{/snippet}
+
 {#snippet ResponseModule()}
 	<section class="container-col module" id="response-section">
 		{#if petition.answeredAt}
-			{@render ResponseArticle()}
+			{#if isEditing}
+				{@render EditForm()}
+			{:else}
+				{@render ResponseArticle()}
+				{@render EditBtn()}
+			{/if}
 		{:else if petition.status === 'pending'}
 			{@render ReviewBtn()}
 		{:else if petition.status === 'reviewing'}
+			{@render UnreviewBtn()}
+			<br />
+			<hr />
 			{@render ResponseForm()}
 		{:else if petition.status === 'ongoing'}
 			<p>30명 이상이 동의하면 학생회가 검토 후 답변합니다.</p>

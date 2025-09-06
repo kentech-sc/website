@@ -69,6 +69,28 @@ export const actions = {
 		);
 		return { petition: JSON.stringify(petition) };
 	},
+	unreviewPetition: async ({ request, locals }) => {
+		const formData = await request.formData();
+		const petitionIdRaw = (formData.get('petition-id') ?? '').toString();
+		const petitionId: PetitionId = new Types.ObjectId(petitionIdRaw);
+		const petition = await PetitionService.unreviewPetitionById(petitionId, locals.user._id);
+		return { petition: JSON.stringify(petition) };
+	},
+	editResponse: async ({ request, locals }) => {
+		const formData = await request.formData();
+		const response = (formData.get('response') ?? '').toString();
+		const petitionIdRaw = (formData.get('petition-id') ?? '').toString();
+		const petitionId = new Types.ObjectId(petitionIdRaw);
+
+		if (!response || !petitionId) return fail(400, { message: 'response is required' });
+
+		const petition = await PetitionService.reviseResponseById(
+			petitionId,
+			locals.user._id,
+			response
+		);
+		return { petition: JSON.stringify(petition) };
+	},
 	deleteResponse: async ({ request, locals }) => {
 		const formData = await request.formData();
 		const petitionIdRaw = (formData.get('petition-id') ?? '').toString();

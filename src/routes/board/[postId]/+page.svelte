@@ -83,11 +83,14 @@
 					</p>
 				</div>
 				{#if post.userId === user._id}
-					<div class="delete-post-form">
-						<CommonForm actionName="deletePost" formName="deletePost">
-							<input type="hidden" name="post-id" value={post._id} />
-							<button type="submit">삭제</button>
-						</CommonForm>
+					<div class="container">
+						<a href="{post._id}/edit" class="btn-anchor">수정</a>
+						<div class="delete-post-form">
+							<CommonForm actionName="deletePost" formName="deletePost">
+								<input type="hidden" name="post-id" value={post._id} />
+								<button type="submit">삭제</button>
+							</CommonForm>
+						</div>
 					</div>
 				{/if}
 			</header>

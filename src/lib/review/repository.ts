@@ -47,8 +47,18 @@ export default class ReviewRepository {
 		return await ReviewModel.findOneAndUpdate({ _id: reviewId }, review, { new: true }).lean();
 	}
 
-	static async deleteReviewById(reviewId: ReviewId): Promise<Review | null> {
-		return await ReviewModel.findOneAndDelete({ _id: reviewId }).lean();
+	static async editReviewById(
+		reviewId: ReviewId,
+		reviewUpdate: ReviewUpdate,
+		userId: UserId
+	): Promise<Review | null> {
+		return await ReviewModel.findOneAndUpdate({ _id: reviewId, userId }, reviewUpdate, {
+			new: true
+		}).lean();
+	}
+
+	static async deleteReviewById(reviewId: ReviewId, userId: UserId): Promise<Review | null> {
+		return await ReviewModel.findOneAndDelete({ _id: reviewId, userId }).lean();
 	}
 
 	static async deleteAllReviewsByCourseId(courseId: CourseId): Promise<void> {

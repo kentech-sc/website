@@ -3,6 +3,7 @@ import type { UserId } from '$lib/user/types.js';
 import ReviewRepository from './repository.js';
 import type { CourseId } from '$lib/course/types.js';
 import type { ProfessorId } from '$lib/professor/types.js';
+import type { User } from '$lib/user/types.js';
 
 export default class ReviewService {
 	static translatedTerm: Record<number, string> = {
@@ -68,14 +69,18 @@ export default class ReviewService {
 		return reviews;
 	}
 
-	static async updateReviewById(reviewId: ReviewId, reviewUpdate: ReviewUpdate): Promise<Review> {
-		const updatedReview = await ReviewRepository.updateReviewById(reviewId, reviewUpdate);
-		if (!updatedReview) throw new Error('존재하지 않는 리뷰입니다.');
+	static async editReviewById(
+		reviewId: ReviewId,
+		reviewUpdate: ReviewUpdate,
+		user: User
+	): Promise<Review> {
+		const updatedReview = await ReviewRepository.editReviewById(reviewId, reviewUpdate, user._id);
+		if (!updatedReview) throw new Error('존재하지 않는 리뷰이거나 작성자가 아닙니다.');
 		return updatedReview;
 	}
 
-	static async deleteReviewById(reviewId: ReviewId): Promise<void> {
-		const deletedReview = await ReviewRepository.deleteReviewById(reviewId);
-		if (!deletedReview) throw new Error('존재하지 않는 리뷰입니다.');
+	static async deleteReviewById(reviewId: ReviewId, user: User): Promise<void> {
+		const deletedReview = await ReviewRepository.deleteReviewById(reviewId, user._id);
+		if (!deletedReview) throw new Error('존재하지 않는 리뷰이거나 작성자가 아닙니다.');
 	}
 }

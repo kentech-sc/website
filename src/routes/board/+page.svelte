@@ -21,7 +21,7 @@
 
 {#snippet ListItem(post: Post)}
 	<tr>
-		<td><a href={`/board/${post._id}`}>{post.title}</a></td>
+		<td><a href={`/board/${post._id}`}>{post.title} [{post.commentCnt}]</a></td>
 		<td>{post.displayName}</td>
 		<td>{GeneralUtils.parseDate(post.createdAt)}</td>
 		<td>{post.viewCnt}</td>
