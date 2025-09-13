@@ -11,6 +11,7 @@ import type {
 } from './types';
 import { CommentModel, PostModel } from './model';
 import GeneralUtils from '$lib/general/utils';
+import { paginateModel } from '$lib/general/paginate';
 import type { UserId } from '$lib/user/types';
 
 export class PostRepository {
@@ -22,8 +23,12 @@ export class PostRepository {
 		return await PostModel.findOne({ _id: postId }).lean();
 	}
 
-	static async getPostsByBoardId(boardId: BoardId): Promise<Post[]> {
-		return await PostModel.find({ boardId }).sort({ createdAt: -1 }).lean();
+	static async getPostsByBoardId(
+		boardId: BoardId,
+		limit = 10,
+		{ fromId, toId }: { fromId?: PostId; toId?: PostId } = {}
+	): Promise<{ pageItems: Post[]; fromId?: PostId; toId?: PostId }> {
+		return await paginateModel(PostModel, { boardId }, limit, { fromId, toId });
 	}
 
 	static async updatePostById(postId: PostId, post: PostUpdate): Promise<Post | null> {
@@ -73,7 +78,7 @@ export class CommentRepository {
 		return await CommentModel.findOne({ _id: commentId }).lean();
 	}
 
-	static async getCommentsByPostId(postId: PostId): Promise<Comment[]> {
+	static async getAllCommentsByPostId(postId: PostId): Promise<Comment[]> {
 		return await CommentModel.find({ postId }).sort({ createdAt: -1 }).lean();
 	}
 

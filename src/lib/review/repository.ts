@@ -3,6 +3,8 @@ import type { CourseId } from '$lib/course/types.js';
 import type { ProfessorId } from '$lib/professor/types.js';
 import ReviewModel from './model.js';
 import type { UserId } from '$lib/user/types.js';
+import { paginateModel } from '$lib/general/paginate';
+import type { FilterQuery } from 'mongoose';
 
 export default class ReviewRepository {
 	static async createReview(review: ReviewCreate): Promise<Review> {
@@ -13,34 +15,27 @@ export default class ReviewRepository {
 		return await ReviewModel.findOne({ _id: reviewId }).lean();
 	}
 
-	static async getAllReviews(): Promise<Review[]> {
-		return await ReviewModel.find().sort({ createdAt: -1 }).lean();
+	static async getReviewsWithCondition(
+		limit = 10,
+		{
+			professorId,
+			courseId,
+			fromId,
+			toId
+		}: { professorId?: ProfessorId; courseId?: CourseId; fromId?: ReviewId; toId?: ReviewId } = {}
+	): Promise<{ pageItems: Review[]; fromId?: ReviewId; toId?: ReviewId }> {
+		const filterQuery: FilterQuery<Review> = {};
+		if (professorId) filterQuery.professorId = professorId;
+		if (courseId) filterQuery.courseId = courseId;
+		return await paginateModel(ReviewModel, filterQuery, limit, { fromId, toId });
 	}
 
-	static async getReviewsByCourseId(courseId: CourseId): Promise<Review[]> {
-		return await ReviewModel.find({ courseId }).sort({ createdAt: -1 }).lean();
-	}
-
-	static async getReviewsByProfessorId(professorId: ProfessorId): Promise<Review[]> {
-		return await ReviewModel.find({ professorId }).sort({ createdAt: -1 }).lean();
-	}
-
-	static async getReviewsByUserId(userId: UserId): Promise<Review[]> {
-		return await ReviewModel.find({ userId }).sort({ createdAt: -1 }).lean();
-	}
-
-	static async getReviewsByCourseIdAndUserId(
-		courseId: CourseId,
-		userId: UserId
-	): Promise<Review[]> {
-		return await ReviewModel.find({ courseId, userId }).sort({ createdAt: -1 }).lean();
-	}
-
-	static async getReviewsByCourseIdAndProfessorId(
-		courseId: CourseId,
-		professorId: ProfessorId
-	): Promise<Review[]> {
-		return await ReviewModel.find({ courseId, professorId }).sort({ createdAt: -1 }).lean();
+	static async getReviewsByUserId(
+		userId: UserId,
+		limit = 10,
+		{ fromId, toId }: { fromId?: ReviewId; toId?: ReviewId } = {}
+	): Promise<{ pageItems: Review[]; fromId?: ReviewId; toId?: ReviewId }> {
+		return await paginateModel(ReviewModel, { userId }, limit, { fromId, toId });
 	}
 
 	static async updateReviewById(reviewId: ReviewId, review: ReviewUpdate): Promise<Review | null> {

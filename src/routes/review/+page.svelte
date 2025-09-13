@@ -4,23 +4,26 @@
 	import ReviewService from '$lib/review/service.js';
 	import type { Course } from '$lib/course/types.js';
 	import type { Professor } from '$lib/professor/types.js';
+	import CommonListBtnModule from '$lib/assets/commonListBtnModule.svelte';
+	import { goto } from '$app/navigation';
 
 	let { data } = $props();
-	const allReviews = $state<Review[]>(JSON.parse(data?.reviews || '[]'));
+	const reviews = $derived<Review[]>(JSON.parse(data?.reviews || '[]'));
+	const fromId = $derived<string | null>(data?.fromId ?? null);
+	const toId = $derived<string | null>(data?.toId ?? null);
 
 	let selectedCourse = $state<string>('');
 	let selectedProfessor = $state<string>('');
 
-	let reviews = $derived.by<Review[]>(() => {
-		return allReviews.filter((review) => {
-			if (selectedCourse && review.courseId.toString() !== selectedCourse) return false;
-			if (selectedProfessor && review.professorId.toString() !== selectedProfessor) return false;
-			return true;
-		});
+	$effect(() => {
+		const querys = [];
+		if (selectedCourse) querys.push(`course=${selectedCourse}`);
+		if (selectedProfessor) querys.push(`professor=${selectedProfessor}`);
+		goto(`/review?${querys.join('&')}`);
 	});
 
-	const courses = $state<Course[]>(JSON.parse(data?.courses || '[]'));
-	const professors = $state<Professor[]>(JSON.parse(data?.professors || '[]'));
+	const courses = $derived<Course[]>(JSON.parse(data?.courses || '[]'));
+	const professors = $derived<Professor[]>(JSON.parse(data?.professors || '[]'));
 </script>
 
 {#snippet HeaderModule()}
@@ -98,6 +101,7 @@
 <section class="container-col module">
 	{@render FilterModule()}
 	{@render ListModule()}
+	<CommonListBtnModule pageName="review" {toId} {fromId} />
 </section>
 
 <style lang="scss">

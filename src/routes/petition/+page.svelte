@@ -2,9 +2,12 @@
 	import GeneralUtils from '$lib/general/utils.js';
 	import type { Petition } from '$lib/petition/types.js';
 	import PetitionService from '$lib/petition/service';
+	import CommonListBtnModule from '$lib/assets/commonListBtnModule.svelte';
 
 	let { data } = $props();
-	const petitions = $state<Petition[]>(JSON.parse(data?.petitions || '[]'));
+	const petitions = $derived<Petition[]>(JSON.parse(data?.petitions || '[]'));
+	const fromId = $derived<string | null>(data?.fromId ?? null);
+	const toId = $derived<string | null>(data?.toId ?? null);
 </script>
 
 {#snippet HeaderModule()}
@@ -81,6 +84,7 @@
 				{/each}
 			</tbody>
 		</table>
+		<CommonListBtnModule pageName="petition" {toId} {fromId} />
 	</section>
 {/snippet}
 

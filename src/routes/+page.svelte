@@ -16,7 +16,7 @@
 		<h2>{title}<a href="/{link}">더보기</a></h2>
 		<hr />
 		{#if items.length === 0}
-			<p>작성된 {title}이 없습니다.</p>
+			<p>작성된 글이 없습니다.</p>
 		{:else}
 			{#each items as item (item._id)}
 				<a href={`/${link}/${item._id}`} class="container grid-item-a">

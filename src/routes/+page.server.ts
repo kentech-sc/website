@@ -5,13 +5,16 @@ import BoardService from '$lib/board/service';
 import ReviewApplication from '$lib/applications/review.js';
 
 export const load = async () => {
-	const reviewsRaw = await ReviewService.getAllReviews();
+	const reviewsResult = await ReviewService.getReviews();
+	const reviewsRaw = reviewsResult.pageItems;
 	const reviews = await ReviewApplication.fillReviews(reviewsRaw);
 
-	const postsRaw = await BoardService.getPostsByBoardId('main');
+	const postsResult = await BoardService.getPostsByBoardId('main');
+	const postsRaw = postsResult.pageItems;
 	const posts = await UserService.fillDisplayNames(postsRaw);
 
-	const petitionsRaw = await PetitionService.getAllPetitions();
+	const petitionsResult = await PetitionService.getPetitions();
+	const petitionsRaw = petitionsResult.pageItems;
 
 	return {
 		posts: JSON.stringify(posts),

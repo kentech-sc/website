@@ -25,9 +25,11 @@ export default class PetitionService {
 		return petition;
 	}
 
-	static async getAllPetitions(): Promise<Petition[]> {
-		const petitions = await PetitionRepository.getAllPetitions();
-		return Promise.all(petitions.map((petition) => this.refreshStatusByPetition(petition)));
+	static async getPetitions(
+		limit = 10,
+		{ fromId, toId }: { fromId?: PetitionId; toId?: PetitionId } = {}
+	): Promise<{ pageItems: Petition[]; fromId?: PetitionId; toId?: PetitionId }> {
+		return await PetitionRepository.getPetitions(limit, { fromId, toId });
 	}
 
 	static async createPetition(title: string, content: string, userId: UserId): Promise<Petition> {

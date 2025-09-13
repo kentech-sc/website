@@ -29,7 +29,7 @@
 	background-color: white;
 }
 
-.btn-anchor {
+@mixin BtnStyle {
 	color: black;
 	margin-right: 0.5rem;
 	padding: 0.25rem 0.75rem;
@@ -42,6 +42,20 @@
 		cursor: pointer;
 		background-color: var(--hover-color-gray-2);
 		text-decoration: none;
+	}
+}
+
+.btn-anchor {
+	@include BtnStyle;
+}
+
+.btn-anchor-disabled {
+	@include BtnStyle;
+
+	color: var(--color-gray-2);
+
+	&:hover {
+		cursor: not-allowed;
 	}
 }
 

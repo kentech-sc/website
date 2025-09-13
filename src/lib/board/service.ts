@@ -20,9 +20,12 @@ export default class BoardService {
 		return post;
 	}
 
-	static async getPostsByBoardId(boardId: BoardId): Promise<Post[]> {
-		const posts = await PostRepository.getPostsByBoardId(boardId);
-		return posts;
+	static async getPostsByBoardId(
+		boardId: BoardId,
+		limit = 10,
+		{ fromId, toId }: { fromId?: PostId; toId?: PostId } = {}
+	): Promise<{ pageItems: Post[]; fromId?: PostId; toId?: PostId }> {
+		return await PostRepository.getPostsByBoardId(boardId, limit, { fromId, toId });
 	}
 
 	static async getCommentById(commentId: CommentId): Promise<Comment> {
@@ -32,7 +35,7 @@ export default class BoardService {
 	}
 
 	static async getCommentsByPostId(postId: PostId): Promise<Comment[]> {
-		const comments = await CommentRepository.getCommentsByPostId(postId);
+		const comments = await CommentRepository.getAllCommentsByPostId(postId);
 		if (!comments) throw new Error('댓글이 존재하지 않습니다.');
 		return comments;
 	}

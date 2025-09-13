@@ -1,6 +1,7 @@
 import type { UserId } from '$lib/user/types';
 import { PetitionModel } from './model';
 import type { PetitionCreate, Petition, PetitionId, PetitionUpdate } from './types';
+import { paginateModel } from '$lib/general/paginate';
 
 export class PetitionRepository {
 	static async createPetition(petition: PetitionCreate): Promise<Petition> {
@@ -11,8 +12,11 @@ export class PetitionRepository {
 		return await PetitionModel.findOne({ _id: petitionId }).lean();
 	}
 
-	static async getAllPetitions(): Promise<Petition[]> {
-		return await PetitionModel.find().sort({ createdAt: -1 }).lean();
+	static async getPetitions(
+		limit = 10,
+		{ fromId, toId }: { fromId?: PetitionId; toId?: PetitionId } = {}
+	): Promise<{ pageItems: Petition[]; fromId?: PetitionId; toId?: PetitionId }> {
+		return await paginateModel(PetitionModel, {}, limit, { fromId, toId });
 	}
 
 	static async updatePetitionById(

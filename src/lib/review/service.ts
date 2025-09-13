@@ -46,26 +46,30 @@ export default class ReviewService {
 		return review;
 	}
 
-	static async getAllReviews(): Promise<Review[]> {
-		const reviews = await ReviewRepository.getAllReviews();
+	static async getReviews(
+		limit = 10,
+		{
+			fromId,
+			toId,
+			courseId,
+			professorId
+		}: { fromId?: ReviewId; toId?: ReviewId; courseId?: CourseId; professorId?: ProfessorId } = {}
+	): Promise<{ pageItems: Review[]; fromId?: ReviewId; toId?: ReviewId }> {
+		const reviews = await ReviewRepository.getReviewsWithCondition(limit, {
+			fromId,
+			toId,
+			courseId,
+			professorId
+		});
 		return reviews;
 	}
 
-	static async getReviewByCourseId(courseId: CourseId): Promise<Review[]> {
-		const reviews = await ReviewRepository.getReviewsByCourseId(courseId);
-		if (!reviews) throw new Error('리뷰가 존재하지 않습니다.');
-		return reviews;
-	}
-
-	static async getReviewByProfessorId(professorId: ProfessorId): Promise<Review[]> {
-		const reviews = await ReviewRepository.getReviewsByProfessorId(professorId);
-		if (!reviews) throw new Error('리뷰가 존재하지 않습니다.');
-		return reviews;
-	}
-
-	static async getReviewByUserId(userId: UserId): Promise<Review[]> {
-		const reviews = await ReviewRepository.getReviewsByUserId(userId);
-		if (!reviews) throw new Error('리뷰가 존재하지 않습니다.');
+	static async getReviewsByUserId(
+		userId: UserId,
+		limit = 10,
+		{ fromId, toId }: { fromId?: ReviewId; toId?: ReviewId } = {}
+	): Promise<{ pageItems: Review[]; fromId?: ReviewId; toId?: ReviewId }> {
+		const reviews = await ReviewRepository.getReviewsByUserId(userId, limit, { fromId, toId });
 		return reviews;
 	}
 

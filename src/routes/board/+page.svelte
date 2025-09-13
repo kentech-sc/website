@@ -1,9 +1,12 @@
 <script lang="ts">
+	import CommonListBtnModule from '$lib/assets/commonListBtnModule.svelte';
 	import type { Post } from '$lib/board/types.js';
 	import GeneralUtils from '$lib/general/utils.js';
 
 	let { data } = $props();
-	const posts = $state<Post[]>(JSON.parse(data?.posts || '[]'));
+	const posts = $derived<Post[]>(JSON.parse(data?.posts ?? '[]'));
+	const fromId = $derived<string | null>(data.fromId ?? null);
+	const toId = $derived<string | null>(data.toId ?? null);
 </script>
 
 {#snippet HeaderModule()}
@@ -49,9 +52,12 @@
 				</tr>
 			</thead>
 			<tbody>
-				{#each posts as post (post._id)}{@render ListItem(post)}{/each}
+				{#each posts as post (post._id)}
+					{@render ListItem(post)}
+				{/each}
 			</tbody>
 		</table>
+		<CommonListBtnModule pageName="board" {toId} {fromId} />
 	</section>
 {/snippet}
 
