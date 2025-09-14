@@ -8,6 +8,7 @@
 	import CommonForm from '$lib/assets/commonForm.svelte';
 
 	import PetitionService from '$lib/petition/service';
+	import UserService from '$lib/user/service';
 
 	const user = JSON.parse(page.data.user);
 
@@ -27,17 +28,20 @@
 			if (updatedPetition.signCnt > petition.signCnt) {
 				petition.signCnt = updatedPetition.signCnt;
 				petition.signedBy.push(user._id);
-				signersNames.push(user.realName);
+				const displayName = UserService.fillDisplayName(user, 'realName');
+				signersNames.push(displayName);
 			} else if (updatedPetition.signCnt < petition.signCnt) {
 				petition.signCnt = updatedPetition.signCnt;
 				petition.signedBy = petition.signedBy.filter((id) => id.toString() !== user._id.toString());
-				signersNames = signersNames.filter((name) => name !== user.realName);
+				const displayName = UserService.fillDisplayName(user, 'realName');
+				signersNames = signersNames.filter((name) => name !== displayName);
 			} else {
 				isEditing = false;
 				petition.answeredAt = updatedPetition.answeredAt;
 				petition.response = updatedPetition.response;
 				petition.responderId = updatedPetition.responderId;
-				petition.responderName = updatedPetition.responderId ? user.realName : null;
+				const displayName = UserService.fillDisplayName(user, 'realName');
+				petition.responderName = updatedPetition.responderId ? displayName : null;
 			}
 		}
 	});

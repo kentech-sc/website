@@ -5,7 +5,7 @@ import UserService from '$lib/user/service';
 export default class PetitionApplication {
 	static async getSignersRealNamesByPetition(petition: Petition): Promise<Array<string | null>> {
 		const users = await UserService.getUsersByIds(petition.signedBy);
-		return users.map((user) => user?.realName ?? null);
+		return users.map((user) => (user ? UserService.fillDisplayName(user, 'realName') : null));
 	}
 
 	static async fillRealNamesForPetitions(petitions: Petition[]): Promise<Petition[]> {
@@ -26,11 +26,14 @@ export default class PetitionApplication {
 
 		// Petition 배열 갱신
 		for (const petition of petitions) {
-			petition.petitionerName =
-				petitionerByUserId.get(petition.petitionerId.toString())?.realName ?? null;
+			const petitioner = petitionerByUserId.get(petition.petitionerId.toString());
+			const responder = responderByUserId.get(petition.responderId?.toString() ?? '');
 
-			petition.responderName = petition.responderId
-				? (responderByUserId.get(petition.responderId.toString())?.realName ?? null)
+			petition.petitionerName = petitioner
+				? UserService.fillDisplayName(petitioner, 'realName')
+				: null;
+			petition.responderName = responder
+				? UserService.fillDisplayName(responder, 'realName')
 				: null;
 		}
 

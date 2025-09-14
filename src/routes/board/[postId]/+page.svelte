@@ -7,6 +7,7 @@
 	import Heart from '@lucide/svelte/icons/heart';
 	import CommonForm from '$lib/assets/commonForm.svelte';
 	import { invalidateAll } from '$app/navigation';
+	import UserService from '$lib/user/service.js';
 
 	const user = JSON.parse(page.data.user);
 
@@ -18,6 +19,8 @@
 	let likeFormResult = $state<ActionResult | null>(null);
 	let commentFormResult = $state<ActionResult | null>(null);
 	let commentTextarea = $state<HTMLTextAreaElement | null>(null);
+
+	let displayType = $state<'anonymous' | 'nickname' | 'realName'>('anonymous');
 
 	$effect(() => {
 		if (likeFormResult?.type === 'success') {
@@ -109,14 +112,33 @@
 	>
 		<div id="comment-form-div" class="container-col">
 			<div class="container">
-				<span><b>[{user.nickname}]</b></span>&nbsp;
+				<span><b>[{UserService.fillDisplayName(user, displayType)}]</b></span>&nbsp;
 				<div class="container" id="radio-div">
 					<label for="anonymous">익명</label>
-					<input type="radio" id="anonymous" name="displayType" value="anonymous" checked />
+					<input
+						type="radio"
+						id="anonymous"
+						name="displayType"
+						value="anonymous"
+						checked
+						bind:group={displayType}
+					/>
 					<label for="nickname">별명</label>
-					<input type="radio" id="nickname" name="displayType" value="nickname" />
+					<input
+						type="radio"
+						id="nickname"
+						name="displayType"
+						value="nickname"
+						bind:group={displayType}
+					/>
 					<label for="realName">실명</label>
-					<input type="radio" id="realName" name="displayType" value="realName" />
+					<input
+						type="radio"
+						id="realName"
+						name="displayType"
+						value="realName"
+						bind:group={displayType}
+					/>
 				</div>
 			</div>
 			<div class="container">

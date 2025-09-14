@@ -1,6 +1,6 @@
 import type { UpdateQuery, Types } from 'mongoose';
 
-export type Group = 'none' | 'any' | 'guest' | 'user' | 'dev' | 'manager' | 'blocked' | UserId;
+export type Group = 'guest' | 'user' | 'dev' | 'moderator' | 'manager';
 export type UserId = Types.ObjectId;
 export type DisplayType = 'email' | 'realName' | 'nickname' | 'anonymous';
 
@@ -9,6 +9,7 @@ export interface UserBase {
 	realName: string;
 	nickname: string;
 	group: Group;
+	blockedUntil: Date | null;
 }
 
 export interface User extends UserBase {

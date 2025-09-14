@@ -12,16 +12,21 @@ export default class UserService {
 		if (!user) throw new Error('존재하지 않는 사용자입니다.');
 		return user;
 	}
-	static async getUserByRealName(realName: string): Promise<User> {
-		const user = await UserRepository.getUserByRealName(realName);
-		if (!user) throw new Error('존재하지 않는 사용자입니다.');
-		return user;
+
+	static async getUsersByRealName(realName: string): Promise<User[]> {
+		return await UserRepository.getUsersByRealName(realName);
 	}
+
+	static async getUserOrNullByNickname(nickname: string): Promise<User | null> {
+		return await UserRepository.getUserByNickname(nickname);
+	}
+
 	static async getUserByNickname(nickname: string): Promise<User> {
 		const user = await UserRepository.getUserByNickname(nickname);
 		if (!user) throw new Error('존재하지 않는 사용자입니다.');
 		return user;
 	}
+
 	static async getUserById(userId: UserId): Promise<User> {
 		const user = await UserRepository.getUserById(userId);
 		if (!user) throw new Error('존재하지 않는 사용자입니다.');
@@ -32,32 +37,13 @@ export default class UserService {
 		return await UserRepository.getUsersByIds(userIds);
 	}
 
-	static isGroup(group: string): boolean {
-		const groups: string[] = ['none', 'any', 'guest', 'user', 'dev', 'manager', 'blocked'];
-		return groups.includes(group);
-	}
+	// static async signinUserByEmail(email: string): Promise<User> {
+	// 	// TODO: Will this function be used?
+	// 	const user = await this.getUserByEmail(email);
 
-	static canChangeName(targetUser: User, operatorEmail: string, operatorGroup: Group): boolean {
-		if ((['blocked'] as Group[]).includes(operatorGroup))
-			throw new Error('차단된 사용자는 이름을 변경할 수 없습니다.');
-		if (targetUser.email !== operatorEmail) throw new Error('이름 변경은 본인만 가능합니다.');
-		return true;
-	}
-
-	static canChangeGroup(targetUser: User, operatorGroup: Group): boolean {
-		if (!(['system', 'manager', 'dev'] as Group[]).includes(operatorGroup))
-			throw new Error('그룹 변경 권한이 없습니다.');
-		if ((['system', 'dev'] as Group[]).includes(targetUser.group))
-			throw new Error('시스템 및 개발자 그룹은 그룹을 변경할 수 없습니다.');
-		return true;
-	}
-	static async signinUserByEmail(email: string): Promise<User> {
-		// TODO: Will this function be used?
-		const user = await this.getUserByEmail(email);
-
-		// await LogRepository.setUserLogByEmailAndAction(email, 'signin', `name: ${user.name}`);
-		return user;
-	}
+	// 	// await LogRepository.setUserLogByEmailAndAction(email, 'signin', `name: ${user.name}`);
+	// 	return user;
+	// }
 
 	static async signupUserByEmailAndRealName(email: string, realName: string): Promise<User> {
 		let user = await this.getUserOrNullByEmail(email);
@@ -65,9 +51,53 @@ export default class UserService {
 
 		const nickname = email.split('@')[0];
 
-		user = await UserRepository.createUser({ email, realName, nickname, group: 'user' });
+		user = await UserRepository.createUser({
+			email,
+			realName,
+			nickname,
+			group: 'user',
+			blockedUntil: null
+		});
 
 		return user;
+	}
+
+	// ============ Change user info =====================
+
+	static isGroup(group: string): boolean {
+		const groups: string[] = ['none', 'any', 'guest', 'user', 'dev', 'manager'];
+		return groups.includes(group);
+	}
+
+	static async canChangeNickname(
+		targetUser: User,
+		newNickname: string,
+		operatorUser: User
+	): Promise<boolean> {
+		if (
+			!(
+				targetUser.email === operatorUser.email ||
+				(['dev', 'manager'] as Group[]).includes(operatorUser.group)
+			)
+		)
+			throw new Error('이름 변경은 본인만 가능합니다.');
+		if (targetUser.nickname === newNickname) throw new Error('변경 사항이 없습니다.');
+		const user = await this.getUserOrNullByNickname(newNickname);
+		if (user) throw new Error('이미 같은 별명의 사용자가 있습니다.');
+		return true;
+	}
+
+	static canChangeGroup(targetUser: User, newGroup: Group, operatorUser: User): boolean {
+		if (!(['user', 'moderator', 'manager'] as Group[]).includes(newGroup))
+			throw new Error('그룹 변경은 "user", "moderator", "manager"로만 가능합니다.');
+
+		if (!(['manager', 'dev'] as Group[]).includes(operatorUser.group))
+			throw new Error('그룹 변경 권한이 없습니다.');
+
+		if ((['dev'] as Group[]).includes(targetUser.group))
+			throw new Error('개발자의 그룹은 변경할 수 없습니다.');
+
+		return true;
 	}
 
 	static async changeNicknameByEmail(
@@ -75,33 +105,26 @@ export default class UserService {
 		newNickname: string,
 		operator: User
 	): Promise<void> {
-		const user = await this.getUserByEmail(email);
+		console.log(email);
+		console.log(newNickname);
+		console.log(operator);
 
-		const res = this.canChangeName(user, operator.email, operator.group);
-		if (!res) throw new Error('이름 변경은 본인만 가능합니다.');
+		const target = await this.getUserByEmail(email);
 
-		await UserRepository.updateUserById(user._id, { nickname: newNickname });
-	}
+		console.log('===target===');
+		console.log(target);
 
-	static async #changeGroupByUser(user: User, group: Group, operator: User): Promise<void> {
-		const res = this.canChangeGroup(user, operator.group);
-		if (!res) throw new Error('그룹 변경 권한이 없습니다.');
-
-		await UserRepository.updateUserById(user._id, { group });
+		if (await this.canChangeNickname(target, newNickname, operator)) {
+			await UserRepository.updateUserById(target._id, { nickname: newNickname });
+		}
 	}
 
 	static async changeGroupByEmail(email: string, group: Group, operator: User): Promise<void> {
-		if (!(['user', 'manager'] as Group[]).includes(group))
-			throw new Error("The group of user can only be 'user' or 'manager'!");
-		const user = await this.getUserByEmail(email);
-		await this.#changeGroupByUser(user, group, operator);
-	}
+		const target = await this.getUserByEmail(email);
 
-	static async changeGroupByUserId(userId: UserId, group: Group, operator: User): Promise<void> {
-		if (!(['user', 'blocked'] as Group[]).includes(group))
-			throw new Error('This function is made for blocking and unblocking user!');
-		const user = await this.getUserById(userId);
-		await this.#changeGroupByUser(user, group, operator);
+		if (this.canChangeGroup(target, group, operator)) {
+			await UserRepository.updateUserById(target._id, { group });
+		}
 	}
 
 	static async removeUserByEmail(email: string): Promise<void> {
@@ -110,6 +133,8 @@ export default class UserService {
 
 		await UserRepository.deleteUserByEmail(email);
 	}
+
+	// ========= Fill display names ===============
 
 	static async #createUserIdAndIdxMap<T extends { userId: UserId }>(arr: T[]) {
 		const userIds = arr.map((item) => item.userId);
@@ -128,6 +153,26 @@ export default class UserService {
 		return { userById, idxByUserId };
 	}
 
+	static fillDisplayName(
+		user: User,
+		displayType: DisplayType,
+		idxByUserId?: Map<string, number>
+	): string {
+		if (displayType === 'anonymous') {
+			if (!idxByUserId) return '익명의 켄텍인';
+			return `익명의 켄텍인 ${idxByUserId.get(user._id.toString())}`;
+		} else if (displayType === 'realName') {
+			const id = user.email.split('@')[0];
+			if (id.length >= 8) {
+				return `${user[displayType]} (${id.slice(0, 4) + '****'})`;
+			} else {
+				return `${user[displayType]} (${id.slice(0, id.length - 4) + '****'})`;
+			}
+		} else {
+			return user[displayType];
+		}
+	}
+
 	static async fillDisplayNamesByDisplayType<T extends { userId: UserId }>(
 		arr: T[],
 		displayType: DisplayType
@@ -136,15 +181,9 @@ export default class UserService {
 		return arr.map((item) => {
 			const user = userById.get(item.userId.toString());
 
-			let displayName = null;
+			if (!user) return { ...item, displayName: null };
 
-			if (!user) {
-				displayName = null;
-			} else if (displayType === 'anonymous') {
-				displayName = `익명의 켄텍인 ${idxByUserId.get(item.userId.toString())}`;
-			} else {
-				displayName = user[displayType];
-			}
+			const displayName = this.fillDisplayName(user, displayType, idxByUserId);
 
 			return {
 				...item,
@@ -162,17 +201,13 @@ export default class UserService {
 		return arr.map((item) => {
 			const user = userById.get(item.userId.toString());
 
-			let displayName = null;
+			if (!user) return { ...item, displayName: null };
 
-			if (!user) {
-				displayName = null;
-			} else if (item.displayType === 'anonymous') {
-				displayName = no_idx_for_anon
-					? '익명의 켄텍인'
-					: `익명의 켄텍인 ${idxByUserId.get(item.userId.toString())}`;
-			} else {
-				displayName = user[item.displayType];
-			}
+			const displayName = this.fillDisplayName(
+				user,
+				item.displayType,
+				no_idx_for_anon ? undefined : idxByUserId
+			);
 
 			return {
 				...item,

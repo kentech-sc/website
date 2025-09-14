@@ -15,8 +15,8 @@ export default class UserRepository {
 		return await UserModel.findOne({ email }).lean();
 	}
 
-	static async getUserByRealName(realName: string): Promise<User | null> {
-		return await UserModel.findOne({ realName }).lean();
+	static async getUsersByRealName(realName: string): Promise<User[]> {
+		return await UserModel.find({ realName }).lean();
 	}
 
 	static async getUserByNickname(nickname: string): Promise<User | null> {
@@ -45,16 +45,16 @@ export default class UserRepository {
 		return emails.map((email) => userByEmail.get(email) ?? null);
 	}
 
-	static async getUsersByRealNames(realNames: string[]): Promise<Array<User | null>> {
-		const users = await UserModel.find({ realName: { $in: realNames } }).lean();
+	// static async getUsersByRealNames(realNames: string[]): Promise<Array<User | null>> {
+	// 	const users = await UserModel.find({ realName: { $in: realNames } }).lean();
 
-		const userByRealName = new Map<string, User>();
-		for (const user of users) {
-			userByRealName.set(user.realName, user);
-		}
+	// 	const userByRealName = new Map<string, User>();
+	// 	for (const user of users) {
+	// 		userByRealName.set(user.realName, user);
+	// 	}
 
-		return realNames.map((realName) => userByRealName.get(realName) ?? null);
-	}
+	// 	return realNames.map((realName) => userByRealName.get(realName) ?? null);
+	// }
 
 	static async getUsersByNicknames(nicknames: string[]): Promise<Array<User | null>> {
 		const users = await UserModel.find({ nickname: { $in: nicknames } }).lean();

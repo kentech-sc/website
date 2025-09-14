@@ -1,7 +1,6 @@
 <script lang="ts">
 	import '$lib/style/main.css';
 	import favicon from '$lib/assets/kentech.ico';
-	import { signOut } from '@auth/sveltekit/client';
 	import { page } from '$app/state';
 
 	let { children } = $props();
@@ -17,8 +16,9 @@
 {#snippet ProfileModule()}
 	<div class="container" id="profile-div">
 		{#if user}
-			<p>{user?.nickname}</p>
-			<button onclick={() => signOut()}>로그아웃</button>
+			<a href="/profile" class="btn-anchor">
+				<p>{user?.nickname}</p>
+			</a>
 		{:else}
 			<p>로그인 필요</p>
 		{/if}
@@ -34,10 +34,10 @@
 
 {#snippet NavBar()}
 	<header class="container module">
-		<img src={favicon} alt="logo" />
+		<a href="/">
+			<img src={favicon} alt="logo" />
+		</a>
 		<nav>
-			<a href="/">Home</a>
-			|
 			<a href="/board">자유게시판</a>
 			|
 			<a href="/review">강의평가</a>
@@ -104,7 +104,7 @@
 		}
 
 		#profile-div {
-			button {
+			a {
 				margin-left: 0.5rem;
 			}
 		}
