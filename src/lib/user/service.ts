@@ -1,4 +1,4 @@
-import type { DisplayType, Group, User, UserId } from './types';
+import type { DisplayType, Group, User, UserId, UserUpdate } from './types';
 
 import UserRepository from './repository.js';
 
@@ -100,38 +100,64 @@ export default class UserService {
 		return true;
 	}
 
+	static canBlockOrUnblockUser(targetUser: User, operatorUser: User): boolean {
+		if (['manager', 'dev'].includes(targetUser.group)) throw new Error('차단할 수 없습니다.');
+		if (!(['manager', 'dev'] as Group[]).includes(operatorUser.group))
+			throw new Error('차단 또는 차단 해제 권한이 없습니다.');
+		return true;
+	}
+
+	static async updateUserById(userId: UserId, userUpdate: UserUpdate): Promise<User> {
+		const user = await UserRepository.updateUserById(userId, userUpdate);
+		if (!user) throw new Error('존재하지 않는 사용자입니다.');
+		return user;
+	}
+
 	static async changeNicknameByEmail(
 		email: string,
 		newNickname: string,
 		operator: User
-	): Promise<void> {
-		console.log(email);
-		console.log(newNickname);
-		console.log(operator);
-
+	): Promise<User> {
 		const target = await this.getUserByEmail(email);
 
-		console.log('===target===');
-		console.log(target);
+		if (!(await this.canChangeNickname(target, newNickname, operator)))
+			throw new Error('이름 변경이 불가능합니다.');
 
-		if (await this.canChangeNickname(target, newNickname, operator)) {
-			await UserRepository.updateUserById(target._id, { nickname: newNickname });
-		}
+		return await this.updateUserById(target._id, { nickname: newNickname });
 	}
 
-	static async changeGroupByEmail(email: string, group: Group, operator: User): Promise<void> {
+	static async changeGroupByEmail(email: string, group: Group, operator: User): Promise<User> {
 		const target = await this.getUserByEmail(email);
 
-		if (this.canChangeGroup(target, group, operator)) {
-			await UserRepository.updateUserById(target._id, { group });
-		}
+		if (!this.canChangeGroup(target, group, operator)) throw new Error('그룹 변경이 불가능합니다.');
+
+		return await this.updateUserById(target._id, { group });
 	}
 
-	static async removeUserByEmail(email: string): Promise<void> {
-		const user = await this.getUserByEmail(email);
-		if (!user) throw new Error('존재하지 않는 사용자입니다.');
+	static async blockUserByEmail(
+		email: string,
+		operator: User,
+		duration = 7 * 24 * 60 * 60 * 1000
+	): Promise<User> {
+		const target = await this.getUserByEmail(email);
 
-		await UserRepository.deleteUserByEmail(email);
+		if (!this.canBlockOrUnblockUser(target, operator)) throw new Error('차단이 불가능합니다.');
+
+		return await this.updateUserById(target._id, { blockedUntil: new Date(Date.now() + duration) });
+	}
+
+	static async unblockUserByEmail(email: string, operator: User): Promise<User> {
+		const target = await this.getUserByEmail(email);
+
+		if (!this.canBlockOrUnblockUser(target, operator)) throw new Error('차단 해제가 불가능합니다.');
+
+		return await this.updateUserById(target._id, { blockedUntil: null });
+	}
+
+	static async removeUserByEmail(email: string): Promise<User> {
+		const deletedUser = await UserRepository.deleteUserByEmail(email);
+		if (!deletedUser) throw new Error('존재하지 않는 사용자입니다.');
+		return deletedUser;
 	}
 
 	// ========= Fill display names ===============

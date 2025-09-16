@@ -5,7 +5,6 @@ import type {
 	PostUpdate,
 	CommentId,
 	CommentCreate,
-	CommentUpdate,
 	Post,
 	Comment
 } from './types';
@@ -40,9 +39,9 @@ export default class BoardService {
 		return comments;
 	}
 
-	// static async getCommentsByPostIds(postIds: PostId[]): Promise<Array<Comment[] | null>> {
-	// 	return await CommentRepository.getCommentsByPostIds(postIds);
-	// }
+	static #canEditOrDeletePost(post: Post, user: User): boolean {
+		return post.userId.equals(user._id) || user.group === 'moderator' || user.group === 'manager';
+	}
 
 	static async createPostByBoardId(
 		boardId: BoardId,
@@ -65,17 +64,22 @@ export default class BoardService {
 		return await PostRepository.createPost(post);
 	}
 
-	static async editPostById(postId: PostId, post: PostUpdate, user: User): Promise<Post> {
-		const updatedPost = await PostRepository.editPostById(postId, post, user._id);
-		if (!updatedPost) throw new Error('존재하지 않는 게시글이거나, 작성자가 아닙니다.');
+	static async editPostById(postId: PostId, postUpdate: PostUpdate, user: User): Promise<Post> {
+		const post = await this.getPostById(postId);
+		if (!this.#canEditOrDeletePost(post, user)) throw new Error('작성자가 아닙니다.');
+		const updatedPost = await PostRepository.updatePostById(postId, postUpdate);
+		if (!updatedPost) throw new Error('존재하지 않는 게시글입니다.');
 		return updatedPost;
 	}
 
-	static async deletePostById(postId: PostId, user: User): Promise<void> {
+	static async deletePostById(postId: PostId, user: User): Promise<Post> {
 		return await mongoose.connection.transaction(async () => {
-			const deletedPost = await PostRepository.deletePostById(postId, user._id);
-			if (!deletedPost) throw new Error('존재하지 않는 게시글이거나, 작성자가 아닙니다.');
+			const post = await this.getPostById(postId);
+			if (!this.#canEditOrDeletePost(post, user)) throw new Error('작성자가 아닙니다.');
+			const deletedPost = await PostRepository.deletePostById(postId);
+			if (!deletedPost) throw new Error('존재하지 않는 게시글입니다.');
 			await CommentRepository.deleteAllCommentsByPostId(postId);
+			return deletedPost;
 		});
 	}
 
@@ -112,21 +116,18 @@ export default class BoardService {
 		return await CommentRepository.createComment(comment);
 	}
 
-	static async editCommentById(
-		commentId: CommentId,
-		comment: CommentUpdate,
-		user: User
-	): Promise<Comment> {
-		const updatedComment = await CommentRepository.editCommentById(commentId, comment, user._id);
-		if (!updatedComment) throw new Error('존재하지 않는 댓글이거나, 작성자가 아닙니다.');
-		return updatedComment;
+	static #canEditOrDeleteComment(comment: Comment, user: User): boolean {
+		return (
+			comment.userId.equals(user._id) || user.group === 'moderator' || user.group === 'manager'
+		);
 	}
 
-	static async deleteCommentById(commentId: CommentId, user: User): Promise<void> {
-		return await mongoose.connection.transaction(async () => {
-			const deletedComment = await CommentRepository.deleteCommentById(commentId, user._id);
-			if (deletedComment === null) throw new Error('존재하지 않는 댓글이거나, 작성자가 아닙니다.');
-		});
+	static async deleteCommentById(commentId: CommentId, user: User): Promise<Comment> {
+		const comment = await this.getCommentById(commentId);
+		if (!this.#canEditOrDeleteComment(comment, user)) throw new Error('작성자가 아닙니다.');
+		const deletedComment = await CommentRepository.deleteCommentById(commentId);
+		if (!deletedComment) throw new Error('존재하지 않는 댓글입니다.');
+		return deletedComment;
 	}
 
 	// static async likeCommentById(commentId: CommentId, userId: UserId): Promise<void> {

@@ -1,5 +1,5 @@
 // import * as Sentry from '@sentry/sveltekit';
-import type { Handle, ServerInit } from '@sveltejs/kit';
+import type { ActionResult, Handle, HandleServerError, ServerInit } from '@sveltejs/kit';
 import { redirect } from '@sveltejs/kit';
 import { sequence } from '@sveltejs/kit/hooks';
 
@@ -10,16 +10,6 @@ import { handle as authenticationHandle } from './auth.js';
 import DBService from '$lib/general/db.js';
 import UserService from '$lib/user/service.js';
 import type { User } from '$lib/user/types.js';
-
-async function getUser(email: string, name: string): Promise<User> {
-	const user = await UserService.getUserOrNullByEmail(email);
-
-	if (!user) {
-		return await UserService.signupUserByEmailAndRealName(email, name);
-	} else {
-		return user;
-	}
-}
 
 function checkEnv() {
 	// if (PUBLIC_REQUIRE_LOGIN === undefined) {
@@ -50,6 +40,15 @@ export const init: ServerInit = async () => {
 	console.log('[Server Is Ready]');
 };
 
+async function getUser(email: string, name: string): Promise<User> {
+	const user = await UserService.getUserOrNullByEmail(email);
+	if (!user) {
+		return await UserService.signupUserByEmailAndRealName(email, name);
+	} else {
+		return user;
+	}
+}
+
 const authorizationHandle: Handle = async ({ event, resolve }) => {
 	const session = await event.locals.auth();
 
@@ -73,19 +72,32 @@ const authorizationHandle: Handle = async ({ event, resolve }) => {
 	}
 };
 
-// export const handleError: HandleServerError = Sentry.handleErrorWithSentry(
-// 	async ({ error, event }) => {
-// 		const fullTitle =
-// 			event.params.fullTitle ||
-// 			'사용자:' + event.params.userName ||
-// 			'검색:' + event.params.query ||
-// 			event.url.pathname;
+export const blockHandle: Handle = async ({ event, resolve }) => {
+	const user = event.locals.user;
 
-// 		return {
-// 			message: error instanceof Error ? error.message : '알 수 없는 에러',
-// 			fullTitle
-// 		};
-// 	}
-// );
+	if (user?.blockedUntil && user.blockedUntil > new Date()) {
+		// form action 요청일 경우 차단
+		if (event.request.method === 'POST') {
+			const result: ActionResult = {
+				type: 'error',
+				status: 403,
+				error: {
+					message: '차단된 사용자입니다.'
+				}
+			};
+			return new Response(JSON.stringify(result), { status: 403 });
+		}
+	}
 
-export const handle = sequence(authenticationHandle, authorizationHandle);
+	return resolve(event);
+};
+
+// export const handleError: HandleServerError = ({ error, event }) => {
+//   console.error('⚠️ Error occurred:', error, 'at', event.url.pathname);
+
+//   return {
+//     message: '예상치 못한 오류가 발생했습니다.',
+//   };
+// };
+
+export const handle = sequence(authenticationHandle, authorizationHandle, blockHandle);

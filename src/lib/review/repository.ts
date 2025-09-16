@@ -38,22 +38,17 @@ export default class ReviewRepository {
 		return await paginateModel(ReviewModel, { userId }, limit, { fromId, toId });
 	}
 
-	static async updateReviewById(reviewId: ReviewId, review: ReviewUpdate): Promise<Review | null> {
-		return await ReviewModel.findOneAndUpdate({ _id: reviewId }, review, { new: true }).lean();
-	}
-
-	static async editReviewById(
+	static async updateReviewById(
 		reviewId: ReviewId,
-		reviewUpdate: ReviewUpdate,
-		userId: UserId
+		reviewUpdate: ReviewUpdate
 	): Promise<Review | null> {
-		return await ReviewModel.findOneAndUpdate({ _id: reviewId, userId }, reviewUpdate, {
+		return await ReviewModel.findOneAndUpdate({ _id: reviewId }, reviewUpdate, {
 			new: true
 		}).lean();
 	}
 
-	static async deleteReviewById(reviewId: ReviewId, userId: UserId): Promise<Review | null> {
-		return await ReviewModel.findOneAndDelete({ _id: reviewId, userId }).lean();
+	static async deleteReviewById(reviewId: ReviewId): Promise<Review | null> {
+		return await ReviewModel.findOneAndDelete({ _id: reviewId }).lean();
 	}
 
 	static async deleteAllReviewsByCourseId(courseId: CourseId): Promise<void> {

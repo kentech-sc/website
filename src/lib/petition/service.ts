@@ -1,4 +1,4 @@
-import type { UserId } from '$lib/user/types';
+import type { User, UserId } from '$lib/user/types';
 import { PetitionRepository } from './repository';
 import type { Petition, PetitionCreate, PetitionId, PetitionUpdate } from './types';
 
@@ -54,14 +54,15 @@ export default class PetitionService {
 		return updatedPetition;
 	}
 
-	static async deletePetitionById(
-		petitionId: PetitionId,
-		userId: UserId
-	): Promise<Petition | null> {
+	static #canDeletePetition(petition: Petition, user: User): boolean {
+		return petition.petitionerId.equals(user._id) || user.group === 'manager';
+	}
+
+	static async deletePetitionById(petitionId: PetitionId, user: User): Promise<Petition | null> {
+		const petition = await this.getPetitionById(petitionId);
+		if (!this.#canDeletePetition(petition, user)) throw new Error('청원을 삭제할 권한이 없습니다.');
 		const deletedPetition = await PetitionRepository.deletePetitionById(petitionId);
 		if (!deletedPetition) throw new Error('존재하지 않는 청원입니다.');
-		if (deletedPetition.petitionerId.toString() !== userId.toString())
-			throw new Error('청원을 삭제할 권한이 없습니다.');
 		return deletedPetition;
 	}
 
@@ -79,27 +80,34 @@ export default class PetitionService {
 		return await PetitionRepository.unsignPetitionById(petitionId, userId);
 	}
 
-	static async reviewPetitionById(petitionId: PetitionId, _userId: UserId): Promise<Petition> {
+	static #canManagePetition(user: User): boolean {
+		return user.group === 'manager';
+	}
+
+	static async reviewPetitionById(petitionId: PetitionId, user: User): Promise<Petition> {
 		const petition = await this.getPetitionById(petitionId);
+		if (!this.#canManagePetition(user)) throw new Error('청원을 검토할 권한이 없습니다.');
 		if (petition.status === 'reviewing') throw new Error('이미 검토 중인 청원입니다.');
 		return await this.updatePetitionById(petitionId, { status: 'reviewing' });
 	}
 
-	static async unreviewPetitionById(petitionId: PetitionId, _userId: UserId): Promise<Petition> {
+	static async unreviewPetitionById(petitionId: PetitionId, user: User): Promise<Petition> {
 		const petition = await this.getPetitionById(petitionId);
+		if (!this.#canManagePetition(user)) throw new Error('청원을 검토 취소할 권한이 없습니다.');
 		if (petition.status !== 'reviewing') throw new Error('아직 검토 중이지 않은 청원입니다.');
 		return await this.updatePetitionById(petitionId, { status: 'pending' });
 	}
 
 	static async responseToPetitionById(
 		petitionId: PetitionId,
-		responderId: UserId,
+		responder: User,
 		response: string
 	): Promise<Petition> {
 		const petition = await this.getPetitionById(petitionId);
+		if (!this.#canManagePetition(responder)) throw new Error('청원을 답변할 권한이 없습니다.');
 		if (petition.responderId) throw new Error('이미 답변된 청원입니다.');
 		return await this.updatePetitionById(petitionId, {
-			responderId,
+			responderId: responder._id,
 			response,
 			status: 'answered',
 			answeredAt: new Date()
@@ -108,24 +116,25 @@ export default class PetitionService {
 
 	static async reviseResponseById(
 		petitionId: PetitionId,
-		responderId: UserId,
+		responder: User,
 		response: string
 	): Promise<Petition> {
 		const petition = await this.getPetitionById(petitionId);
 		if (!petition.responderId) throw new Error('답변이 없는 청원입니다.');
-		if (petition.responderId.toString() !== responderId.toString())
-			throw new Error('답변을 수정할 권한이 없습니다.');
+		if (!this.#canManagePetition(responder))
+			throw new Error('청원을 답변을 수정할 권한이 없습니다.');
 		return await this.updatePetitionById(petitionId, {
 			response,
+			responderId: responder._id,
 			answeredAt: new Date()
 		});
 	}
 
-	static async deleteResponseById(petitionId: PetitionId, responderId: UserId): Promise<Petition> {
+	static async deleteResponseById(petitionId: PetitionId, responder: User): Promise<Petition> {
 		const petition = await this.getPetitionById(petitionId);
 		if (!petition.responderId) throw new Error('답변이 없는 청원입니다.');
-		if (petition.responderId.toString() !== responderId.toString())
-			throw new Error('답변을 삭제할 권한이 없습니다.');
+		if (!this.#canManagePetition(responder))
+			throw new Error('청원의 답변을 삭제할 권한이 없습니다.');
 		return await this.updatePetitionById(petitionId, {
 			responderId: null,
 			response: null,

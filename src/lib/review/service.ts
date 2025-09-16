@@ -73,18 +73,29 @@ export default class ReviewService {
 		return reviews;
 	}
 
+	static #canEditOrDeleteReview(review: Review, user: User): boolean {
+		return review.userId.equals(user._id) || user.group === 'manager';
+	}
+
 	static async editReviewById(
 		reviewId: ReviewId,
 		reviewUpdate: ReviewUpdate,
 		user: User
 	): Promise<Review> {
-		const updatedReview = await ReviewRepository.editReviewById(reviewId, reviewUpdate, user._id);
-		if (!updatedReview) throw new Error('존재하지 않는 리뷰이거나 작성자가 아닙니다.');
+		const review = await this.getReviewById(reviewId);
+		if (!this.#canEditOrDeleteReview(review, user))
+			throw new Error('리뷰를 수정할 권한이 없습니다.');
+		const updatedReview = await ReviewRepository.updateReviewById(reviewId, reviewUpdate);
+		if (!updatedReview) throw new Error('존재하지 않는 리뷰입니다.');
 		return updatedReview;
 	}
 
-	static async deleteReviewById(reviewId: ReviewId, user: User): Promise<void> {
-		const deletedReview = await ReviewRepository.deleteReviewById(reviewId, user._id);
-		if (!deletedReview) throw new Error('존재하지 않는 리뷰이거나 작성자가 아닙니다.');
+	static async deleteReviewById(reviewId: ReviewId, user: User): Promise<Review> {
+		const review = await this.getReviewById(reviewId);
+		if (!this.#canEditOrDeleteReview(review, user))
+			throw new Error('리뷰를 삭제할 권한이 없습니다.');
+		const deletedReview = await ReviewRepository.deleteReviewById(reviewId);
+		if (!deletedReview) throw new Error('존재하지 않는 리뷰입니다.');
+		return deletedReview;
 	}
 }

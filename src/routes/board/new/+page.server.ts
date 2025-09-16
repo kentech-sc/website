@@ -25,6 +25,7 @@ export const actions = {
 			locals.user._id,
 			displayType
 		);
+
 		redirect(302, '/board/' + post._id);
 	}
 };

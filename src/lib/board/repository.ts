@@ -15,8 +15,8 @@ import { paginateModel } from '$lib/general/paginate';
 import type { UserId } from '$lib/user/types';
 
 export class PostRepository {
-	static async createPost(post: PostCreate): Promise<Post> {
-		return (await PostModel.create(post)).toObject();
+	static async createPost(postCreate: PostCreate): Promise<Post> {
+		return (await PostModel.create(postCreate)).toObject();
 	}
 
 	static async getPostById(postId: PostId): Promise<Post | null> {
@@ -31,20 +31,12 @@ export class PostRepository {
 		return await paginateModel(PostModel, { boardId }, limit, { fromId, toId });
 	}
 
-	static async updatePostById(postId: PostId, post: PostUpdate): Promise<Post | null> {
-		return await PostModel.findOneAndUpdate({ _id: postId }, post, { new: true }).lean();
+	static async updatePostById(postId: PostId, postUpdate: PostUpdate): Promise<Post | null> {
+		return await PostModel.findOneAndUpdate({ _id: postId }, postUpdate, { new: true }).lean();
 	}
 
-	static async editPostById(
-		postId: PostId,
-		post: PostUpdate,
-		userId: UserId
-	): Promise<Post | null> {
-		return await PostModel.findOneAndUpdate({ _id: postId, userId }, post, { new: true }).lean();
-	}
-
-	static async deletePostById(postId: PostId, userId: UserId): Promise<Post | null> {
-		return await PostModel.findOneAndDelete({ _id: postId, userId }).lean();
+	static async deletePostById(postId: PostId): Promise<Post | null> {
+		return await PostModel.findOneAndDelete({ _id: postId }).lean();
 	}
 
 	static async deleteAllPostsByBoardId(boardId: BoardId): Promise<void> {
@@ -69,9 +61,9 @@ export class PostRepository {
 }
 
 export class CommentRepository {
-	static async createComment(comment: CommentCreate): Promise<Comment> {
-		await PostRepository.updatePostById(comment.postId, { $inc: { commentCnt: 1 } });
-		return (await CommentModel.create(comment)).toObject();
+	static async createComment(commentCreate: CommentCreate): Promise<Comment> {
+		await PostRepository.updatePostById(commentCreate.postId, { $inc: { commentCnt: 1 } });
+		return (await CommentModel.create(commentCreate)).toObject();
 	}
 
 	static async getCommentById(commentId: CommentId): Promise<Comment | null> {
@@ -93,18 +85,17 @@ export class CommentRepository {
 		return postIds.map((postId) => commentsById.get(postId.toString()) ?? null);
 	}
 
-	static async editCommentById(
+	static async updateCommentById(
 		commentId: CommentId,
-		comment: CommentUpdate,
-		userId: UserId
+		commentUpdate: CommentUpdate
 	): Promise<Comment | null> {
-		return await CommentModel.findOneAndUpdate({ _id: commentId, userId }, comment, {
+		return await CommentModel.findOneAndUpdate({ _id: commentId }, commentUpdate, {
 			new: true
 		}).lean();
 	}
 
-	static async deleteCommentById(commentId: CommentId, userId: UserId): Promise<Comment | null> {
-		const comment = await CommentModel.findOneAndDelete({ _id: commentId, userId }).lean();
+	static async deleteCommentById(commentId: CommentId): Promise<Comment | null> {
+		const comment = await CommentModel.findOneAndDelete({ _id: commentId }).lean();
 		if (!comment) return null;
 		await PostRepository.updatePostById(comment.postId, { $inc: { commentCnt: -1 } });
 		return comment;

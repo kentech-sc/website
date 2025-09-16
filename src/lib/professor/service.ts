@@ -1,5 +1,6 @@
 import type { ProfessorCreate, Professor, ProfessorId, ProfessorUpdate } from './types.js';
 import ProfessorRepository from './repository.js';
+import type { User } from '$lib/user/types.js';
 
 export default class ProfessorService {
 	static async createProfessor(professor: ProfessorCreate): Promise<Professor> {
@@ -13,8 +14,7 @@ export default class ProfessorService {
 	}
 
 	static async getAllProfessors(): Promise<Professor[]> {
-		const professors = await ProfessorRepository.getAllProfessors();
-		return professors;
+		return await ProfessorRepository.getAllProfessors();
 	}
 
 	static async getProfessorsByIdsOrNull(
@@ -23,16 +23,23 @@ export default class ProfessorService {
 		return await ProfessorRepository.getProfessorsByIds(professorIds);
 	}
 
+	static #canManageProfessor(user: User): boolean {
+		return user.group === 'manager';
+	}
+
 	static async updateProfessorById(
 		professorId: ProfessorId,
-		professor: ProfessorUpdate
+		professor: ProfessorUpdate,
+		user: User
 	): Promise<Professor> {
+		if (!this.#canManageProfessor(user)) throw new Error('권한이 없습니다.');
 		const updatedProfessor = await ProfessorRepository.updateProfessorById(professorId, professor);
 		if (!updatedProfessor) throw new Error('존재하지 않는 교수님입니다.');
 		return updatedProfessor;
 	}
 
-	static async deleteProfessorById(professorId: ProfessorId): Promise<void> {
+	static async deleteProfessorById(professorId: ProfessorId, user: User): Promise<void> {
+		if (!this.#canManageProfessor(user)) throw new Error('권한이 없습니다.');
 		const deletedProfessor = await ProfessorRepository.deleteProfessorById(professorId);
 		if (!deletedProfessor) throw new Error('존재하지 않는 교수님입니다.');
 	}
