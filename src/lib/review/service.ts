@@ -13,6 +13,20 @@ export default class ReviewService {
 		4: '겨울'
 	};
 
+	static checkReviewYearAndTerm(year: number, term: number): boolean {
+		const years = Array.from({ length: new Date().getFullYear() - 2021 }, (_, i) => 22 + i);
+		if (years.indexOf(year) === -1 || term < 1 || term > 4) return false;
+		return true;
+	}
+
+	static checkReviewScore(score: { assignment: number; lecture: number; exam: number }): boolean {
+		for (const key in score) {
+			if (score[key as keyof typeof score] < 1 || score[key as keyof typeof score] > 10)
+				return false;
+		}
+		return true;
+	}
+
 	static async createReview(
 		courseId: CourseId,
 		professorId: ProfessorId,
@@ -27,6 +41,9 @@ export default class ReviewService {
 		},
 		comment: string
 	): Promise<Review> {
+		if (!this.checkReviewYearAndTerm(year, term))
+			throw new Error('연도 또는 학기 값이 올바르지 않습니다.');
+		if (!this.checkReviewScore(score)) throw new Error('점수는 1에서 10 사이의 값이어야 합니다.');
 		const review: ReviewCreate = {
 			courseId,
 			professorId,

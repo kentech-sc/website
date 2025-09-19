@@ -18,10 +18,7 @@ export const actions = {
 		const formData = await request.formData();
 
 		const courseIdRaw = (formData.get('courseId') ?? '').toString();
-		const courseId: CourseId = new Types.ObjectId(courseIdRaw);
-
 		const professorIdRaw = (formData.get('professorId') ?? '').toString();
-		const professorId: ProfessorId = new Types.ObjectId(professorIdRaw);
 
 		const year = Number(formData.get('year'));
 		const term = Number(formData.get('term'));
@@ -35,10 +32,18 @@ export const actions = {
 
 		const comment = (formData.get('comment') ?? '').toString();
 
-		if (!courseId || !professorId || !year || !term || !title || !score || !comment)
+		if (!courseIdRaw || !professorIdRaw || !year || !term || !title || !score)
 			return fail(400, {
-				message: 'courseId, professorId, year, term, title, score, comment are required'
+				message: 'courseId, professorId, year, term, title, score are required'
 			});
+
+		const courseId: CourseId = new Types.ObjectId(courseIdRaw);
+		const professorId: ProfessorId = new Types.ObjectId(professorIdRaw);
+
+		if (!ReviewService.checkReviewYearAndTerm(year, term))
+			return fail(400, { message: '연도 또는 학기 값이 올바르지 않습니다.' });
+		if (!ReviewService.checkReviewScore(score))
+			return fail(400, { message: '점수는 1에서 10 사이의 값이어야 합니다.' });
 
 		const review = await ReviewService.createReview(
 			courseId,

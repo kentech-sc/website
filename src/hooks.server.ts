@@ -12,12 +12,6 @@ import UserService from '$lib/user/service.js';
 import type { User } from '$lib/user/types.js';
 
 function checkEnv() {
-	// if (PUBLIC_REQUIRE_LOGIN === undefined) {
-	// 	throw new Error('Please set "PUBLIC_REQUIRE_LOGIN" in the .env file!');
-	// }
-	// if (PUBLIC_REQUIRE_LOGIN !== 'true' && PUBLIC_REQUIRE_LOGIN !== 'false') {
-	// 	throw new Error('"PUBLIC_REQUIRE_LOGIN" must be "true" or "false"!');
-	// }
 	if (MONGO_URI === undefined) {
 		throw new Error('Please set "MONGO_URI" in the .env file!');
 	}

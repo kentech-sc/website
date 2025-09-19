@@ -51,11 +51,11 @@
 {/snippet}
 
 {#snippet ReviewContents()}
-	<p><b>과제:</b> {review.score.assignment}</p>
+	<p><b>과제 양:</b> {review.score.assignment}</p>
 	<hr />
-	<p><b>강의:</b> {review.score.lecture}</p>
+	<p><b>강의 난이도:</b> {review.score.lecture}</p>
 	<hr />
-	<p><b>시험:</b> {review.score.exam}</p>
+	<p><b>시험 횟수:</b> {review.score.exam}</p>
 	<hr />
 	<pre>{review.comment}</pre>
 {/snippet}
