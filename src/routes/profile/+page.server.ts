@@ -1,5 +1,11 @@
 import UserService from '$lib/user/service';
-import { error } from '@sveltejs/kit';
+import { error, redirect } from '@sveltejs/kit';
+
+export async function load({ locals }) {
+	if (locals.user.group === 'guest') {
+		redirect(303, '/signin');
+	}
+}
 
 export const actions = {
 	changeNickname: async ({ request, locals }) => {

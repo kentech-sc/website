@@ -172,7 +172,9 @@
 
 {#snippet CommentModule()}
 	<section class="container-col module">
-		{@render CommentForm()}
+		{#if user.group !== 'guest'}
+			{@render CommentForm()}
+		{/if}
 		{#if comments.length === 0}
 			<p>작성된 댓글이 없습니다.</p>
 		{:else}

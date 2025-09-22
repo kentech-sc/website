@@ -19,6 +19,8 @@ export const load = async ({ params, request }) => {
 
 export const actions = {
 	deletePost: async ({ request, locals }) => {
+		if (locals.user.group === 'guest')
+			return fail(403, { message: '게스트 유저는 게시글을 삭제할 수 없습니다.' });
 		const formData = await request.formData();
 		const postIdRaw = (formData.get('post-id') ?? '').toString();
 		const postId: PostId = new Types.ObjectId(postIdRaw);
@@ -26,6 +28,8 @@ export const actions = {
 		redirect(302, '/board');
 	},
 	likePost: async ({ request, locals }) => {
+		if (locals.user.group === 'guest')
+			return fail(403, { message: '게스트 유저는 좋아요를 누를 수 없습니다.' });
 		const formData = await request.formData();
 		const postIdRaw = (formData.get('post-id') ?? '').toString();
 		const postId: PostId = new Types.ObjectId(postIdRaw);
@@ -33,6 +37,8 @@ export const actions = {
 		return { post: JSON.stringify(post) };
 	},
 	unlikePost: async ({ request, locals }) => {
+		if (locals.user.group === 'guest')
+			return fail(403, { message: '게스트 유저는 좋아요를 취소할 수 없습니다.' });
 		const formData = await request.formData();
 		const postIdRaw = (formData.get('post-id') ?? '').toString();
 		const postId: PostId = new Types.ObjectId(postIdRaw);
@@ -40,6 +46,9 @@ export const actions = {
 		return { post: JSON.stringify(post) };
 	},
 	createComment: async ({ request, locals, params }) => {
+		if (locals.user.group === 'guest')
+			return fail(403, { message: '게스트 유저는 댓글을 작성할 수 없습니다.' });
+
 		const postIdRaw = params.postId;
 		const postId: PostId = new Types.ObjectId(postIdRaw);
 		const formData = await request.formData();
@@ -70,6 +79,8 @@ export const actions = {
 	// 	return { comment: JSON.stringify(comment) };
 	// },
 	deleteComment: async ({ request, locals }) => {
+		if (locals.user.group === 'guest')
+			return fail(403, { message: '게스트 유저는 댓글을 삭제할 수 없습니다.' });
 		const formData = await request.formData();
 		const commentIdRaw = (formData.get('comment-id') ?? '').toString();
 		const commentId: CommentId = new Types.ObjectId(commentIdRaw);

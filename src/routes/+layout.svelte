@@ -15,12 +15,14 @@
 
 {#snippet ProfileModule()}
 	<div class="container" id="profile-div">
-		{#if user}
+		{#if user.group !== 'guest'}
 			<a href="/profile" class="btn-anchor">
 				<p>{user?.nickname}</p>
 			</a>
 		{:else}
-			<p>로그인 필요</p>
+			<a href="/signin" class="btn-anchor">
+				<p>로그인</p>
+			</a>
 		{/if}
 	</div>
 {/snippet}

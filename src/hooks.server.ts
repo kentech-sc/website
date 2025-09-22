@@ -10,6 +10,7 @@ import { handle as authenticationHandle } from './auth.js';
 import DBService from '$lib/general/db.js';
 import UserService from '$lib/user/service.js';
 import type { User } from '$lib/user/types.js';
+import { Types } from 'mongoose';
 
 function checkEnv() {
 	if (MONGO_URI === undefined) {
@@ -58,11 +59,30 @@ const authorizationHandle: Handle = async ({ event, resolve }) => {
 		return await resolve(event);
 	} else {
 		// Unauthorized
-		if (event.url.pathname.startsWith('/signin')) {
-			return await resolve(event);
-		} else {
+
+		if (
+			event.url.pathname.startsWith('/petition') ||
+			event.url.pathname.startsWith('/review') ||
+			event.url.pathname.startsWith('/board/new') ||
+			event.url.pathname.startsWith('/board/edit') ||
+			event.url.pathname.startsWith('/profile')
+		) {
 			redirect(303, '/signin');
 		}
+
+		const user = {
+			email: '',
+			nickname: '',
+			realName: '',
+			blockedUntil: null,
+			group: 'guest' as const,
+			_id: new Types.ObjectId(),
+			createdAt: new Date(),
+			updatedAt: new Date()
+		};
+		event.locals.user = user;
+
+		return await resolve(event);
 	}
 };
 

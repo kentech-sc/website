@@ -3,7 +3,7 @@
 </script>
 
 <section class="container-col module">
-	<h1>켄텍 이메일로 로그인 후 이용 가능합니다.</h1>
+	<h1>켄텍 이메일로 로그인해주세요.</h1>
 	<GoogleModule />
 </section>
 
