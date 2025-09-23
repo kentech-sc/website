@@ -1,0 +1,60 @@
+:root {
+	/* --color-primary-1: rgb(118, 181, 72);
+	--color-primary-2: rgb(93, 154, 61);
+	--color-primary-3: rgb(66, 106, 44);
+	--color-primary-4: rgb(45, 74, 28);
+	--text-color-primary-1: rgb(118, 181, 72);
+	--text-color-primary-2: rgb(93, 154, 61);
+	--text-color-primary-3: rgb(66, 106, 44);
+	--text-color-primary-4: rgb(45, 74, 28); */
+
+	--primary: oklch(0.74 0.14 228.94);
+	--secondary: oklch(0.57 0.15 246.9);
+	--tertiary: oklch(0.32 0.11 256.8);
+
+	--primary-text: black;
+	--secondary-text: black;
+	--tertiary-text: white;
+	--primary-border: var(--primary);
+	--secondary-border: var(--secondary);
+	--tertiary-border: var(--tertiary);
+	--primary-bg: oklch(from var(--primary) calc(l + 0.25) calc(c - 0.07) h);
+	--secondary-bg: oklch(from var(--secondary) calc(l + 0.25) calc(c - 0.07) h);
+	--tertiary-bg: oklch(from var(--tertiary) calc(l + 0.25) calc(c - 0.07) h);
+	--primary-hover: oklch(from var(--primary-bg) calc(l - 0.05) c h);
+	--secondary-hover: oklch(from var(--secondary-bg) calc(l - 0.05) c h);
+	--tertiary-hover: oklch(from var(--tertiary-bg) calc(l - 0.05) c h);
+
+	--gray: oklch(0.7 0 0);
+	--gray-text: var(--gray);
+	--gray-border: oklch(from var(--gray) 0.8 c h);
+	--gray-bg: oklch(from var(--gray) 0.98 c h);
+	--gray-hover: oklch(from var(--gray-bg) calc(l - 0.05) c h);
+
+	--white-hover: oklch(from white calc(l - 0.05) c h);
+
+	--error: oklch(0.6 0.3 30);
+	--warn: oklch(0.6 0.3 80);
+	--success: oklch(0.6 0.3 140);
+	--info: oklch(0.6 0.3 210);
+
+	--error-text: var(--error);
+	--error-border: var(--error);
+	--error-bg: oklch(from var(--error) 1 0.02 h);
+	--error-hover: oklch(from var(--error-bg) calc(l - 0.05) c h);
+
+	--warn-text: var(--warn);
+	--warn-border: var(--warn);
+	--warn-bg: oklch(from var(--warn) 1 0.02 h);
+	--warn-hover: oklch(from var(--warn-bg) calc(l - 0.05) c h);
+
+	--success-text: var(--success);
+	--success-border: var(--success);
+	--success-bg: oklch(from var(--success) 1 0.02 h);
+	--success-hover: oklch(from var(--success-bg) calc(l - 0.05) c h);
+
+	--info-text: var(--info);
+	--info-border: var(--info);
+	--info-bg: oklch(from var(--info) 1 0.02 h);
+	--info-hover: oklch(from var(--info-bg) calc(l - 0.05) c h);
+}

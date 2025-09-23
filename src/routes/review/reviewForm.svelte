@@ -59,6 +59,8 @@
 				type="number"
 				id="assignmentScore"
 				name="assignmentScore"
+				min="1"
+				max="10"
 				required
 				value={review?.score.assignment}
 			/>
@@ -69,13 +71,23 @@
 				type="number"
 				id="lectureScore"
 				name="lectureScore"
+				min="1"
+				max="10"
 				required
 				value={review?.score.lecture}
 			/>
 		</div>
 		<div>
 			<label for="examScore">시험 횟수 (적음:1~많음:10)</label>
-			<input type="number" id="examScore" name="examScore" required value={review?.score.exam} />
+			<input
+				type="number"
+				id="examScore"
+				name="examScore"
+				min="1"
+				max="10"
+				required
+				value={review?.score.exam}
+			/>
 		</div>
 	</div>
 {/snippet}

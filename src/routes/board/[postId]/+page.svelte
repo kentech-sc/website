@@ -180,6 +180,7 @@
 		{:else}
 			{#each comments as comment (comment._id)}
 				{@render CommentItem(comment)}
+				<hr />
 			{/each}
 		{/if}
 	</section>
@@ -215,7 +216,6 @@
 		width: stretch;
 		justify-content: space-between;
 		padding: 0.25rem;
-		border-bottom: solid gray 0.1rem;
 
 		.delete-comment-form {
 			width: fit-content;

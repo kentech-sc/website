@@ -36,7 +36,7 @@
 
 {#snippet NavBar()}
 	<header class="container module">
-		<a href="/">
+		<a href="/" class="container" id="logo-anchor">
 			<img src={favicon} alt="logo" />
 		</a>
 		<nav>
@@ -75,7 +75,7 @@
 {/snippet}
 
 {#snippet Footer()}
-	<footer class="container module">
+	<footer class="module">
 		<p>2025 KENTECH STUDENT COUNCIL</p>
 		<p>Developed by nemovim</p>
 	</footer>
@@ -101,8 +101,14 @@
 		position: sticky;
 		top: 0;
 
-		img {
-			width: 1.5rem;
+		border: none;
+		border-bottom: solid var(--gray-border) 0.1rem;
+
+		#logo-anchor {
+			img {
+				width: 1.5rem;
+				margin-right: 0.25rem;
+			}
 		}
 
 		#profile-div {
@@ -141,8 +147,12 @@
 	}
 
 	footer {
+		flex-grow: 1;
+		border: none;
+		border-top: solid var(--gray-border) 0.1rem;
 		font-size: 0.75rem;
-		color: var(--text-color-gray-4);
+		color: var(--gray-text);
+		background-color: var(--gray-bg);
 		justify-content: space-between;
 	}
 </style>

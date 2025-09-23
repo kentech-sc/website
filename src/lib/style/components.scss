@@ -1,3 +1,5 @@
+@use 'base';
+
 .hidden {
 	display: none;
 }
@@ -23,46 +25,112 @@
 	flex-direction: column;
 }
 
-.module {
+@mixin Module {
+	border-width: 0.1rem;
+	border-style: solid;
 	padding: 1rem;
-	border: solid grey 0.1rem;
-	background-color: white;
 }
 
-@mixin BtnStyle {
-	color: black;
-	margin-right: 0.5rem;
-	padding: 0.25rem 0.75rem;
-	border: solid var(--color-gray-3) 0.05rem;
+.module {
+	@include Module;
+	border-color: var(--gray-border);
 	background-color: white;
-	font-size: 1rem;
-	font-weight: bold;
-
-	&:hover {
-		cursor: pointer;
-		background-color: var(--hover-color-gray-2);
-		text-decoration: none;
-	}
 }
 
 .btn-anchor {
-	@include BtnStyle;
+	@include base.BtnStyle;
 }
 
 .btn-anchor-disabled {
-	@include BtnStyle;
+	@include base.BtnStyle;
 
-	color: var(--color-gray-2);
+	color: var(--gray-text);
 
 	&:hover {
 		cursor: not-allowed;
 	}
 }
 
-.warn-btn {
-	background-color: var(--color-error-back);
+.error {
+	@include Module;
+
+	color: var(--error-text);
+	background-color: var(--error-bg);
+	border-color: var(--error-text);
 
 	&:hover {
-		background-color: var(--color-error-hover);
+		background-color: var(--error-hover);
+	}
+}
+
+.warn {
+	@include Module;
+
+	color: var(--warn-text);
+	background-color: var(--warn-bg);
+	border-color: var(--warn-text);
+
+	&:hover {
+		background-color: var(--warn-hover);
+	}
+}
+
+.success {
+	@include Module;
+
+	color: var(--success-text);
+	background-color: var(--success-bg);
+	border-color: var(--success-text);
+
+	&:hover {
+		background-color: var(--success-hover);
+	}
+}
+
+.info {
+	@include Module;
+
+	color: var(--info-text);
+	background-color: var(--info-bg);
+	border-color: var(--info-text);
+
+	&:hover {
+		background-color: var(--info-hover);
+	}
+}
+
+.primary {
+	padding: 1rem;
+
+	color: var(--primary-text);
+	background-color: var(--primary-bg);
+	// border-color: var(--primary-border);
+
+	&:hover {
+		background-color: var(--primary-hover);
+	}
+}
+
+.secondary {
+	padding: 1rem;
+
+	color: var(--secondary-text);
+	background-color: var(--secondary-bg);
+	// border-color: var(--secondary-border);
+
+	&:hover {
+		background-color: var(--secondary-hover);
+	}
+}
+
+.tertiary {
+	padding: 1rem;
+
+	color: var(--tertiary-text);
+	background-color: var(--tertiary-bg);
+	// border-color: var(--tertiary-border);
+
+	&:hover {
+		background-color: var(--tertiary-hover);
 	}
 }

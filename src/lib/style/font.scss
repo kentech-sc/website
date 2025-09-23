@@ -1,0 +1,35 @@
+@font-face {
+	font-family: 'NanumGothic';
+	font-weight: 700;
+	src: url('/fonts/nanum-gothic-700.woff2') format('woff2');
+	/* unicode-range: U+AC00-D7A3, U+0021-007E; */
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'NanumGothic';
+	font-weight: 400;
+	src: url('/fonts/nanum-gothic-400.woff2') format('woff2');
+	/* unicode-range: U+AC00-D7A3, U+0021-007E; */
+	font-display: swap;
+}
+
+/* @font-face {
+	font-family: 'NanumBarunpen';
+	font-weight: 400;
+	src: url('/fonts/NanumBarunpenR.woff2') format('woff2');
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'NanumBarunpen';
+	font-weight: 700;
+	src: url('/fonts/NanumBarunpenB.woff2') format('woff2');
+	font-display: swap;
+} */
+
+/* @font-face {
+	font-family: 'Arial';
+	src: local('Arial');
+	unicode-range: U+005C;
+} */

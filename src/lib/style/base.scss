@@ -9,7 +9,7 @@
 
 html {
 	font-size: 16px;
-	background-color: var(--back-color-gray-2);
+	background-color: white;
 	height: stretch;
 	// letter-spacing: 0.0rem;
 }
@@ -33,19 +33,15 @@ html {
 }
 
 body {
-	background-color: var(--back-color-gray-2);
+	background-color: white;
 	height: stretch;
-
-	& > div {
-		display: flex;
-		flex-direction: column;
-		min-height: 100vh;
-	}
+	display: flex;
+	flex-direction: column;
 }
 
 a {
 	text-decoration-line: none;
-	color: var(--text-color-primary-3);
+	color: var(--secondary);
 }
 
 a:hover {
@@ -56,7 +52,7 @@ a:hover {
 }
 
 s {
-	color: var(--text-color-gray-3);
+	color: var(--gray-text);
 	text-decoration-thickness: 0.05rem;
 }
 
@@ -75,23 +71,29 @@ table {
 
 th,
 td {
-	border: solid var(--color-gray-3) 0.05rem;
-	background-color: var(--back-color-gray-1);
+	border: solid var(--gray-border) 0.05rem;
+	background-color: var(--gray-bg);
+}
+
+@mixin BtnStyle {
+	color: black;
+	margin-right: 0.5rem;
+	padding: 0.25rem 0.75rem;
+	border: solid var(--gray-border) 0.05rem;
+	background-color: white;
+	font-size: 1rem;
+	font-weight: bold;
+
+	&:hover {
+		cursor: pointer;
+		background-color: var(--white-hover);
+		text-decoration: none;
+	}
 }
 
 button,
 label.button {
-	padding: 0.25rem 0.75rem;
-	border: solid var(--color-gray-3) 0.05rem;
-	background-color: white;
-	font-size: 1rem;
-	font-weight: bold;
-}
-
-button:hover,
-label.button:hover {
-	cursor: pointer;
-	background-color: var(--hover-color-gray-2);
+	@include BtnStyle;
 }
 
 textarea,
@@ -100,7 +102,7 @@ select {
 	font-size: 0.85rem;
 	background-color: white;
 	padding: 0.25rem 0.5rem;
-	border: 0.05rem solid var(--color-gray-3);
+	border: 0.05rem solid var(--gray-border);
 }
 
 select {
@@ -110,4 +112,5 @@ select {
 hr {
 	width: stretch;
 	margin: 0.5rem 0;
+	border: solid 0.05rem var(--gray-border);
 }

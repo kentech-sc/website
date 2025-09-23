@@ -37,15 +37,15 @@
 	</section>
 {/snippet}
 
-<div class="module" id="banner-div">
+<div class="primary" id="banner-div">
 	<p>(대충 배너)</p>
 </div>
 
-<div class="module" id="calendar-div">
+<div class="secondary" id="calendar-div">
 	<p>(대충 달력)</p>
 </div>
 
-<div class="module" id="photo-div">
+<div class="tertiary" id="photo-div">
 	<p>(대충 사진)</p>
 </div>
 
@@ -96,11 +96,11 @@
 			justify-content: space-between;
 
 			&:nth-child(2n + 1) {
-				background-color: var(--back-color-gray-2);
+				background-color: var(--gray-bg);
 			}
 
 			&:hover {
-				background-color: var(--back-color-gray-3);
+				background-color: var(--gray-hover);
 				cursor: pointer;
 				text-decoration: none;
 			}
