@@ -4,14 +4,6 @@
 	display: none;
 }
 
-.external-link {
-	color: green;
-}
-
-.nonexistent-link {
-	color: red;
-}
-
 .container {
 	display: flex;
 	align-items: center;
@@ -29,6 +21,8 @@
 	border-width: 0.1rem;
 	border-style: solid;
 	padding: 1rem;
+	width: stretch;
+	margin-top: 1rem;
 }
 
 .module {

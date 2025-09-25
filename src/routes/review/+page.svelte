@@ -1,11 +1,13 @@
 <script lang="ts">
 	import type { Review } from '$lib/review/types.js';
-	import GeneralUtils from '$lib/general/utils.js';
-	import ReviewService from '$lib/review/service.js';
 	import type { Course } from '$lib/course/types.js';
 	import type { Professor } from '$lib/professor/types.js';
-	import CommonListBtnModule from '$lib/assets/commonListBtnModule.svelte';
 	import { goto } from '$app/navigation';
+
+	import CommonListBtnModule from '$lib/components/CommonListBtnModule.svelte';
+	import ReviewHeader from './_components/ReviewHeader.svelte';
+	import ReviewList from './_components/ReviewList.svelte';
+	import ReviewFilter from './_components/ReviewFilter.svelte';
 
 	let { data } = $props();
 	const reviews = $derived<Review[]>(JSON.parse(data?.reviews || '[]'));
@@ -26,120 +28,10 @@
 	const professors = $derived<Professor[]>(JSON.parse(data?.professors || '[]'));
 </script>
 
-{#snippet HeaderModule()}
-	<header class="container module">
-		<h1>강의 평가</h1>
-		<a href="/review/_new">강의/교수 추가하기</a>
-		<a href="/review/new">평가하기</a>
-	</header>
-{/snippet}
-
-{#snippet FilterModule()}
-	<div class="container" id="filter-div">
-		<div>
-			<label for="course">강의</label>
-			<select id="course" bind:value={selectedCourse}>
-				<option value="">전체</option>
-				{#each courses as course (course._id)}
-					<option value={course._id}>[{course.code}] {course.name}</option>
-				{/each}
-			</select>
-		</div>
-		<div>
-			<label for="professor">교수</label>
-			<select id="professor" bind:value={selectedProfessor}>
-				<option value="">전체</option>
-				{#each professors as professor (professor._id)}
-					<option value={professor._id}>{professor.name} 교수님</option>
-				{/each}
-			</select>
-		</div>
-	</div>
-{/snippet}
-
-{#snippet ListModule()}
-	<table>
-		<colgroup>
-			<col style="width:55%" />
-			<col style="width:15%" />
-			<col style="width:15%" />
-			<col style="width:15%" />
-		</colgroup>
-		<thead>
-			<tr>
-				<th>한줄평</th>
-				<th>교수님</th>
-				<th>작성자</th>
-				<th>작성일</th>
-			</tr>
-		</thead>
-		<tbody>
-			{#if reviews.length === 0}
-				<tr>
-					<td colspan="4">작성된 평가가 없습니다.</td>
-				</tr>
-			{:else}
-				{#each reviews as review (review._id)}
-					<tr>
-						<td><a href={`/review/${review._id}`}>"{review.title}"</a></td>
-						<td>{review.professorName}</td>
-						<td>{review.year}학년도 {ReviewService.translatedTerm[review.term]}학기</td>
-						<td>{GeneralUtils.parseDate(review.createdAt, 'date')}</td>
-					</tr>
-				{/each}
-			{/if}
-		</tbody>
-	</table>
-{/snippet}
-
-{@render HeaderModule()}
-
-<section class="module">
-	<p>(대충 주의사항)</p>
-</section>
+<ReviewHeader pageType="list" />
 
 <section class="container-col module">
-	{@render FilterModule()}
-	{@render ListModule()}
+	<ReviewFilter {courses} {professors} bind:selectedCourse bind:selectedProfessor />
+	<ReviewList {reviews} />
 	<CommonListBtnModule pageName="review" {toId} {fromId} />
 </section>
-
-<style lang="scss">
-	section {
-		width: stretch;
-		margin: 0.5rem;
-	}
-
-	header {
-		width: stretch;
-		margin: 0.5rem;
-		justify-content: space-between;
-	}
-
-	#filter-div {
-		width: stretch;
-		justify-content: flex-start;
-		margin-bottom: 0.5rem;
-
-		div:nth-child(2) {
-			margin-left: 1rem;
-		}
-	}
-
-	table {
-		width: stretch;
-
-		td,
-		th {
-			padding: 0.5rem;
-		}
-
-		td {
-			text-align: center;
-		}
-
-		td:first-child {
-			text-align: left;
-		}
-	}
-</style>

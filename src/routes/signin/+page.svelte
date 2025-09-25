@@ -1,5 +1,5 @@
 <script lang="ts">
-	import GoogleModule from './googleModule.svelte';
+	import GoogleModule from './_components/GoogleModule.svelte';
 </script>
 
 <section class="container-col module">

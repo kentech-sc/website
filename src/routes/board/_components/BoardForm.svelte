@@ -1,5 +1,5 @@
 <script lang="ts">
-	import CommonForm from '$lib/assets/commonForm.svelte';
+	import CommonForm from '$lib/components/CommonForm.svelte';
 	import type { Post } from '$lib/board/types';
 
 	let { post }: { post?: Post } = $props();
@@ -34,7 +34,7 @@
 	</div>
 {/snippet}
 
-{#snippet FormModule()}
+<section class="module">
 	<CommonForm actionName="editPost" formName="editPost">
 		<div id="form-div">
 			{@render RadioModule()}
@@ -47,9 +47,7 @@
 			<button type="submit">수정</button>
 		</div>
 	</CommonForm>
-{/snippet}
-
-{@render FormModule()}
+</section>
 
 <style lang="scss">
 	#radio-div {

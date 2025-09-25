@@ -77,12 +77,12 @@ td {
 
 @mixin BtnStyle {
 	color: black;
-	margin-right: 0.5rem;
 	padding: 0.25rem 0.75rem;
 	border: solid var(--gray-border) 0.05rem;
 	background-color: white;
 	font-size: 1rem;
 	font-weight: bold;
+	word-break: keep-all;
 
 	&:hover {
 		cursor: pointer;
@@ -107,6 +107,11 @@ select {
 
 select {
 	height: 1.8rem;
+}
+
+pre {
+	white-space: break-spaces;
+	word-break: break-all;
 }
 
 hr {

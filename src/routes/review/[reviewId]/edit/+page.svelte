@@ -2,7 +2,8 @@
 	import type { Course } from '$lib/course/types.js';
 	import type { Professor } from '$lib/professor/types.js';
 	import type { Review } from '$lib/review/types.js';
-	import ReviewForm from '../../reviewForm.svelte';
+	import ReviewForm from '../../_components/ReviewForm.svelte';
+	import ReviewHeader from '../../_components/ReviewHeader.svelte';
 
 	let { data } = $props();
 	let courses = $state<Course[]>(JSON.parse(data?.courses || '[]'));
@@ -10,32 +11,6 @@
 	let review = $state<Review>(JSON.parse(data?.review || '{}'));
 </script>
 
-{#snippet HeaderModule()}
-	<header class="container module">
-		<h1>강의 평가</h1>
-		<a href="/review">목록</a>
-	</header>
-{/snippet}
+<ReviewHeader pageType="edit" />
 
-{@render HeaderModule()}
-
-<section class="module">
-	<p>(대충 주의사항)</p>
-</section>
-
-<section class="container-col module" id="form-section">
-	<ReviewForm {professors} {courses} {review} />
-</section>
-
-<style lang="scss">
-	section {
-		width: stretch;
-		margin: 0.5rem;
-	}
-
-	header {
-		width: stretch;
-		margin: 0.5rem;
-		justify-content: space-between;
-	}
-</style>
+<ReviewForm {professors} {courses} {review} />

@@ -23,3 +23,9 @@
 	{@render PrevBtn()}
 	{@render NextBtn()}
 </div>
+
+<style lang="scss">
+	div {
+		margin-top: 0.5rem;
+	}
+</style>

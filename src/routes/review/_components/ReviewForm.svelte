@@ -1,5 +1,5 @@
 <script lang="ts">
-	import CommonForm from '$lib/assets/commonForm.svelte';
+	import CommonForm from '$lib/components/CommonForm.svelte';
 	import ReviewService from '$lib/review/service.js';
 	import type { Review } from '$lib/review/types';
 	import type { Professor } from '$lib/professor/types';
@@ -92,7 +92,7 @@
 	</div>
 {/snippet}
 
-{#snippet FormModule()}
+<section class="module">
 	<CommonForm
 		actionName={review ? 'editReview' : 'createReview'}
 		formName={review ? 'editReview' : 'createReview'}
@@ -108,16 +108,14 @@
 			<button type="submit">{review ? '수정하기' : '평가하기'}</button>
 		</div>
 	</CommonForm>
-{/snippet}
-
-{@render FormModule()}
+</section>
 
 <style lang="scss">
 	#form-div {
 		width: stretch;
 		align-items: flex-start;
 
-		& > *:not(label) {
+		& > *:not(label, button) {
 			margin-bottom: 1rem;
 		}
 
