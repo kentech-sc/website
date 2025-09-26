@@ -60,7 +60,7 @@ export default class PetitionService {
 
 	static async deletePetitionById(petitionId: PetitionId, user: User): Promise<Petition | null> {
 		const petition = await this.getPetitionById(petitionId);
-		if (!this.#canDeletePetition(petition, user)) throw new Error('청원을 삭제할 권한이 없습니다.');
+		if (!this.#canDeletePetition(petition, user)) throw new Error('삭제할 권한이 없습니다.');
 		const deletedPetition = await PetitionRepository.deletePetitionById(petitionId);
 		if (!deletedPetition) throw new Error('존재하지 않는 청원입니다.');
 		return deletedPetition;
@@ -73,11 +73,17 @@ export default class PetitionService {
 	}
 
 	static async signPetitionById(petitionId: PetitionId, userId: UserId): Promise<Petition> {
-		return await PetitionRepository.signPetitionById(petitionId, userId);
+		const updatedPetition = await PetitionRepository.signPetitionById(petitionId, userId);
+		if (!updatedPetition)
+			throw new Error('존재하지 않는 청원이거나, 이미 답변되거나 만료된 청원입니다.');
+		return updatedPetition;
 	}
 
 	static async unsignPetitionById(petitionId: PetitionId, userId: UserId): Promise<Petition> {
-		return await PetitionRepository.unsignPetitionById(petitionId, userId);
+		const updatedPetition = await PetitionRepository.unsignPetitionById(petitionId, userId);
+		if (!updatedPetition)
+			throw new Error('존재하지 않는 청원이거나, 이미 답변되거나 만료된 청원입니다.');
+		return updatedPetition;
 	}
 
 	static #canManagePetition(user: User): boolean {
@@ -86,14 +92,14 @@ export default class PetitionService {
 
 	static async reviewPetitionById(petitionId: PetitionId, user: User): Promise<Petition> {
 		const petition = await this.getPetitionById(petitionId);
-		if (!this.#canManagePetition(user)) throw new Error('청원을 검토할 권한이 없습니다.');
+		if (!this.#canManagePetition(user)) throw new Error('검토할 권한이 없습니다.');
 		if (petition.status === 'reviewing') throw new Error('이미 검토 중인 청원입니다.');
 		return await this.updatePetitionById(petitionId, { status: 'reviewing' });
 	}
 
 	static async unreviewPetitionById(petitionId: PetitionId, user: User): Promise<Petition> {
 		const petition = await this.getPetitionById(petitionId);
-		if (!this.#canManagePetition(user)) throw new Error('청원을 검토 취소할 권한이 없습니다.');
+		if (!this.#canManagePetition(user)) throw new Error('검토 취소할 권한이 없습니다.');
 		if (petition.status !== 'reviewing') throw new Error('아직 검토 중이지 않은 청원입니다.');
 		return await this.updatePetitionById(petitionId, { status: 'pending' });
 	}
@@ -104,7 +110,7 @@ export default class PetitionService {
 		response: string
 	): Promise<Petition> {
 		const petition = await this.getPetitionById(petitionId);
-		if (!this.#canManagePetition(responder)) throw new Error('청원을 답변할 권한이 없습니다.');
+		if (!this.#canManagePetition(responder)) throw new Error('답변할 권한이 없습니다.');
 		if (petition.responderId) throw new Error('이미 답변된 청원입니다.');
 		return await this.updatePetitionById(petitionId, {
 			responderId: responder._id,
@@ -121,8 +127,7 @@ export default class PetitionService {
 	): Promise<Petition> {
 		const petition = await this.getPetitionById(petitionId);
 		if (!petition.responderId) throw new Error('답변이 없는 청원입니다.');
-		if (!this.#canManagePetition(responder))
-			throw new Error('청원을 답변을 수정할 권한이 없습니다.');
+		if (!this.#canManagePetition(responder)) throw new Error('답변을 수정할 권한이 없습니다.');
 		return await this.updatePetitionById(petitionId, {
 			response,
 			responderId: responder._id,
@@ -133,8 +138,7 @@ export default class PetitionService {
 	static async deleteResponseById(petitionId: PetitionId, responder: User): Promise<Petition> {
 		const petition = await this.getPetitionById(petitionId);
 		if (!petition.responderId) throw new Error('답변이 없는 청원입니다.');
-		if (!this.#canManagePetition(responder))
-			throw new Error('청원의 답변을 삭제할 권한이 없습니다.');
+		if (!this.#canManagePetition(responder)) throw new Error('답변을 삭제할 권한이 없습니다.');
 		return await this.updatePetitionById(petitionId, {
 			responderId: null,
 			response: null,

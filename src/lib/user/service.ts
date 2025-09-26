@@ -101,7 +101,8 @@ export default class UserService {
 	}
 
 	static canBlockOrUnblockUser(targetUser: User, operatorUser: User): boolean {
-		if (['manager', 'dev'].includes(targetUser.group)) throw new Error('차단할 수 없습니다.');
+		if (['manager', 'dev'].includes(targetUser.group))
+			throw new Error('관리자나 개발자는 차단 또는 차단 해제할 수 없습니다.');
 		if (!(['manager', 'dev'] as Group[]).includes(operatorUser.group))
 			throw new Error('차단 또는 차단 해제 권한이 없습니다.');
 		return true;

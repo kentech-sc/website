@@ -17,7 +17,7 @@ export const load = async ({ url }) => {
 	const professorIdRaw = url.searchParams.get('professor');
 	const professorId = professorIdRaw ? new Types.ObjectId(professorIdRaw) : undefined;
 
-	const limit = 3;
+	const limit = 5;
 
 	const reviewsResult = await ReviewService.getReviews(limit, {
 		fromId,

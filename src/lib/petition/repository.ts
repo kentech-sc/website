@@ -44,17 +44,25 @@ export class PetitionRepository {
 		await PetitionModel.deleteMany();
 	}
 
-	static async signPetitionById(petitionId: PetitionId, userId: UserId): Promise<Petition> {
+	static async signPetitionById(petitionId: PetitionId, userId: UserId): Promise<Petition | null> {
 		return await PetitionModel.findOneAndUpdate(
-			{ _id: petitionId, signedBy: { $ne: userId }, petitionerId: { $ne: userId } },
+			{
+				_id: petitionId,
+				signedBy: { $ne: userId },
+				status: { $nin: ['answered', 'expired'] },
+				petitionerId: { $ne: userId }
+			},
 			{ $push: { signedBy: userId }, $inc: { signCnt: 1 } },
 			{ new: true }
 		).lean();
 	}
 
-	static async unsignPetitionById(petitionId: PetitionId, userId: UserId): Promise<Petition> {
+	static async unsignPetitionById(
+		petitionId: PetitionId,
+		userId: UserId
+	): Promise<Petition | null> {
 		return await PetitionModel.findOneAndUpdate(
-			{ _id: petitionId, signedBy: userId },
+			{ _id: petitionId, signedBy: userId, status: { $nin: ['answered', 'expired'] } },
 			{ $pull: { signedBy: userId }, $inc: { signCnt: -1 } },
 			{ new: true }
 		).lean();

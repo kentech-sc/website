@@ -51,7 +51,10 @@
 	</form>
 
 	{#if errorMsg}
-		{errorMsg}
+		<!-- {errorMsg} -->
+		<p id="error-msg" class="error">
+			{errorMsg}
+		</p>
 		<!-- <CommonError>{errorMsg}</CommonError> -->
 	{/if}
 </div>
@@ -65,5 +68,11 @@
 		border: none;
 		display: flex;
 		flex-direction: column;
+	}
+
+	#error-msg {
+		border-right: none;
+		border-left: none;
+		padding: 0.5rem;
 	}
 </style>

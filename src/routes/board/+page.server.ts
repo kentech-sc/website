@@ -9,7 +9,7 @@ export const load = async ({ url }) => {
 	const toIdRaw = url.searchParams.get('to');
 	const toId = toIdRaw ? new Types.ObjectId(toIdRaw) : undefined;
 
-	const limit = 3;
+	const limit = 5;
 
 	const postResult = await BoardService.getPostsByBoardId('main', limit, { fromId, toId });
 	const postsRaw = postResult.pageItems;

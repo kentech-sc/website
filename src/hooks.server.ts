@@ -107,12 +107,10 @@ export const blockHandle: Handle = async ({ event, resolve }) => {
 	return resolve(event);
 };
 
-// export const handleError: HandleServerError = ({ error, event }) => {
-//   console.error('⚠️ Error occurred:', error, 'at', event.url.pathname);
-
-//   return {
-//     message: '예상치 못한 오류가 발생했습니다.',
-//   };
-// };
+export const handleError: HandleServerError = ({ error, event }) => {
+	return {
+		message: error instanceof Error ? error.message : '예상치 못한 오류가 발생했습니다.'
+	};
+};
 
 export const handle = sequence(authenticationHandle, authorizationHandle, blockHandle);
