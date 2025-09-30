@@ -5,12 +5,12 @@
 	import PanelGroup from './_components/PanelGroup.svelte';
 
 	let { children } = $props();
+
 </script>
 
 <NavBar />
 
 <div id="layout" class="container">
-	<PanelGroup />
 	<main class="container-col">
 		{@render children?.()}
 	</main>
@@ -24,7 +24,7 @@
 
 		main {
 			flex: 1;
-			max-width: 70vw;
+			max-width: 82.5vw;
 		}
 	}
 </style>

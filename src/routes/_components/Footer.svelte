@@ -1,5 +1,9 @@
 <footer class="module">
-	<p>2025 KENTECH STUDENT COUNCIL</p>
+	<h1>4th KENTECH STUDENT COUNCIL 4:evr</h1>
+	<p>내용</p>
+	<br>
+	<p>Mail: studentcouncil@kentech.ac.kr</p>
+	<br>
 	<p>Developed by nemovim</p>
 </footer>
 
@@ -7,10 +11,18 @@
 	footer {
 		flex-grow: 1;
 		border: none;
-		border-top: solid var(--gray-border) 0.1rem;
-		font-size: 0.75rem;
-		color: var(--gray-text);
-		background-color: var(--gray-bg);
+		padding: 2rem;
+		padding-left: 3rem;
+		
+		color: var(--tertiary-text);
+		background-color: var(--tertiary);
 		justify-content: space-between;
+
+		h1 {
+			font-weight: bold;
+			font-size: 1.5rem;
+		}
 	}
+
+
 </style>

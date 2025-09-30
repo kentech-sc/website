@@ -58,7 +58,7 @@
 		justify-content: space-between;
 
 		&:nth-child(2n + 1) {
-			background-color: var(--gray-bg);
+			background-color: var(--gray-bg);  
 		}
 
 		&:hover {
