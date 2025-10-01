@@ -48,17 +48,34 @@
 	table {
 		width: stretch;
 
+		td,
 		th {
 			padding: 0.5rem;
+			background-color: white;
+			border: none;
 		}
 
-		td {
-			padding: 0.5rem;
+		thead > tr > th {
+			border-bottom: solid var(--gray-border) 0.1rem;
+		}
+
+		tbody > tr:nth-child(2n) > td {
+			background-color: var(--gray-bg);
+		}
+
+		td:nth-child(n) {
 			text-align: center;
 		}
 
 		td:first-child {
 			text-align: left;
+		}
+
+		td:first-child {
+			font-weight: bold;
+			a {
+				color: black;
+			}
 		}
 	}
 </style>

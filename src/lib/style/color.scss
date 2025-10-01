@@ -27,11 +27,11 @@
 
 	--gray: oklch(0.7 0 0);
 	--gray-text: var(--gray);
-	--gray-border: oklch(from var(--gray) 0.8 c h);
+	--gray-border: oklch(from var(--gray) 0.85 c h);
 	--gray-bg: oklch(from var(--gray) 0.98 c h);
 	--gray-hover: oklch(from var(--gray-bg) calc(l - 0.05) c h);
 
-	--white-hover: oklch(from white calc(l - 0.1) c h);
+	--white-hover: oklch(from white calc(l - 0.08) c h);
 
 	--error: oklch(0.6 0.3 30);
 	--warn: oklch(0.6 0.3 80);

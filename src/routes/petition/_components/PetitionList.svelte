@@ -10,11 +10,9 @@
 {#snippet PetitionItem(petition: Petition)}
 	<tr>
 		<td class="title-td"
-			><a href="/petition/{petition._id}"
-				><b
-					><span style="color: {PetitionService.colorStatus[petition.status]}"
-						>[{PetitionService.translatedStatus[petition.status]}]</span
-					></b
+			><a href="/petition/{petition._id}">
+				<span style="color: {PetitionService.colorStatus[petition.status]}"
+					>[{PetitionService.translatedStatus[petition.status]}]</span
 				>
 				{petition.title}</a
 			></td
@@ -77,6 +75,16 @@
 		td,
 		th {
 			padding: 0.5rem;
+			background-color: white;
+			border: none;
+		}
+
+		thead > tr > th {
+			border-bottom: solid var(--gray-border) 0.1rem;
+		}
+
+		tbody > tr:nth-child(2n) > td {
+			background-color: var(--gray-bg);
 		}
 
 		td:nth-child(n) {
@@ -87,14 +95,11 @@
 			text-align: left;
 		}
 
-		.title-td > a {
+		td:first-child {
 			font-weight: bold;
-			color: black;
-		}
-
-		.response-td > a {
-			font-weight: bold;
-			color: black;
+			a {
+				color: black;
+			}
 		}
 	}
 </style>

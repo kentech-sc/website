@@ -13,7 +13,7 @@
 			id="anonymous"
 			name="displayType"
 			value="anonymous"
-			{...{ checked: post?.displayType === 'anonymous' }}
+			{...{ checked: post?.displayType === 'anonymous' || !post }}
 		/>
 		<label for="nickname">별명</label>
 		<input
@@ -35,7 +35,10 @@
 {/snippet}
 
 <section class="module">
-	<CommonForm actionName="editPost" formName="editPost">
+	<CommonForm
+		actionName={post ? 'editPost' : 'createPost'}
+		formName={post ? 'editPost' : 'createPost'}
+	>
 		<div id="form-div">
 			{@render RadioModule()}
 
@@ -44,7 +47,7 @@
 
 			<label for="content">내용</label>
 			<textarea id="content" name="content">{post?.content}</textarea>
-			<button type="submit">수정</button>
+			<button type="submit">{post ? '수정' : '작성'}</button>
 		</div>
 	</CommonForm>
 </section>

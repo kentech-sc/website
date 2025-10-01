@@ -41,6 +41,10 @@
 </section>
 
 <style lang="scss">
+	section {
+		margin: 0.5rem;
+	}
+
 	h2 {
 		display: flex;
 		justify-content: space-between;
@@ -58,7 +62,7 @@
 		justify-content: space-between;
 
 		&:nth-child(2n + 1) {
-			background-color: var(--gray-bg);  
+			background-color: var(--gray-bg);
 		}
 
 		&:hover {

@@ -34,9 +34,9 @@ html {
 
 body {
 	background-color: white;
-	height: stretch;
 	display: flex;
 	flex-direction: column;
+	min-height: stretch;
 }
 
 a {
@@ -49,6 +49,10 @@ a:hover {
 	text-decoration: underline;
 	text-underline-offset: 0.2rem;
 	text-decoration-thickness: 0.05rem;
+}
+
+a:focus {
+	outline: none;
 }
 
 s {
@@ -79,6 +83,7 @@ td {
 	color: black;
 	padding: 0.25rem 0.75rem;
 	border: solid var(--gray-border) 0.05rem;
+	// border-radius: 0.5rem;
 	background-color: white;
 	font-size: 1rem;
 	font-weight: bold;

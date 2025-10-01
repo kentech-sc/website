@@ -29,6 +29,9 @@
 	@include Module;
 	border-color: var(--gray-border);
 	background-color: white;
+	border-radius: 0.8rem;
+	box-shadow: 0 0.2rem 0.3rem rgba(0, 0, 0, 0.1);
+	padding: 1.2rem 1.5rem;
 }
 
 .btn-anchor {

@@ -8,7 +8,7 @@
 
 {#snippet ListItem(post: Post)}
 	<tr>
-		<td><a href={`/board/${post._id}`}>{post.title} [{post.commentCnt}]</a></td>
+		<td><a href={`/board/${post._id}`}>{post.title} <span>[{post.commentCnt}]</span></a></td>
 		<td>{post.displayName}</td>
 		<td>{GeneralUtils.parseDate(post.createdAt)}</td>
 		<td>{post.viewCnt}</td>
@@ -50,6 +50,16 @@
 		td,
 		th {
 			padding: 0.5rem;
+			background-color: white;
+			border: none;
+		}
+
+		thead > tr > th {
+			border-bottom: solid var(--gray-border) 0.1rem;
+		}
+
+		tbody > tr:nth-child(2n) > td {
+			background-color: var(--gray-bg);
 		}
 
 		td:nth-child(n) {
@@ -58,6 +68,18 @@
 
 		td:first-child {
 			text-align: left;
+		}
+
+		td:first-child {
+			font-weight: bold;
+			a {
+				color: black;
+
+				span {
+					color: var(--secondary);
+					font-size: 0.8rem;
+				}
+			}
 		}
 	}
 </style>

@@ -8,21 +8,7 @@
 	let reviews = $state<Review[]>(JSON.parse(data?.reviews || '[]'));
 	let posts = $state<Post[]>(JSON.parse(data?.posts || '[]'));
 	let petitions = $state<Petition[]>(JSON.parse(data?.petitions || '[]'));
-
-	import slide01 from '$lib/assets/slide01.jpg';
-  	import slide02 from '$lib/assets/slide02.jpg';
-  	import slide03 from '$lib/assets/slide03.jpg';
-
-	const slides = [
-		{title: 'slide01', image: slide01},
-		{title: 'slide02', image: slide02},
-		{title: 'slide03', image: slide03}
-	];
-
-	import SlideShow from './_components/SlideShow.svelte'
 </script>
-
-<SlideShow {slides} />
 
 <div class="primary" id="banner">
 	<p>(대충 배너)</p>
@@ -48,13 +34,13 @@
 	#calendar,
 	#photo {
 		width: stretch;
-		margin: 0.5rem 0;
+		margin-top: 1rem;
 	}
 
 	#grid-container {
 		width: stretch;
 		display: grid;
 		grid-template-columns: 1fr 1fr;
-		margin: 0.5rem 0;
+		margin-top: 1rem;
 	}
 </style>

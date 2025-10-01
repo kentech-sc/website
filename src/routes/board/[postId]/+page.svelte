@@ -4,8 +4,7 @@
 
 	import BoardHeader from '../_components/BoardHeader.svelte';
 	import BoardArticle from '../_components/BoardArticle.svelte';
-	import CommentList from '../_components/CommentList.svelte';
-	import CommentForm from '../_components/CommentForm.svelte';
+	import CommentSection from '../_components/CommentSection.svelte';
 
 	const user = JSON.parse(page.data.user);
 
@@ -17,9 +16,4 @@
 
 <BoardHeader pageType="detail" />
 <BoardArticle bind:post {user} />
-<section class="container-col module">
-	{#if user.group !== 'guest'}
-		<CommentForm {user} />
-	{/if}
-	<CommentList {comments} {user} />
-</section>
+<CommentSection {comments} {user} />

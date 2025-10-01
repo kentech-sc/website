@@ -93,9 +93,9 @@
 	}
 
 	#like-btn {
-		border: solid 0.1rem black;
+		border: solid 0.05rem var(--gray-border);
 		border-radius: 0.5rem;
-		padding: 0.1rem 0.4rem;
+		padding: 0.15rem 0.5rem;
 		width: fit-content;
 		margin-top: 0.5rem;
 

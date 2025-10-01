@@ -2,13 +2,20 @@
 	import '$lib/style/main.css';
 	import Footer from './_components/Footer.svelte';
 	import NavBar from './_components/NavBar.svelte';
-	import PanelGroup from './_components/PanelGroup.svelte';
+	// import PanelGroup from './_components/PanelGroup.svelte';
+
+	import { page } from '$app/state';
+	import SlideShow from './_components/SlideShow.svelte';
 
 	let { children } = $props();
-
 </script>
 
-<NavBar />
+{#if page.route.id === '/'}
+	<NavBar isMain={true} />
+	<SlideShow />
+{:else}
+	<NavBar isMain={false} />
+{/if}
 
 <div id="layout" class="container">
 	<main class="container-col">
