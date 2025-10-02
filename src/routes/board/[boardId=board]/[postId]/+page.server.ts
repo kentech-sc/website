@@ -18,14 +18,14 @@ export const load = async ({ params, request }) => {
 };
 
 export const actions = {
-	deletePost: async ({ request, locals }) => {
+	deletePost: async ({ request, locals, params }) => {
 		if (locals.user.group === 'guest')
 			return fail(403, { message: '게스트 유저는 게시글을 삭제할 수 없습니다.' });
 		const formData = await request.formData();
 		const postIdRaw = (formData.get('post-id') ?? '').toString();
 		const postId: PostId = new Types.ObjectId(postIdRaw);
 		await BoardService.deletePostById(postId, locals.user);
-		redirect(302, '/board');
+		redirect(302, '/board/' + params.boardId);
 	},
 	likePost: async ({ request, locals }) => {
 		if (locals.user.group === 'guest')

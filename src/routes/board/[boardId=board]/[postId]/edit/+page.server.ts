@@ -37,6 +37,6 @@ export const actions = {
 			},
 			locals.user
 		);
-		redirect(302, '/board/' + post._id);
+		redirect(302, '/board/' + params.boardId + '/' + post._id);
 	}
 };

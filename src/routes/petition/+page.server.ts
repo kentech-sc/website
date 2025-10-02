@@ -9,7 +9,7 @@ export const load = async ({ url }) => {
 	const toIdRaw = url.searchParams.get('to');
 	const toId = toIdRaw ? new Types.ObjectId(toIdRaw) : undefined;
 
-	const limit = 5;
+	const limit = 10;
 
 	const petitionsResult = await PetitionService.getPetitions(limit, { fromId, toId });
 	const petitionsRaw = petitionsResult.pageItems;

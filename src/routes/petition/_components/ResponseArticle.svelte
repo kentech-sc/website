@@ -57,7 +57,7 @@
 	<article>
 		<header class="container">
 			<div class="container-col">
-				<h2>[답변] {petition.title}</h2>
+				<h2><span style="color: purple">[답변]</span> {petition.title}</h2>
 				<p>
 					{petition.responderName} | {GeneralUtils.parseDate(petition.answeredAt!)}
 				</p>

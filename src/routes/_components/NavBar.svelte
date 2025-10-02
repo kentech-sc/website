@@ -16,9 +16,9 @@
 
 {#snippet Nav()}
 	<nav>
-		<a href="/">공지사항</a>
+		<a href="/board/notice">공지사항</a>
 
-		<a href="/board">자유게시판</a>
+		<a href="/board/free">자유게시판</a>
 
 		<a href="/review">강의평가</a>
 

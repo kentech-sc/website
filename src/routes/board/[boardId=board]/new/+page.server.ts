@@ -7,7 +7,7 @@ import { fail, redirect } from '@sveltejs/kit';
 // };
 
 export const actions = {
-	createPost: async ({ request, locals }) => {
+	createPost: async ({ request, locals, params }) => {
 		const formData = await request.formData();
 		const title = (formData.get('title') ?? '').toString();
 		const content = (formData.get('content') ?? '').toString();
@@ -19,13 +19,13 @@ export const actions = {
 		if (!title || !content) return fail(400, { message: 'title, content are required' });
 
 		const post = await BoardService.createPostByBoardId(
-			'main',
+			params.boardId,
 			title,
 			content,
 			locals.user._id,
 			displayType
 		);
 
-		redirect(302, '/board/' + post._id);
+		redirect(302, '/board/' + params.boardId + '/' + post._id);
 	}
 };

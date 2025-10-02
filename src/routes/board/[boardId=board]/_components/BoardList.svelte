@@ -1,14 +1,17 @@
 <script lang="ts">
+	import { page } from '$app/state';
 	import CommonListBtnModule from '$lib/components/CommonListBtnModule.svelte';
 	import type { Post } from '$lib/board/types.js';
 	import GeneralUtils from '$lib/general/utils.js';
 
 	let { posts, toId, fromId } = $props();
+
+	const boardId = $derived(page.params.boardId);
 </script>
 
 {#snippet ListItem(post: Post)}
 	<tr>
-		<td><a href={`/board/${post._id}`}>{post.title} <span>[{post.commentCnt}]</span></a></td>
+		<td><a href={`/board/${boardId}/${post._id}`}>{post.title} <span>[{post.commentCnt}]</span></a></td>
 		<td>{post.displayName}</td>
 		<td>{GeneralUtils.parseDate(post.createdAt)}</td>
 		<td>{post.viewCnt}</td>
@@ -40,7 +43,7 @@
 			{/each}
 		</tbody>
 	</table>
-	<CommonListBtnModule pageName="board" {toId} {fromId} />
+	<CommonListBtnModule pageName="board/{boardId}" {toId} {fromId} />
 </section>
 
 <style lang="scss">

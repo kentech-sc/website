@@ -6,7 +6,8 @@
 
 	let { data } = $props();
 	let reviews = $state<Review[]>(JSON.parse(data?.reviews || '[]'));
-	let posts = $state<Post[]>(JSON.parse(data?.posts || '[]'));
+	let freePosts = $state<Post[]>(JSON.parse(data?.freePosts || '[]'));
+	let noticePosts = $state<Post[]>(JSON.parse(data?.noticePosts || '[]'));
 	let petitions = $state<Petition[]>(JSON.parse(data?.petitions || '[]'));
 </script>
 
@@ -23,9 +24,9 @@
 </div>
 
 <div id="grid-container">
-	<GridSection title="공지사항" items={[]} link="" />
+	<GridSection title="공지사항" items={noticePosts.slice(0, 5)} link="board/notice" />
 	<GridSection title="청원" items={petitions.slice(0, 5)} link="petition" />
-	<GridSection title="자유게시판" items={posts.slice(0, 5)} link="board" />
+	<GridSection title="자유게시판" items={freePosts.slice(0, 5)} link="board/free" />
 	<GridSection title="강의평가" items={reviews.slice(0, 5)} link="review" />
 </div>
 
