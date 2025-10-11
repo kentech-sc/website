@@ -43,24 +43,30 @@ export default class BoardService {
 		return post.userId.equals(user._id) || user.group === 'moderator' || user.group === 'manager';
 	}
 
+	static #canCreatePost(post: PostCreate, user: User): boolean {
+		if (post.boardId === 'notice') return user.group === 'moderator' || user.group === 'manager';
+		else return true;
+	}
+
 	static async createPostByBoardId(
 		boardId: BoardId,
 		title: string,
 		content: string,
-		userId: UserId,
+		user: User,
 		displayType: DisplayType
 	): Promise<Post> {
 		const post: PostCreate = {
 			boardId,
 			title,
 			content,
-			userId,
+			userId: user._id,
 			likeCnt: 0,
 			likedBy: [],
 			viewCnt: 0,
 			commentCnt: 0,
 			displayType
 		};
+		if (!this.#canCreatePost(post, user)) throw new Error('관리자만 작성할 수 있습니다.');
 		return await PostRepository.createPost(post);
 	}
 

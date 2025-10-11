@@ -22,7 +22,7 @@ export const actions = {
 			params.boardId,
 			title,
 			content,
-			locals.user._id,
+			locals.user,
 			displayType
 		);
 
