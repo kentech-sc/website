@@ -20,5 +20,6 @@ const PetitionSchema = new mongoose.Schema(
 );
 
 PetitionSchema.index({ signedBy: 1 });
+PetitionSchema.index({ title: 'text', content: 'text', response: 'text' });
 
 export const PetitionModel = mongoose.model<Petition>('Petition', PetitionSchema);

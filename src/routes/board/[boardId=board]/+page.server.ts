@@ -5,10 +5,10 @@ import { Types } from 'mongoose';
 export const load = async ({ url, params }) => {
 	const boardId = params.boardId;
 
-	const fromIdRaw: string | null = url.searchParams.get('from');
+	const fromIdRaw = url.searchParams.get('from');
 	const fromId = fromIdRaw ? new Types.ObjectId(fromIdRaw) : undefined;
 
-	const toIdRaw: string | null = url.searchParams.get('to');
+	const toIdRaw = url.searchParams.get('to');
 	const toId = toIdRaw ? new Types.ObjectId(toIdRaw) : undefined;
 
 	const limit = 10;

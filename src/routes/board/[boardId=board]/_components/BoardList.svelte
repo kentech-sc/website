@@ -11,7 +11,10 @@
 
 {#snippet ListItem(post: Post)}
 	<tr>
-		<td><a href={`/board/${boardId}/${post._id}`}>{post.title} <span>[{post.commentCnt}]</span></a></td>
+		<td
+			><a href={`/board/${boardId}/${post._id}`}>{post.title} <span>[{post.commentCnt}]</span></a
+			></td
+		>
 		<td>{post.displayName}</td>
 		<td>{GeneralUtils.parseDate(post.createdAt)}</td>
 		<td>{post.viewCnt}</td>
@@ -61,7 +64,7 @@
 			border-bottom: solid var(--gray-border) 0.1rem;
 		}
 
-		tbody > tr:nth-child(2n) > td {
+		tbody > tr:nth-child(2n + 1) > td {
 			background-color: var(--gray-bg);
 		}
 

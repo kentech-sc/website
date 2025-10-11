@@ -33,7 +33,9 @@ const CommentSchema = new mongoose.Schema(
 );
 
 PostSchema.index({ likedBy: 1 });
+PostSchema.index({ title: 'text', content: 'text' });
 CommentSchema.index({ likedBy: 1 });
+CommentSchema.index({ content: 'text' });
 
 export const PostModel = mongoose.model<Post>('Post', PostSchema);
 export const CommentModel = mongoose.model<Comment>('Comment', CommentSchema);

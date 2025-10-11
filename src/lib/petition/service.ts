@@ -22,7 +22,7 @@ export default class PetitionService {
 	static async getPetitionById(petitionId: PetitionId): Promise<Petition> {
 		const petition = await PetitionRepository.getPetitionById(petitionId);
 		if (!petition) throw new Error('존재하지 않는 청원입니다.');
-		return petition;
+		return await this.refreshStatusByPetition(petition);
 	}
 
 	static async getPetitions(
@@ -156,5 +156,14 @@ export default class PetitionService {
 			}
 		}
 		return petition;
+	}
+
+	static async searchPetitionByQuery(
+		query: string,
+		page = 1,
+		limit = 10
+	): Promise<{ items: Petition[]; more: boolean }> {
+		const petitions = await PetitionRepository.searchPetitionByQuery(query, page, limit);
+		return { items: petitions.slice(0, limit), more: petitions.length > limit };
 	}
 }

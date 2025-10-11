@@ -58,4 +58,15 @@ export default class ReviewRepository {
 	static async deleteAllReviewsByProfessorId(professorId: ProfessorId): Promise<void> {
 		await ReviewModel.deleteMany({ professorId });
 	}
+
+	static async searchReviewByQuery(q: string, page = 1, limit = 10): Promise<Review[]> {
+		const results = await ReviewModel.find(
+			{ $text: { $search: q } },
+			{ searchScore: { $meta: 'textScore' } }
+		)
+			.sort({ searchScore: { $meta: 'textScore' }, createdAt: -1 })
+			.skip((page - 1) * limit)
+			.limit(limit + 1);
+		return results;
+	}
 }

@@ -41,9 +41,9 @@
 {/snippet}
 
 {#snippet Search()}
-	<button id="search-btn" class="container">
+	<a href="/search" id="search-anchor" class="container">
 		<Search_img size="1.2rem" color="white" />
-	</button>
+	</a>
 	<!-- <div id="search-box">
 		<input class="serach-txt" placeholder="검색어를 입력해 주세요">
 	</div> -->
@@ -120,7 +120,8 @@
 				}
 			}
 
-			#search-btn {
+			#search-anchor {
+				padding: 0.2rem 0.5rem;
 				background-color: var(--secondary);
 				border-radius: 1rem;
 				border: white solid 0.1rem;

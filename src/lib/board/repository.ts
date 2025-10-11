@@ -58,6 +58,17 @@ export class PostRepository {
 			{ new: true }
 		).lean();
 	}
+
+	static async searchPostByQuery(q: string, page = 1, limit = 10): Promise<Post[]> {
+		const results = await PostModel.find(
+			{ $text: { $search: q } },
+			{ searchScore: { $meta: 'textScore' } }
+		)
+			.sort({ searchScore: { $meta: 'textScore' }, createdAt: -1 })
+			.skip((page - 1) * limit)
+			.limit(limit + 1);
+		return results;
+	}
 }
 
 export class CommentRepository {
@@ -103,5 +114,16 @@ export class CommentRepository {
 
 	static async deleteAllCommentsByPostId(postId: PostId): Promise<void> {
 		await CommentModel.deleteMany({ postId });
+	}
+
+	static async searchCommentByQuery(q: string, page = 1, limit = 10): Promise<Comment[]> {
+		const results = await CommentModel.find(
+			{ $text: { $search: q } },
+			{ searchScore: { $meta: 'textScore' } }
+		)
+			.sort({ searchScore: { $meta: 'textScore' } })
+			.skip((page - 1) * limit)
+			.limit(limit + 1);
+		return results;
 	}
 }

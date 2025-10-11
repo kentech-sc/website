@@ -67,4 +67,15 @@ export class PetitionRepository {
 			{ new: true }
 		).lean();
 	}
+
+	static async searchPetitionByQuery(q: string, page = 1, limit = 10): Promise<Petition[]> {
+		const results = await PetitionModel.find(
+			{ $text: { $search: q } },
+			{ searchScore: { $meta: 'textScore' } }
+		)
+			.sort({ searchScore: { $meta: 'textScore' }, createdAt: -1 })
+			.skip((page - 1) * limit)
+			.limit(limit + 1);
+		return results;
+	}
 }

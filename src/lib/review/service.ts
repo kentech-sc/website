@@ -115,4 +115,13 @@ export default class ReviewService {
 		if (!deletedReview) throw new Error('존재하지 않는 리뷰입니다.');
 		return deletedReview;
 	}
+
+	static async searchReviewByQuery(
+		query: string,
+		page = 1,
+		limit = 10
+	): Promise<{ items: Review[]; more: boolean }> {
+		const reviews = await ReviewRepository.searchReviewByQuery(query, page, limit);
+		return { items: reviews.slice(0, limit), more: reviews.length > limit };
+	}
 }

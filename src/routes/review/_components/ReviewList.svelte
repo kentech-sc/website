@@ -59,7 +59,7 @@
 			border-bottom: solid var(--gray-border) 0.1rem;
 		}
 
-		tbody > tr:nth-child(2n) > td {
+		tbody > tr:nth-child(2n + 1) > td {
 			background-color: var(--gray-bg);
 		}
 

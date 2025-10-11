@@ -147,4 +147,17 @@ export default class BoardService {
 	// 		$pull: { likedBy: userId }
 	// 	});
 	// }
+
+	static async searchPostByQuery(
+		q: string,
+		page = 1,
+		limit = 10
+	): Promise<{ items: Post[]; more: boolean }> {
+		const posts = await PostRepository.searchPostByQuery(q, page, limit);
+		return { items: posts.slice(0, limit), more: posts.length > limit };
+	}
+
+	// static async searchCommentByQuery(q: string, page=1, limit = 10): Promise<Comment[]> {
+	// 	return await CommentRepository.searchCommentByQuery(q, page, limit);
+	// }
 }
