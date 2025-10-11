@@ -66,7 +66,8 @@ export class PostRepository {
 		)
 			.sort({ searchScore: { $meta: 'textScore' }, createdAt: -1 })
 			.skip((page - 1) * limit)
-			.limit(limit + 1);
+			.limit(limit + 1)
+			.lean();
 		return results;
 	}
 }
@@ -123,7 +124,8 @@ export class CommentRepository {
 		)
 			.sort({ searchScore: { $meta: 'textScore' } })
 			.skip((page - 1) * limit)
-			.limit(limit + 1);
+			.limit(limit + 1)
+			.lean();
 		return results;
 	}
 }

@@ -75,7 +75,8 @@ export class PetitionRepository {
 		)
 			.sort({ searchScore: { $meta: 'textScore' }, createdAt: -1 })
 			.skip((page - 1) * limit)
-			.limit(limit + 1);
+			.limit(limit + 1)
+			.lean();
 		return results;
 	}
 }

@@ -3,8 +3,20 @@ import CourseRepository from './repository.js';
 import type { User } from '$lib/user/types.js';
 
 export default class CourseService {
-	static async createCourse(course: CourseCreate): Promise<Course> {
+	static #canManageCourse(user: User): boolean {
+		return user.group === 'manager';
+	}
+
+	static async createCourse(course: CourseCreate, user: User): Promise<Course> {
+		if (!this.#canManageCourse(user)) throw new Error('권한이 없습니다.');
+		if (await this.getCourseByCode(course.code)) throw new Error('이미 존재하는 강의입니다.');
 		return await CourseRepository.createCourse(course);
+	}
+
+	static async getCourseByCode(courseCode: string): Promise<Course> {
+		const course = await CourseRepository.getCourseByCode(courseCode);
+		if (!course) throw new Error('존재하지 않는 강의입니다.');
+		return course;
 	}
 
 	static async getCourseById(courseId: CourseId): Promise<Course> {
@@ -19,10 +31,6 @@ export default class CourseService {
 
 	static async getCoursesOrNullByIds(ids: CourseId[]): Promise<Array<Course | null>> {
 		return await CourseRepository.getCoursesByIds(ids);
-	}
-
-	static #canManageCourse(user: User): boolean {
-		return user.group === 'manager';
 	}
 
 	static async updateCourseById(

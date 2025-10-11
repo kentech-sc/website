@@ -66,7 +66,8 @@ export default class ReviewRepository {
 		)
 			.sort({ searchScore: { $meta: 'textScore' }, createdAt: -1 })
 			.skip((page - 1) * limit)
-			.limit(limit + 1);
+			.limit(limit + 1)
+			.lean();
 		return results;
 	}
 }

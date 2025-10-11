@@ -3,8 +3,20 @@ import ProfessorRepository from './repository.js';
 import type { User } from '$lib/user/types.js';
 
 export default class ProfessorService {
-	static async createProfessor(professor: ProfessorCreate): Promise<Professor> {
+	static #canManageProfessor(user: User): boolean {
+		return user.group === 'manager';
+	}
+
+	static async createProfessor(professor: ProfessorCreate, user: User): Promise<Professor> {
+		if (!this.#canManageProfessor(user)) throw new Error('권한이 없습니다.');
+		if (await this.getProfessorByName(professor.name)) throw new Error('이미 존재하는 교수님입니다.');
 		return await ProfessorRepository.createProfessor(professor);
+	}
+
+	static async getProfessorByName(professorName: string): Promise<Professor> {
+		const professor = await ProfessorRepository.getProfessorByName(professorName);
+		if (!professor) throw new Error('존재하지 않는 교수님입니다.');
+		return professor;
 	}
 
 	static async getProfessorById(professorId: ProfessorId): Promise<Professor> {
@@ -21,10 +33,6 @@ export default class ProfessorService {
 		professorIds: ProfessorId[]
 	): Promise<Array<Professor | null>> {
 		return await ProfessorRepository.getProfessorsByIds(professorIds);
-	}
-
-	static #canManageProfessor(user: User): boolean {
-		return user.group === 'manager';
 	}
 
 	static async updateProfessorById(
