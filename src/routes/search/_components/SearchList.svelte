@@ -16,18 +16,18 @@
 	<div class="result-item container">
 		{#if 'boardId' in result}
 			<a href="/board/{result.boardId}/{result._id}">
-				<h3>[게시글] {result.title}</h3>
-				<p>{result.content}</p>
+				<h3 class="ellipsis">[게시글] {result.title}</h3>
+				<p class="ellipsis">{result.content}</p>
 			</a>
 		{:else if 'courseId' in result}
 			<a href="/review/{result._id}">
-				<h3>[강의평가] {result.title}</h3>
-				<p>{result.comment}</p>
+				<h3 class="ellipsis">[강의평가] {result.title}</h3>
+				<p class="ellipsis">{result.comment}</p>
 			</a>
 		{:else}
 			<a href="/petition/{result._id}">
-				<h3>[청원] {result.title}</h3>
-				<p>{result.content}</p>
+				<h3 class="ellipsis">[청원] {result.title}</h3>
+				<p class="ellipsis">{result.content}</p>
 			</a>
 		{/if}
 	</div>
@@ -67,6 +67,7 @@
 
 		a {
 			color: black;
+			width: 100%;
 		}
 	}
 

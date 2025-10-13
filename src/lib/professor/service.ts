@@ -9,7 +9,8 @@ export default class ProfessorService {
 
 	static async createProfessor(professor: ProfessorCreate, user: User): Promise<Professor> {
 		if (!this.#canManageProfessor(user)) throw new Error('권한이 없습니다.');
-		if (await this.getProfessorByName(professor.name)) throw new Error('이미 존재하는 교수님입니다.');
+		if (await this.getProfessorByName(professor.name))
+			throw new Error('이미 존재하는 교수님입니다.');
 		return await ProfessorRepository.createProfessor(professor);
 	}
 

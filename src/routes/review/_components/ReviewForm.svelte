@@ -92,6 +92,16 @@
 	</div>
 {/snippet}
 
+{#snippet TitleInput()}
+	<label for="title">한줄평</label>
+	<input type="text" id="title" name="title" required value={review?.title} maxlength="100" />
+{/snippet}
+
+{#snippet CommentInput()}
+	<label for="comment">기타</label>
+	<textarea id="comment" name="comment">{review?.comment}</textarea>
+{/snippet}
+
 <section class="module">
 	<CommonForm
 		actionName={review ? 'editReview' : 'createReview'}
@@ -100,11 +110,9 @@
 		<div id="form-div" class="container-col">
 			{@render CourseInputs()}
 			{@render TermInputs()}
-			<label for="title">한줄평</label>
-			<input type="text" id="title" name="title" required value={review?.title} />
 			{@render ScoreInputs()}
-			<label for="comment">기타</label>
-			<textarea id="comment" name="comment">{review?.comment}</textarea>
+			{@render TitleInput()}
+			{@render CommentInput()}
 			<button type="submit">{review ? '수정하기' : '평가하기'}</button>
 		</div>
 	</CommonForm>

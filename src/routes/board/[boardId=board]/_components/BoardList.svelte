@@ -12,7 +12,8 @@
 {#snippet ListItem(post: Post)}
 	<tr>
 		<td
-			><a href={`/board/${boardId}/${post._id}`}>{post.title} <span>[{post.commentCnt}]</span></a
+			><a href={`/board/${boardId}/${post._id}`}
+				><span class="ellipsis">{post.title}</span><span>[{post.commentCnt}]</span></a
 			></td
 		>
 		<td>{post.displayName}</td>
@@ -60,6 +61,17 @@
 			border: none;
 		}
 
+		td:first-child > a {
+			display: grid;
+			justify-content: start;
+			align-items: center;
+			grid-template-columns: auto auto;
+
+			span:last-child {
+				margin-left: 0.2rem;
+			}
+		}
+
 		thead > tr > th {
 			border-bottom: solid var(--gray-border) 0.1rem;
 		}
@@ -81,7 +93,7 @@
 			a {
 				color: black;
 
-				span {
+				span:last-child {
 					color: var(--secondary);
 					font-size: 0.8rem;
 				}

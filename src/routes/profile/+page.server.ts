@@ -1,4 +1,5 @@
 import UserService from '$lib/user/service';
+import type { Group } from '$lib/user/types';
 import { redirect } from '@sveltejs/kit';
 
 export async function load({ locals }) {
@@ -13,6 +14,13 @@ export const actions = {
 		const nickname = (formData.get('nickname') ?? '').toString();
 		await UserService.changeNicknameByEmail(locals.user.email, nickname, locals.user);
 		return { nickname };
+	},
+	changeGroup: async ({ request, locals }) => {
+		const formData = await request.formData();
+		const email = (formData.get('email') ?? '').toString();
+		const group = (formData.get('group') ?? '').toString();
+		await UserService.changeGroupByEmail(email, group as Group, locals.user);
+		return { email, group };
 	},
 	blockUser: async ({ request, locals }) => {
 		const formData = await request.formData();

@@ -6,7 +6,8 @@
 	<CommonForm actionName="search" formName="search">
 		<div id="form-div">
 			<label for="query">검색어: </label>
-			<input type="text" id="query" name="query" />
+			<!-- svelte-ignore a11y_autofocus -->
+			<input type="text" id="query" name="query" autofocus />
 			<button type="submit">검색</button>
 		</div>
 	</CommonForm>
@@ -16,9 +17,10 @@
 	#form-div {
 		width: stretch;
 		align-items: flex-start;
-		// input {
-		// 	width: stretch;
-		// 	margin-bottom: 0.5rem;
-		// }
+		input {
+			width: 50%;
+			padding: 0.3rem 0.6rem;
+			font-size: 1.2rem;
+		}
 	}
 </style>
