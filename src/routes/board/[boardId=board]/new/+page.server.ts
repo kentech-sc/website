@@ -1,10 +1,7 @@
 import BoardService from '$lib/board/service';
 import { fail, redirect } from '@sveltejs/kit';
 
-// export const load = async () => {
-// 	const postArr = await BoardService.getPostsByBoardId('main');
-// 	return { postArr: JSON.stringify(postArr) };
-// };
+export const load = async () => {};
 
 export const actions = {
 	createPost: async ({ request, locals, params }) => {
