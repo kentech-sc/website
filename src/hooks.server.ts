@@ -60,6 +60,8 @@ const authorizationHandle: Handle = async ({ event, resolve }) => {
 	} else {
 		// Unauthorized
 
+		console.log(event.url.pathname);
+
 		if (
 			event.url.pathname.startsWith('/petition') ||
 			event.url.pathname.startsWith('/course') ||
