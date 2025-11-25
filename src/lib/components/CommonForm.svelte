@@ -12,12 +12,12 @@
 	} = $props();
 
 	let loading = $state<boolean>(false);
-	// let comment = $state<string>('');
 	let errorMsg = $state<string>('');
 
 	function formHandle() {
 		loading = true;
 		return async ({ update, result }: { update: () => Promise<void>; result: ActionResult }) => {
+			console.log(result.type)
 			if (result.type === 'success') {
 				formResult = result;
 				// await update();
@@ -25,10 +25,8 @@
 			} else if (result.type === 'redirect') {
 				goto(result.location);
 			} else if (result.type === 'failure') {
-				console.log('failure');
 				errorMsg = result.data?.message || '알 수 없는 오류가 발생했습니다.';
 			} else if (result.type === 'error') {
-				console.log('error');
 				errorMsg = result.error?.message || '알 수 없는 오류가 발생했습니다.';
 			}
 			loading = false;
@@ -51,11 +49,9 @@
 	</form>
 
 	{#if errorMsg}
-		<!-- {errorMsg} -->
 		<p id="error-msg" class="error">
 			{errorMsg}
 		</p>
-		<!-- <CommonError>{errorMsg}</CommonError> -->
 	{/if}
 </div>
 

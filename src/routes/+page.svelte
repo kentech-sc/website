@@ -39,9 +39,10 @@
 	}
 
 	#grid-container {
+		max-width: stretch;
 		width: stretch;
 		display: grid;
-		grid-template-columns: 1fr 1fr;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
 		margin-top: 1rem;
 	}
 </style>

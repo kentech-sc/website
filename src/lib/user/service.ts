@@ -81,6 +81,7 @@ export default class UserService {
 			)
 		)
 			throw new Error('이름 변경은 본인만 가능합니다.');
+		if (newNickname.length < 4) throw new Error('별명은 4자 이상이어야 합니다.');
 		if (targetUser.nickname === newNickname) throw new Error('변경 사항이 없습니다.');
 		const user = await this.getUserOrNullByNickname(newNickname);
 		if (user) throw new Error('이미 같은 별명의 사용자가 있습니다.');

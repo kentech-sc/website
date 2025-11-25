@@ -27,7 +27,7 @@
 		<tr>
 			<th>한줄평</th>
 			<th>교수님</th>
-			<th>작성자</th>
+			<th>수강 학기</th>
 			<th>작성일</th>
 		</tr>
 	</thead>
@@ -47,6 +47,10 @@
 <style lang="scss">
 	table {
 		width: stretch;
+
+		th {
+			word-break: keep-all;
+		}
 
 		td,
 		th {

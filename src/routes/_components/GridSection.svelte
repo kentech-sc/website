@@ -61,6 +61,16 @@
 		padding: 0.25rem;
 		justify-content: space-between;
 
+		span:first-child {
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+
+		span:last-child {
+			white-space: nowrap;
+		}
+
 		&:nth-child(2n + 1) {
 			background-color: var(--gray-bg);
 		}

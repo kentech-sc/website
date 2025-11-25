@@ -64,9 +64,8 @@ const authorizationHandle: Handle = async ({ event, resolve }) => {
 			event.url.pathname.startsWith('/petition') ||
 			event.url.pathname.startsWith('/course') ||
 			event.url.pathname.startsWith('/review') ||
-			event.url.pathname.startsWith('/board/new') ||
-			event.url.pathname.startsWith('/board/edit') ||
-			event.url.pathname.startsWith('/profile')
+			event.url.pathname.startsWith('/profile') ||
+			event.url.pathname.search(/^\/board\/(?:free|notice)\/(?:new|edit)$/) !== -1
 		) {
 			redirect(303, '/signin');
 		}
@@ -107,9 +106,10 @@ export const blockHandle: Handle = async ({ event, resolve }) => {
 	return resolve(event);
 };
 
-export const handleError: HandleServerError = ({ error, event }) => {
+export const handleError: HandleServerError = ({ error, event, status, message }) => {
 	return {
-		message: error instanceof Error ? error.message : '예상치 못한 오류가 발생했습니다.'
+		message,
+		status
 	};
 };
 

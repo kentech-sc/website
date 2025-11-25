@@ -72,6 +72,10 @@
 	table {
 		width: stretch;
 
+		th {
+			word-break: keep-all;
+		}
+
 		td,
 		th {
 			padding: 0.5rem;

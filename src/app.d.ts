@@ -4,7 +4,10 @@ import type { User } from '$lib/user/types';
 // for information about these interfaces
 declare global {
 	namespace App {
-		// interface Error {}
+		interface Error {
+			status: number;
+			message: string;
+		}
 		interface Locals {
 			user: User;
 			// auth: RequestEvent['locals']['auth'];

@@ -49,7 +49,7 @@
 	</div> -->
 {/snippet}
 
-<header class="container" id={isMain ? 'main-nav' : 'sub-nav'}>
+<header class="container" id={isMain ? 'main-nav' : 'sub-nav'} data-sveltekit-preload-data="hover">
 	<div class="container">
 		{@render Logo()}
 		{@render Nav()}
