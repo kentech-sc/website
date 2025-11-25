@@ -2,10 +2,8 @@ import CourseService from '$lib/course/service';
 import ProfessorService from '$lib/professor/service';
 import { fail } from '@sveltejs/kit';
 
-// export const load = async () => {
-// 	const courseArr = await CourseReviewService.getCourseArr();
-// 	return { courseArr: JSON.stringify(courseArr) };
-// };
+// The below line is essential to prevent rendering the page without server request which leads to skipping the server hooks.
+export const load = async () => {};
 
 export const actions = {
 	addCourse: async ({ request, locals }) => {

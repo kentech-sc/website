@@ -1,10 +1,8 @@
 import PetitionService from '$lib/petition/service';
 import { fail, redirect } from '@sveltejs/kit';
 
-// export const load = async () => {
-// 	const postArr = await BoardService.getPostsByBoardId('main');
-// 	return { postArr: JSON.stringify(postArr) };
-// };
+// The below line is essential to prevent rendering the page without server request which leads to skipping the server hooks.
+export const load = async () => {};
 
 export const actions = {
 	createPetition: async ({ request, locals }) => {
