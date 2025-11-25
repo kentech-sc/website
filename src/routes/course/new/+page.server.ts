@@ -2,6 +2,9 @@ import CourseService from '$lib/course/service';
 import ProfessorService from '$lib/professor/service';
 import { fail } from '@sveltejs/kit';
 
+// The below line is essential to prevent rendering the page without server request which leads to skipping the server hooks.
+export const load = () => {};
+
 export const actions = {
 	addCourse: async ({ request, locals }) => {
 		const formData = await request.formData();
