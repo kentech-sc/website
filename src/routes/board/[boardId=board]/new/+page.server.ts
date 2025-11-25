@@ -1,8 +1,12 @@
 import BoardService from '$lib/board/service';
 import { fail, redirect } from '@sveltejs/kit';
 
-// // The below line is essential to prevent rendering the page without server request which leads to skipping the server hooks.
+// The below line is essential to prevent rendering the page without server request which leads to skipping the server hooks.
 // export const load = async () => {};
+
+export const ssr = true;
+export const csr = true;
+export const prerender = false;
 
 export const actions = {
 	createPost: async ({ request, locals, params }) => {
