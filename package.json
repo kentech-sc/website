@@ -1,7 +1,7 @@
 {
 	"name": "website",
 	"private": true,
-	"version": "0.1.17",
+	"version": "0.1.18",
 	"type": "module",
 	"scripts": {
 		"dev": "vite dev",
@@ -35,6 +35,7 @@
 	},
 	"dependencies": {
 		"@lucide/svelte": "^0.542.0",
+		"@sentry/sveltekit": "^10.27.0",
 		"mongoose": "^8.18.0"
 	}
 }

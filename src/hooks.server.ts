@@ -1,4 +1,4 @@
-// import * as Sentry from '@sentry/sveltekit';
+import * as Sentry from '@sentry/sveltekit';
 import type { ActionResult, Handle, HandleServerError, ServerInit } from '@sveltejs/kit';
 import { redirect } from '@sveltejs/kit';
 import { sequence } from '@sveltejs/kit/hooks';
@@ -106,11 +106,16 @@ export const blockHandle: Handle = async ({ event, resolve }) => {
 	return resolve(event);
 };
 
-export const handleError: HandleServerError = ({ error, event, status, message }) => {
-	return {
-		message,
-		status
-	};
-};
+export const handleError: HandleServerError = Sentry.handleErrorWithSentry(
+	({ status, message }) => {
+		return {
+			message,
+			status
+		};
+	}
+);
 
-export const handle = sequence(authenticationHandle, authorizationHandle, blockHandle);
+export const handle = sequence(
+	Sentry.sentryHandle(),
+	sequence(authenticationHandle, authorizationHandle, blockHandle)
+);

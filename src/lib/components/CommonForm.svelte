@@ -16,8 +16,14 @@
 
 	function formHandle() {
 		loading = true;
-		return async ({ update, result }: { update: () => Promise<void>; result: ActionResult }) => {
-			console.log(result.type)
+		return async ({
+			// update,
+			result
+		}: {
+			// update: () => Promise<void>;
+			result: ActionResult;
+		}) => {
+			console.log(result.type);
 			if (result.type === 'success') {
 				formResult = result;
 				// await update();
