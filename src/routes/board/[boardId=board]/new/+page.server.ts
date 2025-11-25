@@ -1,7 +1,7 @@
 import BoardService from '$lib/board/service';
 import { fail, redirect } from '@sveltejs/kit';
 
-export const load = async () => {};
+// export const load = async () => {};
 
 export const actions = {
 	createPost: async ({ request, locals, params }) => {
