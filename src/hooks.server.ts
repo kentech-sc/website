@@ -65,7 +65,7 @@ const authorizationHandle: Handle = async ({ event, resolve }) => {
 			event.url.pathname.startsWith('/course') ||
 			event.url.pathname.startsWith('/review') ||
 			event.url.pathname.startsWith('/profile') ||
-			event.url.pathname.search(/^\/board\/(?:free|notice)\/(?:new|edit)$/) !== -1
+			/^\/board\/(?:free|notice)\/(?:new|edit)/.test(event.url.pathname)
 		) {
 			redirect(303, '/signin');
 		}
