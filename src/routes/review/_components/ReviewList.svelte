@@ -2,7 +2,7 @@
 	import type { Review } from '$lib/review/types.js';
 
 	import ReviewService from '$lib/review/service';
-	import GeneralUtils from '$lib/general/utils';
+	import GeneralUtils from '$lib/common/utils';
 
 	let { reviews } = $props();
 </script>

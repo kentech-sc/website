@@ -1,5 +1,5 @@
 import PetitionApplication from '$lib/applications/petition';
-import PetitionService from '$lib/petition/service';
+import PetitionService from '$lib/srv/petition.srv';
 import { Types } from 'mongoose';
 
 export const load = async ({ url }) => {

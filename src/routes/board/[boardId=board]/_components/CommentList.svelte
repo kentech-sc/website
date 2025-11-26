@@ -3,7 +3,7 @@
 	import type { Comment } from '$lib/board/types.js';
 	import type { ActionResult } from '@sveltejs/kit';
 
-	import GeneralUtils from '$lib/general/utils.js';
+	import GeneralUtils from '$lib/common/utils.js';
 	import CommonForm from '$lib/components/CommonForm.svelte';
 	import { invalidateAll } from '$app/navigation';
 

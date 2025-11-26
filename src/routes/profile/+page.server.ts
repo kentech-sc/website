@@ -1,5 +1,5 @@
-import UserService from '$lib/user/service';
-import type { Group } from '$lib/user/types';
+import UserService from '$lib/srv/user.srv';
+import type { Group } from '$lib/types/user.type';
 import { fail, redirect } from '@sveltejs/kit';
 
 export async function load({ locals }) {

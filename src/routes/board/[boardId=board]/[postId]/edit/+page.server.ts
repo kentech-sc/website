@@ -1,6 +1,6 @@
-import BoardService from '$lib/board/service';
+import BoardService from '$lib/srv/comment.srv';
 import { fail, redirect } from '@sveltejs/kit';
-import type { PostId } from '$lib/board/types';
+import type { PostId } from '$lib/types/comment.type';
 import { Types } from 'mongoose';
 
 export const load = async ({ params }) => {

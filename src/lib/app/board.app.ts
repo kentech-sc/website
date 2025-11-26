@@ -1,0 +1,21 @@
+import type { PostId, Post } from '$lib/types/post.type';
+import type { Comment } from '$lib/types/comment.type';
+
+import * as PostService from '$lib/srv/post.srv.js';
+import * as CommentService from '$lib/srv/comment.srv.js';
+import * as UserService from '$lib/srv/user.srv.js';
+
+export async function getPostAndCommentsByPostId(
+	postId: PostId
+): Promise<{ post: Post; comments: Comment[] }> {
+	const postRaw = await PostService.getPostById(postId);
+	const commentsRaw = (await CommentService.getCommentsByPostId(postId)).toReversed();
+
+	const raws = [postRaw, ...commentsRaw];
+	const filled = await UserService.fillDisplayNames(raws);
+
+	const post = filled[0] as Post;
+	const comments = filled.slice(1) as Comment[];
+
+	return { post, comments };
+}

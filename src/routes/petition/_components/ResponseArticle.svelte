@@ -1,6 +1,6 @@
 <script lang="ts">
 	import CommonForm from '$lib/components/CommonForm.svelte';
-	import GeneralUtils from '$lib/general/utils.js';
+	import GeneralUtils from '$lib/common/utils.js';
 	import type { ActionResult } from '@sveltejs/kit';
 	import type { Petition } from '$lib/petition/types.js';
 	import type { User } from '$lib/user/types.js';

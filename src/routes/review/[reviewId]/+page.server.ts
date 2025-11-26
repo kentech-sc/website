@@ -1,6 +1,6 @@
-import ReviewService from '$lib/review/service';
+import ReviewService from '$lib/srv/review.srv';
 import ReviewApplication from '$lib/applications/review.js';
-import type { ReviewId } from '$lib/review/types';
+import type { ReviewId } from '$lib/types/review.type';
 import { redirect } from '@sveltejs/kit';
 import { Types } from 'mongoose';
 

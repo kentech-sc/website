@@ -1,6 +1,6 @@
-import PetitionService from '$lib/petition/service';
+import PetitionService from '$lib/srv/petition.srv';
 import PetitionApplication from '$lib/applications/petition.js';
-import type { PetitionId } from '$lib/petition/types.js';
+import type { PetitionId } from '$lib/types/petition.type.js';
 import { fail, redirect } from '@sveltejs/kit';
 import { Types } from 'mongoose';
 

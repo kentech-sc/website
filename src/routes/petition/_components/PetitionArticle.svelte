@@ -2,7 +2,7 @@
 	import ThumbsUp from '@lucide/svelte/icons/thumbs-up';
 	import CommonForm from '$lib/components/CommonForm.svelte';
 	import PetitionService from '$lib/petition/service';
-	import GeneralUtils from '$lib/general/utils.js';
+	import GeneralUtils from '$lib/common/utils.js';
 	import type { ActionResult } from '@sveltejs/kit';
 	import UserService from '$lib/user/service';
 	import type { Petition } from '$lib/petition/types.js';

@@ -1,4 +1,4 @@
-import PetitionService from '$lib/petition/service';
+import PetitionService from '$lib/srv/petition.srv';
 import { fail, redirect } from '@sveltejs/kit';
 
 // The below line is essential to prevent rendering the page without server request which leads to skipping the server hooks.

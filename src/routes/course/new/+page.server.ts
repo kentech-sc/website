@@ -1,5 +1,5 @@
-import CourseService from '$lib/course/service';
-import ProfessorService from '$lib/professor/service';
+import CourseService from '$lib/srv/course.srv';
+import ProfessorService from '$lib/srv/prof.srv';
 import { fail } from '@sveltejs/kit';
 
 // The below line is essential to prevent rendering the page without server request which leads to skipping the server hooks.

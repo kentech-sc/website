@@ -1,6 +1,6 @@
-import BoardService from '$lib/board/service';
+import BoardService from '$lib/srv/comment.srv';
 import BoardApplication from '$lib/applications/board';
-import type { PostId, CommentId } from '$lib/board/types.js';
+import type { PostId, CommentId } from '$lib/types/comment.type.js';
 import { fail, redirect } from '@sveltejs/kit';
 import { Types } from 'mongoose';
 

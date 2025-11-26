@@ -1,6 +1,6 @@
 <script lang="ts">
 	import ReviewService from '$lib/review/service';
-	import GeneralUtils from '$lib/general/utils';
+	import GeneralUtils from '$lib/common/utils';
 	import CommonForm from '$lib/components/CommonForm.svelte';
 
 	let { review, user } = $props();

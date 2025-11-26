@@ -1,5 +1,5 @@
-import BoardService from '$lib/board/service';
-import UserService from '$lib/user/service.js';
+import BoardService from '$lib/srv/comment.srv';
+import UserService from '$lib/srv/user.srv.js';
 import { Types } from 'mongoose';
 
 export const load = async ({ url, params }) => {

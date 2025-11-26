@@ -2,7 +2,7 @@
 	import { page } from '$app/state';
 	import CommonListBtnModule from '$lib/components/CommonListBtnModule.svelte';
 	import type { Post } from '$lib/board/types.js';
-	import GeneralUtils from '$lib/general/utils.js';
+	import GeneralUtils from '$lib/common/utils.js';
 
 	let { posts, toId, fromId } = $props();
 

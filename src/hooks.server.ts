@@ -8,8 +8,8 @@ import { MONGO_URI } from '$env/static/private';
 
 import { handle as authenticationHandle } from './auth.js';
 import DBService from '$lib/general/db.js';
-import UserService from '$lib/user/service.js';
-import type { User } from '$lib/user/types.js';
+import UserService from '$lib/srv/user.srv.js';
+import type { User } from '$lib/types/user.type.js';
 import { Types } from 'mongoose';
 
 function checkEnv() {

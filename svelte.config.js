@@ -21,6 +21,12 @@ const config = {
 			instrumentation: {
 				server: true
 			}
+		},
+
+		alias: {
+			style: 'src/style',
+			assets: 'src/assets',
+			components: 'src/components'
 		}
 	}
 };

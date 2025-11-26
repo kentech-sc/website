@@ -2,7 +2,7 @@
 	import type { Petition } from '$lib/petition/types.js';
 	import PetitionService from '$lib/petition/service';
 	import CommonListBtnModule from '$lib/components/CommonListBtnModule.svelte';
-	import GeneralUtils from '$lib/general/utils.js';
+	import GeneralUtils from '$lib/common/utils.js';
 
 	let { petitions, toId, fromId } = $props();
 </script>

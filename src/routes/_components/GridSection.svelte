@@ -1,5 +1,5 @@
 <script lang="ts">
-	import GeneralUtils from '$lib/general/utils.js';
+	import GeneralUtils from '$lib/common/utils.js';
 	import PetitionService from '$lib/petition/service';
 	import type { Review } from '$lib/review/types.js';
 	import type { Post } from '$lib/board/types.js';

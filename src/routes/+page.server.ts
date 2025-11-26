@@ -1,7 +1,7 @@
-import ReviewService from '$lib/review/service.js';
-import UserService from '$lib/user/service.js';
-import PetitionService from '$lib/petition/service.js';
-import BoardService from '$lib/board/service';
+import ReviewService from '$lib/srv/review.srv.js';
+import UserService from '$lib/srv/user.srv.js';
+import PetitionService from '$lib/srv/petition.srv.js';
+import BoardService from '$lib/srv/comment.srv';
 import ReviewApplication from '$lib/applications/review.js';
 
 export const load = async () => {

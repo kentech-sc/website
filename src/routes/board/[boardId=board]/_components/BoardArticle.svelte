@@ -2,7 +2,7 @@
 	import type { ActionResult } from '@sveltejs/kit';
 	import type { Post } from '$lib/board/types.js';
 	import type { User } from '$lib/user/types';
-	import GeneralUtils from '$lib/general/utils.js';
+	import GeneralUtils from '$lib/common/utils.js';
 	import { Types } from 'mongoose';
 
 	import Heart from '@lucide/svelte/icons/heart';

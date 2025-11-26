@@ -1,7 +1,7 @@
-import ReviewService from '$lib/review/service';
+import ReviewService from '$lib/srv/review.srv';
 import ReviewApplication from '$lib/applications/review.js';
-import CourseService from '$lib/course/service';
-import ProfessorService from '$lib/professor/service';
+import CourseService from '$lib/srv/course.srv';
+import ProfessorService from '$lib/srv/prof.srv';
 import { Types } from 'mongoose';
 
 export const load = async ({ url }) => {
