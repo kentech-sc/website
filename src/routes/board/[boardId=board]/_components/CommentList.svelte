@@ -1,10 +1,12 @@
 <script lang="ts">
-	import type { User } from '$lib/user/types.js';
-	import type { Comment } from '$lib/board/types.js';
+	import type { User } from '$lib/types/user.type.js';
+	import type { Comment } from '$lib/types/comment.type.js';
+
 	import type { ActionResult } from '@sveltejs/kit';
 
-	import GeneralUtils from '$lib/common/utils.js';
-	import CommonForm from '$lib/components/CommonForm.svelte';
+	import * as CommonUtils from '$lib/common/utils.js';
+	import CommonForm from '$components/CommonForm.svelte';
+
 	import { invalidateAll } from '$app/navigation';
 
 	let { comments, user }: { comments: Comment[]; user: User } = $props();
@@ -31,7 +33,7 @@
 	<div class="container comment-div">
 		<p><b>[{comment.displayName}]</b> {comment.content}</p>
 		<div class="container">
-			<p>{GeneralUtils.parseDate(comment.createdAt)}</p>
+			<p>{CommonUtils.parseDate(comment.createdAt)}</p>
 			{#if comment.userId === user._id}{@render DeleteBtn(comment)}{/if}
 		</div>
 	</div>

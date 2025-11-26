@@ -1,5 +1,6 @@
 <script lang="ts">
-	import '$lib/style/main.css';
+	import '$style/main.css';
+
 	import Footer from './_components/Footer.svelte';
 	import NavBar from './_components/NavBar.svelte';
 	// import PanelGroup from './_components/PanelGroup.svelte';

@@ -1,5 +1,5 @@
-import type { CourseCreate, Course, CourseId, CourseUpdate } from '$lib/types/course.type';
-import type { User } from '$lib/types/user.type';
+import type { CourseCreate, Course, CourseId, CourseUpdate } from '$lib/types/course.type.js';
+import type { User } from '$lib/types/user.type.js';
 
 import * as CourseRepository from '$lib/repo/course.repo.js';
 

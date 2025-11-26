@@ -1,8 +1,8 @@
 import type { UpdateQuery, Types } from 'mongoose';
 
-import type { CourseId } from './course.type';
-import type { ProfessorId } from './prof.type';
-import type { UserId } from './user.type';
+import type { CourseId } from './course.type.js';
+import type { ProfessorId } from './prof.type.js';
+import type { UserId } from './user.type.js';
 
 export type ReviewId = Types.ObjectId;
 

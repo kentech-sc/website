@@ -1,5 +1,6 @@
-import type { BoardId, PostId, PostCreate, PostUpdate, Post } from '$lib/types/post.type';
-import type { UserId } from '$lib/types/user.type';
+import type { BoardId } from '$lib/types/board.type.js';
+import type { PostId, PostCreate, PostUpdate, Post } from '$lib/types/post.type.js';
+import type { UserId } from '$lib/types/user.type.js';
 
 import { PostModel } from '$lib/models/post.model.js';
 

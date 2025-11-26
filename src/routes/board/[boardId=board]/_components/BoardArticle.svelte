@@ -1,12 +1,15 @@
 <script lang="ts">
 	import type { ActionResult } from '@sveltejs/kit';
-	import type { Post } from '$lib/board/types.js';
-	import type { User } from '$lib/user/types';
-	import GeneralUtils from '$lib/common/utils.js';
 	import { Types } from 'mongoose';
 
+	import type { Post } from '$lib/types/post.type.js';
+	import type { User } from '$lib/types/user.type.js';
+
+	import * as CommonUtils from '$lib/common/utils.js';
+
+	import CommonForm from '$components/CommonForm.svelte';
+
 	import Heart from '@lucide/svelte/icons/heart';
-	import CommonForm from '$lib/components/CommonForm.svelte';
 
 	let { post = $bindable<Post>(), user }: { post: Post; user: User } = $props();
 
@@ -58,7 +61,7 @@
 		<div class="container-col">
 			<h2>{post.title}</h2>
 			<p>
-				{post.displayName} | {GeneralUtils.parseDate(post.createdAt)} | 조회수: {post.viewCnt}
+				{post.displayName} | {CommonUtils.parseDate(post.createdAt)} | 조회수: {post.viewCnt}
 			</p>
 		</div>
 		{#if post.userId === user._id}{@render BtnGroup()}{/if}

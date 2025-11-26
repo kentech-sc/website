@@ -1,7 +1,7 @@
 import type { Types, UpdateQuery } from 'mongoose';
 
-import type { UserId, DisplayType } from './user.type';
-import type { PostId } from './post.type';
+import type { UserId, DisplayType } from './user.type.js';
+import type { PostId } from './post.type.js';
 
 export type CommentId = Types.ObjectId;
 

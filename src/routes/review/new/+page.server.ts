@@ -1,10 +1,12 @@
-import CourseService from '$lib/srv/course.srv';
-import ProfessorService from '$lib/srv/prof.srv';
-import ReviewService from '$lib/srv/review.srv';
-import { fail, redirect } from '@sveltejs/kit';
+import * as CourseService from '$lib/srv/course.srv.js';
+import * as ProfessorService from '$lib/srv/prof.srv.js';
+import * as ReviewService from '$lib/srv/review.srv.js';
+
 import { Types } from 'mongoose';
-import type { CourseId } from '$lib/types/course.type';
-import type { ProfessorId } from '$lib/types/prof.type';
+import { fail, redirect } from '@sveltejs/kit';
+
+import type { CourseId } from '$lib/types/course.type.js';
+import type { ProfessorId } from '$lib/types/prof.type.js';
 
 export const load = async () => {
 	const courses = await CourseService.getAllCourses();

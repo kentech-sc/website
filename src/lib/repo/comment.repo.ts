@@ -1,5 +1,5 @@
-import type { Comment, CommentId, CommentCreate, CommentUpdate } from '$lib/types/comment.type';
-import type { PostId } from '$lib/types/post.type';
+import type { Comment, CommentId, CommentCreate, CommentUpdate } from '$lib/types/comment.type.js';
+import type { PostId } from '$lib/types/post.type.js';
 
 import * as CommonUtils from '$lib/common/utils.js';
 import { CommentModel } from '$lib/models/comment.model.js';

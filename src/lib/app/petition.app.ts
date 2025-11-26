@@ -1,5 +1,5 @@
-import type { Petition } from '$lib/types/petition.type';
-import type { UserId } from '$lib/types/user.type';
+import type { Petition } from '$lib/types/petition.type.js';
+import type { UserId } from '$lib/types/user.type.js';
 
 import * as UserService from '$lib/srv/user.srv.js';
 

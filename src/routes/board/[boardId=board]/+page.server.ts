@@ -1,5 +1,6 @@
-import BoardService from '$lib/srv/comment.srv';
-import UserService from '$lib/srv/user.srv.js';
+import * as PostService from '$lib/srv/post.srv.js';
+import * as UserService from '$lib/srv/user.srv.js';
+
 import { Types } from 'mongoose';
 
 export const load = async ({ url, params }) => {
@@ -13,7 +14,7 @@ export const load = async ({ url, params }) => {
 
 	const limit = 10;
 
-	const postResult = await BoardService.getPostsByBoardId(boardId, limit, { fromId, toId });
+	const postResult = await PostService.getPostsByBoardId(boardId, limit, { fromId, toId });
 	const postsRaw = postResult.pageItems;
 	const posts = await UserService.fillDisplayNames(postsRaw, true);
 

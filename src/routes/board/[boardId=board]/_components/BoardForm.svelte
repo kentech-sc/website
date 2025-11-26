@@ -1,6 +1,7 @@
 <script lang="ts">
-	import CommonForm from '$lib/components/CommonForm.svelte';
-	import type { Post } from '$lib/board/types';
+	import CommonForm from '$components/CommonForm.svelte';
+
+	import type { Post } from '$lib/types/post.type.js';
 
 	let { post }: { post?: Post } = $props();
 </script>

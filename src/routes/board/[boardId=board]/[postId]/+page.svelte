@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import type { Comment, Post } from '$lib/board/types.js';
+
+	import type { Post } from '$lib/types/post.type.js';
+	import type { Comment } from '$lib/types/comment.type.js';
 
 	import BoardHeader from '../_components/BoardHeader.svelte';
 	import BoardArticle from '../_components/BoardArticle.svelte';

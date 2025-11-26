@@ -1,10 +1,12 @@
 <script lang="ts">
-	import type { Review } from '$lib/review/types.js';
-	import type { Course } from '$lib/course/types.js';
-	import type { Professor } from '$lib/professor/types.js';
 	import { goto } from '$app/navigation';
 
-	import CommonListBtnModule from '$lib/components/CommonListBtnModule.svelte';
+	import type { Review } from '$lib/types/review.type.js';
+	import type { Course } from '$lib/types/course.type.js';
+	import type { Professor } from '$lib/types/prof.type.js';
+
+	import CommonListBtnModule from '$components/CommonListBtnModule.svelte';
+
 	import ReviewHeader from './_components/ReviewHeader.svelte';
 	import ReviewList from './_components/ReviewList.svelte';
 	import ReviewFilter from './_components/ReviewFilter.svelte';

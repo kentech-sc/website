@@ -1,5 +1,6 @@
 <script lang="ts">
-	import type { Petition } from '$lib/petition/types.js';
+	import type { Petition } from '$lib/types/petition.type.js';
+
 	import PetitionHeader from './_components/PetitionHeader.svelte';
 	import PetitionList from './_components/PetitionList.svelte';
 

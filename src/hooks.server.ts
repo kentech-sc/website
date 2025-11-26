@@ -7,8 +7,8 @@ import { sequence } from '@sveltejs/kit/hooks';
 import { MONGO_URI } from '$env/static/private';
 
 import { handle as authenticationHandle } from './auth.js';
-import DBService from '$lib/general/db.js';
-import UserService from '$lib/srv/user.srv.js';
+import * as DBService from '$lib/common/db.js';
+import * as UserService from '$lib/srv/user.srv.js';
 import type { User } from '$lib/types/user.type.js';
 import { Types } from 'mongoose';
 

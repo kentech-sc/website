@@ -1,13 +1,18 @@
 <script lang="ts">
-	import ThumbsUp from '@lucide/svelte/icons/thumbs-up';
-	import CommonForm from '$lib/components/CommonForm.svelte';
-	import PetitionService from '$lib/petition/service';
-	import GeneralUtils from '$lib/common/utils.js';
 	import type { ActionResult } from '@sveltejs/kit';
-	import UserService from '$lib/user/service';
-	import type { Petition } from '$lib/petition/types.js';
-	import type { User } from '$lib/user/types.js';
 	import { Types } from 'mongoose';
+
+	import ThumbsUp from '@lucide/svelte/icons/thumbs-up';
+
+	import CommonForm from '$components/CommonForm.svelte';
+
+	import * as CommonUtils from '$lib/common/utils.js';
+
+	import * as PetitionService from '$lib/srv/petition.srv.js';
+	import * as UserService from '$lib/srv/user.srv.js';
+
+	import type { Petition } from '$lib/types/petition.type.js';
+	import type { User } from '$lib/types/user.type.js';
 
 	let {
 		petition = $bindable<Petition>(),
@@ -78,7 +83,7 @@
 				{petition.title}
 			</h2>
 			<p>
-				{petition.petitionerName} | {GeneralUtils.parseDate(petition.createdAt)} | 조회수: {petition.viewCnt}
+				{petition.petitionerName} | {CommonUtils.parseDate(petition.createdAt)} | 조회수: {petition.viewCnt}
 			</p>
 		</div>
 		{#if petition.petitionerId === user._id}

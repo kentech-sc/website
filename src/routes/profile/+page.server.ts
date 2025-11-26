@@ -1,5 +1,6 @@
-import UserService from '$lib/srv/user.srv';
-import type { Group } from '$lib/types/user.type';
+import * as UserService from '$lib/srv/user.srv.js';
+import type { UserGroup } from '$lib/types/user.type.js';
+
 import { fail, redirect } from '@sveltejs/kit';
 
 export async function load({ locals }) {
@@ -25,7 +26,7 @@ export const actions = {
 			const formData = await request.formData();
 			const email = (formData.get('email') ?? '').toString();
 			const group = (formData.get('group') ?? '').toString();
-			await UserService.changeGroupByEmail(email, group as Group, locals.user);
+			await UserService.changeGroupByEmail(email, group as UserGroup, locals.user);
 			return { email, group };
 		} catch (error) {
 			if (error instanceof Error) return fail(400, { message: error.message });

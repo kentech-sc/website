@@ -1,5 +1,6 @@
 <script lang="ts">
-	import type { Post } from '$lib/board/types.js';
+	import type { Post } from '$lib/types/post.type.js';
+
 	import BoardHeader from './_components/BoardHeader.svelte';
 	import BoardList from './_components/BoardList.svelte';
 

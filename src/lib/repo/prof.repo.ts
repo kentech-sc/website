@@ -3,7 +3,8 @@ import type {
 	Professor,
 	ProfessorCreate,
 	ProfessorUpdate
-} from '$lib/types/prof.type';
+} from '$lib/types/prof.type.js';
+
 import ProfessorModel from '$lib/models/prof.model.js';
 
 export async function createProfessor(professor: ProfessorCreate): Promise<Professor> {

@@ -1,5 +1,6 @@
 <script lang="ts">
-	import CommonForm from '$lib/components/CommonForm.svelte';
+	import CommonForm from '$components/CommonForm.svelte';
+
 	import type { ActionResult } from '@sveltejs/kit';
 	import { invalidateAll } from '$app/navigation';
 

@@ -1,6 +1,7 @@
 <script lang="ts">
-	import type { Course } from '$lib/course/types.js';
-	import type { Professor } from '$lib/professor/types.js';
+	import type { Course } from '$lib/types/course.type.js';
+	import type { Professor } from '$lib/types/prof.type.js';
+
 	import ReviewForm from '../_components/ReviewForm.svelte';
 	import ReviewHeader from '../_components/ReviewHeader.svelte';
 

@@ -1,8 +1,10 @@
 <script lang="ts">
-	import type { Petition } from '$lib/petition/types.js';
-	import PetitionService from '$lib/petition/service';
-	import CommonListBtnModule from '$lib/components/CommonListBtnModule.svelte';
-	import GeneralUtils from '$lib/common/utils.js';
+	import type { Petition } from '$lib/types/petition.type.js';
+
+	import CommonListBtnModule from '$components/CommonListBtnModule.svelte';
+
+	import * as PetitionService from '$lib/srv/petition.srv.js';
+	import * as CommonUtils from '$lib/common/utils.js';
 
 	let { petitions, toId, fromId } = $props();
 </script>
@@ -18,7 +20,7 @@
 			></td
 		>
 		<td>{petition.petitionerName}</td>
-		<td>{GeneralUtils.parseDate(petition.createdAt)}</td>
+		<td>{CommonUtils.parseDate(petition.createdAt)}</td>
 		<td>{petition.viewCnt}</td>
 		<td>{petition.signCnt}</td>
 	</tr>
@@ -33,7 +35,7 @@
 				></td
 			>
 			<td>{petition.responderName}</td>
-			<td>{GeneralUtils.parseDate(petition.answeredAt)}</td>
+			<td>{CommonUtils.parseDate(petition.answeredAt)}</td>
 			<td>-</td>
 			<td>-</td>
 		</tr>

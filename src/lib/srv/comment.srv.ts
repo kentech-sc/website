@@ -1,6 +1,6 @@
-import type { CommentId, CommentCreate, Comment } from '$lib/types/comment.type';
-import type { PostId } from '$lib/types/post.type';
-import type { User, UserId, DisplayType } from '$lib/types/user.type';
+import type { CommentId, CommentCreate, Comment } from '$lib/types/comment.type.js';
+import type { PostId } from '$lib/types/post.type.js';
+import type { User, UserId, DisplayType } from '$lib/types/user.type.js';
 
 import * as CommentRepository from '$lib/repo/comment.repo.js';
 

@@ -1,7 +1,7 @@
 <script lang="ts">
-	import type { Petition } from '$lib/petition/types.js';
-	import type { Post } from '$lib/board/types.js';
-	import type { Review } from '$lib/review/types';
+	import type { Petition } from '$lib/types/petition.type.js';
+	import type { Post } from '$lib/types/post.type.js';
+	import type { Review } from '$lib/types/review.type.js';
 
 	let {
 		results,

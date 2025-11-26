@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import type { Review } from '$lib/review/types.js';
+
+	import type { Review } from '$lib/types/review.type.js';
+
 	import ReviewArticle from '../_components/ReviewArticle.svelte';
 	import ReviewHeader from '../_components/ReviewHeader.svelte';
 

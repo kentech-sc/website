@@ -1,8 +1,10 @@
-import ReviewService from '$lib/srv/review.srv';
-import ReviewApplication from '$lib/applications/review.js';
-import CourseService from '$lib/srv/course.srv';
-import ProfessorService from '$lib/srv/prof.srv';
 import { Types } from 'mongoose';
+
+import * as ReviewApplication from '$lib/app/review.app.js';
+
+import * as ReviewService from '$lib/srv/review.srv.js';
+import * as CourseService from '$lib/srv/course.srv.js';
+import * as ProfessorService from '$lib/srv/prof.srv.js';
 
 export const load = async ({ url }) => {
 	const fromIdRaw = url.searchParams.get('from');

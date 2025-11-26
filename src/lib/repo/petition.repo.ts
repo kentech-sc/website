@@ -1,10 +1,10 @@
-import type { UserId } from '$lib/types/user.type';
+import type { UserId } from '$lib/types/user.type.js';
 import type {
 	PetitionCreate,
 	Petition,
 	PetitionId,
 	PetitionUpdate
-} from '$lib/types/petition.type';
+} from '$lib/types/petition.type.js';
 
 import { PetitionModel } from '$lib/models/petition.model.js';
 

@@ -1,9 +1,11 @@
 <script lang="ts">
-	import GeneralUtils from '$lib/common/utils.js';
-	import PetitionService from '$lib/petition/service';
-	import type { Review } from '$lib/review/types.js';
-	import type { Post } from '$lib/board/types.js';
-	import type { Petition } from '$lib/petition/types.js';
+	import * as CommonUtils from '$lib/common/utils.js';
+
+	import * as PetitionService from '$lib/srv/petition.srv.js';
+
+	import type { Review } from '$lib/types/review.type.js';
+	import type { Post } from '$lib/types/post.type.js';
+	import type { Petition } from '$lib/types/petition.type.js';
 
 	let {
 		title,
@@ -26,7 +28,7 @@
 			{/if}
 			{item.title}
 		</span>
-		<span>{GeneralUtils.parseDate(item.createdAt, 'date')}</span>
+		<span>{CommonUtils.parseDate(item.createdAt, 'date')}</span>
 	</a>
 {/snippet}
 

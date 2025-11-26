@@ -1,8 +1,9 @@
 <script lang="ts">
-	import type { Review } from '$lib/review/types.js';
+	import type { Review } from '$lib/types/review.type.js';
 
-	import ReviewService from '$lib/review/service';
-	import GeneralUtils from '$lib/common/utils';
+	import * as ReviewService from '$lib/srv/review.srv.js';
+
+	import * as CommonUtils from '$lib/common/utils.js';
 
 	let { reviews } = $props();
 </script>
@@ -12,7 +13,7 @@
 		<td><a href={`/review/${review._id}`}>"{review.title}"</a></td>
 		<td>{review.professorName}</td>
 		<td>{review.year}학년도 {ReviewService.translatedTerm[review.term]}학기</td>
-		<td>{GeneralUtils.parseDate(review.createdAt, 'date')}</td>
+		<td>{CommonUtils.parseDate(review.createdAt, 'date')}</td>
 	</tr>
 {/snippet}
 

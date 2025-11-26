@@ -1,9 +1,9 @@
 <script lang="ts">
-	import slide01 from '$lib/assets/slide01.jpg';
-	import slide02 from '$lib/assets/slide02.jpg';
-	import slide03 from '$lib/assets/slide03.jpg';
-	import leftImg from '$lib/assets/left.png';
-	import rightImg from '$lib/assets/right.png';
+	import slide01 from '$assets/slide01.jpg';
+	import slide02 from '$assets/slide02.jpg';
+	import slide03 from '$assets/slide03.jpg';
+	import leftImg from '$assets/left.png';
+	import rightImg from '$assets/right.png';
 
 	const slides = [
 		{ title: '~풍경 사진~', image: slide01 },

@@ -1,5 +1,5 @@
 import { redirect } from '@sveltejs/kit';
-import SearchApplication from '$lib/applications/search';
+import * as SearchApplication from '$lib/app/search.app.js';
 
 export const load = async ({ url }) => {
 	const query = url.searchParams.get('query');

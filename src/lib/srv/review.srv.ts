@@ -1,7 +1,7 @@
-import type { ReviewUpdate, ReviewId, Review, ReviewCreate } from '$lib/types/review.type';
-import type { User, UserId } from '$lib/types/user.type';
-import type { CourseId } from '$lib/types/course.type';
-import type { ProfessorId } from '$lib/types/prof.type';
+import type { ReviewUpdate, ReviewId, Review, ReviewCreate } from '$lib/types/review.type.js';
+import type { User, UserId } from '$lib/types/user.type.js';
+import type { CourseId } from '$lib/types/course.type.js';
+import type { ProfessorId } from '$lib/types/prof.type.js';
 
 import { UserGroup } from '$lib/types/user.type.js';
 

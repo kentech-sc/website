@@ -1,6 +1,10 @@
-import BoardService from '$lib/srv/comment.srv';
-import BoardApplication from '$lib/applications/board';
-import type { PostId, CommentId } from '$lib/types/comment.type.js';
+import * as PostService from '$lib/srv/post.srv.js';
+import * as CommentService from '$lib/srv/comment.srv.js';
+import * as BoardApplication from '$lib/app/board.app.js';
+
+import type { CommentId } from '$lib/types/comment.type.js';
+import type { PostId } from '$lib/types/post.type.js';
+
 import { fail, redirect } from '@sveltejs/kit';
 import { Types } from 'mongoose';
 
@@ -9,7 +13,7 @@ export const load = async ({ params, request }) => {
 	const postId: PostId = new Types.ObjectId(postIdRaw);
 
 	if (new URL(request.url).searchParams.get('x-sveltekit-invalidated') !== '11') {
-		await BoardService.viewPostById(postId);
+		await PostService.viewPostById(postId);
 	}
 
 	const { post, comments } = await BoardApplication.getPostAndCommentsByPostId(postId);
@@ -24,7 +28,7 @@ export const actions = {
 		const formData = await request.formData();
 		const postIdRaw = (formData.get('post-id') ?? '').toString();
 		const postId: PostId = new Types.ObjectId(postIdRaw);
-		await BoardService.deletePostById(postId, locals.user);
+		await PostService.deletePostById(postId, locals.user);
 		redirect(302, '/board/' + params.boardId);
 	},
 	likePost: async ({ request, locals }) => {
@@ -33,7 +37,7 @@ export const actions = {
 		const formData = await request.formData();
 		const postIdRaw = (formData.get('post-id') ?? '').toString();
 		const postId: PostId = new Types.ObjectId(postIdRaw);
-		const post = await BoardService.likePostById(postId, locals.user._id);
+		const post = await PostService.likePostById(postId, locals.user._id);
 		return { post: JSON.stringify(post) };
 	},
 	unlikePost: async ({ request, locals }) => {
@@ -42,7 +46,7 @@ export const actions = {
 		const formData = await request.formData();
 		const postIdRaw = (formData.get('post-id') ?? '').toString();
 		const postId: PostId = new Types.ObjectId(postIdRaw);
-		const post = await BoardService.unlikePostById(postId, locals.user._id);
+		const post = await PostService.unlikePostById(postId, locals.user._id);
 		return { post: JSON.stringify(post) };
 	},
 	createComment: async ({ request, locals, params }) => {
@@ -61,7 +65,7 @@ export const actions = {
 		if (displayType !== 'anonymous' && displayType !== 'nickname' && displayType !== 'realName')
 			return fail(400, { message: 'displayType is invalid' });
 
-		const comment = await BoardService.createCommentByPostId(
+		const comment = await CommentService.createCommentByPostId(
 			postId,
 			content,
 			locals.user._id,
@@ -84,7 +88,7 @@ export const actions = {
 		const formData = await request.formData();
 		const commentIdRaw = (formData.get('comment-id') ?? '').toString();
 		const commentId: CommentId = new Types.ObjectId(commentIdRaw);
-		await BoardService.deleteCommentById(commentId, locals.user);
+		await CommentService.deleteCommentById(commentId, locals.user);
 		return { commentIdRaw };
 	}
 	// likeComment: async ({ request, locals }) => {

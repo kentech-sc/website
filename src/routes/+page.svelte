@@ -1,7 +1,7 @@
 <script lang="ts">
-	import type { Review } from '$lib/review/types.js';
-	import type { Post } from '$lib/board/types.js';
-	import type { Petition } from '$lib/petition/types.js';
+	import type { Review } from '$lib/types/review.type.js';
+	import type { Post } from '$lib/types/post.type.js';
+	import type { Petition } from '$lib/types/petition.type.js';
 	import GridSection from './_components/GridSection.svelte';
 
 	let { data } = $props();

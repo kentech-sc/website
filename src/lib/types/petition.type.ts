@@ -1,6 +1,6 @@
 import type { Types, UpdateQuery } from 'mongoose';
 
-import type { UserId } from './user.type';
+import type { UserId } from './user.type.js';
 
 export const PetitionStatus = {
 	Ongoing: 'ongoing', // 아직 진행 중 (기준 미달)

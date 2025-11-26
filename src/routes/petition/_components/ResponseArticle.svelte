@@ -1,10 +1,12 @@
 <script lang="ts">
-	import CommonForm from '$lib/components/CommonForm.svelte';
-	import GeneralUtils from '$lib/common/utils.js';
+	import CommonForm from '$components/CommonForm.svelte';
+
 	import type { ActionResult } from '@sveltejs/kit';
-	import type { Petition } from '$lib/petition/types.js';
-	import type { User } from '$lib/user/types.js';
-	import UserService from '$lib/user/service';
+	import type { Petition } from '$lib/types/petition.type.js';
+	import type { User } from '$lib/types/user.type.js';
+
+	import * as CommonUtils from '$lib/common/utils.js';
+	import * as UserService from '$lib/srv/user.srv.js';
 
 	let { petition = $bindable<Petition>(), user }: { petition: Petition; user: User } = $props();
 
@@ -59,7 +61,7 @@
 			<div class="container-col">
 				<h2><span style="color: purple">[답변]</span> {petition.title}</h2>
 				<p>
-					{petition.responderName} | {GeneralUtils.parseDate(petition.answeredAt!)}
+					{petition.responderName} | {CommonUtils.parseDate(petition.answeredAt!)}
 				</p>
 			</div>
 			{#if petition.responderId === user._id}

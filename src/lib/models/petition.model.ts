@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import type { Petition } from '$lib/types/petition.type';
+import type { Petition } from '$lib/types/petition.type.js';
 
 const PetitionSchema = new mongoose.Schema(
 	{

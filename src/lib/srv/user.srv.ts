@@ -1,4 +1,4 @@
-import type { User, UserId, UserUpdate } from '$lib/types/user.type';
+import type { User, UserId, UserUpdate } from '$lib/types/user.type.js';
 
 import { UserGroup, DisplayType } from '$lib/types/user.type.js';
 

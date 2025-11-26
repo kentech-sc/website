@@ -3,8 +3,8 @@ import type {
 	Professor,
 	ProfessorId,
 	ProfessorUpdate
-} from '$lib/types/prof.type';
-import type { User } from '$lib/types/user.type';
+} from '$lib/types/prof.type.js';
+import type { User } from '$lib/types/user.type.js';
 
 import { UserGroup } from '$lib/types/user.type.js';
 

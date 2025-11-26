@@ -1,9 +1,9 @@
 import type { FilterQuery } from 'mongoose';
 
-import type { Review, ReviewCreate, ReviewUpdate, ReviewId } from '$lib/types/review.type';
-import type { CourseId } from '$lib/types/course.type';
-import type { ProfessorId } from '$lib/types/prof.type';
-import type { UserId } from '$lib/types/user.type';
+import type { Review, ReviewCreate, ReviewUpdate, ReviewId } from '$lib/types/review.type.js';
+import type { CourseId } from '$lib/types/course.type.js';
+import type { ProfessorId } from '$lib/types/prof.type.js';
+import type { UserId } from '$lib/types/user.type.js';
 
 import ReviewModel from '$lib/models/review.model.js';
 

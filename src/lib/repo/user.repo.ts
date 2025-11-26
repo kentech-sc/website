@@ -1,4 +1,4 @@
-import type { User, UserCreate, UserUpdate, UserId } from '$lib/types/user.type';
+import type { User, UserCreate, UserUpdate, UserId } from '$lib/types/user.type.js';
 
 import UserModel from '$lib/models/user.model.js';
 

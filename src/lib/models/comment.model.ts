@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import type { Comment } from '$lib/types/comment.type';
+import type { Comment } from '$lib/types/comment.type.js';
 
 const CommentSchema = new mongoose.Schema(
 	{

@@ -1,5 +1,5 @@
-import type { PostId, Post } from '$lib/types/post.type';
-import type { Comment } from '$lib/types/comment.type';
+import type { PostId, Post } from '$lib/types/post.type.js';
+import type { Comment } from '$lib/types/comment.type.js';
 
 import * as PostService from '$lib/srv/post.srv.js';
 import * as CommentService from '$lib/srv/comment.srv.js';

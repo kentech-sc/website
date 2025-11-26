@@ -1,8 +1,11 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import CommonListBtnModule from '$lib/components/CommonListBtnModule.svelte';
-	import type { Post } from '$lib/board/types.js';
-	import GeneralUtils from '$lib/common/utils.js';
+
+	import CommonListBtnModule from '$components/CommonListBtnModule.svelte';
+
+	import type { Post } from '$lib/types/post.type.js';
+
+	import * as CommonUtils from '$lib/common/utils.js';
 
 	let { posts, toId, fromId } = $props();
 
@@ -17,7 +20,7 @@
 			></td
 		>
 		<td>{post.displayName}</td>
-		<td>{GeneralUtils.parseDate(post.createdAt)}</td>
+		<td>{CommonUtils.parseDate(post.createdAt)}</td>
 		<td>{post.viewCnt}</td>
 		<td>{post.likeCnt}</td>
 	</tr>

@@ -1,13 +1,15 @@
-import BoardService from '$lib/srv/comment.srv';
+import * as PostService from '$lib/srv/post.srv.js';
+
 import { fail, redirect } from '@sveltejs/kit';
-import type { PostId } from '$lib/types/comment.type';
 import { Types } from 'mongoose';
+
+import type { PostId } from '$lib/types/post.type.js';
 
 export const load = async ({ params }) => {
 	const postIdRaw = params.postId;
 	const postId: PostId = new Types.ObjectId(postIdRaw);
 
-	const post = await BoardService.getPostById(postId);
+	const post = await PostService.getPostById(postId);
 
 	return { post: JSON.stringify(post) };
 };
@@ -28,7 +30,7 @@ export const actions = {
 
 		if (!title || !content) return fail(400, { message: 'title, content are required' });
 
-		const post = await BoardService.editPostById(
+		const post = await PostService.editPostById(
 			postId,
 			{
 				title,

@@ -1,4 +1,4 @@
-import type { Review } from '$lib/types/review.type';
+import type { Review } from '$lib/types/review.type.js';
 
 import * as CourseService from '$lib/srv/course.srv.js';
 import * as ProfessorService from '$lib/srv/prof.srv.js';

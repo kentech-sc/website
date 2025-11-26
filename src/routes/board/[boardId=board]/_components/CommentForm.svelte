@@ -1,9 +1,12 @@
 <script lang="ts">
 	import type { ActionResult } from '@sveltejs/kit';
-	import type { User } from '$lib/user/types';
-	import CommonForm from '$lib/components/CommonForm.svelte';
-	import UserService from '$lib/user/service';
 	import { invalidateAll } from '$app/navigation';
+
+	import type { User } from '$lib/types/user.type.js';
+
+	import * as UserService from '$lib/srv/user.srv.js';
+
+	import CommonForm from '$components/CommonForm.svelte';
 
 	let { user }: { user: User } = $props();
 

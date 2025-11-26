@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import type { Review } from '$lib/types/review.type';
+import type { Review } from '$lib/types/review.type.js';
 
 const ReviewSchema = new mongoose.Schema<Review>(
 	{

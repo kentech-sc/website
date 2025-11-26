@@ -1,7 +1,8 @@
 <script lang="ts">
-	import ReviewService from '$lib/review/service';
-	import GeneralUtils from '$lib/common/utils';
-	import CommonForm from '$lib/components/CommonForm.svelte';
+	import * as ReviewService from '$lib/srv/review.srv.js';
+	import * as CommonUtils from '$lib/common/utils.js';
+
+	import CommonForm from '$components/CommonForm.svelte';
 
 	let { review, user } = $props();
 </script>
@@ -20,7 +21,7 @@
 
 {#snippet ReviewerInfo()}
 	<p>
-		{review.year}학년도 {ReviewService.translatedTerm[review.term]}학기 수강생 | {GeneralUtils.parseDate(
+		{review.year}학년도 {ReviewService.translatedTerm[review.term]}학기 수강생 | {CommonUtils.parseDate(
 			review.createdAt
 		)}
 	</p>

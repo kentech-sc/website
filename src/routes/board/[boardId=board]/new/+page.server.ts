@@ -1,4 +1,5 @@
-import BoardService from '$lib/srv/comment.srv';
+import * as PostService from '$lib/srv/post.srv.js';
+
 import { fail, redirect } from '@sveltejs/kit';
 
 // The below line is essential to prevent rendering the page without server request which leads to skipping the server hooks.
@@ -16,7 +17,7 @@ export const actions = {
 
 		if (!title || !content) return fail(400, { message: 'title, content are required' });
 
-		const post = await BoardService.createPostByBoardId(
+		const post = await PostService.createPostByBoardId(
 			params.boardId,
 			title,
 			content,

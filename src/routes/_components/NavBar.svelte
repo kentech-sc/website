@@ -1,6 +1,8 @@
 <script lang="ts">
-	import favicon from '$lib/assets/top-logo-white.png';
+	import favicon from '$assets/top-logo-white.png';
+
 	import { page } from '$app/state';
+
 	const user = $derived(JSON.parse(page.data.user ?? '{}'));
 
 	let { isMain = false } = $props();

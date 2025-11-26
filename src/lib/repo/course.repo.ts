@@ -1,4 +1,5 @@
-import type { CourseId, Course, CourseCreate, CourseUpdate } from '$lib/types/course.type';
+import type { CourseId, Course, CourseCreate, CourseUpdate } from '$lib/types/course.type.js';
+
 import CourseModel from '$lib/models/course.model.js';
 
 export async function createCourse(course: CourseCreate): Promise<Course> {

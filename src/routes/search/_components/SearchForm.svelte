@@ -1,5 +1,5 @@
-<script>
-	import CommonForm from '$lib/components/CommonForm.svelte';
+<script lang="ts">
+	import CommonForm from '$components/CommonForm.svelte';
 </script>
 
 <section class="module">

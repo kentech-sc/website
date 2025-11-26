@@ -24,9 +24,9 @@ const config = {
 		},
 
 		alias: {
-			style: 'src/style',
-			assets: 'src/assets',
-			components: 'src/components'
+			$style: 'src/style',
+			$assets: 'src/assets',
+			$components: 'src/components'
 		}
 	}
 };

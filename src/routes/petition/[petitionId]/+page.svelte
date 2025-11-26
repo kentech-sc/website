@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import type { Petition } from '$lib/petition/types.js';
+
+	import type { Petition } from '$lib/types/petition.type.js';
 
 	import PetitionHeader from '../_components/PetitionHeader.svelte';
 	import PetitionArticle from '../_components/PetitionArticle.svelte';

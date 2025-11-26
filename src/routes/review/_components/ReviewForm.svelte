@@ -1,9 +1,11 @@
 <script lang="ts">
-	import CommonForm from '$lib/components/CommonForm.svelte';
-	import ReviewService from '$lib/review/service.js';
-	import type { Review } from '$lib/review/types';
-	import type { Professor } from '$lib/professor/types';
-	import type { Course } from '$lib/course/types';
+	import CommonForm from '$components/CommonForm.svelte';
+
+	import * as ReviewService from '$lib/srv/review.srv.js';
+
+	import type { Review } from '$lib/types/review.type.js';
+	import type { Professor } from '$lib/types/prof.type.js';
+	import type { Course } from '$lib/types/course.type.js';
 
 	let {
 		professors,
