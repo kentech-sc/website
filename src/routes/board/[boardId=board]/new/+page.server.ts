@@ -15,7 +15,7 @@ export const load = () => {};
 export const actions = {
 	createPost: withActionErrorHandling(async ({ request, locals, params }) => {
 		const boardId = params.boardId;
-		if (!boardId || !(boardId in BoardId)) throw new SrvError('boardId missing');
+		if (!(Object.values(BoardId).includes(boardId as BoardId))) throw new SrvError('boardId missing');
 
 		const formData = await request.formData();
 		const title = (formData.get('title') ?? '').toString();
