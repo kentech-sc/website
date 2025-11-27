@@ -3,11 +3,13 @@ import * as ProfessorService from '$lib/srv/prof.srv.js';
 
 import { fail } from '@sveltejs/kit';
 
+import { withActionErrorHandling } from '$lib/common/errors.js';
+
 // The below line is essential to prevent rendering the page without server request which leads to skipping the server hooks.
 export const load = () => {};
 
 export const actions = {
-	addCourse: async ({ request, locals }) => {
+	addCourse: withActionErrorHandling(async ({ request, locals }) => {
 		const formData = await request.formData();
 		const code = (formData.get('code') ?? '').toString();
 		const name = (formData.get('name') ?? '').toString();
@@ -20,8 +22,8 @@ export const actions = {
 		if (!course) return fail(400, { message: 'course creation failed' });
 
 		return { success: true };
-	},
-	addProfessor: async ({ request, locals }) => {
+	}),
+	addProfessor: withActionErrorHandling(async ({ request, locals }) => {
 		const formData = await request.formData();
 		const name = (formData.get('name') ?? '').toString();
 
@@ -31,5 +33,5 @@ export const actions = {
 		if (!professor) return fail(400, { message: 'professor creation failed' });
 
 		return { success: true };
-	}
+	})
 };

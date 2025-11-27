@@ -1,10 +1,16 @@
 import * as PostService from '$lib/srv/post.srv.js';
 import * as UserService from '$lib/srv/user.srv.js';
 
+import { BoardId } from '$lib/types/board.type.js';
 import { Types } from 'mongoose';
 
-export const load = async ({ url, params }) => {
+import { withLoadErrorHandling } from '$lib/common/errors.js';
+
+import { SrvError } from '$lib/common/errors.js';
+
+export const load = withLoadErrorHandling(async ({ url, params }) => {
 	const boardId = params.boardId;
+	if (!boardId || !(boardId in BoardId)) throw new SrvError('boardId missing');
 
 	const fromIdRaw = url.searchParams.get('from');
 	const fromId = fromIdRaw ? new Types.ObjectId(fromIdRaw) : undefined;
@@ -14,7 +20,10 @@ export const load = async ({ url, params }) => {
 
 	const limit = 10;
 
-	const postResult = await PostService.getPostsByBoardId(boardId, limit, { fromId, toId });
+	const postResult = await PostService.getPostsByBoardId(boardId as BoardId, limit, {
+		fromId,
+		toId
+	});
 	const postsRaw = postResult.pageItems;
 	const posts = await UserService.fillDisplayNames(postsRaw, true);
 
@@ -23,4 +32,4 @@ export const load = async ({ url, params }) => {
 		fromId: postResult.fromId?.toString(),
 		toId: postResult.toId?.toString()
 	};
-};
+});

@@ -4,11 +4,19 @@ import { fail, redirect } from '@sveltejs/kit';
 
 import { DisplayType } from '$lib/types/user.type.js';
 
+import { withActionErrorHandling } from '$lib/common/errors.js';
+
+import { SrvError } from '$lib/common/errors.js';
+import { BoardId } from '$lib/types/board.type.js';
+
 // The below line is essential to prevent rendering the page without server request which leads to skipping the server hooks.
 export const load = () => {};
 
 export const actions = {
-	createPost: async ({ request, locals, params }) => {
+	createPost: withActionErrorHandling(async ({ request, locals, params }) => {
+		const boardId = params.boardId;
+		if (!boardId || !(boardId in BoardId)) throw new SrvError('boardId missing');
+
 		const formData = await request.formData();
 		const title = (formData.get('title') ?? '').toString();
 		const content = (formData.get('content') ?? '').toString();
@@ -22,7 +30,7 @@ export const actions = {
 		if (!title || !content) return fail(400, { message: 'title, content are required' });
 
 		const post = await PostService.createPostByBoardId(
-			params.boardId,
+			boardId as BoardId,
 			title,
 			content,
 			locals.user,
@@ -30,5 +38,5 @@ export const actions = {
 		);
 
 		redirect(302, '/board/' + params.boardId + '/' + post._id);
-	}
+	})
 };

@@ -1,13 +1,15 @@
 import type { Petition } from '$lib/types/petition.type.js';
 import type { UserId } from '$lib/types/user.type.js';
-
+import { DisplayType } from '$lib/types/user.type.js';
 import * as UserService from '$lib/srv/user.srv.js';
 
 export async function getSignersRealNamesByPetition(
 	petition: Petition
 ): Promise<Array<string | null>> {
 	const users = await UserService.getUsersByIds(petition.signedBy);
-	return users.map((user) => (user ? UserService.fillDisplayName(user, 'realName') : null));
+	return users.map((user) =>
+		user ? UserService.fillDisplayName(user, DisplayType.RealName) : null
+	);
 }
 
 export async function fillRealNamesForPetitions(petitions: Petition[]): Promise<Petition[]> {
@@ -30,9 +32,11 @@ export async function fillRealNamesForPetitions(petitions: Petition[]): Promise<
 		const responder = responderByUserId.get(petition.responderId?.toString() ?? '');
 
 		petition.petitionerName = petitioner
-			? UserService.fillDisplayName(petitioner, 'realName')
+			? UserService.fillDisplayName(petitioner, DisplayType.RealName)
 			: null;
-		petition.responderName = responder ? UserService.fillDisplayName(responder, 'realName') : null;
+		petition.responderName = responder
+			? UserService.fillDisplayName(responder, DisplayType.RealName)
+			: null;
 	}
 
 	return petitions;

@@ -2,23 +2,25 @@ import type { CourseCreate, Course, CourseId, CourseUpdate } from '$lib/types/co
 import type { User } from '$lib/types/user.type.js';
 
 import * as CourseRepository from '$lib/repo/course.repo.js';
-import * as CoursePerm from '$lib/perm/course.perm.js';
+import * as CourseRule from '$lib/rules/course.rule.js';
+
+import { RuleError, SrvError } from '$lib/common/errors.js';
 
 export async function createCourse(course: CourseCreate, user: User): Promise<Course> {
-	if (!CoursePerm.canManageCourse(user)) throw new Error('권한이 없습니다.');
-	if (await getCourseByCode(course.code)) throw new Error('이미 존재하는 강의입니다.');
+	if (!CourseRule.canManageCourse(user)) throw new RuleError('권한이 없습니다.');
+	if (await getCourseByCode(course.code)) throw new SrvError('이미 존재하는 강의입니다.');
 	return await CourseRepository.createCourse(course);
 }
 
 export async function getCourseByCode(courseCode: string): Promise<Course> {
 	const course = await CourseRepository.getCourseByCode(courseCode);
-	if (!course) throw new Error('존재하지 않는 강의입니다.');
+	if (!course) throw new SrvError('존재하지 않는 강의입니다.');
 	return course;
 }
 
 export async function getCourseById(courseId: CourseId): Promise<Course> {
 	const course = await CourseRepository.getCourseById(courseId);
-	if (!course) throw new Error('존재하지 않는 강의입니다.');
+	if (!course) throw new SrvError('존재하지 않는 강의입니다.');
 	return course;
 }
 
@@ -35,16 +37,16 @@ export async function updateCourseById(
 	course: CourseUpdate,
 	user: User
 ): Promise<Course> {
-	if (!CoursePerm.canManageCourse(user)) throw new Error('권한이 없습니다.');
+	if (!CourseRule.canManageCourse(user)) throw new RuleError('권한이 없습니다.');
 	const updatedCourse = await CourseRepository.updateCourseById(courseId, course);
-	if (!updatedCourse) throw new Error('존재하지 않는 강의입니다.');
+	if (!updatedCourse) throw new SrvError('존재하지 않는 강의입니다.');
 	return updatedCourse;
 }
 
 export async function deleteCourseById(courseId: CourseId, user: User): Promise<void> {
-	if (!CoursePerm.canManageCourse(user)) throw new Error('권한이 없습니다.');
+	if (!CourseRule.canManageCourse(user)) throw new RuleError('권한이 없습니다.');
 	const deletedCourse = await CourseRepository.deleteCourseById(courseId);
-	if (!deletedCourse) throw new Error('존재하지 않는 강의입니다.');
+	if (!deletedCourse) throw new SrvError('존재하지 않는 강의입니다.');
 }
 
 export async function createCourseByIdMap<T extends { courseId: CourseId }>(

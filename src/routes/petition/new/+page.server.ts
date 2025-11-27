@@ -1,12 +1,13 @@
 import * as PetitionService from '$lib/srv/petition.srv.js';
 
 import { fail, redirect } from '@sveltejs/kit';
+import { withActionErrorHandling } from '$lib/common/errors.js';
 
 // The below line is essential to prevent rendering the page without server request which leads to skipping the server hooks.
 export const load = () => {};
 
 export const actions = {
-	createPetition: async ({ request, locals }) => {
+	createPetition: withActionErrorHandling(async ({ request, locals }) => {
 		const formData = await request.formData();
 		const title = (formData.get('title') ?? '').toString();
 		const content = (formData.get('content') ?? '').toString();
@@ -15,5 +16,5 @@ export const actions = {
 
 		const petition = await PetitionService.createPetition(title, content, locals.user._id);
 		redirect(302, '/petition/' + petition._id);
-	}
+	})
 };

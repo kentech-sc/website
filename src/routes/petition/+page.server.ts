@@ -2,7 +2,9 @@ import * as PetitionApplication from '$lib/app/petition.app.js';
 import * as PetitionService from '$lib/srv/petition.srv.js';
 import { Types } from 'mongoose';
 
-export const load = async ({ url }) => {
+import { withLoadErrorHandling } from '$lib/common/errors.js';
+
+export const load = withLoadErrorHandling(async ({ url }) => {
 	const fromIdRaw = url.searchParams.get('from');
 	const fromId = fromIdRaw ? new Types.ObjectId(fromIdRaw) : undefined;
 
@@ -20,4 +22,4 @@ export const load = async ({ url }) => {
 		fromId: petitionsResult.fromId?.toString(),
 		toId: petitionsResult.toId?.toString()
 	};
-};
+});

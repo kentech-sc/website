@@ -1,23 +1,25 @@
 import * as CourseService from '$lib/srv/course.srv.js';
 import * as ProfessorService from '$lib/srv/prof.srv.js';
 import * as ReviewService from '$lib/srv/review.srv.js';
-import * as ReviewPerm from '$lib/perm/review.perm.js';
+import * as ReviewRule from '$lib/rules/review.rule.js';
 
 import { Types } from 'mongoose';
 import { fail, redirect } from '@sveltejs/kit';
 
+import { withActionErrorHandling, withLoadErrorHandling } from '$lib/common/errors.js';
+
 import type { CourseId } from '$lib/types/course.type.js';
 import type { ProfessorId } from '$lib/types/prof.type.js';
 
-export const load = async () => {
+export const load = withLoadErrorHandling(async () => {
 	const courses = await CourseService.getAllCourses();
 	const professors = await ProfessorService.getAllProfessors();
 
 	return { courses: JSON.stringify(courses), professors: JSON.stringify(professors) };
-};
+});
 
 export const actions = {
-	createReview: async ({ request, locals }) => {
+	createReview: withActionErrorHandling(async ({ request, locals }) => {
 		const formData = await request.formData();
 
 		const courseIdRaw = (formData.get('courseId') ?? '').toString();
@@ -43,9 +45,9 @@ export const actions = {
 		const courseId: CourseId = new Types.ObjectId(courseIdRaw);
 		const professorId: ProfessorId = new Types.ObjectId(professorIdRaw);
 
-		if (!ReviewPerm.checkReviewYearAndTerm(year, term))
+		if (!ReviewRule.checkReviewYearAndTerm(year, term))
 			return fail(400, { message: '연도 또는 학기 값이 올바르지 않습니다.' });
-		if (!ReviewPerm.checkReviewScore(score))
+		if (!ReviewRule.checkReviewScore(score))
 			return fail(400, { message: '점수는 1에서 10 사이의 값이어야 합니다.' });
 
 		const review = await ReviewService.createReview(
@@ -59,5 +61,5 @@ export const actions = {
 			comment
 		);
 		redirect(302, '/review/' + review._id);
-	}
+	})
 };

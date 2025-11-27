@@ -3,7 +3,9 @@ import type { User, UserId, UserUpdate } from '$lib/types/user.type.js';
 import { UserGroup, DisplayType } from '$lib/types/user.type.js';
 
 import * as UserRepository from '$lib/repo/user.repo.js';
-import * as UserPerm from '$lib/perm/user.perm.js';
+import * as UserRule from '$lib/rules/user.rule.js';
+
+import { RuleError, SrvError } from '$lib/common/errors.js';
 
 export async function getUserOrNullByEmail(email: string): Promise<User | null> {
 	return await UserRepository.getUserByEmail(email);
@@ -11,7 +13,7 @@ export async function getUserOrNullByEmail(email: string): Promise<User | null> 
 
 export async function getUserByEmail(email: string): Promise<User> {
 	const user = await UserRepository.getUserByEmail(email);
-	if (!user) throw new Error('존재하지 않는 사용자입니다.');
+	if (!user) throw new SrvError('존재하지 않는 사용자입니다.');
 	return user;
 }
 
@@ -25,13 +27,13 @@ export async function getUserOrNullByNickname(nickname: string): Promise<User | 
 
 export async function getUserByNickname(nickname: string): Promise<User> {
 	const user = await UserRepository.getUserByNickname(nickname);
-	if (!user) throw new Error('존재하지 않는 사용자입니다.');
+	if (!user) throw new SrvError('존재하지 않는 사용자입니다.');
 	return user;
 }
 
 export async function getUserById(userId: UserId): Promise<User> {
 	const user = await UserRepository.getUserById(userId);
-	if (!user) throw new Error('존재하지 않는 사용자입니다.');
+	if (!user) throw new SrvError('존재하지 않는 사용자입니다.');
 	return user;
 }
 
@@ -49,7 +51,7 @@ export async function getUsersByIds(userIds: UserId[]): Promise<Array<User | nul
 
 export async function signupUserByEmailAndRealName(email: string, realName: string): Promise<User> {
 	let user = await getUserOrNullByEmail(email);
-	if (user) throw new Error('이미 가입된 사용자입니다.');
+	if (user) throw new RuleError('이미 가입된 사용자입니다.');
 
 	const nickname = email.split('@')[0];
 
@@ -72,7 +74,7 @@ export function isGroup(group: string): boolean {
 
 export async function updateUserById(userId: UserId, userUpdate: UserUpdate): Promise<User> {
 	const user = await UserRepository.updateUserById(userId, userUpdate);
-	if (!user) throw new Error('존재하지 않는 사용자입니다.');
+	if (!user) throw new SrvError('존재하지 않는 사용자입니다.');
 	return user;
 }
 
@@ -84,8 +86,8 @@ export async function changeNicknameByEmail(
 	const target = await getUserByEmail(email);
 
 	const isDuplicate = !!(await getUserOrNullByNickname(newNickname));
-	if (!UserPerm.canChangeNickname(target, newNickname, operator, isDuplicate))
-		throw new Error('이름 변경이 불가능합니다.');
+	if (!UserRule.canChangeNickname(target, newNickname, operator, isDuplicate))
+		throw new RuleError('이름 변경이 불가능합니다.');
 
 	return await updateUserById(target._id, { nickname: newNickname });
 }
@@ -97,8 +99,8 @@ export async function changeGroupByEmail(
 ): Promise<User> {
 	const target = await getUserByEmail(email);
 
-	if (!UserPerm.canChangeGroup(target, group, operator))
-		throw new Error('그룹 변경이 불가능합니다.');
+	if (!UserRule.canChangeGroup(target, group, operator))
+		throw new RuleError('그룹 변경이 불가능합니다.');
 
 	return await updateUserById(target._id, { group });
 }
@@ -110,7 +112,8 @@ export async function blockUserByEmail(
 ): Promise<User> {
 	const target = await getUserByEmail(email);
 
-	if (!UserPerm.canBlockOrUnblockUser(target, operator)) throw new Error('차단이 불가능합니다.');
+	if (!UserRule.canBlockOrUnblockUser(target, operator))
+		throw new RuleError('차단이 불가능합니다.');
 
 	return await updateUserById(target._id, { blockedUntil: new Date(Date.now() + duration) });
 }
@@ -118,15 +121,15 @@ export async function blockUserByEmail(
 export async function unblockUserByEmail(email: string, operator: User): Promise<User> {
 	const target = await getUserByEmail(email);
 
-	if (!UserPerm.canBlockOrUnblockUser(target, operator))
-		throw new Error('차단 해제가 불가능합니다.');
+	if (!UserRule.canBlockOrUnblockUser(target, operator))
+		throw new RuleError('차단 해제가 불가능합니다.');
 
 	return await updateUserById(target._id, { blockedUntil: null });
 }
 
 export async function removeUserByEmail(email: string): Promise<User> {
 	const deletedUser = await UserRepository.deleteUserByEmail(email);
-	if (!deletedUser) throw new Error('존재하지 않는 사용자입니다.');
+	if (!deletedUser) throw new SrvError('존재하지 않는 사용자입니다.');
 	return deletedUser;
 }
 

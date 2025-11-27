@@ -6,7 +6,9 @@ import * as ReviewService from '$lib/srv/review.srv.js';
 import * as CourseService from '$lib/srv/course.srv.js';
 import * as ProfessorService from '$lib/srv/prof.srv.js';
 
-export const load = async ({ url }) => {
+import { withLoadErrorHandling } from '$lib/common/errors.js';
+
+export const load = withLoadErrorHandling(async ({ url }) => {
 	const fromIdRaw = url.searchParams.get('from');
 	const fromId = fromIdRaw ? new Types.ObjectId(fromIdRaw) : undefined;
 
@@ -40,4 +42,4 @@ export const load = async ({ url }) => {
 		courses: JSON.stringify(courses),
 		professors: JSON.stringify(professors)
 	};
-};
+});

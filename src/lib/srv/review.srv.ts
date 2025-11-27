@@ -4,7 +4,9 @@ import type { CourseId } from '$lib/types/course.type.js';
 import type { ProfessorId } from '$lib/types/prof.type.js';
 
 import * as ReviewRepository from '$lib/repo/review.repo.js';
-import * as ReviewPerm from '$lib/perm/review.perm.js';
+import * as ReviewRule from '$lib/rules/review.rule.js';
+
+import { RuleError, SrvError } from '$lib/common/errors.js';
 
 export const translatedTerm: Record<number, string> = {
 	1: '1',
@@ -27,10 +29,10 @@ export async function createReview(
 	},
 	comment: string
 ): Promise<Review> {
-	if (!ReviewPerm.checkReviewYearAndTerm(year, term))
-		throw new Error('연도 또는 학기 값이 올바르지 않습니다.');
-	if (!ReviewPerm.checkReviewScore(score))
-		throw new Error('점수는 1에서 10 사이의 값이어야 합니다.');
+	if (!ReviewRule.checkReviewYearAndTerm(year, term))
+		throw new RuleError('연도 또는 학기 값이 올바르지 않습니다.');
+	if (!ReviewRule.checkReviewScore(score))
+		throw new RuleError('점수는 1에서 10 사이의 값이어야 합니다.');
 	const review: ReviewCreate = {
 		courseId,
 		professorId,
@@ -46,7 +48,7 @@ export async function createReview(
 
 export async function getReviewById(reviewId: ReviewId): Promise<Review> {
 	const review = await ReviewRepository.getReviewById(reviewId);
-	if (!review) throw new Error('존재하지 않는 리뷰입니다.');
+	if (!review) throw new SrvError('존재하지 않는 리뷰입니다.');
 	return review;
 }
 
@@ -83,19 +85,19 @@ export async function editReviewById(
 	user: User
 ): Promise<Review> {
 	const review = await getReviewById(reviewId);
-	if (!ReviewPerm.canEditOrDeleteReview(review, user))
-		throw new Error('리뷰를 수정할 권한이 없습니다.');
+	if (!ReviewRule.canEditOrDeleteReview(review, user))
+		throw new RuleError('리뷰를 수정할 권한이 없습니다.');
 	const updatedReview = await ReviewRepository.updateReviewById(reviewId, reviewUpdate);
-	if (!updatedReview) throw new Error('존재하지 않는 리뷰입니다.');
+	if (!updatedReview) throw new SrvError('존재하지 않는 리뷰입니다.');
 	return updatedReview;
 }
 
 export async function deleteReviewById(reviewId: ReviewId, user: User): Promise<Review> {
 	const review = await getReviewById(reviewId);
-	if (!ReviewPerm.canEditOrDeleteReview(review, user))
-		throw new Error('리뷰를 삭제할 권한이 없습니다.');
+	if (!ReviewRule.canEditOrDeleteReview(review, user))
+		throw new RuleError('리뷰를 삭제할 권한이 없습니다.');
 	const deletedReview = await ReviewRepository.deleteReviewById(reviewId);
-	if (!deletedReview) throw new Error('존재하지 않는 리뷰입니다.');
+	if (!deletedReview) throw new SrvError('존재하지 않는 리뷰입니다.');
 	return deletedReview;
 }
 

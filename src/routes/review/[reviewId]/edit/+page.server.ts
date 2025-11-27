@@ -5,12 +5,14 @@ import * as ReviewService from '$lib/srv/review.srv.js';
 import { fail, redirect } from '@sveltejs/kit';
 import { Types } from 'mongoose';
 
+import { withActionErrorHandling, withLoadErrorHandling } from '$lib/common/errors.js';
+
 import type { CourseId } from '$lib/types/course.type.js';
 import type { ProfessorId } from '$lib/types/prof.type.js';
 
 import * as ReviewApplication from '$lib/app/review.app.js';
 
-export const load = async ({ params }) => {
+export const load = withLoadErrorHandling(async ({ params }) => {
 	const courses = await CourseService.getAllCourses();
 	const professors = await ProfessorService.getAllProfessors();
 
@@ -26,10 +28,10 @@ export const load = async ({ params }) => {
 		professors: JSON.stringify(professors),
 		review: JSON.stringify(review)
 	};
-};
+});
 
 export const actions = {
-	editReview: async ({ request, locals, params }) => {
+	editReview: withActionErrorHandling(async ({ request, locals, params }) => {
 		const reviewIdRaw = params.reviewId;
 		const reviewId = new Types.ObjectId(reviewIdRaw);
 
@@ -72,5 +74,5 @@ export const actions = {
 			locals.user
 		);
 		redirect(302, '/review/' + review._id);
-	}
+	})
 };

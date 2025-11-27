@@ -3,17 +3,19 @@ import type { PostId } from '$lib/types/post.type.js';
 import type { User, UserId, DisplayType } from '$lib/types/user.type.js';
 
 import * as CommentRepository from '$lib/repo/comment.repo.js';
-import * as CommentPerm from '$lib/perm/comment.perm.js';
+import * as CommentRule from '$lib/rules/comment.rule.js';
+
+import { RuleError, SrvError } from '$lib/common/errors.js';
 
 export async function getCommentById(commentId: CommentId): Promise<Comment> {
 	const comment = await CommentRepository.getCommentById(commentId);
-	if (!comment) throw new Error('존재하지 않는 댓글입니다.');
+	if (!comment) throw new SrvError('존재하지 않는 댓글입니다.');
 	return comment;
 }
 
 export async function getCommentsByPostId(postId: PostId): Promise<Comment[]> {
 	const comments = await CommentRepository.getAllCommentsByPostId(postId);
-	if (!comments) throw new Error('댓글이 존재하지 않습니다.');
+	if (!comments) throw new SrvError('댓글이 존재하지 않습니다.');
 	return comments;
 }
 
@@ -36,9 +38,9 @@ export async function createCommentByPostId(
 
 export async function deleteCommentById(commentId: CommentId, user: User): Promise<Comment> {
 	const comment = await getCommentById(commentId);
-	if (!CommentPerm.canEditOrDeleteComment(comment, user)) throw new Error('작성자가 아닙니다.');
+	if (!CommentRule.canEditOrDeleteComment(comment, user)) throw new RuleError('작성자가 아닙니다.');
 	const deletedComment = await CommentRepository.deleteCommentById(commentId);
-	if (!deletedComment) throw new Error('존재하지 않는 댓글입니다.');
+	if (!deletedComment) throw new SrvError('존재하지 않는 댓글입니다.');
 	return deletedComment;
 }
 

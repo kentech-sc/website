@@ -5,17 +5,19 @@ import { Types } from 'mongoose';
 
 import type { PostId } from '$lib/types/post.type.js';
 
-export const load = async ({ params }) => {
+import { withActionErrorHandling, withLoadErrorHandling } from '$lib/common/errors.js';
+
+export const load = withLoadErrorHandling(async ({ params }) => {
 	const postIdRaw = params.postId;
 	const postId: PostId = new Types.ObjectId(postIdRaw);
 
 	const post = await PostService.getPostById(postId);
 
 	return { post: JSON.stringify(post) };
-};
+});
 
 export const actions = {
-	editPost: async ({ request, locals, params }) => {
+	editPost: withActionErrorHandling(async ({ request, locals, params }) => {
 		const postIdRaw = params.postId;
 		const postId: PostId = new Types.ObjectId(postIdRaw);
 
@@ -40,5 +42,5 @@ export const actions = {
 			locals.user
 		);
 		redirect(302, '/board/' + params.boardId + '/' + post._id);
-	}
+	})
 };

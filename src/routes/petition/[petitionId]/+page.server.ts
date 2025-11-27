@@ -6,7 +6,9 @@ import type { PetitionId } from '$lib/types/petition.type.js';
 import { fail, redirect } from '@sveltejs/kit';
 import { Types } from 'mongoose';
 
-export const load = async ({ params, request }) => {
+import { withActionErrorHandling, withLoadErrorHandling } from '$lib/common/errors.js';
+
+export const load = withLoadErrorHandling(async ({ params, request }) => {
 	const petitionIdRaw = params.petitionId;
 	const petitionId: PetitionId = new Types.ObjectId(petitionIdRaw);
 
@@ -23,10 +25,10 @@ export const load = async ({ params, request }) => {
 		petition: JSON.stringify(petition),
 		signersNames: JSON.stringify(signersNames)
 	};
-};
+});
 
 export const actions = {
-	deletePetition: async ({ request, locals }) => {
+	deletePetition: withActionErrorHandling(async ({ request, locals }) => {
 		const formData = await request.formData();
 		const petitionIdRaw = (formData.get('petition-id') ?? '').toString();
 		if (!petitionIdRaw || typeof petitionIdRaw !== 'string')
@@ -34,29 +36,29 @@ export const actions = {
 		const petitionId: PetitionId = new Types.ObjectId(petitionIdRaw);
 		await PetitionService.deletePetitionById(petitionId, locals.user);
 		redirect(302, '/petition');
-	},
-	signPetition: async ({ request, locals }) => {
+	}),
+	signPetition: withActionErrorHandling(async ({ request, locals }) => {
 		const formData = await request.formData();
 		const petitionIdRaw = (formData.get('petition-id') ?? '').toString();
 		const petitionId: PetitionId = new Types.ObjectId(petitionIdRaw);
 		const petition = await PetitionService.signPetitionById(petitionId, locals.user._id);
 		return { petition: JSON.stringify(petition) };
-	},
-	unsignPetition: async ({ request, locals }) => {
+	}),
+	unsignPetition: withActionErrorHandling(async ({ request, locals }) => {
 		const formData = await request.formData();
 		const petitionIdRaw = (formData.get('petition-id') ?? '').toString();
 		const petitionId: PetitionId = new Types.ObjectId(petitionIdRaw);
 		const petition = await PetitionService.unsignPetitionById(petitionId, locals.user._id);
 		return { petition: JSON.stringify(petition) };
-	},
-	reviewPetition: async ({ request, locals }) => {
+	}),
+	reviewPetition: withActionErrorHandling(async ({ request, locals }) => {
 		const formData = await request.formData();
 		const petitionIdRaw = (formData.get('petition-id') ?? '').toString();
 		const petitionId: PetitionId = new Types.ObjectId(petitionIdRaw);
 		const petition = await PetitionService.reviewPetitionById(petitionId, locals.user);
 		return { petition: JSON.stringify(petition) };
-	},
-	responseToPetition: async ({ request, locals }) => {
+	}),
+	responseToPetition: withActionErrorHandling(async ({ request, locals }) => {
 		const formData = await request.formData();
 		const response = (formData.get('response') ?? '').toString();
 		const petitionIdRaw = (formData.get('petition-id') ?? '').toString();
@@ -70,15 +72,15 @@ export const actions = {
 			response
 		);
 		return { petition: JSON.stringify(petition) };
-	},
-	unreviewPetition: async ({ request, locals }) => {
+	}),
+	unreviewPetition: withActionErrorHandling(async ({ request, locals }) => {
 		const formData = await request.formData();
 		const petitionIdRaw = (formData.get('petition-id') ?? '').toString();
 		const petitionId: PetitionId = new Types.ObjectId(petitionIdRaw);
 		const petition = await PetitionService.unreviewPetitionById(petitionId, locals.user);
 		return { petition: JSON.stringify(petition) };
-	},
-	editResponse: async ({ request, locals }) => {
+	}),
+	editResponse: withActionErrorHandling(async ({ request, locals }) => {
 		const formData = await request.formData();
 		const response = (formData.get('response') ?? '').toString();
 		const petitionIdRaw = (formData.get('petition-id') ?? '').toString();
@@ -88,12 +90,12 @@ export const actions = {
 
 		const petition = await PetitionService.reviseResponseById(petitionId, locals.user, response);
 		return { petition: JSON.stringify(petition) };
-	},
-	deleteResponse: async ({ request, locals }) => {
+	}),
+	deleteResponse: withActionErrorHandling(async ({ request, locals }) => {
 		const formData = await request.formData();
 		const petitionIdRaw = (formData.get('petition-id') ?? '').toString();
 		const petitionId: PetitionId = new Types.ObjectId(petitionIdRaw);
 		const petition = await PetitionService.deleteResponseById(petitionId, locals.user);
 		return { petition: JSON.stringify(petition) };
-	}
+	})
 };

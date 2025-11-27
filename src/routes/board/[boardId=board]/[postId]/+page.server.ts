@@ -6,10 +6,12 @@ import type { PostId } from '$lib/types/post.type.js';
 
 import { DisplayType } from '$lib/types/user.type.js';
 
+import { withActionErrorHandling, withLoadErrorHandling } from '$lib/common/errors.js';
+
 import { fail, redirect } from '@sveltejs/kit';
 import { Types } from 'mongoose';
 
-export const load = async ({ params, request }) => {
+export const load = withLoadErrorHandling(async ({ params, request }) => {
 	const postIdRaw = params.postId;
 	const postId: PostId = new Types.ObjectId(postIdRaw);
 
@@ -20,10 +22,10 @@ export const load = async ({ params, request }) => {
 	const { post, comments } = await BoardApplication.getPostAndCommentsByPostId(postId);
 
 	return { post: JSON.stringify(post), comments: JSON.stringify(comments) };
-};
+});
 
 export const actions = {
-	deletePost: async ({ request, locals, params }) => {
+	deletePost: withActionErrorHandling(async ({ request, locals, params }) => {
 		if (locals.user.group === 'guest')
 			return fail(403, { message: '게스트 유저는 게시글을 삭제할 수 없습니다.' });
 		const formData = await request.formData();
@@ -31,8 +33,8 @@ export const actions = {
 		const postId: PostId = new Types.ObjectId(postIdRaw);
 		await PostService.deletePostById(postId, locals.user);
 		redirect(302, '/board/' + params.boardId);
-	},
-	likePost: async ({ request, locals }) => {
+	}),
+	likePost: withActionErrorHandling(async ({ request, locals }) => {
 		if (locals.user.group === 'guest')
 			return fail(403, { message: '게스트 유저는 좋아요를 누를 수 없습니다.' });
 		const formData = await request.formData();
@@ -40,8 +42,8 @@ export const actions = {
 		const postId: PostId = new Types.ObjectId(postIdRaw);
 		const post = await PostService.likePostById(postId, locals.user._id);
 		return { post: JSON.stringify(post) };
-	},
-	unlikePost: async ({ request, locals }) => {
+	}),
+	unlikePost: withActionErrorHandling(async ({ request, locals }) => {
 		if (locals.user.group === 'guest')
 			return fail(403, { message: '게스트 유저는 좋아요를 취소할 수 없습니다.' });
 		const formData = await request.formData();
@@ -49,8 +51,8 @@ export const actions = {
 		const postId: PostId = new Types.ObjectId(postIdRaw);
 		const post = await PostService.unlikePostById(postId, locals.user._id);
 		return { post: JSON.stringify(post) };
-	},
-	createComment: async ({ request, locals, params }) => {
+	}),
+	createComment: withActionErrorHandling(async ({ request, locals, params }) => {
 		if (locals.user.group === 'guest')
 			return fail(403, { message: '게스트 유저는 댓글을 작성할 수 없습니다.' });
 
@@ -76,7 +78,7 @@ export const actions = {
 		);
 
 		return { comment: JSON.stringify(comment) };
-	},
+	}),
 	// editComment: async ({ request, locals }) => {
 	// 	const formData = await request.formData();
 	// 	const commentIdRaw = (formData.get('comment-id') ?? '').toString();
@@ -85,7 +87,7 @@ export const actions = {
 	// 	const comment = await BoardService.editCommentById(commentId, { content }, locals.user);
 	// 	return { comment: JSON.stringify(comment) };
 	// },
-	deleteComment: async ({ request, locals }) => {
+	deleteComment: withActionErrorHandling(async ({ request, locals }) => {
 		if (locals.user.group === 'guest')
 			return fail(403, { message: '게스트 유저는 댓글을 삭제할 수 없습니다.' });
 		const formData = await request.formData();
@@ -93,7 +95,7 @@ export const actions = {
 		const commentId: CommentId = new Types.ObjectId(commentIdRaw);
 		await BoardApplication.deleteCommentAndUpdatePost(commentId, locals.user);
 		return { commentIdRaw };
-	}
+	})
 	// likeComment: async ({ request, locals }) => {
 	// 	const formData = await request.formData();
 	// 	const commentIdRaw = (formData.get('comment-id') ?? '').toString();
