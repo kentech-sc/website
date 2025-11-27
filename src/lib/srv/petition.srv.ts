@@ -6,10 +6,10 @@ import type {
 	PetitionUpdate
 } from '$lib/types/petition.type.js';
 
-import { UserGroup } from '$lib/types/user.type.js';
 import { PetitionStatus } from '$lib/types/petition.type.js';
 
 import * as PetitionRepository from '$lib/repo/petition.repo.js';
+import * as PetitionPerm from '$lib/perm/petition.perm.js';
 
 export const translatedStatus: Record<PetitionStatus, string> = {
 	ongoing: '진행 중',
@@ -66,16 +66,12 @@ export async function updatePetitionById(
 	return updatedPetition;
 }
 
-export function canDeletePetition(petition: Petition, user: User): boolean {
-	return petition.petitionerId.equals(user._id) || user.group === UserGroup.Manager;
-}
-
 export async function deletePetitionById(
 	petitionId: PetitionId,
 	user: User
 ): Promise<Petition | null> {
 	const petition = await getPetitionById(petitionId);
-	if (!canDeletePetition(petition, user)) throw new Error('삭제할 권한이 없습니다.');
+	if (!PetitionPerm.canDeletePetition(petition, user)) throw new Error('삭제할 권한이 없습니다.');
 	const deletedPetition = await PetitionRepository.deletePetitionById(petitionId);
 	if (!deletedPetition) throw new Error('존재하지 않는 청원입니다.');
 	return deletedPetition;
@@ -104,22 +100,18 @@ export async function unsignPetitionById(
 	return updatedPetition;
 }
 
-export function canManagePetition(user: User): boolean {
-	return user.group === UserGroup.Manager;
-}
-
 export async function reviewPetitionById(petitionId: PetitionId, user: User): Promise<Petition> {
 	const petition = await getPetitionById(petitionId);
-	if (!canManagePetition(user)) throw new Error('검토할 권한이 없습니다.');
+	if (!PetitionPerm.canManagePetition(user)) throw new Error('검토할 권한이 없습니다.');
 	if (petition.status === 'reviewing') throw new Error('이미 검토 중인 청원입니다.');
 	return await updatePetitionById(petitionId, { status: PetitionStatus.Reviewing });
 }
 
 export async function unreviewPetitionById(petitionId: PetitionId, user: User): Promise<Petition> {
 	const petition = await getPetitionById(petitionId);
-	if (!canManagePetition(user)) throw new Error('검토 취소할 권한이 없습니다.');
+	if (!PetitionPerm.canManagePetition(user)) throw new Error('검토 취소할 권한이 없습니다.');
 	if (petition.status !== 'reviewing') throw new Error('아직 검토 중이지 않은 청원입니다.');
-	return await updatePetitionById(petitionId, { status: 'pending' });
+	return await updatePetitionById(petitionId, { status: PetitionStatus.Pending });
 }
 
 export async function responseToPetitionById(
@@ -128,12 +120,12 @@ export async function responseToPetitionById(
 	response: string
 ): Promise<Petition> {
 	const petition = await getPetitionById(petitionId);
-	if (!canManagePetition(responder)) throw new Error('답변할 권한이 없습니다.');
+	if (!PetitionPerm.canManagePetition(responder)) throw new Error('답변할 권한이 없습니다.');
 	if (petition.responderId) throw new Error('이미 답변된 청원입니다.');
 	return await updatePetitionById(petitionId, {
 		responderId: responder._id,
 		response,
-		status: 'answered',
+		status: PetitionStatus.Answered,
 		answeredAt: new Date()
 	});
 }
@@ -145,7 +137,7 @@ export async function reviseResponseById(
 ): Promise<Petition> {
 	const petition = await getPetitionById(petitionId);
 	if (!petition.responderId) throw new Error('답변이 없는 청원입니다.');
-	if (!canManagePetition(responder)) throw new Error('답변을 수정할 권한이 없습니다.');
+	if (!PetitionPerm.canManagePetition(responder)) throw new Error('답변을 수정할 권한이 없습니다.');
 	return await updatePetitionById(petitionId, {
 		response,
 		responderId: responder._id,
@@ -159,21 +151,21 @@ export async function deleteResponseById(
 ): Promise<Petition> {
 	const petition = await getPetitionById(petitionId);
 	if (!petition.responderId) throw new Error('답변이 없는 청원입니다.');
-	if (!canManagePetition(responder)) throw new Error('답변을 삭제할 권한이 없습니다.');
+	if (!PetitionPerm.canManagePetition(responder)) throw new Error('답변을 삭제할 권한이 없습니다.');
 	return await updatePetitionById(petitionId, {
 		responderId: null,
 		response: null,
-		status: 'reviewing',
+		status: PetitionStatus.Reviewing,
 		answeredAt: null
 	});
 }
 
 export async function refreshStatusByPetition(petition: Petition): Promise<Petition> {
-	if (petition.status === 'ongoing') {
+	if (petition.status === PetitionStatus.Ongoing) {
 		if (petition.signCnt >= 30) {
-			return await updatePetitionById(petition._id, { status: 'pending' });
+			return await updatePetitionById(petition._id, { status: PetitionStatus.Pending });
 		} else if (petition.createdAt < new Date(Date.now() - 14 * 24 * 60 * 60 * 1000)) {
-			return await updatePetitionById(petition._id, { status: 'expired' });
+			return await updatePetitionById(petition._id, { status: PetitionStatus.Expired });
 		}
 	}
 	return petition;

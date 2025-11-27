@@ -1,6 +1,7 @@
 import * as CourseService from '$lib/srv/course.srv.js';
 import * as ProfessorService from '$lib/srv/prof.srv.js';
 import * as ReviewService from '$lib/srv/review.srv.js';
+import * as ReviewPerm from '$lib/perm/review.perm.js';
 
 import { Types } from 'mongoose';
 import { fail, redirect } from '@sveltejs/kit';
@@ -42,9 +43,9 @@ export const actions = {
 		const courseId: CourseId = new Types.ObjectId(courseIdRaw);
 		const professorId: ProfessorId = new Types.ObjectId(professorIdRaw);
 
-		if (!ReviewService.checkReviewYearAndTerm(year, term))
+		if (!ReviewPerm.checkReviewYearAndTerm(year, term))
 			return fail(400, { message: '연도 또는 학기 값이 올바르지 않습니다.' });
-		if (!ReviewService.checkReviewScore(score))
+		if (!ReviewPerm.checkReviewScore(score))
 			return fail(400, { message: '점수는 1에서 10 사이의 값이어야 합니다.' });
 
 		const review = await ReviewService.createReview(

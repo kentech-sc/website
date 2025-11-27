@@ -2,7 +2,7 @@
 	import CommonForm from '$components/CommonForm.svelte';
 
 	import type { ActionResult } from '@sveltejs/kit';
-	import type { Petition } from '$lib/types/petition.type.js';
+	import { PetitionStatus, type Petition } from '$lib/types/petition.type.js';
 	import type { User } from '$lib/types/user.type.js';
 
 	import * as CommonUtils from '$lib/common/utils.js';
@@ -86,16 +86,16 @@
 		{:else}
 			{@render ResponseArticle()}
 		{/if}
-	{:else if petition.status === 'pending'}
+	{:else if petition.status === PetitionStatus.Pending}
 		{@render ReviewBtn()}
-	{:else if petition.status === 'reviewing'}
+	{:else if petition.status === PetitionStatus.Reviewing}
 		{@render UnreviewBtn()}
 		<br />
 		<hr />
 		{@render ResponseForm(null)}
-	{:else if petition.status === 'ongoing'}
+	{:else if petition.status === PetitionStatus.Ongoing}
 		<p>30명 이상이 동의하면 학생회가 검토 후 답변합니다.</p>
-	{:else if petition.status === 'expired'}
+	{:else if petition.status === PetitionStatus.Expired}
 		<p>청원 기간이 만료되었습니다.</p>
 	{/if}
 </section>

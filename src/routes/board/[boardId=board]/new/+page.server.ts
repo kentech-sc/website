@@ -2,6 +2,8 @@ import * as PostService from '$lib/srv/post.srv.js';
 
 import { fail, redirect } from '@sveltejs/kit';
 
+import { DisplayType } from '$lib/types/user.type.js';
+
 // The below line is essential to prevent rendering the page without server request which leads to skipping the server hooks.
 export const load = () => {};
 
@@ -10,10 +12,12 @@ export const actions = {
 		const formData = await request.formData();
 		const title = (formData.get('title') ?? '').toString();
 		const content = (formData.get('content') ?? '').toString();
-		const displayType = (formData.get('displayType') ?? '').toString();
+		const displayTypeRaw = (formData.get('displayType') ?? '').toString();
 
-		if (displayType !== 'anonymous' && displayType !== 'nickname' && displayType !== 'realName')
+		if (!Object.values(DisplayType).includes(displayTypeRaw as DisplayType))
 			return fail(400, { message: 'displayType is invalid' });
+
+		const displayType = displayTypeRaw as DisplayType;
 
 		if (!title || !content) return fail(400, { message: 'title, content are required' });
 

@@ -5,6 +5,8 @@ import * as BoardApplication from '$lib/app/board.app.js';
 import type { CommentId } from '$lib/types/comment.type.js';
 import type { PostId } from '$lib/types/post.type.js';
 
+import { DisplayType } from '$lib/types/user.type.js';
+
 import { fail, redirect } from '@sveltejs/kit';
 import { Types } from 'mongoose';
 
@@ -60,10 +62,12 @@ export const actions = {
 
 		if (!content) return fail(400, { message: 'content is required' });
 
-		const displayType = (formData.get('displayType') ?? '').toString();
+		const displayTypeRaw = (formData.get('displayType') ?? '').toString();
 
-		if (displayType !== 'anonymous' && displayType !== 'nickname' && displayType !== 'realName')
+		if (!Object.values(DisplayType).includes(displayTypeRaw as DisplayType))
 			return fail(400, { message: 'displayType is invalid' });
+
+		const displayType = displayTypeRaw as DisplayType;
 
 		const comment = await CommentService.createCommentByPostId(
 			postId,

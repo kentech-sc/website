@@ -3,6 +3,7 @@ import type { PostId } from '$lib/types/post.type.js';
 import type { User, UserId, DisplayType } from '$lib/types/user.type.js';
 
 import * as CommentRepository from '$lib/repo/comment.repo.js';
+import * as CommentPerm from '$lib/perm/comment.perm.js';
 
 export async function getCommentById(commentId: CommentId): Promise<Comment> {
 	const comment = await CommentRepository.getCommentById(commentId);
@@ -33,13 +34,9 @@ export async function createCommentByPostId(
 	return await CommentRepository.createComment(comment);
 }
 
-export function canEditOrDeleteComment(comment: Comment, user: User): boolean {
-	return comment.userId.equals(user._id) || user.group === 'moderator' || user.group === 'manager';
-}
-
 export async function deleteCommentById(commentId: CommentId, user: User): Promise<Comment> {
 	const comment = await getCommentById(commentId);
-	if (!canEditOrDeleteComment(comment, user)) throw new Error('작성자가 아닙니다.');
+	if (!CommentPerm.canEditOrDeleteComment(comment, user)) throw new Error('작성자가 아닙니다.');
 	const deletedComment = await CommentRepository.deleteCommentById(commentId);
 	if (!deletedComment) throw new Error('존재하지 않는 댓글입니다.');
 	return deletedComment;

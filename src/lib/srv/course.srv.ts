@@ -2,13 +2,10 @@ import type { CourseCreate, Course, CourseId, CourseUpdate } from '$lib/types/co
 import type { User } from '$lib/types/user.type.js';
 
 import * as CourseRepository from '$lib/repo/course.repo.js';
-
-export function canManageCourse(user: User): boolean {
-	return user.group === 'manager';
-}
+import * as CoursePerm from '$lib/perm/course.perm.js';
 
 export async function createCourse(course: CourseCreate, user: User): Promise<Course> {
-	if (!canManageCourse(user)) throw new Error('권한이 없습니다.');
+	if (!CoursePerm.canManageCourse(user)) throw new Error('권한이 없습니다.');
 	if (await getCourseByCode(course.code)) throw new Error('이미 존재하는 강의입니다.');
 	return await CourseRepository.createCourse(course);
 }
@@ -38,14 +35,14 @@ export async function updateCourseById(
 	course: CourseUpdate,
 	user: User
 ): Promise<Course> {
-	if (!canManageCourse(user)) throw new Error('권한이 없습니다.');
+	if (!CoursePerm.canManageCourse(user)) throw new Error('권한이 없습니다.');
 	const updatedCourse = await CourseRepository.updateCourseById(courseId, course);
 	if (!updatedCourse) throw new Error('존재하지 않는 강의입니다.');
 	return updatedCourse;
 }
 
 export async function deleteCourseById(courseId: CourseId, user: User): Promise<void> {
-	if (!canManageCourse(user)) throw new Error('권한이 없습니다.');
+	if (!CoursePerm.canManageCourse(user)) throw new Error('권한이 없습니다.');
 	const deletedCourse = await CourseRepository.deleteCourseById(courseId);
 	if (!deletedCourse) throw new Error('존재하지 않는 강의입니다.');
 }

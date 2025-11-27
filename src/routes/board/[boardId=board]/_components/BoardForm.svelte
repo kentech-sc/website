@@ -3,6 +3,8 @@
 
 	import type { Post } from '$lib/types/post.type.js';
 
+	import { DisplayType } from '$lib/types/user.type.js';
+
 	let { post }: { post?: Post } = $props();
 </script>
 
@@ -13,24 +15,24 @@
 			type="radio"
 			id="anonymous"
 			name="displayType"
-			value="anonymous"
-			{...{ checked: post?.displayType === 'anonymous' || !post }}
+			value={DisplayType.Anonymous}
+			{...{ checked: post?.displayType === DisplayType.Anonymous || !post }}
 		/>
 		<label for="nickname">별명</label>
 		<input
 			type="radio"
 			id="nickname"
 			name="displayType"
-			value="nickname"
-			{...{ checked: post?.displayType === 'nickname' }}
+			value={DisplayType.Nickname}
+			{...{ checked: post?.displayType === DisplayType.Nickname }}
 		/>
 		<label for="realName">실명</label>
 		<input
 			type="radio"
 			id="realName"
 			name="displayType"
-			value="realName"
-			{...{ checked: post?.displayType === 'realName' }}
+			value={DisplayType.RealName}
+			{...{ checked: post?.displayType === DisplayType.RealName }}
 		/>
 	</div>
 {/snippet}

@@ -3,6 +3,7 @@
 	import { invalidateAll } from '$app/navigation';
 
 	import type { User } from '$lib/types/user.type.js';
+	import { DisplayType } from '$lib/types/user.type.js';
 
 	import * as UserService from '$lib/srv/user.srv.js';
 
@@ -11,7 +12,7 @@
 	let { user }: { user: User } = $props();
 
 	let commentFormResult = $state<ActionResult | null>(null);
-	let displayType = $state<'anonymous' | 'nickname' | 'realName'>('anonymous');
+	let displayType = $state<DisplayType>(DisplayType.Anonymous);
 	let commentTextarea = $state<HTMLTextAreaElement | null>(null);
 
 	$effect(() => {
@@ -31,7 +32,7 @@
 			type="radio"
 			id="anonymous"
 			name="displayType"
-			value="anonymous"
+			value={DisplayType.Anonymous}
 			checked
 			bind:group={displayType}
 		/>
@@ -40,7 +41,7 @@
 			type="radio"
 			id="nickname"
 			name="displayType"
-			value="nickname"
+			value={DisplayType.Nickname}
 			bind:group={displayType}
 		/>
 		<label for="realName">실명</label>
@@ -48,7 +49,7 @@
 			type="radio"
 			id="realName"
 			name="displayType"
-			value="realName"
+			value={DisplayType.RealName}
 			bind:group={displayType}
 		/>
 	</div>

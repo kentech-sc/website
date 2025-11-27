@@ -3,11 +3,11 @@ import mongoose from 'mongoose';
 import type { Post, PostId, PostCreate, PostUpdate } from '$lib/types/post.type.js';
 import type { User, UserId, DisplayType } from '$lib/types/user.type.js';
 
-import { UserGroup } from '$lib/types/user.type.js';
 import { BoardId } from '$lib/types/board.type.js';
 
 import * as PostRepository from '$lib/repo/post.repo.js';
 import * as CommentRepository from '$lib/repo/comment.repo.js';
+import * as PostPerm from '$lib/perm/post.perm.js';
 
 export async function getPostById(postId: PostId): Promise<Post> {
 	const post = await PostRepository.getPostById(postId);
@@ -21,20 +21,6 @@ export async function getPostsByBoardId(
 	{ fromId, toId }: { fromId?: PostId; toId?: PostId } = {}
 ): Promise<{ pageItems: Post[]; fromId?: PostId; toId?: PostId }> {
 	return await PostRepository.getPostsByBoardId(boardId, limit, { fromId, toId });
-}
-
-export function canEditOrDeletePost(post: Post, user: User): boolean {
-	return (
-		post.userId.equals(user._id) ||
-		user.group === UserGroup.Moderator ||
-		user.group === UserGroup.Manager
-	);
-}
-
-export function canCreatePost(post: PostCreate, user: User): boolean {
-	if (post.boardId === BoardId.Notice)
-		return user.group === UserGroup.Moderator || user.group === UserGroup.Manager;
-	else return true;
 }
 
 export async function createPostByBoardId(
@@ -55,7 +41,7 @@ export async function createPostByBoardId(
 		commentCnt: 0,
 		displayType
 	};
-	if (!canCreatePost(post, user)) throw new Error('관리자만 작성할 수 있습니다.');
+	if (!PostPerm.canCreatePost(post, user)) throw new Error('관리자만 작성할 수 있습니다.');
 	return await PostRepository.createPost(post);
 }
 
@@ -65,7 +51,7 @@ export async function editPostById(
 	user: User
 ): Promise<Post> {
 	const post = await getPostById(postId);
-	if (!canEditOrDeletePost(post, user)) throw new Error('작성자가 아닙니다.');
+	if (!PostPerm.canEditOrDeletePost(post, user)) throw new Error('작성자가 아닙니다.');
 	const updatedPost = await PostRepository.updatePostById(postId, postUpdate);
 	if (!updatedPost) throw new Error('존재하지 않는 게시글입니다.');
 	return updatedPost;
@@ -74,7 +60,7 @@ export async function editPostById(
 export async function deletePostById(postId: PostId, user: User): Promise<Post> {
 	return await mongoose.connection.transaction(async () => {
 		const post = await getPostById(postId);
-		if (!canEditOrDeletePost(post, user)) throw new Error('작성자가 아닙니다.');
+		if (!PostPerm.canEditOrDeletePost(post, user)) throw new Error('작성자가 아닙니다.');
 		const deletedPost = await PostRepository.deletePostById(postId);
 		if (!deletedPost) throw new Error('존재하지 않는 게시글입니다.');
 		await CommentRepository.deleteAllCommentsByPostId(postId);

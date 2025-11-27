@@ -3,6 +3,7 @@ import type { User, UserId, UserUpdate } from '$lib/types/user.type.js';
 import { UserGroup, DisplayType } from '$lib/types/user.type.js';
 
 import * as UserRepository from '$lib/repo/user.repo.js';
+import * as UserPerm from '$lib/perm/user.perm.js';
 
 export async function getUserOrNullByEmail(email: string): Promise<User | null> {
 	return await UserRepository.getUserByEmail(email);
@@ -69,46 +70,6 @@ export function isGroup(group: string): boolean {
 	return (Object.values(UserGroup) as string[]).includes(group);
 }
 
-export async function canChangeNickname(
-	targetUser: User,
-	newNickname: string,
-	operatorUser: User
-): Promise<boolean> {
-	if (
-		!(
-			targetUser.email === operatorUser.email ||
-			([UserGroup.Dev, UserGroup.Manager] as UserGroup[]).includes(operatorUser.group)
-		)
-	)
-		throw new Error('이름 변경은 본인만 가능합니다.');
-	if (newNickname.length < 4) throw new Error('별명은 4자 이상이어야 합니다.');
-	if (targetUser.nickname === newNickname) throw new Error('변경 사항이 없습니다.');
-	const user = await getUserOrNullByNickname(newNickname);
-	if (user) throw new Error('이미 같은 별명의 사용자가 있습니다.');
-	return true;
-}
-
-export function canChangeGroup(targetUser: User, newGroup: UserGroup, operatorUser: User): boolean {
-	if (!([UserGroup.User, UserGroup.Moderator, UserGroup.Manager] as UserGroup[]).includes(newGroup))
-		throw new Error('그룹 변경은 "user", "moderator", "manager"로만 가능합니다.');
-
-	if (!([UserGroup.Manager, UserGroup.Dev] as UserGroup[]).includes(operatorUser.group))
-		throw new Error('그룹 변경 권한이 없습니다.');
-
-	if (([UserGroup.Dev] as UserGroup[]).includes(targetUser.group))
-		throw new Error('개발자의 그룹은 변경할 수 없습니다.');
-
-	return true;
-}
-
-export function canBlockOrUnblockUser(targetUser: User, operatorUser: User): boolean {
-	if (([UserGroup.Manager, UserGroup.Dev] as UserGroup[]).includes(targetUser.group))
-		throw new Error('관리자나 개발자는 차단 또는 차단 해제할 수 없습니다.');
-	if (!([UserGroup.Manager, UserGroup.Dev] as UserGroup[]).includes(operatorUser.group))
-		throw new Error('차단 또는 차단 해제 권한이 없습니다.');
-	return true;
-}
-
 export async function updateUserById(userId: UserId, userUpdate: UserUpdate): Promise<User> {
 	const user = await UserRepository.updateUserById(userId, userUpdate);
 	if (!user) throw new Error('존재하지 않는 사용자입니다.');
@@ -122,7 +83,8 @@ export async function changeNicknameByEmail(
 ): Promise<User> {
 	const target = await getUserByEmail(email);
 
-	if (!(await canChangeNickname(target, newNickname, operator)))
+	const isDuplicate = !!(await getUserOrNullByNickname(newNickname));
+	if (!UserPerm.canChangeNickname(target, newNickname, operator, isDuplicate))
 		throw new Error('이름 변경이 불가능합니다.');
 
 	return await updateUserById(target._id, { nickname: newNickname });
@@ -135,7 +97,8 @@ export async function changeGroupByEmail(
 ): Promise<User> {
 	const target = await getUserByEmail(email);
 
-	if (!canChangeGroup(target, group, operator)) throw new Error('그룹 변경이 불가능합니다.');
+	if (!UserPerm.canChangeGroup(target, group, operator))
+		throw new Error('그룹 변경이 불가능합니다.');
 
 	return await updateUserById(target._id, { group });
 }
@@ -147,7 +110,7 @@ export async function blockUserByEmail(
 ): Promise<User> {
 	const target = await getUserByEmail(email);
 
-	if (!canBlockOrUnblockUser(target, operator)) throw new Error('차단이 불가능합니다.');
+	if (!UserPerm.canBlockOrUnblockUser(target, operator)) throw new Error('차단이 불가능합니다.');
 
 	return await updateUserById(target._id, { blockedUntil: new Date(Date.now() + duration) });
 }
@@ -155,7 +118,8 @@ export async function blockUserByEmail(
 export async function unblockUserByEmail(email: string, operator: User): Promise<User> {
 	const target = await getUserByEmail(email);
 
-	if (!canBlockOrUnblockUser(target, operator)) throw new Error('차단 해제가 불가능합니다.');
+	if (!UserPerm.canBlockOrUnblockUser(target, operator))
+		throw new Error('차단 해제가 불가능합니다.');
 
 	return await updateUserById(target._id, { blockedUntil: null });
 }
