@@ -1,5 +1,4 @@
 import * as PostService from '$lib/srv/post.srv.js';
-import * as CommentService from '$lib/srv/comment.srv.js';
 import * as BoardApplication from '$lib/app/board.app.js';
 
 import type { CommentId } from '$lib/types/comment.type.js';
@@ -69,7 +68,7 @@ export const actions = {
 
 		const displayType = displayTypeRaw as DisplayType;
 
-		const comment = await CommentService.createCommentByPostId(
+		const comment = await BoardApplication.createCommentAndUpdatePost(
 			postId,
 			content,
 			locals.user._id,
@@ -92,7 +91,7 @@ export const actions = {
 		const formData = await request.formData();
 		const commentIdRaw = (formData.get('comment-id') ?? '').toString();
 		const commentId: CommentId = new Types.ObjectId(commentIdRaw);
-		await CommentService.deleteCommentById(commentId, locals.user);
+		await BoardApplication.deleteCommentAndUpdatePost(commentId, locals.user);
 		return { commentIdRaw };
 	}
 	// likeComment: async ({ request, locals }) => {

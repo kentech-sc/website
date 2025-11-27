@@ -4,10 +4,7 @@ import type { PostId } from '$lib/types/post.type.js';
 import * as CommonUtils from '$lib/common/utils.js';
 import { CommentModel } from '$lib/models/comment.model.js';
 
-import * as PostRepository from './post.repo.js';
-
 export async function createComment(commentCreate: CommentCreate): Promise<Comment> {
-	await PostRepository.updatePostById(commentCreate.postId, { $inc: { commentCnt: 1 } });
 	return (await CommentModel.create(commentCreate)).toObject();
 }
 
@@ -42,7 +39,6 @@ export async function updateCommentById(
 export async function deleteCommentById(commentId: CommentId): Promise<Comment | null> {
 	const comment = await CommentModel.findOneAndDelete({ _id: commentId }).lean();
 	if (!comment) return null;
-	await PostRepository.updatePostById(comment.postId, { $inc: { commentCnt: -1 } });
 	return comment;
 }
 

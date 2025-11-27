@@ -1,7 +1,9 @@
 import type { PostId, Post } from '$lib/types/post.type.js';
-import type { Comment } from '$lib/types/comment.type.js';
+import type { Comment, CommentId } from '$lib/types/comment.type.js';
+import type { User, UserId, DisplayType } from '$lib/types/user.type.js';
 
 import * as PostService from '$lib/srv/post.srv.js';
+import * as PostRepository from '$lib/repo/post.repo.js';
 import * as CommentService from '$lib/srv/comment.srv.js';
 import * as UserService from '$lib/srv/user.srv.js';
 
@@ -18,4 +20,19 @@ export async function getPostAndCommentsByPostId(
 	const comments = filled.slice(1) as Comment[];
 
 	return { post, comments };
+}
+
+export async function createCommentAndUpdatePost(
+	postId: PostId,
+	content: string,
+	userId: UserId,
+	displayType: DisplayType
+) {
+	await PostRepository.updatePostById(postId, { $inc: { commentCnt: 1 } });
+	await CommentService.createCommentByPostId(postId, content, userId, displayType);
+}
+
+export async function deleteCommentAndUpdatePost(commentId: CommentId, user: User) {
+	const deletedComment = await CommentService.deleteCommentById(commentId, user);
+	await PostRepository.updatePostById(deletedComment.postId, { $inc: { commentCnt: -1 } });
 }
