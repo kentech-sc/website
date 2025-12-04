@@ -9,6 +9,9 @@
 
 	import CommonForm from '$components/CommonForm.svelte';
 
+	import Clock from '@lucide/svelte/icons/clock';
+	import Eye from '@lucide/svelte/icons/eye';
+	import Message from '@lucide/svelte/icons/message-circle';
 	import Heart from '@lucide/svelte/icons/heart';
 
 	let { post = $bindable<Post>(), user }: { post: Post; user: User } = $props();
@@ -60,8 +63,12 @@
 	<header class="container">
 		<div class="container-col">
 			<h2>{post.title}</h2>
+			<p>{post.displayName}</p>
 			<p>
-				{post.displayName} | {CommonUtils.parseDate(post.createdAt)} | 조회수: {post.viewCnt}
+				<span><Clock size="1rem" color=var(--gray-text)/>{CommonUtils.parseDate(post.createdAt)}</span>
+				<span><Eye size="1rem" color=var(--gray-text)/>{post.viewCnt}</span>
+				<span><Message size="1rem" color=var(--gray-text)/>{post.commentCnt}</span>
+				<span><Heart size="1rem" color=var(--gray-text)/>{post.likeCnt}</span>
 			</p>
 		</div>
 		{#if post.userId === user._id}{@render BtnGroup()}{/if}
@@ -83,6 +90,30 @@
 
 		header > div {
 			align-items: flex-start;
+			padding-bottom: 0.5rem;
+
+			p:last-child {
+				display: flex;
+				align-items: center;
+				gap: 1rem;
+				color: var(--gray-text);
+				font-size: 0.8rem;
+
+				span{
+					display: flex;
+					align-items: center;
+					gap: 0.2rem;
+				}
+			}
+
+			h2 + p {
+				line-height: 250%;
+			}
+		}
+
+		pre {
+			line-height: 150%;
+			margin-top: 2rem;
 		}
 
 		.delete-post-form {

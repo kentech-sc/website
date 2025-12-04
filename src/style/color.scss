@@ -25,7 +25,7 @@
 	--secondary-hover: oklch(from var(--secondary-bg) calc(l - 0.05) c h);
 	--tertiary-hover: oklch(from var(--tertiary-bg) calc(l - 0.05) c h);
 
-	--gray: oklch(0.7 0 0);
+	--gray: oklch(0.6 0 0);
 	--gray-text: var(--gray);
 	--gray-border: oklch(from var(--gray) 0.85 c h);
 	--gray-bg: oklch(from var(--gray) 0.98 c h);
