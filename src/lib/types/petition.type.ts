@@ -1,5 +1,6 @@
 import type { Types, UpdateQuery } from 'mongoose';
 
+import type { FileId } from './file-meta.type.js';
 import type { UserId } from './user.type.js';
 
 export const PetitionStatus = {
@@ -24,6 +25,13 @@ export interface PetitionBase {
 	signedBy: UserId[];
 
 	petitionerId: UserId;
+
+	responderId: UserId | null;
+	response: string | null;
+
+	answeredAt: Date | null;
+
+	files: FileId[];
 }
 
 export interface Petition extends PetitionBase {
@@ -33,14 +41,10 @@ export interface Petition extends PetitionBase {
 
 	petitionerName?: string | null;
 
-	responderId: UserId | null;
 	responderName?: string | null;
-	response: string | null;
-
-	answeredAt: Date | null;
 }
 
-export type PetitionCreate = PetitionBase;
+export type PetitionCreate = Pick<PetitionBase, 'title' | 'content' | 'petitionerId' | 'files'>;
 export type PetitionUpdate = UpdateQuery<
 	Pick<
 		Petition,

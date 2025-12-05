@@ -29,8 +29,6 @@ export async function createCommentByPostId(
 		postId,
 		content,
 		userId,
-		likeCnt: 0,
-		likedBy: [],
 		displayType
 	};
 	return await CommentRepository.createComment(comment);

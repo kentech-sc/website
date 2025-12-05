@@ -60,12 +60,14 @@ export function calcByte(s: string): number {
 
 /* Date 객체나 문자열을 특정 형식의 문자열로 변환
  - type: 'datetime' → (YYYY/MM/DD HH:mm)
- - type: 'date' → (YYYY-MM-DD, ISO 형식)
+ - type: 'datetime-iso' → (YYYY-MM-DDTHH:mm:ss)
+ - type: 'date' → (YYYY/MM/DD)
+ - type: 'date-iso' → (YYYY-MM-DD, ISO 형식)
  - type: 'time' → (HH:mm)
  */
 export function parseDate(
 	date: Date | string,
-	type: 'date' | 'datetime' | 'time' = 'datetime'
+	type: 'date' | 'datetime' | 'time' | 'datetime-iso' | 'date-iso' = 'datetime'
 ): string {
 	if (typeof date === 'string') date = new Date(date);
 
@@ -76,7 +78,12 @@ export function parseDate(
 			date.getHours()
 		)}:${pad(date.getMinutes())}`;
 
-	if (type === 'date') return date.toISOString().split('T')[0];
+	if (type === 'datetime-iso') return date.toISOString();
+
+	if (type === 'date')
+		return `${date.getFullYear()}/${pad(date.getMonth() + 1)}/${pad(date.getDate())}`;
+
+	if (type === 'date-iso') return date.toISOString().split('T')[0];
 
 	if (type === 'time') return `${pad(date.getHours())}:${pad(date.getMinutes())}`;
 

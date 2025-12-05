@@ -9,16 +9,18 @@ export interface CommentBase {
 	postId: PostId;
 	content: string;
 	userId: UserId;
+	displayType: DisplayType;
+
 	likeCnt: number;
 	likedBy: UserId[];
-	displayType: DisplayType;
-	displayName?: string | null;
 }
 
 export interface Comment extends CommentBase {
 	_id: CommentId;
 	createdAt: Date;
+
+	displayName?: string | null;
 }
 
-export type CommentCreate = CommentBase;
+export type CommentCreate = Pick<CommentBase, 'postId' | 'content' | 'userId' | 'displayType'>;
 export type CommentUpdate = UpdateQuery<Pick<CommentBase, 'content' | 'likeCnt'>>;

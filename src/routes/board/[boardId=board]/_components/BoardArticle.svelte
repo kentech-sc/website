@@ -72,7 +72,7 @@
 	<article>
 		{@render ArticleHeader()}
 		<hr />
-		<pre>{post.content}</pre>
+		<pre>{@html post.content}</pre>
 		{@render LikeBtn()}
 	</article>
 </section>
@@ -87,6 +87,10 @@
 
 		.delete-post-form {
 			width: fit-content;
+		}
+
+		pre :global(img) {
+			max-width: 100%;
 		}
 	}
 

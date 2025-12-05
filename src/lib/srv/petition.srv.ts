@@ -51,10 +51,7 @@ export async function createPetition(
 		title,
 		content,
 		petitionerId: userId,
-		viewCnt: 0,
-		signCnt: 0,
-		signedBy: [],
-		status: PetitionStatus.Ongoing
+		files: []
 	};
 	return await PetitionRepository.createPetition(petition);
 }

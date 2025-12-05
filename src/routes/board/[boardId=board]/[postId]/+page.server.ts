@@ -19,9 +19,13 @@ export const load = withLoadErrorHandling(async ({ params, request }) => {
 		await PostService.viewPostById(postId);
 	}
 
-	const { post, comments } = await BoardApplication.getPostAndCommentsByPostId(postId);
+	const { post, comments, files } = await BoardApplication.getPostDetailByPostId(postId);
 
-	return { post: JSON.stringify(post), comments: JSON.stringify(comments) };
+	return {
+		post: JSON.stringify(post),
+		comments: JSON.stringify(comments),
+		files: JSON.stringify(files)
+	};
 });
 
 export const actions = {

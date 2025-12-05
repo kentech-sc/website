@@ -10,7 +10,7 @@ import { SrvError } from '$lib/common/errors.js';
 
 export const load = withLoadErrorHandling(async ({ url, params }) => {
 	const boardId = params.boardId;
-	if (!(Object.values(BoardId).includes(boardId as BoardId))) throw new SrvError('boardId missing');
+	if (!Object.values(BoardId).includes(boardId as BoardId)) throw new SrvError('boardId missing');
 
 	const fromIdRaw = url.searchParams.get('from');
 	const fromId = fromIdRaw ? new Types.ObjectId(fromIdRaw) : undefined;

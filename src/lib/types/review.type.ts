@@ -19,15 +19,16 @@ export interface ReviewBase {
 		exam: number;
 	};
 	comment: string;
-	courseCode?: string | null;
-	courseName?: string | null;
-	professorName?: string | null;
 }
 
 export interface Review extends ReviewBase {
 	_id: ReviewId;
 	createdAt: Date;
 	updatedAt: Date;
+
+	courseCode?: string | null;
+	courseName?: string | null;
+	professorName?: string | null;
 }
 
 export type ReviewCreate = ReviewBase;

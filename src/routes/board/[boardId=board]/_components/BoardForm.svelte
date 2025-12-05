@@ -5,7 +5,13 @@
 
 	import { DisplayType } from '$lib/types/user.type.js';
 
-	let { post }: { post?: Post } = $props();
+	let { post, files }: { post?: Post; files?: FileMeta[] } = $props();
+
+	import QuillEditor from '$components/QuillEditor.svelte';
+	import type { FileMeta } from '$lib/types/file-meta.type';
+
+	let editorHtml = $state('');
+	let uploadedFileMetas = $state<FileMeta[]>(files ?? []);
 </script>
 
 {#snippet RadioModule()}
@@ -49,7 +55,19 @@
 			<input type="text" id="title" name="title" value={post?.title} />
 
 			<label for="content">내용</label>
-			<textarea id="content" name="content">{post?.content}</textarea>
+			<!-- <textarea id="content" name="content">{post?.content}</textarea> -->
+			<input class="hidden" type="text" name="content" bind:value={editorHtml} readonly />
+			{#each uploadedFileMetas as fileMeta (fileMeta._id)}
+				<input
+					class="hidden"
+					type="text"
+					name="fileMetas"
+					value={JSON.stringify(fileMeta)}
+					readonly
+				/>
+			{/each}
+
+			<QuillEditor bind:editorHtml bind:uploadedFileMetas initialHtml={post?.content} />
 			<button type="submit">{post ? '수정' : '작성'}</button>
 		</div>
 	</CommonForm>
@@ -73,15 +91,14 @@
 		width: stretch;
 		align-items: flex-start;
 
-		input:not([type='radio']),
-		textarea {
+		input:not([type='radio']) {
 			width: stretch;
 			margin-bottom: 0.5rem;
 		}
 
-		textarea {
-			height: 50vh;
-			resize: vertical;
-		}
+		// textarea {
+		// 	height: 50vh;
+		// 	resize: vertical;
+		// }
 	}
 </style>

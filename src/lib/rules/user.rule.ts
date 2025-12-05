@@ -8,6 +8,7 @@ export function canChangeNickname(
 	operatorUser: User,
 	isDuplicate: boolean
 ): boolean {
+	newNickname = newNickname.trim();
 	if (
 		!(
 			targetUser.email === operatorUser.email ||

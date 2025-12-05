@@ -3,34 +3,39 @@ import type { ActionResult, Handle, HandleServerError, ServerInit } from '@svelt
 import { redirect } from '@sveltejs/kit';
 import { sequence } from '@sveltejs/kit/hooks';
 
-// import { AWS_BUCKET_NAME, AWS_ID, AWS_SECRET } from '$env/static/private';
-import { MONGO_URI } from '$env/static/private';
+import { Types } from 'mongoose';
 
 import { handle as authenticationHandle } from './auth.js';
-import * as DBService from '$lib/common/db.js';
+
+import { AWS_BUCKET_NAME, AWS_ID, AWS_SECRET } from '$env/static/private';
+import { MONGO_URI } from '$env/static/private';
+
 import * as UserService from '$lib/srv/user.srv.js';
 import type { User } from '$lib/types/user.type.js';
-import { Types } from 'mongoose';
+
+import * as DB from '$lib/common/db.js';
+import { FileStorage } from '$lib/common/storage.js';
 
 function checkEnv() {
 	if (MONGO_URI === undefined) {
 		throw new Error('Please set "MONGO_URI" in the .env file!');
 	}
-	// if (AWS_BUCKET_NAME === undefined) {
-	// 	throw new Error('Please set "AWS_BUCKET_NAME" in the .env file!');
-	// }
-	// if (AWS_ID === undefined) {
-	// 	throw new Error('Please set "AWS_ID" in the .env file!');
-	// }
-	// if (AWS_SECRET === undefined) {
-	// 	throw new Error('Please set "AWS_SECRET" in the .env file!');
-	// }
+	if (AWS_BUCKET_NAME === undefined) {
+		throw new Error('Please set "AWS_BUCKET_NAME" in the .env file!');
+	}
+	if (AWS_ID === undefined) {
+		throw new Error('Please set "AWS_ID" in the .env file!');
+	}
+	if (AWS_SECRET === undefined) {
+		throw new Error('Please set "AWS_SECRET" in the .env file!');
+	}
 }
 
 export const init: ServerInit = async () => {
 	checkEnv();
 
-	await DBService.init(MONGO_URI);
+	await FileStorage.init(AWS_BUCKET_NAME, AWS_ID, AWS_SECRET);
+	await DB.init(MONGO_URI);
 
 	console.log('[Server Is Ready]');
 };
@@ -107,7 +112,8 @@ export const blockHandle: Handle = async ({ event, resolve }) => {
 };
 
 export const handleError: HandleServerError = Sentry.handleErrorWithSentry(
-	({ status, message }) => {
+	({ error, status, message }) => {
+		console.log(error);
 		return {
 			message,
 			status

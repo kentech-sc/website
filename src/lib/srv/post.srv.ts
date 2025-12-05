@@ -1,5 +1,3 @@
-import mongoose from 'mongoose';
-
 import type { Post, PostId, PostCreate, PostUpdate } from '$lib/types/post.type.js';
 import type { User, UserId, DisplayType } from '$lib/types/user.type.js';
 
@@ -8,7 +6,6 @@ import { BoardId } from '$lib/types/board.type.js';
 import { RuleError, SrvError } from '$lib/common/errors.js';
 
 import * as PostRepository from '$lib/repo/post.repo.js';
-import * as CommentRepository from '$lib/repo/comment.repo.js';
 import * as PostRule from '$lib/rules/post.rule.js';
 
 export async function getPostById(postId: PostId): Promise<Post> {
@@ -25,26 +22,10 @@ export async function getPostsByBoardId(
 	return await PostRepository.getPostsByBoardId(boardId, limit, { fromId, toId });
 }
 
-export async function createPostByBoardId(
-	boardId: BoardId,
-	title: string,
-	content: string,
-	user: User,
-	displayType: DisplayType
-): Promise<Post> {
-	const post: PostCreate = {
-		boardId,
-		title,
-		content,
-		userId: user._id,
-		likeCnt: 0,
-		likedBy: [],
-		viewCnt: 0,
-		commentCnt: 0,
-		displayType
-	};
-	if (!PostRule.canCreatePost(post, user)) throw new RuleError('관리자만 작성할 수 있습니다.');
-	return await PostRepository.createPost(post);
+export async function createPostByBoardId(postCreate: PostCreate, user: User): Promise<Post> {
+	if (!PostRule.canCreatePost(postCreate, user))
+		throw new RuleError('관리자만 작성할 수 있습니다.');
+	return await PostRepository.createPost(postCreate);
 }
 
 export async function editPostById(
@@ -60,14 +41,11 @@ export async function editPostById(
 }
 
 export async function deletePostById(postId: PostId, user: User): Promise<Post> {
-	return await mongoose.connection.transaction(async () => {
-		const post = await getPostById(postId);
-		if (!PostRule.canEditOrDeletePost(post, user)) throw new RuleError('작성자가 아닙니다.');
-		const deletedPost = await PostRepository.deletePostById(postId);
-		if (!deletedPost) throw new SrvError('존재하지 않는 게시글입니다.');
-		await CommentRepository.deleteAllCommentsByPostId(postId);
-		return deletedPost;
-	});
+	const post = await getPostById(postId);
+	if (!PostRule.canEditOrDeletePost(post, user)) throw new RuleError('작성자가 아닙니다.');
+	const deletedPost = await PostRepository.deletePostById(postId);
+	if (!deletedPost) throw new SrvError('존재하지 않는 게시글입니다.');
+	return deletedPost;
 }
 
 export async function viewPostById(postId: PostId): Promise<void> {
