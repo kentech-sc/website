@@ -69,7 +69,7 @@ export class FileStorage {
 
 		const date = parseDate(new Date(), 'date');
 		const category = getCategoryByExtension(ext);
-		const key = `${category}/${date}/${randomUUID()}.${ext}`;
+		const key = `files/${category}/${date}/${randomUUID()}.${ext}`;
 
 		const mimetype = file.type;
 		const command = new PutObjectCommand({
