@@ -58,9 +58,9 @@
 <CommonForm actionName="createComment" formName="createComment" bind:formResult={commentFormResult}>
 	<div id="comment-form-div" class="container-col">
 		<div class="container">
-			<span><b>[{UserService.fillDisplayName(user, displayType)}]</b></span>&nbsp;
-			{@render RadioModule()}
+			<span><b>[{UserService.fillDisplayName(user, displayType)}]</b></span>
 		</div>
+		{@render RadioModule()}
 		<div class="container">
 			<textarea name="content" autocomplete="off" bind:this={commentTextarea}></textarea>
 			<button type="submit">작성</button>
@@ -72,7 +72,7 @@
 	#comment-form-div {
 		justify-content: space-between;
 		width: stretch;
-		margin-top: 1rem;
+		
 		padding: 0.25rem;
 
 		label {
@@ -102,8 +102,7 @@
 
 		#radio-div {
 			justify-content: flex-start;
-			margin-left: 1rem;
-
+			
 			input {
 				margin-left: 0.5rem;
 				margin-right: 1.5rem;

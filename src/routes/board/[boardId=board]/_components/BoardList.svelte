@@ -20,7 +20,7 @@
 			></td
 		>
 		<td>{post.displayName}</td>
-		<td>{CommonUtils.parseDate(post.createdAt)}</td>
+		<td>{CommonUtils.parseDate(post.createdAt, )}</td>
 		<td>{post.viewCnt}</td>
 		<td>{post.likeCnt}</td>
 	</tr>
@@ -29,11 +29,11 @@
 <section class="container-col module">
 	<table>
 		<colgroup>
-			<col style="width:50%" />
+			<col style="width:60%" />
+			<col style="width:12%" />
 			<col style="width:16%" />
-			<col style="width:20%" />
-			<col style="width:7%" />
-			<col style="width:7%" />
+			<col style="width:6%" />
+			<col style="width:6%" />
 		</colgroup>
 		<thead>
 			<tr>
@@ -83,8 +83,14 @@
 			border-bottom: solid var(--gray-border) 0.1rem;
 		}
 
-		tbody > tr:nth-child(2n + 1) > td {
-			background-color: var(--gray-bg);
+		tbody {
+			tr {
+				border-bottom: solid var(--gray-border) 0.1rem;
+			}
+
+			tr:hover > td {
+				background-color: var(--gray-bg);
+			}
 		}
 
 		td:nth-child(n) {

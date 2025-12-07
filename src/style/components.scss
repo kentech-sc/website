@@ -34,6 +34,14 @@
 	padding: 1.2rem 1.5rem;
 }
 
+.module_head {
+	@include Module;
+	border:none;
+	background-color: white;
+	border-radius: 0.8rem;
+	padding: 1.2rem 0rem;
+}
+
 .ellipsis {
 	white-space: nowrap;
 	overflow: hidden;
