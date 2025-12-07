@@ -1,10 +1,11 @@
 import mongoose from 'mongoose';
-import type { Petition } from '$lib/types/petition.type.js';
+import { PetitionStatus, type Petition } from '$lib/types/petition.type.js';
 
 const PetitionSchema = new mongoose.Schema(
 	{
 		title: { type: String, required: true },
 		content: { type: String, required: true },
+		status: { type: String, default: PetitionStatus.Ongoing },
 		viewCnt: { type: Number, default: 0 },
 		signCnt: { type: Number, default: 0 },
 		signedBy: { type: [mongoose.Schema.Types.ObjectId], default: [] },
@@ -13,7 +14,6 @@ const PetitionSchema = new mongoose.Schema(
 		responderId: { type: mongoose.Schema.Types.ObjectId, default: null },
 		response: { type: String, default: null },
 		answeredAt: { type: Date, default: null },
-		status: { type: String, required: true }
 	},
 	{
 		timestamps: true
