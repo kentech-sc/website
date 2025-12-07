@@ -1,27 +1,5 @@
 import { fileTypeFromBuffer } from 'file-type';
-import DOMPurify from 'dompurify';
-import { JSDOM } from 'jsdom';
-
-// -----------------------------
-// DOMPurify 초기화 (서버 시작 시 단 1회만)
-// -----------------------------
-const window = new JSDOM('').window;
-const purify = DOMPurify(window);
-
-purify.setConfig({
-	USE_PROFILES: { svg: true },
-	FORBID_TAGS: ['script', 'foreignObject', 'iframe', 'embed', 'object'],
-	FORBID_ATTR: [
-		'onload',
-		'onerror',
-		'onclick',
-		'onmouseover',
-		'onmouseenter',
-		'onmouseleave',
-		'onmousemove',
-		'onwheel'
-	]
-});
+import DOMPurify from "isomorphic-dompurify";
 
 // -----------------------------
 // 허용된 확장자 + MIME 타입
@@ -44,10 +22,10 @@ export const allowedMimeTypes = [
 // -----------------------------
 // SVG sanitize 함수
 // -----------------------------
-export function sanitizeSvg(svgString: string): string {
-	let cleaned = purify.sanitize(svgString, { RETURN_TRUSTED_TYPE: false });
 
-	// 외부 URL 제거
+export function sanitizeSvg(svgString: string): string {
+	let cleaned = DOMPurify.sanitize(svgString, { USE_PROFILES: { svg: true, svgFilters: true } });
+
 	cleaned = cleaned.replace(/href="http[^"]+"/gi, '');
 	cleaned = cleaned.replace(/xlink:href="http[^"]+"/gi, '');
 

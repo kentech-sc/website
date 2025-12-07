@@ -6,8 +6,8 @@
 	import BoardHeader from '../../_components/BoardHeader.svelte';
 
 	let { data } = $props();
-	const post = $state<Post>(JSON.parse(data?.post ?? '{}'));
-	const files = $state<FileMeta[]>(JSON.parse(data?.files ?? '[]'));
+	const post = $derived<Post>(JSON.parse(data?.post ?? '{}'));
+	const files = $derived<Array<FileMeta | null>>(JSON.parse(data?.files ?? '[]'));
 </script>
 
 <BoardHeader pageType="edit" />

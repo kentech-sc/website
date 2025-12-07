@@ -14,9 +14,9 @@
 
 	let { data } = $props();
 
-	let post = $state<Post>(JSON.parse(data?.post || '{}'));
+	let post = $derived<Post>(JSON.parse(data?.post || '{}'));
 	let comments = $derived<Comment[]>(JSON.parse(data?.comments || '[]'));
-	let files = $derived<FileMeta[]>(JSON.parse(data?.files || '[]'));
+	let files = $derived<Array<FileMeta|null>>(JSON.parse(data?.files || '[]'));
 </script>
 
 <BoardHeader pageType="detail" />

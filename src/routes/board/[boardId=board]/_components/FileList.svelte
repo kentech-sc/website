@@ -8,6 +8,8 @@
 
 	let { files, user }: { files: FileMeta[]; user: User } = $props();
 
+	let filteredFiles = $derived(files.filter(file => file !== null));
+
 	let formResult = $state<ActionResult | null>(null);
 
 	$effect(() => {
@@ -23,11 +25,11 @@
 	</div>
 {/snippet}
 
-{#if files.length !== 0}
+{#if filteredFiles.length !== 0}
 	<div class="module">
 		<h3>첨부파일</h3>
 
-		{#each files as file, idx (file._id)}
+		{#each filteredFiles as file, idx (idx)}
 			<hr />
 			{@render FileItem(file, idx)}
 		{/each}

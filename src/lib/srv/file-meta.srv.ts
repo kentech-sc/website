@@ -12,10 +12,10 @@ export async function getFileMetaById(fileId: FileId): Promise<FileMeta> {
 	return fileMeta;
 }
 
-export async function getFileMetasByIds(fileIds: FileId[]): Promise<Array<FileMeta>> {
+export async function getFileMetasByIds(fileIds: FileId[]): Promise<Array<FileMeta|null>> {
 	const fileMetas = await FileMetaRepository.getFileMetasByFileIds(fileIds);
 	return fileMetas.map((fileMeta) => {
-		if (!fileMeta) throw new SrvError('일치하는 파일이 존재하지 않습니다.');
+		if (!fileMeta) return null;
 		fileMeta.path = FileStorage.getFilePathFromKey(fileMeta.key);
 		return fileMeta;
 	});

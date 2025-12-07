@@ -18,7 +18,7 @@ import * as UserService from '$lib/srv/user.srv.js';
 
 export async function getPostDetailByPostId(
 	postId: PostId
-): Promise<{ post: Post; comments: Comment[]; files: FileMeta[] }> {
+): Promise<{ post: Post; comments: Comment[]; files: Array<FileMeta|null> }> {
 	const postRaw = await PostService.getPostById(postId);
 	const commentsRaw = (await CommentService.getCommentsByPostId(postId)).toReversed();
 	const files = await FileMetaService.getFileMetasByIds(postRaw.files);
