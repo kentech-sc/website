@@ -2,7 +2,7 @@ import type { FileId, FileMeta } from '$lib/types/file-meta.type.js';
 
 import * as FileMetaRepository from '$lib/repo/file-meta.repo.js';
 
-import { RuleError, SrvError } from '$lib/common/errors.js';
+import { SrvError } from '$lib/common/errors.js';
 import { FileStorage } from '$lib/common/storage.js';
 
 export async function getFileMetaById(fileId: FileId): Promise<FileMeta> {
@@ -12,7 +12,7 @@ export async function getFileMetaById(fileId: FileId): Promise<FileMeta> {
 	return fileMeta;
 }
 
-export async function getFileMetasByIds(fileIds: FileId[]): Promise<Array<FileMeta|null>> {
+export async function getFileMetasByIds(fileIds: FileId[]): Promise<Array<FileMeta | null>> {
 	const fileMetas = await FileMetaRepository.getFileMetasByFileIds(fileIds);
 	return fileMetas.map((fileMeta) => {
 		if (!fileMeta) return null;

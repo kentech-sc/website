@@ -65,10 +65,14 @@
 			<h2>{post.title}</h2>
 			<p>{post.displayName}</p>
 			<p>
-				<span><Clock size="1rem" color=var(--gray-text)/>{CommonUtils.parseDate(post.createdAt)}</span>
-				<span><Eye size="1rem" color=var(--gray-text)/>{post.viewCnt}</span>
-				<span><Message size="1rem" color=var(--gray-text)/>{post.commentCnt}</span>
-				<span><Heart size="1rem" color=var(--gray-text)/>{post.likeCnt}</span>
+				<span
+					><Clock size="1rem" color="var(--gray-text)" />{CommonUtils.parseDate(
+						post.createdAt
+					)}</span
+				>
+				<span><Eye size="1rem" color="var(--gray-text)" />{post.viewCnt}</span>
+				<span><Message size="1rem" color="var(--gray-text)" />{post.commentCnt}</span>
+				<span><Heart size="1rem" color="var(--gray-text)" />{post.likeCnt}</span>
 			</p>
 		</div>
 		{#if post.userId === user._id}{@render BtnGroup()}{/if}
@@ -79,6 +83,7 @@
 	<article>
 		{@render ArticleHeader()}
 		<hr />
+		<!-- eslint-disable svelte/no-at-html-tags -->
 		<pre>{@html post.content}</pre>
 		{@render LikeBtn()}
 	</article>
@@ -99,7 +104,7 @@
 				color: var(--gray-text);
 				font-size: 0.8rem;
 
-				span{
+				span {
 					display: flex;
 					align-items: center;
 					gap: 0.2rem;

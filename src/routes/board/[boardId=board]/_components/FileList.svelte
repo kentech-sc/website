@@ -1,14 +1,13 @@
 <script lang="ts">
-	import type { User } from '$lib/types/user.type.js';
 	import type { FileMeta } from '$lib/types/file-meta.type.js';
 
 	import type { ActionResult } from '@sveltejs/kit';
 
 	import { invalidateAll } from '$app/navigation';
 
-	let { files, user }: { files: FileMeta[]; user: User } = $props();
+	let { files }: { files: (FileMeta | null)[] } = $props();
 
-	let filteredFiles = $derived(files.filter(file => file !== null));
+	let filteredFiles = $derived(files.filter((file) => file !== null));
 
 	let formResult = $state<ActionResult | null>(null);
 

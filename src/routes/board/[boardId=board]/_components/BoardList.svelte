@@ -20,7 +20,7 @@
 			></td
 		>
 		<td>{post.displayName}</td>
-		<td>{CommonUtils.parseDate(post.createdAt, )}</td>
+		<td>{CommonUtils.parseDate(post.createdAt)}</td>
 		<td>{post.viewCnt}</td>
 		<td>{post.likeCnt}</td>
 	</tr>

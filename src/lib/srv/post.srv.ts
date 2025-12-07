@@ -1,5 +1,5 @@
 import type { Post, PostId, PostCreate, PostUpdate } from '$lib/types/post.type.js';
-import type { User, UserId, DisplayType } from '$lib/types/user.type.js';
+import type { User, UserId } from '$lib/types/user.type.js';
 
 import { BoardId } from '$lib/types/board.type.js';
 

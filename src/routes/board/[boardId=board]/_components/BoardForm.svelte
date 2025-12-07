@@ -8,15 +8,10 @@
 	import QuillEditor from '$components/QuillEditor.svelte';
 	import type { FileMeta } from '$lib/types/file-meta.type';
 
-	let { post, files }: { post?: Post; files?: Array<FileMeta|null> } = $props();
+	let { post, files = [] }: { post?: Post; files?: Array<FileMeta | null> } = $props();
 
 	let editorHtml = $state('');
-	let uploadedFileMetas = $state<FileMeta[]>([]);
-
-	$effect(() => {
-		uploadedFileMetas = (files ?? []).filter(file => file !== null)
-	});
-
+	let uploadedFileMetas = $state<FileMeta[]>(files.filter((file) => file !== null));
 </script>
 
 {#snippet RadioModule()}

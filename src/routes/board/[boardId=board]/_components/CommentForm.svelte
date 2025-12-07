@@ -72,7 +72,7 @@
 	#comment-form-div {
 		justify-content: space-between;
 		width: stretch;
-		
+
 		padding: 0.25rem;
 
 		label {
@@ -102,7 +102,7 @@
 
 		#radio-div {
 			justify-content: flex-start;
-			
+
 			input {
 				margin-left: 0.5rem;
 				margin-right: 1.5rem;

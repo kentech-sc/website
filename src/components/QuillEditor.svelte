@@ -48,7 +48,7 @@
 			placeholder: '내용을 입력하세요.'
 		});
 
-		if (!!initialHtml) {
+		if (initialHtml !== undefined) {
 			quill.root.innerHTML = initialHtml;
 		}
 
