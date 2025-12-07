@@ -1,6 +1,6 @@
 import { fileTypeFromBuffer } from 'file-type';
 import DOMPurify from 'dompurify';
-const { JSDOM } = await import('jsdom');
+import { JSDOM } from 'jsdom';
 
 // -----------------------------
 // DOMPurify 초기화 (서버 시작 시 단 1회만)
