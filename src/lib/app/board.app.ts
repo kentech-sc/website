@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 import type { BoardId } from '$lib/types/board.type.js';
 import type { PostId, Post, PostCreate } from '$lib/types/post.type.js';
-import type { Comment, CommentId } from '$lib/types/comment.type.js';
+import type { Comment, CommentCreate, CommentId } from '$lib/types/comment.type.js';
 import type { User, UserId, DisplayType } from '$lib/types/user.type.js';
 import type { FileMeta, FileId } from '$lib/types/file-meta.type';
 
@@ -61,7 +61,13 @@ export async function createCommentAndUpdatePost(
 ) {
 	return await mongoose.connection.transaction(async () => {
 		await PostRepository.updatePostById(postId, { $inc: { commentCnt: 1 } });
-		await CommentService.createCommentByPostId(postId, content, userId, displayType);
+		const commentCreate: CommentCreate = {
+			postId,
+			content,
+			userId,
+			displayType
+		};
+		await CommentService.createCommentByPostId(commentCreate);
 	});
 }
 
@@ -76,6 +82,6 @@ export async function deletePostByPostId(postId: PostId, user: User) {
 	return await mongoose.connection.transaction(async () => {
 		const deletedPost = await PostService.deletePostById(postId, user);
 		await FileMetaService.deleteFilesByIds(deletedPost.files);
-		await CommentRepository.deleteAllCommentsByPostId(postId);
+		await CommentRepository.deleteCommentsByPostId(postId);
 	});
 }

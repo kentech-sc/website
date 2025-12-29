@@ -2,13 +2,14 @@ import type { UpdateQuery, Types } from 'mongoose';
 
 export type ProfessorId = Types.ObjectId;
 
-export interface ProfessorBase {
+export interface ProfessorCreate {
 	name: string;
 }
 
-export interface Professor extends ProfessorBase {
+export interface ProfessorDoc extends ProfessorCreate {
 	_id: ProfessorId;
 }
 
-export type ProfessorCreate = ProfessorBase;
-export type ProfessorUpdate = UpdateQuery<Pick<ProfessorBase, 'name'>>;
+export type Professor = ProfessorDoc;
+
+export type ProfessorUpdate = UpdateQuery<Pick<ProfessorDoc, 'name'>>;

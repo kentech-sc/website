@@ -5,22 +5,23 @@ import type { PostId } from './post.type.js';
 
 export type CommentId = Types.ObjectId;
 
-export interface CommentBase {
+export interface CommentCreate {
 	postId: PostId;
 	content: string;
 	userId: UserId;
 	displayType: DisplayType;
-
-	likeCnt: number;
-	likedBy: UserId[];
 }
 
-export interface Comment extends CommentBase {
+export interface CommentDoc extends CommentCreate {
 	_id: CommentId;
 	createdAt: Date;
 
-	displayName?: string | null;
+	likedBy: UserId[];
 }
 
-export type CommentCreate = Pick<CommentBase, 'postId' | 'content' | 'userId' | 'displayType'>;
-export type CommentUpdate = UpdateQuery<Pick<CommentBase, 'content' | 'likeCnt'>>;
+export interface Comment extends CommentDoc {
+	likeCnt: number;
+	displayName: string | null;
+}
+
+export type CommentUpdate = UpdateQuery<Pick<CommentDoc, 'content'>>;

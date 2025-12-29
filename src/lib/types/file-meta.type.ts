@@ -3,7 +3,7 @@ import type { Types } from 'mongoose';
 export type FileId = Types.ObjectId;
 export type FileKey = string;
 
-export interface FileMetaBase {
+export interface FileMetaCreate {
 	key: FileKey;
 	name: string;
 	size: number;
@@ -11,11 +11,11 @@ export interface FileMetaBase {
 	ext: string;
 }
 
-export interface FileMeta extends FileMetaBase {
+export interface FileMetaDoc extends FileMetaCreate {
 	_id: FileId;
 	createdAt: Date;
-
-	path?: string;
 }
 
-export type FileMetaCreate = FileMetaBase;
+export interface FileMeta extends FileMetaDoc {
+	path: string;
+}

@@ -6,7 +6,7 @@ import type { UserId } from './user.type.js';
 
 export type ReviewId = Types.ObjectId;
 
-export interface ReviewBase {
+export interface ReviewCreate {
 	courseId: CourseId;
 	professorId: ProfessorId;
 	userId: UserId;
@@ -21,17 +21,18 @@ export interface ReviewBase {
 	comment: string;
 }
 
-export interface Review extends ReviewBase {
+export interface ReviewDoc extends ReviewCreate {
 	_id: ReviewId;
 	createdAt: Date;
 	updatedAt: Date;
-
-	courseCode?: string | null;
-	courseName?: string | null;
-	professorName?: string | null;
 }
 
-export type ReviewCreate = ReviewBase;
+export interface Review extends ReviewDoc {
+	courseCode: string | null;
+	courseName: string | null;
+	professorName: string | null;
+}
+
 export type ReviewUpdate = UpdateQuery<
-	Pick<ReviewBase, 'year' | 'term' | 'title' | 'score' | 'comment'>
+	Pick<ReviewDoc, 'year' | 'term' | 'title' | 'score' | 'comment'>
 >;

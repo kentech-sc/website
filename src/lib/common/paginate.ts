@@ -1,15 +1,15 @@
 import type { Model, FilterQuery, Types } from 'mongoose';
 
-import type { Post } from '$lib/types/post.type.js';
-import type { Comment } from '$lib/types/comment.type.js';
-import type { Review } from '$lib/types/review.type.js';
-import type { Petition } from '$lib/types/petition.type.js';
+import type { PostDoc } from '$lib/types/post.type.js';
+import type { CommentDoc } from '$lib/types/comment.type.js';
+import type { ReviewDoc } from '$lib/types/review.type.js';
+import type { PetitionDoc } from '$lib/types/petition.type.js';
 
 import { RuleError } from '$lib/common/errors.js';
 
 // MongoDB 모델 페이지네이션 함수: 지정된 조건에 따라 페이지별 문서를 가져옴
 // id는 정렬되어 있으므로, fromId나 toId를 설정하여 특정 문서부터 가져올 수 있음.
-export async function paginateModel<T extends Post | Comment | Review | Petition>(
+export async function paginateModel<T extends PostDoc | CommentDoc | ReviewDoc | PetitionDoc>(
 	model: Model<T>,
 	filterQuery: FilterQuery<T>,
 	limit = 10,

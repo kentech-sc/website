@@ -6,31 +6,27 @@ import type { FileId } from './file-meta.type.js';
 
 export type PostId = Types.ObjectId;
 
-export interface PostBase {
+export interface PostCreate {
 	boardId: BoardId;
 	title: string;
 	content: string;
 	userId: UserId;
 	files: FileId[];
 	displayType: DisplayType;
-
-	likeCnt: number;
-	likedBy: UserId[];
-	viewCnt: number;
-	commentCnt: number;
 }
 
-export interface Post extends PostBase {
+export interface PostDoc extends PostCreate {
 	_id: PostId;
 	createdAt: Date;
 
-	displayName?: string | null;
+	viewCnt: number;
+	commentCnt: number;
+	likedBy: UserId[];
 }
 
-export type PostCreate = Pick<
-	PostBase,
-	'boardId' | 'title' | 'content' | 'userId' | 'files' | 'displayType'
->;
-export type PostUpdate = UpdateQuery<
-	Pick<PostBase, 'title' | 'content' | 'likeCnt' | 'viewCnt' | 'commentCnt'>
->;
+export interface Post extends PostDoc {
+	likeCnt: number;
+	displayName: string | null;
+}
+
+export type PostUpdate = UpdateQuery<Pick<PostDoc, 'title' | 'content' | 'viewCnt' | 'commentCnt'>>;

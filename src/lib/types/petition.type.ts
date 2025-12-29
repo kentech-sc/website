@@ -15,44 +15,42 @@ export type PetitionStatus = (typeof PetitionStatus)[keyof typeof PetitionStatus
 
 export type PetitionId = Types.ObjectId;
 
-export interface PetitionBase {
+export interface PetitionCreate {
 	title: string;
 	content: string;
-	status: PetitionStatus;
-
-	viewCnt: number;
-	signCnt: number;
-	signedBy: UserId[];
-
 	petitionerId: UserId;
+	files: FileId[];
+}
+
+export interface PetitionDoc extends PetitionCreate {
+	_id: PetitionId;
+	createdAt: Date;
+	updatedAt: Date;
+
+	status: PetitionStatus;
+	viewCnt: number;
+	signedBy: UserId[];
 
 	responderId: UserId | null;
 	response: string | null;
 
 	answeredAt: Date | null;
-
-	files: FileId[];
 }
 
-export interface Petition extends PetitionBase {
-	_id: PetitionId;
-	createdAt: Date;
-	updatedAt: Date;
+export interface Petition extends PetitionDoc {
+	signCnt: number;
 
-	petitionerName?: string | null;
-
-	responderName?: string | null;
+	petitionerName: string | null;
+	responderName: string | null;
 }
 
-export type PetitionCreate = Pick<PetitionBase, 'title' | 'content' | 'petitionerId' | 'files'>;
 export type PetitionUpdate = UpdateQuery<
 	Pick<
-		Petition,
+		PetitionDoc,
 		| 'title'
 		| 'content'
 		| 'status'
 		| 'viewCnt'
-		| 'signCnt'
 		| 'signedBy'
 		| 'responderId'
 		| 'response'

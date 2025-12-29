@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
-import type { User } from '$lib/types/user.type.js';
+import type { UserDoc } from '$lib/types/user.type.js';
 
-const schema = new mongoose.Schema(
+const UserSchema = new mongoose.Schema(
 	{
 		email: { type: String, required: true, unique: true },
 		realName: { type: String, required: true },
@@ -14,4 +14,8 @@ const schema = new mongoose.Schema(
 	}
 );
 
-export default mongoose.model<User>('User', schema);
+// UserSchema.index({ email: 1 });
+UserSchema.index({ realName: 1 });
+// UserSchema.index({ nickname: 1 });
+
+export const UserModel = mongoose.model<UserDoc>('User', UserSchema);

@@ -1,44 +1,46 @@
 import type { UserId } from '$lib/types/user.type.js';
-import type {
-	PetitionCreate,
-	Petition,
-	PetitionId,
-	PetitionUpdate
+import {
+	type PetitionCreate,
+	type PetitionId,
+	type PetitionUpdate,
+	type PetitionDoc,
+	PetitionStatus
 } from '$lib/types/petition.type.js';
 
 import { PetitionModel } from '$lib/models/petition.model.js';
 
 import { paginateModel } from '$lib/common/paginate.js';
 
-export async function createPetition(petition: PetitionCreate): Promise<Petition> {
+export async function createPetition(petition: PetitionCreate): Promise<PetitionDoc> {
 	return (await PetitionModel.create(petition)).toObject();
 }
 
-export async function getPetitionById(petitionId: PetitionId): Promise<Petition | null> {
+export async function getPetitionById(petitionId: PetitionId): Promise<PetitionDoc | null> {
 	return await PetitionModel.findOne({ _id: petitionId }).lean();
 }
 
 export async function getPetitions(
 	limit = 10,
 	{ fromId, toId }: { fromId?: PetitionId; toId?: PetitionId } = {}
-): Promise<{ pageItems: Petition[]; fromId?: PetitionId; toId?: PetitionId }> {
+): Promise<{ pageItems: PetitionDoc[]; fromId?: PetitionId; toId?: PetitionId }> {
 	return await paginateModel(PetitionModel, {}, limit, { fromId, toId });
 }
 
 export async function updatePetitionById(
 	petitionId: PetitionId,
 	petition: PetitionUpdate
-): Promise<Petition | null> {
+): Promise<PetitionDoc | null> {
 	return await PetitionModel.findOneAndUpdate({ _id: petitionId }, petition, {
 		new: true
 	}).lean();
 }
 
-export async function deletePetitionById(petitionId: PetitionId): Promise<Petition | null> {
-	return await PetitionModel.findOneAndDelete({ _id: petitionId }).lean();
+export async function deletePetitionById(petitionId: PetitionId): Promise<boolean> {
+	const res = await PetitionModel.deleteOne({ _id: petitionId });
+	return res.deletedCount > 0;
 }
 
-export async function viewPetitionById(petitionId: PetitionId): Promise<Petition | null> {
+export async function viewPetitionById(petitionId: PetitionId): Promise<PetitionDoc | null> {
 	return await PetitionModel.findOneAndUpdate(
 		{ _id: petitionId },
 		{ $inc: { viewCnt: 1 } },
@@ -46,22 +48,17 @@ export async function viewPetitionById(petitionId: PetitionId): Promise<Petition
 	).lean();
 }
 
-export async function deleteAllPetitions(): Promise<void> {
-	await PetitionModel.deleteMany();
-}
-
 export async function signPetitionById(
 	petitionId: PetitionId,
 	userId: UserId
-): Promise<Petition | null> {
+): Promise<PetitionDoc | null> {
 	return await PetitionModel.findOneAndUpdate(
 		{
 			_id: petitionId,
-			signedBy: { $ne: userId },
-			status: { $nin: ['answered', 'expired'] },
-			petitionerId: { $ne: userId }
+			status: { $nin: [PetitionStatus.Answered, PetitionStatus.Expired] },
+			petitionerId: { $ne: userId } // write-guard for UX performance - prevent self-signing
 		},
-		{ $push: { signedBy: userId }, $inc: { signCnt: 1 } },
+		{ $addToSet: { signedBy: userId } },
 		{ new: true }
 	).lean();
 }
@@ -69,15 +66,19 @@ export async function signPetitionById(
 export async function unsignPetitionById(
 	petitionId: PetitionId,
 	userId: UserId
-): Promise<Petition | null> {
+): Promise<PetitionDoc | null> {
 	return await PetitionModel.findOneAndUpdate(
-		{ _id: petitionId, signedBy: userId, status: { $nin: ['answered', 'expired'] } },
-		{ $pull: { signedBy: userId }, $inc: { signCnt: -1 } },
+		{ _id: petitionId, status: { $nin: [PetitionStatus.Answered, PetitionStatus.Expired] } },
+		{ $pull: { signedBy: userId } },
 		{ new: true }
 	).lean();
 }
 
-export async function searchPetitionByQuery(q: string, page = 1, limit = 10): Promise<Petition[]> {
+export async function searchPetitionsByQuery(
+	q: string,
+	page = 1,
+	limit = 10
+): Promise<{ items: PetitionDoc[]; more: boolean }> {
 	const results = await PetitionModel.find(
 		{ $text: { $search: q } },
 		{ searchScore: { $meta: 'textScore' } }
@@ -86,5 +87,6 @@ export async function searchPetitionByQuery(q: string, page = 1, limit = 10): Pr
 		.skip((page - 1) * limit)
 		.limit(limit + 1)
 		.lean();
-	return results;
+
+	return { items: results.slice(0, limit), more: results.length > limit };
 }

@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import type { Comment } from '$lib/types/comment.type.js';
+import type { CommentDoc } from '$lib/types/comment.type.js';
 
 const CommentSchema = new mongoose.Schema(
 	{
@@ -7,7 +7,6 @@ const CommentSchema = new mongoose.Schema(
 		userId: { type: mongoose.Schema.Types.ObjectId, required: true },
 		displayType: { type: String, required: true },
 		content: { type: String, required: true },
-		likeCnt: { type: Number, required: true, default: 0 },
 		likedBy: { type: [mongoose.Schema.Types.ObjectId], required: true, default: [] }
 	},
 	{
@@ -15,7 +14,7 @@ const CommentSchema = new mongoose.Schema(
 	}
 );
 
-CommentSchema.index({ likedBy: 1 });
+CommentSchema.index({ postId: 1, createdAt: -1 });
 CommentSchema.index({ content: 'text' });
 
-export const CommentModel = mongoose.model<Comment>('Comment', CommentSchema);
+export const CommentModel = mongoose.model<CommentDoc>('Comment', CommentSchema);

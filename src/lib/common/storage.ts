@@ -5,7 +5,7 @@ import { parseDate } from '$lib/common/utils.js';
 import { validateAndProcessFile } from '$lib/rules/file-meta.rule.js';
 import { RuleError } from '$lib/common/errors.js';
 
-import type { FileKey, FileMetaBase } from '$lib/types/file-meta.type.js';
+import type { FileKey, FileMetaCreate } from '$lib/types/file-meta.type.js';
 
 export function getCategoryByExtension(ext: string): string {
 	switch (ext) {
@@ -51,7 +51,7 @@ export class FileStorage {
 		return `${this.#BUCKET_URL}/${key}`;
 	}
 
-	static async uploadFileToStorage(file: File): Promise<FileMetaBase> {
+	static async uploadFileToStorage(file: File): Promise<FileMetaCreate> {
 		const result = await validateAndProcessFile(file);
 		if (!result.ok) throw new RuleError('The file is wrong or not allowed');
 

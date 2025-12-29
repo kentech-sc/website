@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import type { Course } from '$lib/types/course.type.js';
+import type { CourseDoc } from '$lib/types/course.type.js';
 
 const CourseSchema = new mongoose.Schema({
 	code: { type: String, required: true, unique: true },
@@ -7,4 +7,4 @@ const CourseSchema = new mongoose.Schema({
 	content: { type: String, required: true }
 });
 
-export default mongoose.model<Course>('Course', CourseSchema);
+export const CourseModel = mongoose.model<CourseDoc>('Course', CourseSchema);

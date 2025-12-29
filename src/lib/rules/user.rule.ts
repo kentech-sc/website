@@ -42,3 +42,8 @@ export function canBlockOrUnblockUser(targetUser: User, operatorUser: User): boo
 		throw new RuleError('차단 또는 차단 해제 권한이 없습니다.');
 	return true;
 }
+
+export function canRemoveUser(user: User): boolean {
+	if (([UserGroup.Dev] as UserGroup[]).includes(user.group)) return true;
+	return false;
+}

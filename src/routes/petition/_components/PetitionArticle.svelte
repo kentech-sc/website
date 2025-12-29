@@ -31,14 +31,14 @@
 			if (updatedPetition.signCnt > petition.signCnt) {
 				petition.signCnt = updatedPetition.signCnt;
 				petition.signedBy.push(user._id);
-				const displayName = UserService.fillDisplayName(user, 'realName');
+				const displayName = UserService.createDisplayName(user, 'realName');
 				signersNames.push(displayName);
 			} else if (updatedPetition.signCnt < petition.signCnt) {
 				petition.signCnt = updatedPetition.signCnt;
 				petition.signedBy = petition.signedBy.filter(
 					(id) => !new Types.ObjectId(id).equals(user._id)
 				);
-				const displayName = UserService.fillDisplayName(user, 'realName');
+				const displayName = UserService.createDisplayName(user, 'realName');
 				signersNames = signersNames.filter((name) => name !== displayName);
 			}
 		}

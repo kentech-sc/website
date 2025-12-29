@@ -59,8 +59,7 @@ export async function signupUserByEmailAndRealName(email: string, realName: stri
 		email,
 		realName,
 		nickname,
-		group: UserGroup.User,
-		blockedUntil: null
+		group: UserGroup.User
 	});
 
 	return user;
@@ -68,14 +67,10 @@ export async function signupUserByEmailAndRealName(email: string, realName: stri
 
 // ============ Change user info =====================
 
-export function isGroup(group: string): boolean {
-	return (Object.values(UserGroup) as string[]).includes(group);
-}
-
 export async function updateUserById(userId: UserId, userUpdate: UserUpdate): Promise<User> {
-	const user = await UserRepository.updateUserById(userId, userUpdate);
-	if (!user) throw new SrvError('존재하지 않는 사용자입니다.');
-	return user;
+	const updatedUser = await UserRepository.updateUserById(userId, userUpdate);
+	if (!updatedUser) throw new SrvError('존재하지 않는 사용자입니다.');
+	return updatedUser;
 }
 
 export async function changeNicknameByEmail(
@@ -85,7 +80,7 @@ export async function changeNicknameByEmail(
 ): Promise<User> {
 	const target = await getUserByEmail(email);
 
-	const isDuplicate = !!(await getUserOrNullByNickname(newNickname));
+	const isDuplicate = (await getUserOrNullByNickname(newNickname)) !== null;
 	if (!UserRule.canChangeNickname(target, newNickname, operator, isDuplicate))
 		throw new RuleError('이름 변경이 불가능합니다.');
 
@@ -127,10 +122,11 @@ export async function unblockUserByEmail(email: string, operator: User): Promise
 	return await updateUserById(target._id, { blockedUntil: null });
 }
 
-export async function removeUserByEmail(email: string): Promise<User> {
-	const deletedUser = await UserRepository.deleteUserByEmail(email);
-	if (!deletedUser) throw new SrvError('존재하지 않는 사용자입니다.');
-	return deletedUser;
+export async function removeUserByEmail(email: string, user: User): Promise<void> {
+	if (!UserRule.canRemoveUser(user)) throw new RuleError('삭제 권한이 없습니다.');
+
+	const isDeleted = await UserRepository.deleteUserByEmail(email);
+	if (!isDeleted) throw new SrvError('존재하지 않는 사용자입니다.');
 }
 
 // ========= Fill display names ===============
@@ -140,6 +136,7 @@ export const AnonymousName = '익명의 켄텍인';
 export async function createUserIdAndIdxMap<T extends { userId: UserId }>(arr: T[]) {
 	const userIds = arr.map((item) => item.userId);
 	const users = await UserRepository.getUsersByIds(userIds);
+
 	const userById = new Map<string, User>();
 	const idxByUserId = new Map<string, number>();
 
@@ -147,6 +144,7 @@ export async function createUserIdAndIdxMap<T extends { userId: UserId }>(arr: T
 	for (const user of users) {
 		if (!user) continue;
 		if (userById.has(user._id.toString())) continue;
+
 		userById.set(user._id.toString(), user);
 		idxByUserId.set(user._id.toString(), idx++);
 	}
@@ -154,44 +152,51 @@ export async function createUserIdAndIdxMap<T extends { userId: UserId }>(arr: T
 	return { userById, idxByUserId };
 }
 
-export function fillDisplayName(
+export function createDisplayName(
 	user: User,
 	displayType: DisplayType,
 	idxByUserId?: Map<string, number>
 ): string {
-	if (displayType === DisplayType.Anonymous) {
-		if (!idxByUserId) return AnonymousName;
-		return `${AnonymousName} ${idxByUserId.get(user._id.toString())}`;
-	} else if (displayType === DisplayType.RealName) {
-		const id = user.email.split('@')[0];
-		if (id.length >= 8) {
-			return `${user[displayType]} (${id.slice(0, 4) + '****'})`;
-		} else {
-			return `${user[displayType]} (${id.slice(0, id.length - 4) + '****'})`;
+	switch (displayType) {
+		case DisplayType.Anonymous: {
+			if (!idxByUserId) return AnonymousName;
+			const anonIdx = idxByUserId.get(user._id.toString());
+			return `${AnonymousName} ${anonIdx}`; // ex. 익명의 켄텍인 1
 		}
-	} else {
-		return user[displayType];
+
+		case DisplayType.RealName: {
+			const id = user.email.split('@')[0];
+			const maskedId = id.slice(0, Math.min(id.length - 4, 4)) + '****';
+			return `${user.realName} (${maskedId})`; // ex. 홍길동 (hong****)
+		}
+
+		case DisplayType.Nickname: {
+			return user.nickname;
+		}
+
+		default:
+			throw new SrvError('존재하지 않는 Display Type 입니다.');
 	}
 }
 
-export async function fillDisplayNamesByDisplayType<T extends { userId: UserId }>(
-	arr: T[],
-	displayType: DisplayType
-): Promise<T[]> {
-	const { userById, idxByUserId } = await createUserIdAndIdxMap(arr);
-	return arr.map((item) => {
-		const user = userById.get(item.userId.toString());
+// export async function fillDisplayNamesByDisplayType<T extends { userId: UserId }>(
+// 	arr: T[],
+// 	displayType: DisplayType
+// ): Promise<T[]> {
+// 	const { userById, idxByUserId } = await createUserIdAndIdxMap(arr);
+// 	return arr.map((item) => {
+// 		const user = userById.get(item.userId.toString());
 
-		if (!user) return { ...item, displayName: null };
+// 		if (!user) return { ...item, displayName: null };
 
-		const displayName = fillDisplayName(user, displayType, idxByUserId);
+// 		const displayName = createDisplayName(user, displayType, idxByUserId);
 
-		return {
-			...item,
-			displayName
-		};
-	});
-}
+// 		return {
+// 			...item,
+// 			displayName
+// 		};
+// 	});
+// }
 
 export async function fillDisplayNames<T extends { userId: UserId; displayType: DisplayType }>(
 	arr: T[],
@@ -204,7 +209,7 @@ export async function fillDisplayNames<T extends { userId: UserId; displayType: 
 
 		if (!user) return { ...item, displayName: null };
 
-		const displayName = fillDisplayName(
+		const displayName = createDisplayName(
 			user,
 			item.displayType,
 			no_idx_for_anon ? undefined : idxByUserId

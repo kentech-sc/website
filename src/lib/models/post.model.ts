@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import type { Post } from '$lib/types/post.type.js';
+import type { PostDoc } from '$lib/types/post.type.js';
 
 const PostSchema = new mongoose.Schema(
 	{
@@ -9,7 +9,6 @@ const PostSchema = new mongoose.Schema(
 		title: { type: String, required: true },
 		content: { type: String, required: true },
 		viewCnt: { type: Number, required: true, default: 0 },
-		likeCnt: { type: Number, required: true, default: 0 },
 		commentCnt: { type: Number, required: true, default: 0 },
 		likedBy: { type: [mongoose.Schema.Types.ObjectId], required: true, default: [] },
 		files: { type: [mongoose.Schema.Types.ObjectId], default: [] }
@@ -19,7 +18,6 @@ const PostSchema = new mongoose.Schema(
 	}
 );
 
-PostSchema.index({ likedBy: 1 });
 PostSchema.index({ title: 'text', content: 'text' });
 
-export const PostModel = mongoose.model<Post>('Post', PostSchema);
+export const PostModel = mongoose.model<PostDoc>('Post', PostSchema);

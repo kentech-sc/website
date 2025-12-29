@@ -28,10 +28,6 @@ export async function getAllCourses(): Promise<Course[]> {
 	return await CourseRepository.getAllCourses();
 }
 
-export async function getCoursesOrNullByIds(ids: CourseId[]): Promise<Array<Course | null>> {
-	return await CourseRepository.getCoursesByIds(ids);
-}
-
 export async function updateCourseById(
 	courseId: CourseId,
 	course: CourseUpdate,
@@ -43,34 +39,38 @@ export async function updateCourseById(
 	return updatedCourse;
 }
 
-export async function deleteCourseById(courseId: CourseId, user: User): Promise<void> {
+export async function deleteCourseById(courseId: CourseId, user: User): Promise<Course> {
+	const course = await CourseRepository.getCourseById(courseId);
+	if (!course) throw new SrvError('존재하지 않는 강의입니다.');
+
 	if (!CourseRule.canManageCourse(user)) throw new RuleError('권한이 없습니다.');
-	const deletedCourse = await CourseRepository.deleteCourseById(courseId);
-	if (!deletedCourse) throw new SrvError('존재하지 않는 강의입니다.');
+
+	const isDeleted = await CourseRepository.deleteCourseById(courseId);
+	if (!isDeleted) throw new SrvError('이미 삭제된 강의입니다.');
+
+	return course;
 }
 
-export async function createCourseByIdMap<T extends { courseId: CourseId }>(
-	arr: T[]
-): Promise<Map<string, Course>> {
-	const courseIds = arr.map((item) => item.courseId);
+export async function getCourseMapByIds(courseIds: CourseId[]): Promise<Map<string, Course>> {
 	const courses = await CourseRepository.getCoursesByIds(courseIds);
-	const courseById = new Map<string, Course>();
 
+	const map = new Map<string, Course>();
 	for (const course of courses) {
 		if (!course) continue;
-		if (courseById.has(course._id.toString())) continue;
-		courseById.set(course._id.toString(), course);
+		map.set(course._id.toString(), course);
 	}
 
-	return courseById;
+	return map;
 }
 
-export async function fillCourseInfosByCourseIds<T extends { courseId: CourseId }>(
+// Array<{ ... , courseId }>를 받음. 각 item의 courseId로 course 정보를 item에 추가하여 반환.
+export async function attachCourseInfo<T extends { courseId: CourseId }>(
 	arr: T[]
-): Promise<T[]> {
-	const courseById = await createCourseByIdMap(arr);
+): Promise<(T & { courseCode: string | null; courseName: string | null })[]> {
+	const courseMap = await getCourseMapByIds(arr.map((item) => item.courseId));
+
 	return arr.map((item) => {
-		const course = courseById.get(item.courseId.toString());
+		const course = courseMap.get(item.courseId.toString());
 		return {
 			...item,
 			courseCode: course?.code ?? null,

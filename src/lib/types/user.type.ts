@@ -21,19 +21,21 @@ export type DisplayType = (typeof DisplayType)[keyof typeof DisplayType];
 
 export type UserId = Types.ObjectId;
 
-export interface UserBase {
+export interface UserCreate {
 	email: string;
 	realName: string;
 	nickname: string;
 	group: UserGroup;
-	blockedUntil: Date | null;
 }
 
-export interface User extends UserBase {
+export interface UserDoc extends UserCreate {
 	_id: UserId;
 	createdAt: Date;
 	updatedAt: Date;
+
+	blockedUntil: Date | null;
 }
 
-export type UserCreate = UserBase;
-export type UserUpdate = UpdateQuery<Pick<UserBase, 'nickname' | 'group'>>;
+export type User = UserDoc;
+
+export type UserUpdate = UpdateQuery<Pick<UserDoc, 'nickname' | 'group'>>;

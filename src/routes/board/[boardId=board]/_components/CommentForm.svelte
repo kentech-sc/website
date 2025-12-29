@@ -58,7 +58,7 @@
 <CommonForm actionName="createComment" formName="createComment" bind:formResult={commentFormResult}>
 	<div id="comment-form-div" class="container-col">
 		<div class="container">
-			<span><b>[{UserService.fillDisplayName(user, displayType)}]</b></span>
+			<span><b>[{UserService.createDisplayName(user, displayType)}]</b></span>
 		</div>
 		{@render RadioModule()}
 		<div class="container">

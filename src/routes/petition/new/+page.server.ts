@@ -14,7 +14,13 @@ export const actions = {
 
 		if (!title || !content) return fail(400, { message: 'title, content are required' });
 
-		const petition = await PetitionService.createPetition(title, content, locals.user._id);
+		const petition = await PetitionService.createPetition({
+			title,
+			content,
+			petitionerId: locals.user._id,
+			files: []
+		});
+
 		redirect(302, '/petition/' + petition._id);
 	})
 };

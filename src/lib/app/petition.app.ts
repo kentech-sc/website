@@ -8,7 +8,7 @@ export async function getSignersRealNamesByPetition(
 ): Promise<Array<string | null>> {
 	const users = await UserService.getUsersByIds(petition.signedBy);
 	return users.map((user) =>
-		user ? UserService.fillDisplayName(user, DisplayType.RealName) : null
+		user ? UserService.createDisplayName(user, DisplayType.RealName) : null
 	);
 }
 
@@ -27,17 +27,17 @@ export async function fillRealNamesForPetitions(petitions: Petition[]): Promise<
 	const responderByUserId = new Map(responderIds.map((id, i) => [id.toString(), responders[i]]));
 
 	// Petition 배열 갱신
-	for (const petition of petitions) {
+	return petitions.map((petition) => {
 		const petitioner = petitionerByUserId.get(petition.petitionerId.toString());
-		const responder = responderByUserId.get(petition.responderId?.toString() ?? '');
+		const responder = responderByUserId.get((petition.responderId ?? '').toString());
 
 		petition.petitionerName = petitioner
-			? UserService.fillDisplayName(petitioner, DisplayType.RealName)
+			? UserService.createDisplayName(petitioner, DisplayType.RealName)
 			: null;
 		petition.responderName = responder
-			? UserService.fillDisplayName(responder, DisplayType.RealName)
+			? UserService.createDisplayName(responder, DisplayType.RealName)
 			: null;
-	}
 
-	return petitions;
+		return petition;
+	});
 }

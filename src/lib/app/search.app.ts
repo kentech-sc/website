@@ -3,9 +3,9 @@ import * as ReviewService from '$lib/srv/review.srv.js';
 import * as PetitionService from '$lib/srv/petition.srv.js';
 
 export async function search(query: string, page: number, limit: number) {
-	const postResults = await PostService.searchPostByQuery(query ?? '', page, limit);
-	const reviewResults = await ReviewService.searchReviewByQuery(query ?? '', page, limit);
-	const petitionResults = await PetitionService.searchPetitionByQuery(query ?? '', page, limit);
+	const postResults = await PostService.searchPostsByQuery(query ?? '', page, limit);
+	const reviewResults = await ReviewService.searchReviewsByQuery(query ?? '', page, limit);
+	const petitionResults = await PetitionService.searchPetitionsByQuery(query ?? '', page, limit);
 
 	const more = postResults.more || reviewResults.more || petitionResults.more;
 

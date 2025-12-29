@@ -21,7 +21,7 @@
 			petition.answeredAt = updatedPetition.answeredAt;
 			petition.response = updatedPetition.response;
 			petition.responderId = updatedPetition.responderId;
-			const displayName = UserService.fillDisplayName(user, 'realName');
+			const displayName = UserService.createDisplayName(user, 'realName');
 			petition.responderName = updatedPetition.responderId ? displayName : null;
 		}
 	});

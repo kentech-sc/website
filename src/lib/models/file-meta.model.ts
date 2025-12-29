@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import type { FileMeta } from '$lib/types/file-meta.type.js';
+import type { FileMetaDoc } from '$lib/types/file-meta.type.js';
 
 const FileMetaSchema = new mongoose.Schema(
 	{
@@ -14,6 +14,6 @@ const FileMetaSchema = new mongoose.Schema(
 	}
 );
 
-FileMetaSchema.index({ key: 1 });
+// FileMetaSchema.index({ key: 1 });
 
-export const FileMetaModel = mongoose.model<FileMeta>('FileMeta', FileMetaSchema);
+export const FileMetaModel = mongoose.model<FileMetaDoc>('FileMeta', FileMetaSchema);
