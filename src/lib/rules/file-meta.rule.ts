@@ -1,17 +1,17 @@
 import { fileTypeFromBuffer } from 'file-type';
-// import DOMPurify from "isomorphic-dompurify";
+import DOMPurify from "isomorphic-dompurify";
 
 // -----------------------------
 // 허용된 확장자 + MIME 타입
 // -----------------------------
-export const allowedExtensions = ['png', 'jpg', 'jpeg', 'webp', 'pdf', 'docx', 'xlsx'];
+export const allowedExtensions = ['png', 'jpg', 'jpeg', 'webp', 'pdf', 'docx', 'xlsx', 'svg'];
 
 export const allowedMimeTypes = [
 	// images
 	'image/png',
 	'image/jpeg',
 	'image/webp',
-	// 'image/svg+xml',
+	'image/svg+xml',
 
 	// documents
 	'application/pdf',
@@ -24,13 +24,13 @@ export const allowedMimeTypes = [
 // -----------------------------
 
 export function sanitizeSvg(svgString: string): string {
-	// let cleaned = DOMPurify.sanitize(svgString, { USE_PROFILES: { svg: true, svgFilters: true } });
+	let cleaned = DOMPurify.sanitize(svgString, { USE_PROFILES: { svg: true, svgFilters: true } });
 
-	// cleaned = cleaned.replace(/href="http[^"]+"/gi, '');
-	// cleaned = cleaned.replace(/xlink:href="http[^"]+"/gi, '');
+	cleaned = cleaned.replace(/href="http[^"]+"/gi, '');
+	cleaned = cleaned.replace(/xlink:href="http[^"]+"/gi, '');
 
-	// return cleaned;
-	return svgString;
+	return cleaned;
+	// return svgString;
 }
 
 // -----------------------------

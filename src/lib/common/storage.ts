@@ -1,9 +1,9 @@
-import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand, DeleteObjectCommand, HeadObjectCommand } from '@aws-sdk/client-s3';
 import { randomUUID } from 'crypto';
 
 import { parseDate } from '$lib/common/utils.js';
 import { validateAndProcessFile } from '$lib/rules/file-meta.rule.js';
-import { RuleError } from '$lib/common/errors.js';
+import { RuleError, SrvError } from '$lib/common/errors.js';
 
 import type { FileKey, FileMetaCreate } from '$lib/types/file-meta.type.js';
 
@@ -51,6 +51,21 @@ export class FileStorage {
 		return `${this.#BUCKET_URL}/${key}`;
 	}
 
+
+	static async checkObjectExists(key: string): Promise<boolean> {
+		try {
+			await this.#storage.send(
+				new HeadObjectCommand({
+					Bucket: this.#BUCKET_NAME,
+					Key: key
+				})
+			);
+			return true;
+		} catch {
+			return false;
+		}
+	}
+
 	static async uploadFileToStorage(file: File): Promise<FileMetaCreate> {
 		const result = await validateAndProcessFile(file);
 		if (!result.ok) throw new RuleError('The file is wrong or not allowed');
@@ -80,6 +95,7 @@ export class FileStorage {
 		});
 
 		await this.#storage.send(command);
+		if (!(await this.checkObjectExists(key))) throw new SrvError('Failed to upload the file to the storage');
 
 		const fileName = file.name;
 
@@ -98,6 +114,7 @@ export class FileStorage {
 			Key: key
 		});
 		await this.#storage.send(command);
+		if (await this.checkObjectExists(key)) throw new SrvError('Failed to delete the file from the storage');
 	}
 
 	// static async uploadBackupToStorage(fileKey: string, content: string) {

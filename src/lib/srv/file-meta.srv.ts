@@ -26,8 +26,14 @@ export async function getFileMetasByIds(fileIds: FileId[]): Promise<Array<FileMe
 
 export async function uploadFile(file: File): Promise<FileMeta> {
 	const fileMetaCreate = await FileStorage.uploadFileToStorage(file);
-	const fileMeta = await FileMetaRepository.createFileMeta(fileMetaCreate);
-	return toFileMeta(fileMeta);
+
+	try {
+		const fileMeta = await FileMetaRepository.createFileMeta(fileMetaCreate);
+		return toFileMeta(fileMeta);
+	} catch (error) {
+		await FileStorage.deleteFileFromStorage(fileMetaCreate.key);
+		throw error;
+	}
 }
 
 export async function uploadFiles(files: File[]): Promise<FileMeta[]> {
@@ -40,9 +46,13 @@ export async function deleteFileById(fileId: FileId): Promise<FileMeta> {
 	const isDeleted = await FileMetaRepository.deleteFileMetaById(fileId);
 	if (!isDeleted) throw new SrvError('이미 삭제된 파일입니다.');
 
-	await FileStorage.deleteFileFromStorage(fileMeta.key);
-
-	return fileMeta;
+	try {
+		await FileStorage.deleteFileFromStorage(fileMeta.key);
+		return fileMeta;
+	} catch (error) {
+		await FileMetaRepository.createFileMeta(fileMeta);
+		throw error;
+	}
 }
 
 export async function deleteFilesByIds(fileIds: FileId[]): Promise<FileMeta[]> {
