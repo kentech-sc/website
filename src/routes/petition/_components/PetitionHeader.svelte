@@ -1,29 +1,51 @@
 <script lang="ts">
 	let { pageType } = $props();
+	
+	import LinkButton from '$components/common/LinkButton.svelte'
+
+	import Pen from '@lucide/svelte/icons/pencil';
+    import List from '@lucide/svelte/icons/text';
 </script>
 
-<header class="container-col module">
-	<div class="container">
-		<h1>청원</h1>
-		{#if pageType === 'list'}
-			<a href="/petition/new">청원하기</a>
-		{:else if pageType === 'new'}
-			<a href="/petition">목록</a>
-		{:else if pageType === 'detail'}
-			<a href="/petition">목록</a>
-		{/if}
-	</div>
-	<hr />
-	<p>(대충 주의사항)</p>
+<header class="container-col module_head">
+    <div class="container">
+        <h1>청원</h1>
+        
+        {#if pageType === 'list'}
+            <LinkButton href="/petition/new">
+                <Pen size="1rem" />
+                <span>청원하기</span>
+            </LinkButton>
+            
+        {:else if pageType === 'new' || pageType === 'detail'}
+            <LinkButton href="/petition">
+                <List size="1rem" />
+                <span>목록</span>
+            </LinkButton>
+        {/if}
+    </div>
+	<p class="notice">
+        더 나은 학교를 위해 소중한 의견을 제안해 주세요
+    </p>
+    <hr />
 </header>
 
 <style lang="scss">
-	header {
-		align-items: flex-start;
+	 header {
+        align-items: flex-start;
+        width: stretch;
 
-		div {
-			width: stretch;
-			justify-content: space-between;
-		}
-	}
+        .container {
+            width: stretch;
+            justify-content: space-between;
+            align-items: center;
+        }
+    }
+
+    p {
+        font-size: 0.9rem;
+        font-weight: bold;
+        margin: 0;
+    }
+
 </style>

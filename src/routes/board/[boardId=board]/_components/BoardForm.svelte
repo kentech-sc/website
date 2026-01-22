@@ -16,7 +16,6 @@
 
 {#snippet RadioModule()}
 	<div id="radio-div">
-		<label for="anonymous">익명</label>
 		<input
 			type="radio"
 			id="anonymous"
@@ -24,7 +23,7 @@
 			value={DisplayType.Anonymous}
 			{...{ checked: post?.displayType === DisplayType.Anonymous || !post }}
 		/>
-		<label for="nickname">별명</label>
+		<label for="anonymous">익명</label>
 		<input
 			type="radio"
 			id="nickname"
@@ -32,7 +31,7 @@
 			value={DisplayType.Nickname}
 			{...{ checked: post?.displayType === DisplayType.Nickname }}
 		/>
-		<label for="realName">실명</label>
+		<label for="nickname">별명</label>
 		<input
 			type="radio"
 			id="realName"
@@ -40,6 +39,7 @@
 			value={DisplayType.RealName}
 			{...{ checked: post?.displayType === DisplayType.RealName }}
 		/>
+		<label for="realName">실명</label>
 	</div>
 {/snippet}
 
@@ -51,10 +51,8 @@
 		<div id="form-div">
 			{@render RadioModule()}
 
-			<label for="title">제목</label>
-			<input type="text" id="title" name="title" value={post?.title} />
+			<input type="text" id="title" name="title" value={post?.title} placeholder="제목을 입력하세요"/>
 
-			<label for="content">내용</label>
 			<!-- <textarea id="content" name="content">{post?.content}</textarea> -->
 			<input class="hidden" type="text" name="content" bind:value={editorHtml} readonly />
 			{#each uploadedFileMetas as fileMeta (fileMeta._id)}
@@ -75,13 +73,39 @@
 
 <style lang="scss">
 	#radio-div {
-		margin-bottom: 0.5rem;
+		display: flex;
+        width: fit-content;
+        border: 1px solid var(--gray-border);
+        background-color: white;
+        margin-bottom: 0.5rem;
 
 		label {
 			word-break: keep-all;
+			padding: 0.5rem 1.5rem;
+			cursor: pointer;
+			text-align:center;
+			border-right: 1px solid var(--gray-border);
+			transition: all 0.2s ease-in-out;
+
+			&:last-child {
+				border-right: none;
+			}
+
+			&:hover {
+				background-color: var(--secondary-bg);
+			}
+
 		}
 
 		input {
+			display: none;
+
+			&:checked + label{
+				background-color: var(--secondary);
+				color: var(--tertiary-text);
+				font-weight: bold;
+			}
+
 			margin-left: 0.25rem;
 			margin-right: 2rem;
 		}
@@ -100,5 +124,24 @@
 		// 	height: 50vh;
 		// 	resize: vertical;
 		// }
+		
+		.right-align {
+			width: 100%;
+			display: flex;
+			justify-content: flex-end;
+			margin-top: 1rem;
+		}
+
+		button {
+			background-color: var(--secondary);
+			color: white;
+			border: none;
+			padding: 0.5rem 1.5rem;
+			border-radius: 0.25rem;
+			font-size: 1rem;
+			font-weight: bold;
+			transition: background-color 0.2s;
+		}
+
 	}
 </style>
