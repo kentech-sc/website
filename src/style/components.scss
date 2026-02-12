@@ -40,6 +40,12 @@
 	background-color: white;
 	border-radius: 0.8rem;
 	padding: 1.2rem 0rem;
+	
+	p {
+        font-size: 0.9rem;
+        font-weight: bold;
+        margin: 0;
+    }
 }
 
 .ellipsis {
@@ -60,6 +66,29 @@
 	&:hover {
 		cursor: not-allowed;
 	}
+}
+
+button.btn-action {
+	background-color: var(--secondary);
+	color: white;
+	border: none;
+	padding: 0.5rem 1.5rem;
+	border-radius: 0.25rem;
+	font-size: 1rem;
+	font-weight: bold;
+	transition: opacity 0.2s ease;
+
+	&:hover {
+		opacity: 0.9;
+		text-decoration: none;
+	}
+}
+
+.right-align {
+	width: 100%;
+	display: flex;
+	justify-content: flex-end;
+	margin-top: 1rem;
 }
 
 .error {

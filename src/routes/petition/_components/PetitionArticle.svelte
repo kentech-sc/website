@@ -101,7 +101,7 @@
 	<article>
 		{@render ArticleHeader()}
 		<hr />
-		<pre>{petition.content}</pre>
+		<pre>{@html petition.content}</pre>
 		{@render SignBtn()}
 	</article>
 </section>

@@ -3,6 +3,10 @@
 	import * as CommonUtils from '$lib/common/utils.js';
 
 	import CommonForm from '$components/CommonForm.svelte';
+	import StarRating from '$components/common/StarRating.svelte';
+
+	import Clock from '@lucide/svelte/icons/clock';
+    import Calendar from '@lucide/svelte/icons/calendar';
 
 	let { review, user } = $props();
 </script>
@@ -20,25 +24,31 @@
 {/snippet}
 
 {#snippet ReviewerInfo()}
-	<p>
-		{review.year}학년도 {ReviewService.translatedTerm[review.term]}학기 수강생 | {CommonUtils.parseDate(
-			review.createdAt
-		)}
+	<p class="time-info">
+		<span>
+            <Calendar size="1rem" color="var(--gray-text)" />
+            {review.year}년 {ReviewService.translatedTerm[review.term]}학기 수강
+        </span>
+        <span>
+            <Clock size="1rem" color="var(--gray-text)" />
+            {CommonUtils.parseDate(review.createdAt)}
+        </span>
 	</p>
 {/snippet}
 
 {#snippet ReviewHeader()}
 	<header class="container">
-		<div>
-			<p><strong>[{review.courseCode}] {review.courseName}</strong></p>
-			<p>{review.professorName} 교수님</p>
-		</div>
+		<div class="container-col header-content">
+            <p class="sub-text">
+                [{review.courseCode}] {review.courseName} | {review.professorName} 교수님
+            </p>
+            {@render ReviewerInfo()}
+        </div>
 
 		<div>
 			{#if review.userId === user._id}
 				{@render BtnGroup()}
 			{/if}
-			{@render ReviewerInfo()}
 		</div>
 	</header>
 {/snippet}
@@ -46,13 +56,13 @@
 {#snippet ReviewContents()}
 	<h2>"{review.title}"</h2>
 	<hr />
-	<p><b>과제 양:</b> {review.score.assignment}</p>
-	<hr />
-	<p><b>강의 난이도:</b> {review.score.lecture}</p>
-	<hr />
-	<p><b>시험 횟수:</b> {review.score.exam}</p>
-	<hr />
 	<pre>{review.comment}</pre>
+	<hr />
+	<div class="container" id="score">
+		<p><b>과제 양:</b> <StarRating score={review.score.assignment}/></p>
+		<p><b>강의 난이도:</b> <StarRating score={review.score.lecture}/></p>
+		<p><b>시험 횟수:</b> <StarRating score={review.score.exam}/></p>
+	</div>
 {/snippet}
 
 <article class="module">
@@ -87,5 +97,36 @@
 
 	.delete-form {
 		width: fit-content;
+	}
+
+	.time-info {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+		color: var(--gray-text);
+		font-size: 0.8rem;
+		margin: 0;
+
+		span {
+			display: flex;
+			align-items: center;
+			gap: 0.3rem;
+		}
+    }
+	
+
+	#score {
+		gap: 3em;
+		flex-wrap: wrap;
+
+		margin-top: 1rem;
+
+		p {
+			display: flex;
+			align-items: center;
+			gap: 0.5rem;
+			margin: 0;
+			white-space: nowrap;
+		}
 	}
 </style>

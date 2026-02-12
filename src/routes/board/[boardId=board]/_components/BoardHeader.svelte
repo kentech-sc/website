@@ -45,9 +45,4 @@
 			justify-content: space-between;
 		}
 	}
-
-	p {
-		font-size: 0.9rem;
-		font-weight: bold;
-	}
 </style>

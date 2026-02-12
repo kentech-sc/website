@@ -1,7 +1,10 @@
-<header class="container-col module">
+<header class="container-col module_head">
+	<h1>검색</h1>
+
 	<div class="container">
-		<h1>검색</h1>
+		<p>찾고 싶은 내용을 입력해주세요</p>
 	</div>
+	<hr />
 </header>
 
 <style lang="scss">

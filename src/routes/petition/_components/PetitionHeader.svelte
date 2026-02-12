@@ -38,11 +38,4 @@
             align-items: center;
         }
     }
-
-    p {
-        font-size: 0.9rem;
-        font-weight: bold;
-        margin: 0;
-    }
-
 </style>

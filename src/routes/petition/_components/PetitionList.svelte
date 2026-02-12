@@ -89,8 +89,14 @@
 			border-bottom: solid var(--gray-border) 0.1rem;
 		}
 
-		tbody > tr:nth-child(2n + 1) > td {
-			background-color: var(--gray-bg);
+		tbody {
+			tr {
+				border-bottom: solid var(--gray-border) 0.1rem;
+			}
+
+			tr:hover > td {
+				background-color: var(--gray-bg);
+			}
 		}
 
 		td:nth-child(n) {

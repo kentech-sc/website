@@ -66,7 +66,10 @@
 			{/each}
 
 			<QuillEditor bind:editorHtml bind:uploadedFileMetas initialHtml={post?.content} />
-			<button type="submit">{post ? '수정' : '작성'}</button>
+			
+			<div class="right-align">
+				<button type="submit" class="btn-action">{post ? '수정' : '작성'}</button>
+			</div>
 		</div>
 	</CommonForm>
 </section>
@@ -81,7 +84,7 @@
 
 		label {
 			word-break: keep-all;
-			padding: 0.5rem 1.5rem;
+			padding: 0.3rem 0.9rem;
 			cursor: pointer;
 			text-align:center;
 			border-right: 1px solid var(--gray-border);
@@ -111,6 +114,10 @@
 		}
 	}
 
+	#title {
+		font-size: 1rem;
+	}
+
 	#form-div {
 		width: stretch;
 		align-items: flex-start;
@@ -125,23 +132,5 @@
 		// 	resize: vertical;
 		// }
 		
-		.right-align {
-			width: 100%;
-			display: flex;
-			justify-content: flex-end;
-			margin-top: 1rem;
-		}
-
-		button {
-			background-color: var(--secondary);
-			color: white;
-			border: none;
-			padding: 0.5rem 1.5rem;
-			border-radius: 0.25rem;
-			font-size: 1rem;
-			font-weight: bold;
-			transition: background-color 0.2s;
-		}
-
 	}
 </style>
