@@ -1,7 +1,7 @@
 <script lang="ts">
 	import slide01 from '$assets/slide01.jpg';
 	import slide02 from '$assets/slide02.jpg';
-	import slide03 from '$assets/slide03.jpg';
+	import slide03 from '$assets/slide03.png';
 	import leftImg from '$assets/left.png';
 	import rightImg from '$assets/right.png';
 
