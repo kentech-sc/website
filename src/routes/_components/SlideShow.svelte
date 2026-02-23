@@ -4,11 +4,12 @@
 	import slide03 from '$assets/slide03.png';
 	import leftImg from '$assets/left.png';
 	import rightImg from '$assets/right.png';
+	import mainLogo from '$assets/1.Main_Logo.png'
 
 	const slides = [
-		{ title: '~풍경 사진~', image: slide01 },
-		{ title: '~수업 사진~', image: slide02 },
-		{ title: '~회장 사진~', image: slide03 }
+		{ title: '~조감도 사진~', image: slide01 },
+		{ title: '~학생회 사진~', image: slide02 },
+		{ title: '~야경 사진~', image: slide03 }
 	];
 
 	let current = $state(0);
@@ -39,10 +40,11 @@
 </script>
 
 <div class="slideshow">
+	<img src="{mainLogo}" alt="Main Logo" class="center-logo">
+
 	<ul class="slidelist" style="transform: translateX(-{current * 100}%);">
 		{#each slides as slide, idx (idx)}
 			<li class="slideitem">
-				<p>{slide.title}</p>
 				<img src={slide.image} alt={slide.title} />
 			</li>
 		{/each}
@@ -71,6 +73,18 @@
 		width: 100%;
 		height: 100vh;
 		overflow: hidden;
+
+		.center-logo {
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			z-index: 3;
+
+			width: 10rem;
+
+			filter: brightness(0) invert(1);
+		}
 
 		.slidelist {
 			display: flex;
