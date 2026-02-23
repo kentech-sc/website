@@ -11,17 +11,31 @@
 		{ title: '~회장 사진~', image: slide03 }
 	];
 
-	let current = 0;
+	let current = $state(0);
+	let resetTrigger = $state(0);
 
 	function prev() {
 		current = (current - 1 + slides.length) % slides.length;
+		resetTrigger++;
 	}
 	function next() {
 		current = (current + 1) % slides.length;
+		resetTrigger++;
 	}
 	function goTo(idx: number) {
 		current = idx;
+		resetTrigger++;
 	}
+
+	$effect(() => {
+		resetTrigger;
+
+		const timer = setInterval(() => {
+			next();
+		}, 5000);
+
+		return () => clearInterval(timer);
+	})
 </script>
 
 <div class="slideshow">
@@ -34,7 +48,6 @@
 		{/each}
 	</ul>
 
-	<!-- 좌우 버튼 -->
 	<button class="control container" id="left-btn" onclick={prev}
 		><img src={leftImg} alt="left" /></button
 	>
@@ -42,7 +55,6 @@
 		><img src={rightImg} alt="right" /></button
 	>
 
-	<!-- 페이징 -->
 	<ul id="slide-pagelist" class="container">
 		{#each slides as _, idx (idx)}
 			<li>
