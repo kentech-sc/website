@@ -12,7 +12,8 @@ const ReviewSchema = new mongoose.Schema<ReviewDoc>(
 		score: {
 			assignment: { type: Number, required: true },
 			lecture: { type: Number, required: true },
-			exam: { type: Number, required: true }
+			exam: { type: Number, required: true },
+			satisfaction: { type: Number, required: true }
 		},
 		comment: { type: String, default: '' }
 	},

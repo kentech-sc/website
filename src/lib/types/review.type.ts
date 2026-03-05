@@ -17,6 +17,7 @@ export interface ReviewCreate {
 		assignment: number;
 		lecture: number;
 		exam: number;
+		satisfaction: number;
 	};
 	comment: string;
 }

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import CommonForm from '$components/CommonForm.svelte';
+	import StarRating from '$components/common/StarRating.svelte';
 
 	import * as ReviewService from '$lib/srv/review.srv.js';
 
@@ -14,10 +15,27 @@
 	}: { professors: Professor[]; courses: Course[]; review?: Review } = $props();
 
 	let scores = $state({
-        assignment: review?.score.assignment ?? 5,
-        lecture: review?.score.lecture ?? 5,
-        exam: review?.score.exam ?? 5
-    });
+		assignment: review?.score.assignment ?? 5,
+		lecture: review?.score.lecture ?? 5,
+		exam: review?.score.exam ?? 5,
+		satisfaction: review?.score.satisfaction ?? 10
+	});
+
+	function getAmountLabel(value: number): string {
+		if (value <= 2) return '아주 적음';
+		if (value <= 4) return '적음';
+		if (value <= 6) return '보통';
+		if (value <= 8) return '많음';
+		return '아주 많음';
+	}
+
+	function getDifficultyLabel(value: number): string {
+		if (value <= 2) return '매우 쉬움';
+		if (value <= 4) return '쉬움';
+		if (value <= 6) return '보통';
+		if (value <= 8) return '어려움';
+		return '매우 어려움';
+	}
 </script>
 
 {#snippet TermInputs()}
@@ -68,64 +86,71 @@
 {/snippet}
 
 {#snippet ScoreInputs()}
-	<div class="container" id="score-container">
-		<div class="score-item">
-            <div class="label-row">
-                <label for="assignmentScore">과제 양</label>
-                <span class="current-value">{scores.assignment}</span>
-            </div>
-            <input
-                type="range"
-                id="assignmentScore"
-                name="assignmentScore"
-                min="0"
-                max="10"
-                step="1"
-                bind:value={scores.assignment} 
-            />
-            <div class="range-guide">
-                <span>적음(0)</span>
-                <span>많음(10)</span>
-            </div>
-        </div>
-		<div class="score-item">
-            <div class="label-row">
-                <label for="lectureScore">강의 난이도</label>
-                <span class="current-value">{scores.lecture}</span>
-            </div>
-            <input
-                type="range"
-                id="lectureScore"
-                name="lectureScore"
-                min="0"
-                max="10"
-                step="1"
-                bind:value={scores.lecture}
-            />
-            <div class="range-guide">
-                <span>쉬움(0)</span>
-                <span>어려움(10)</span>
-            </div>
-        </div>
-		<div class="score-item">
-            <div class="label-row">
-                <label for="examScore">시험 횟수</label>
-                <span class="current-value">{scores.exam}</span>
-            </div>
-            <input
-                type="range"
-                id="examScore"
-                name="examScore"
-                min="0"
-                max="10"
-                step="1"
-                bind:value={scores.exam}
-            />
-            <div class="range-guide">
-                <span>적음(0)</span>
-                <span>많음(10)</span>
-            </div>
-        </div>
+	<div id="score-container">
+		<div class="container slider-row">
+			<div class="score-item">
+				<div class="label-row">
+					<label for="assignmentScore">과제 양</label>
+					<span class="current-label">{getAmountLabel(scores.assignment)}</span>
+				</div>
+				<input
+					type="range"
+					id="assignmentScore"
+					name="assignmentScore"
+					min="0"
+					max="10"
+					step="1"
+					bind:value={scores.assignment}
+				/>
+				<div class="range-guide">
+					<span>적음</span>
+					<span>많음</span>
+				</div>
+			</div>
+			<div class="score-item">
+				<div class="label-row">
+					<label for="lectureScore">강의 난이도</label>
+					<span class="current-label">{getDifficultyLabel(scores.lecture)}</span>
+				</div>
+				<input
+					type="range"
+					id="lectureScore"
+					name="lectureScore"
+					min="0"
+					max="10"
+					step="1"
+					bind:value={scores.lecture}
+				/>
+				<div class="range-guide">
+					<span>쉬움</span>
+					<span>어려움</span>
+				</div>
+			</div>
+			<div class="score-item">
+				<div class="label-row">
+					<label for="examScore">시험 횟수</label>
+					<span class="current-label">{getAmountLabel(scores.exam)}</span>
+				</div>
+				<input
+					type="range"
+					id="examScore"
+					name="examScore"
+					min="0"
+					max="10"
+					step="1"
+					bind:value={scores.exam}
+				/>
+				<div class="range-guide">
+					<span>적음</span>
+					<span>많음</span>
+				</div>
+			</div>
+		</div>
+		<div class="satisfaction-item">
+			<label>만족도</label>
+			<StarRating interactive bind:score={scores.satisfaction} />
+			<input type="hidden" name="satisfactionScore" value={scores.satisfaction} />
+		</div>
 	</div>
 {/snippet}
 
@@ -212,9 +237,14 @@
     #score-container {
         width: 100%;
         display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .slider-row {
         flex-wrap: wrap;
         gap: 2rem;
-        margin-bottom: 1rem;
     }
 
     .score-item {
@@ -222,8 +252,8 @@
         min-width: 200px;
         display: flex;
         flex-direction: column;
-		
-		margin-right: 2rem;
+
+        margin-right: 2rem;
 
         .label-row {
             display: flex;
@@ -231,10 +261,10 @@
             align-items: center;
             margin-bottom: 0.5rem;
 
-            .current-value {
+            .current-label {
                 color: var(--secondary);
                 font-weight: bold;
-                font-size: 1.1rem;
+                font-size: 0.95rem;
             }
         }
 
@@ -242,8 +272,8 @@
             cursor: pointer;
             accent-color: var(--secondary);
             margin-bottom: 0.3rem;
-			margin-right: 0.5rem;
-			margin-left: 0.5rem;
+            margin-right: 0.5rem;
+            margin-left: 0.5rem;
         }
 
         .range-guide {
@@ -252,5 +282,14 @@
             font-size: 0.75rem;
             color: var(--secondary-text);
         }
-	}
+    }
+
+    .satisfaction-item {
+        label {
+            font-size: 0.9rem;
+            font-weight: bold;
+            margin-left: 0.2rem;
+            margin-bottom: 0.5rem;
+        }
+    }
 </style>

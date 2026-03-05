@@ -1,29 +1,59 @@
 <script lang="ts">
-
     import Star from '@lucide/svelte/icons/star';
 	import StarHalf from '@lucide/svelte/icons/star-half';
 
-    let { score = 0 }: { score: number } = $props();
+    let {
+        score = $bindable(0),
+        interactive = false,
+        onchange
+    }: {
+        score?: number;
+        interactive?: boolean;
+        onchange?: (value: number) => void;
+    } = $props();
 
-    let rating = $derived(score / 2);
+    let hoveredRating = $state(0);
+    let displayRating = $derived(interactive && hoveredRating ? hoveredRating : score / 2);
+
+    function handleMouseMove(e: MouseEvent, starIndex: number) {
+        const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+        hoveredRating = e.clientX - rect.left < rect.width / 2 ? starIndex - 0.5 : starIndex;
+    }
+
+    function handleClick(e: MouseEvent, starIndex: number) {
+        const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+        const newRating = e.clientX - rect.left < rect.width / 2 ? starIndex - 0.5 : starIndex;
+        score = newRating * 2;
+        onchange?.(score);
+    }
 </script>
 
-<div class="star-rating">
+<div class="star-rating" class:interactive onmouseleave={() => (hoveredRating = 0)}>
     {#each [1, 2, 3, 4, 5] as i}
-        <div class="star-wrapper">
-            {#if rating >= i}
+        <div
+            class="star-wrapper"
+            role={interactive ? 'button' : undefined}
+            tabindex={interactive ? 0 : undefined}
+            aria-label={interactive ? `별점 ${i}점` : undefined}
+            onmousemove={interactive ? (e) => handleMouseMove(e, i) : undefined}
+            onclick={interactive ? (e) => handleClick(e, i) : undefined}
+            onkeydown={interactive ? (e) => e.key === 'Enter' && handleClick(e as unknown as MouseEvent, i) : undefined}
+        >
+            {#if displayRating >= i}
                 <Star class="star full" fill="#FFC107"/>
-            
-            {:else if rating >= i - 0.5}
+
+            {:else if displayRating >= i - 0.5}
                 <Star class="star empty background"/>
                 <StarHalf class="star half overlay" fill="#FFC107"/>
-            
+
             {:else}
                 <Star class="star empty"/>
             {/if}
         </div>
     {/each}
-    <span class="score-text">({score})</span>
+    {#if !interactive}
+        <span class="score-text">({score})</span>
+    {/if}
 </div>
 
 <style lang="scss">
@@ -31,11 +61,22 @@
         display: inline-flex;
         align-items: center;
         gap: 0.125rem;
+
+        &.interactive .star-wrapper {
+            cursor: pointer;
+            width: 1.6rem;
+            height: 1.6rem;
+            transition: transform 0.1s ease;
+
+            &:hover {
+                transform: scale(1.15);
+            }
+        }
     }
 
     .star-wrapper {
         position: relative;
-        width: 1.25rem; 
+        width: 1.25rem;
         height: 1.25rem;
         display: flex;
         align-items: center;

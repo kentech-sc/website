@@ -16,6 +16,7 @@ export function checkReviewScore(score: {
 	assignment: number;
 	lecture: number;
 	exam: number;
+	satisfaction: number;
 }): boolean {
 	for (const key in score) {
 		if (score[key as keyof typeof score] < 1 || score[key as keyof typeof score] > 10) return false;

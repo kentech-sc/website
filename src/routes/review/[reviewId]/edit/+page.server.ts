@@ -50,7 +50,8 @@ export const actions = {
 		const score = {
 			assignment: Number(formData.get('assignmentScore')),
 			lecture: Number(formData.get('lectureScore')),
-			exam: Number(formData.get('examScore'))
+			exam: Number(formData.get('examScore')),
+			satisfaction: Number(formData.get('satisfactionScore'))
 		};
 
 		const comment = (formData.get('comment') ?? '').toString();

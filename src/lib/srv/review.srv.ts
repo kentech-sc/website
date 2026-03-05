@@ -41,6 +41,7 @@ export async function createReview(
 		assignment: number;
 		lecture: number;
 		exam: number;
+		satisfaction: number;
 	},
 	comment: string
 ): Promise<Review> {

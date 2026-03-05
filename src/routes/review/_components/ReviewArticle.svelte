@@ -9,6 +9,22 @@
     import Calendar from '@lucide/svelte/icons/calendar';
 
 	let { review, user } = $props();
+
+	function getAmountLabel(value: number): string {
+		if (value <= 2) return '아주 적음';
+		if (value <= 4) return '적음';
+		if (value <= 6) return '보통';
+		if (value <= 8) return '많음';
+		return '아주 많음';
+	}
+
+	function getDifficultyLabel(value: number): string {
+		if (value <= 2) return '매우 쉬움';
+		if (value <= 4) return '쉬움';
+		if (value <= 6) return '보통';
+		if (value <= 8) return '어려움';
+		return '매우 어려움';
+	}
 </script>
 
 {#snippet BtnGroup()}
@@ -58,10 +74,15 @@
 	<hr />
 	<pre>{review.comment}</pre>
 	<hr />
-	<div class="container" id="score">
-		<p><b>과제 양:</b> <StarRating score={review.score.assignment}/></p>
-		<p><b>강의 난이도:</b> <StarRating score={review.score.lecture}/></p>
-		<p><b>시험 횟수:</b> <StarRating score={review.score.exam}/></p>
+	<div id="score">
+		<div class="container score-labels">
+			<p><b>과제 양:</b> <span class="label-value">{getAmountLabel(review.score.assignment)}</span></p>
+			<p><b>강의 난이도:</b> <span class="label-value">{getDifficultyLabel(review.score.lecture)}</span></p>
+			<p><b>시험 횟수:</b> <span class="label-value">{getAmountLabel(review.score.exam)}</span></p>
+		</div>
+		<div class="container score-satisfaction">
+			<p><b>만족도:</b> <StarRating score={review.score.satisfaction}/></p>
+		</div>
 	</div>
 {/snippet}
 
@@ -116,10 +137,19 @@
 	
 
 	#score {
-		gap: 3em;
-		flex-wrap: wrap;
-
 		margin-top: 1rem;
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+
+		.score-labels {
+			gap: 2.5rem;
+			flex-wrap: wrap;
+		}
+
+		.score-satisfaction {
+			gap: 0.5rem;
+		}
 
 		p {
 			display: flex;
@@ -127,6 +157,11 @@
 			gap: 0.5rem;
 			margin: 0;
 			white-space: nowrap;
+		}
+
+		.label-value {
+			color: var(--secondary);
+			font-weight: bold;
 		}
 	}
 </style>

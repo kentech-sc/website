@@ -23,7 +23,7 @@
 		const querys = [];
 		if (selectedCourse) querys.push(`course=${selectedCourse}`);
 		if (selectedProfessor) querys.push(`professor=${selectedProfessor}`);
-		goto(`/review?${querys.join('&')}`);
+		goto(querys.length ? `/review?${querys.join('&')}` : '/review');
 	});
 
 	const courses = $derived<Course[]>(JSON.parse(data?.courses || '[]'));
