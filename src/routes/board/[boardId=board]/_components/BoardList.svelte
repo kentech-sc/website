@@ -2,10 +2,12 @@
 	import { page } from '$app/state';
 
 	import CommonListBtnModule from '$components/CommonListBtnModule.svelte';
+	import MobileListItem from '$components/MobileListItem.svelte';
 
 	import type { Post } from '$lib/types/post.type.js';
 
 	import * as CommonUtils from '$lib/common/utils.js';
+	import { parseRelativeDate } from '$lib/common/utils.js';
 
 	let { posts, toId, fromId } = $props();
 
@@ -50,6 +52,22 @@
 			{/each}
 		</tbody>
 	</table>
+	<CommonListBtnModule pageName="board/{boardId}" {toId} {fromId} />
+</section>
+
+<section class="container-col module mobile-list">
+	{#each posts as post (post._id)}
+		<MobileListItem href={`/board/${boardId}/${post._id}`}>
+			{#snippet row1()}
+				<span class="title">{post.title}</span>
+				{#if post.commentCnt > 0}<span class="comment-cnt">[{post.commentCnt}]</span>{/if}
+			{/snippet}
+			{#snippet row2()}
+				<span class="meta">{post.displayName} · 조회 {post.viewCnt} · 추천 {post.likeCnt}</span>
+				<span class="time">{parseRelativeDate(post.createdAt)}</span>
+			{/snippet}
+		</MobileListItem>
+	{/each}
 	<CommonListBtnModule pageName="board/{boardId}" {toId} {fromId} />
 </section>
 
@@ -110,6 +128,28 @@
 					color: var(--secondary);
 					font-size: 0.8rem;
 				}
+			}
+		}
+	}
+
+	.mobile-list {
+		display: none;
+	}
+
+	@media (max-width: 768px) {
+		section:not(.mobile-list) {
+			display: none;
+		}
+
+		.mobile-list {
+			display: flex;
+			padding: 0;
+
+			:global(.comment-cnt) {
+				flex-shrink: 0;
+				color: var(--secondary);
+				font-size: 0.9rem;
+				font-weight: bold;
 			}
 		}
 	}

@@ -88,6 +88,7 @@
 
 		.slidelist {
 			display: flex;
+			height: 100%;
 			transition: transform 0.5s ease-in-out;
 			list-style-type: none;
 
@@ -97,7 +98,9 @@
 
 				img {
 					width: 100%;
+					height: 100%;
 					display: block;
+					object-fit: cover;
 				}
 			}
 		}

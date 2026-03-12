@@ -11,15 +11,15 @@
 	let petitions = $state<Petition[]>(JSON.parse(data?.petitions || '[]'));
 </script>
 
-<div class="primary" id="banner">
+<div class="primary hidden" id="banner">
 	<p>(대충 배너)</p>
 </div>
 
-<div class="secondary" id="calendar">
+<div class="secondary hidden" id="calendar">
 	<p>(대충 달력)</p>
 </div>
 
-<div class="tertiary" id="photo">
+<div class="tertiary hidden" id="photo">
 	<p>(대충 사진)</p>
 </div>
 

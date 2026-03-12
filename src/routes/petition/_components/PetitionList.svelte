@@ -2,9 +2,11 @@
 	import type { Petition } from '$lib/types/petition.type.js';
 
 	import CommonListBtnModule from '$components/CommonListBtnModule.svelte';
+	import MobileListItem from '$components/MobileListItem.svelte';
 
 	import * as PetitionService from '$lib/srv/petition.srv.js';
 	import * as CommonUtils from '$lib/common/utils.js';
+	import { parseRelativeDate } from '$lib/common/utils.js';
 
 	let { petitions, toId, fromId } = $props();
 </script>
@@ -70,6 +72,22 @@
 	<CommonListBtnModule pageName="petition" {toId} {fromId} />
 </section>
 
+<section class="container-col module mobile-list">
+	{#each petitions as petition (petition._id)}
+		<MobileListItem href="/petition/{petition._id}">
+			{#snippet row1()}
+				<span class="status" style="color: {PetitionService.colorStatus[petition.status]}">[{PetitionService.translatedStatus[petition.status]}]</span>
+				<span class="title">{petition.title}</span>
+			{/snippet}
+			{#snippet row2()}
+				<span class="meta">{petition.petitionerName} · 조회 {petition.viewCnt} · 동의 {petition.signCnt}</span>
+				<span class="time">{parseRelativeDate(petition.createdAt)}</span>
+			{/snippet}
+		</MobileListItem>
+	{/each}
+	<CommonListBtnModule pageName="petition" {toId} {fromId} />
+</section>
+
 <style lang="scss">
 	table {
 		width: stretch;
@@ -111,6 +129,27 @@
 			font-weight: bold;
 			a {
 				color: black;
+			}
+		}
+	}
+
+	.mobile-list {
+		display: none;
+	}
+
+	@media (max-width: 768px) {
+		section:not(.mobile-list) {
+			display: none;
+		}
+
+		.mobile-list {
+			display: flex;
+			padding: 0;
+
+		:global(.status) {
+				flex-shrink: 0;
+				font-size: 0.9rem;
+				font-weight: bold;
 			}
 		}
 	}

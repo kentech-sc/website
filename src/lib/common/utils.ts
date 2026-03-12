@@ -90,6 +90,29 @@ export function parseDate(
 	return '???';
 }
 
+/* 날짜를 상대적 표현으로 변환
+ - 당일: HH:mm
+ - 2일 이상: X일 전
+ - 31일 이상: X달 전
+ - 12달 이상: X년 전
+ */
+export function parseRelativeDate(date: Date | string): string {
+	if (typeof date === 'string') date = new Date(date);
+
+	const now = new Date();
+	const diffMs = now.getTime() - date.getTime();
+	const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+	if (diffDays === 0) {
+		const pad = (n: number) => n.toString().padStart(2, '0');
+		return `${pad(date.getHours())}:${pad(date.getMinutes())}`;
+	}
+	if (diffDays < 31) return `${diffDays}일 전`;
+	const diffMonths = Math.floor(diffDays / 30);
+	if (diffMonths < 12) return `${diffMonths}달 전`;
+	return `${Math.floor(diffMonths / 12)}년 전`;
+}
+
 // 숫자 + 알파벳 + 한글 자음 배열 (정렬용)
 export const choseongArr: string[] = [
 	'0',
