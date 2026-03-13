@@ -1,9 +1,10 @@
 import type { Review } from '$lib/types/review.type.js';
 import type { User } from '$lib/types/user.type.js';
 import { UserGroup } from '$lib/types/user.type.js';
+import { hasMinRole } from '$lib/common/permission.js';
 
 export function canEditOrDeleteReview(review: Review, user: User): boolean {
-	return review.userId.equals(user._id) || user.group === UserGroup.Manager;
+	return review.userId.equals(user._id) || hasMinRole(user, UserGroup.Manager);
 }
 
 export function checkReviewYearAndTerm(year: number, term: number): boolean {

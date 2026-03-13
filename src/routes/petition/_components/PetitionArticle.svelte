@@ -5,6 +5,7 @@
 	import ThumbsUp from '@lucide/svelte/icons/thumbs-up';
 
 	import CommonForm from '$components/CommonForm.svelte';
+	import Permission from '../../_components/Permission.svelte';
 
 	import * as CommonUtils from '$lib/common/utils.js';
 
@@ -86,14 +87,14 @@
 				{petition.petitionerName} | {CommonUtils.parseDate(petition.createdAt)} | 조회수: {petition.viewCnt}
 			</p>
 		</div>
-		{#if petition.petitionerId === user._id}
+		<Permission {user} ownerId={petition.petitionerId} minRole="manager">
 			<div class="delete-form">
 				<CommonForm actionName="deletePetition" formName="deletePetition">
 					<input type="hidden" name="petition-id" value={petition._id} />
 					<button type="submit">삭제</button>
 				</CommonForm>
 			</div>
-		{/if}
+		</Permission>
 	</header>
 {/snippet}
 

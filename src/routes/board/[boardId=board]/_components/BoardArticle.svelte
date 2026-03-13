@@ -8,6 +8,7 @@
 	import * as CommonUtils from '$lib/common/utils.js';
 
 	import CommonForm from '$components/CommonForm.svelte';
+	import Permission from '../../../_components/Permission.svelte';
 
 	import Clock from '@lucide/svelte/icons/clock';
 	import Eye from '@lucide/svelte/icons/eye';
@@ -75,7 +76,7 @@
 				<span><Heart size="1rem" color="var(--gray-text)" />{post.likeCnt}</span>
 			</p>
 		</div>
-		{#if post.userId === user._id}{@render BtnGroup()}{/if}
+		<Permission {user} ownerId={post.userId} minRole="moderator">{@render BtnGroup()}</Permission>
 	</header>
 {/snippet}
 

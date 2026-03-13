@@ -4,6 +4,7 @@
 
 	import CommonForm from '$components/CommonForm.svelte';
 	import StarRating from '$components/common/StarRating.svelte';
+	import Permission from '../../_components/Permission.svelte';
 
 	import Clock from '@lucide/svelte/icons/clock';
     import Calendar from '@lucide/svelte/icons/calendar';
@@ -62,9 +63,9 @@
         </div>
 
 		<div>
-			{#if review.userId === user._id}
+			<Permission {user} ownerId={review.userId} minRole="manager">
 				{@render BtnGroup()}
-			{/if}
+			</Permission>
 		</div>
 	</header>
 {/snippet}

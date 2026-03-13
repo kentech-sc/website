@@ -1,6 +1,7 @@
 import { UserGroup } from '$lib/types/user.type.js';
 import type { User } from '$lib/types/user.type.js';
 import type { Comment, CommentCreate } from '$lib/types/comment.type.js';
+import { hasMinRole } from '$lib/common/permission.js';
 
 export function canCreateComment(commentCreate: CommentCreate): boolean {
 	if (commentCreate.content.trim() === '') return false;
@@ -8,9 +9,5 @@ export function canCreateComment(commentCreate: CommentCreate): boolean {
 }
 
 export function canEditOrDeleteComment(comment: Comment, user: User): boolean {
-	return (
-		comment.userId.equals(user._id) ||
-		user.group === UserGroup.Moderator ||
-		user.group === UserGroup.Manager
-	);
+	return comment.userId.equals(user._id) || hasMinRole(user, UserGroup.Moderator);
 }

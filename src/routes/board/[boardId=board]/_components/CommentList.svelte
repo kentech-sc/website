@@ -6,6 +6,7 @@
 
 	import * as CommonUtils from '$lib/common/utils.js';
 	import CommonForm from '$components/CommonForm.svelte';
+	import Permission from '../../../_components/Permission.svelte';
 
 	import { invalidateAll } from '$app/navigation';
 
@@ -34,7 +35,7 @@
 		<p><b>[{comment.displayName}]</b> {comment.content}</p>
 		<div class="container">
 			<p>{CommonUtils.parseDate(comment.createdAt)}</p>
-			{#if comment.userId === user._id}{@render DeleteBtn(comment)}{/if}
+			<Permission {user} ownerId={comment.userId} minRole="moderator">{@render DeleteBtn(comment)}</Permission>
 		</div>
 	</div>
 {/snippet}
