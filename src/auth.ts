@@ -17,8 +17,20 @@ export const { handle, signIn, signOut } = SvelteKitAuth({
 		})
 	],
 	secret: AUTH_SECRET,
-	trustHost: true // For Vercel
+	trustHost: true, // For Vercel
 	// pages: {
 	//     signIn: '/u/',
-	// }
+	// },
+	callbacks: {
+		async jwt({ token, user, profile }) {
+			if (user && profile) {
+				token.sub = profile.sub ?? undefined;
+			}
+			return token;
+		},
+		async session({ session, token }) {
+			session.user.id = token.sub as string;
+			return session;
+		}
+	}
 });
