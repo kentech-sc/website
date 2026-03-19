@@ -57,7 +57,11 @@
 					<span class="title">"{review.title}"</span>
 				{/snippet}
 				{#snippet row2()}
-					<span class="meta">{review.professorName} · {review.year}학년도 {ReviewService.translatedTerm[review.term]}학기</span>
+					<span class="meta"
+						>{review.professorName} · {review.year}학년도 {ReviewService.translatedTerm[
+							review.term
+						]}학기</span
+					>
 					<span class="time">{parseRelativeDate(review.createdAt)}</span>
 				{/snippet}
 			</MobileListItem>

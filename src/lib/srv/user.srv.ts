@@ -1,4 +1,4 @@
-import type { User, UserId, UserUpdate } from '$lib/types/user.type.js';
+import type { User, UserId, UserUpdate, Profile } from '$lib/types/user.type.js';
 
 import { UserGroup, DisplayType } from '$lib/types/user.type.js';
 
@@ -6,6 +6,10 @@ import * as UserRepository from '$lib/repo/user.repo.js';
 import * as UserRule from '$lib/rules/user.rule.js';
 
 import { RuleError, SrvError } from '$lib/common/errors.js';
+
+export async function getUserOrNullById(userId: UserId): Promise<User | null> {
+	return await UserRepository.getUserById(userId);
+}
 
 export async function getUserOrNullByEmail(email: string): Promise<User | null> {
 	return await UserRepository.getUserByEmail(email);
@@ -17,19 +21,19 @@ export async function getUserByEmail(email: string): Promise<User> {
 	return user;
 }
 
-export async function getUsersByRealName(realName: string): Promise<User[]> {
-	return await UserRepository.getUsersByRealName(realName);
-}
+// export async function getUsersByRealName(realName: string): Promise<User[]> {
+// 	return await UserRepository.getUsersByRealName(realName);
+// }
 
 export async function getUserOrNullByNickname(nickname: string): Promise<User | null> {
 	return await UserRepository.getUserByNickname(nickname);
 }
 
-export async function getUserByNickname(nickname: string): Promise<User> {
-	const user = await UserRepository.getUserByNickname(nickname);
-	if (!user) throw new SrvError('존재하지 않는 사용자입니다.');
-	return user;
-}
+// export async function getUserByNickname(nickname: string): Promise<User> {
+// 	const user = await UserRepository.getUserByNickname(nickname);
+// 	if (!user) throw new SrvError('존재하지 않는 사용자입니다.');
+// 	return user;
+// }
 
 export async function getUserById(userId: UserId): Promise<User> {
 	const user = await UserRepository.getUserById(userId);
@@ -49,15 +53,16 @@ export async function getUsersByIds(userIds: UserId[]): Promise<Array<User | nul
 // 	return user;
 // }
 
-export async function signupUserByEmailAndRealName(email: string, realName: string): Promise<User> {
-	let user = await getUserOrNullByEmail(email);
+export async function signupUser(profile: Profile): Promise<User> {
+	let user = await getUserOrNullById(profile.id);
 	if (user) throw new RuleError('이미 가입된 사용자입니다.');
 
-	const nickname = email.split('@')[0];
+	const nickname = profile.email.split('@')[0];
 
 	user = await UserRepository.createUser({
-		email,
-		realName,
+		_id: profile.id,
+		email: profile.email,
+		realName: profile.name,
 		nickname,
 		group: UserGroup.User
 	});
@@ -73,12 +78,12 @@ export async function updateUserById(userId: UserId, userUpdate: UserUpdate): Pr
 	return updatedUser;
 }
 
-export async function changeNicknameByEmail(
-	email: string,
+export async function changeNicknameById(
+	userId: UserId,
 	newNickname: string,
 	operator: User
 ): Promise<User> {
-	const target = await getUserByEmail(email);
+	const target = await getUserById(userId);
 
 	const isDuplicate = (await getUserOrNullByNickname(newNickname)) !== null;
 	if (!UserRule.canChangeNickname(target, newNickname, operator, isDuplicate))
@@ -143,10 +148,10 @@ export async function createUserIdAndIdxMap<T extends { userId: UserId }>(arr: T
 	let idx = 1;
 	for (const user of users) {
 		if (!user) continue;
-		if (userById.has(user._id.toString())) continue;
+		if (userById.has(user._id)) continue;
 
-		userById.set(user._id.toString(), user);
-		idxByUserId.set(user._id.toString(), idx++);
+		userById.set(user._id, user);
+		idxByUserId.set(user._id, idx++);
 	}
 
 	return { userById, idxByUserId };
@@ -160,7 +165,7 @@ export function createDisplayName(
 	switch (displayType) {
 		case DisplayType.Anonymous: {
 			if (!idxByUserId) return AnonymousName;
-			const anonIdx = idxByUserId.get(user._id.toString());
+			const anonIdx = idxByUserId.get(user._id);
 			return `${AnonymousName} ${anonIdx}`; // ex. 익명의 켄텍인 1
 		}
 
@@ -205,7 +210,7 @@ export async function fillDisplayNames<T extends { userId: UserId; displayType: 
 	const { userById, idxByUserId } = await createUserIdAndIdxMap(arr);
 
 	return arr.map((item) => {
-		const user = userById.get(item.userId.toString());
+		const user = userById.get(item.userId);
 
 		if (!user) return { ...item, displayName: null };
 

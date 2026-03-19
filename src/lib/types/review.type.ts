@@ -29,7 +29,6 @@ export interface ReviewDoc extends ReviewCreate {
 }
 
 export interface Review extends ReviewDoc {
-	courseCode: string | null;
 	courseName: string | null;
 	professorName: string | null;
 }

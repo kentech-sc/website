@@ -8,7 +8,8 @@
 	import * as CommonUtils from '$lib/common/utils.js';
 	import { parseRelativeDate } from '$lib/common/utils.js';
 
-	let { petitions, toId, fromId } = $props();
+	let { petitions, toId, fromId }: { petitions: Petition[]; toId?: string; fromId?: string } =
+		$props();
 </script>
 
 {#snippet PetitionItem(petition: Petition)}
@@ -76,11 +77,15 @@
 	{#each petitions as petition (petition._id)}
 		<MobileListItem href="/petition/{petition._id}">
 			{#snippet row1()}
-				<span class="status" style="color: {PetitionService.colorStatus[petition.status]}">[{PetitionService.translatedStatus[petition.status]}]</span>
+				<span class="status" style="color: {PetitionService.colorStatus[petition.status]}"
+					>[{PetitionService.translatedStatus[petition.status]}]</span
+				>
 				<span class="title">{petition.title}</span>
 			{/snippet}
 			{#snippet row2()}
-				<span class="meta">{petition.petitionerName} · 조회 {petition.viewCnt} · 동의 {petition.signCnt}</span>
+				<span class="meta"
+					>{petition.petitionerName} · 조회 {petition.viewCnt} · 동의 {petition.signCnt}</span
+				>
 				<span class="time">{parseRelativeDate(petition.createdAt)}</span>
 			{/snippet}
 		</MobileListItem>
@@ -146,7 +151,7 @@
 			display: flex;
 			padding: 0;
 
-		:global(.status) {
+			:global(.status) {
 				flex-shrink: 0;
 				font-size: 0.9rem;
 				font-weight: bold;

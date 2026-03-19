@@ -1,4 +1,9 @@
-import { S3Client, PutObjectCommand, DeleteObjectCommand, HeadObjectCommand } from '@aws-sdk/client-s3';
+import {
+	S3Client,
+	PutObjectCommand,
+	DeleteObjectCommand,
+	HeadObjectCommand
+} from '@aws-sdk/client-s3';
 import { randomUUID } from 'crypto';
 
 import { parseDate } from '$lib/common/utils.js';
@@ -51,7 +56,6 @@ export class FileStorage {
 		return `${this.#BUCKET_URL}/${key}`;
 	}
 
-
 	static async checkObjectExists(key: string): Promise<boolean> {
 		try {
 			await this.#storage.send(
@@ -95,7 +99,8 @@ export class FileStorage {
 		});
 
 		await this.#storage.send(command);
-		if (!(await this.checkObjectExists(key))) throw new SrvError('Failed to upload the file to the storage');
+		if (!(await this.checkObjectExists(key)))
+			throw new SrvError('Failed to upload the file to the storage');
 
 		const fileName = file.name;
 
@@ -114,7 +119,8 @@ export class FileStorage {
 			Key: key
 		});
 		await this.#storage.send(command);
-		if (await this.checkObjectExists(key)) throw new SrvError('Failed to delete the file from the storage');
+		if (await this.checkObjectExists(key))
+			throw new SrvError('Failed to delete the file from the storage');
 	}
 
 	// static async uploadBackupToStorage(fileKey: string, content: string) {

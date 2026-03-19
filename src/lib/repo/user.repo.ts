@@ -14,9 +14,9 @@ export async function getUserByEmail(email: string): Promise<UserDoc | null> {
 	return await UserModel.findOne({ email }).lean();
 }
 
-export async function getUsersByRealName(realName: string): Promise<UserDoc[]> {
-	return await UserModel.find({ realName }).lean();
-}
+// export async function getUsersByRealName(realName: string): Promise<UserDoc[]> {
+// 	return await UserModel.find({ realName }).lean();
+// }
 
 export async function getUserByNickname(nickname: string): Promise<UserDoc | null> {
 	return await UserModel.findOne({ nickname }).lean();
@@ -27,33 +27,33 @@ export async function getUsersByIds(userIds: UserId[]): Promise<Array<UserDoc | 
 
 	const userById = new Map<string, UserDoc>();
 	for (const user of users) {
-		userById.set(user._id.toString(), user);
+		userById.set(user._id, user);
 	}
 
-	return userIds.map((userId) => userById.get(userId.toString()) ?? null);
+	return userIds.map((userId) => userById.get(userId) ?? null);
 }
 
-export async function getUsersByEmails(emails: string[]): Promise<Array<UserDoc | null>> {
-	const users = await UserModel.find({ email: { $in: emails } }).lean();
+// export async function getUsersByEmails(emails: string[]): Promise<Array<UserDoc | null>> {
+// 	const users = await UserModel.find({ email: { $in: emails } }).lean();
 
-	const userByEmail = new Map<string, UserDoc>();
-	for (const user of users) {
-		userByEmail.set(user.email, user);
-	}
+// 	const userByEmail = new Map<string, UserDoc>();
+// 	for (const user of users) {
+// 		userByEmail.set(user.email, user);
+// 	}
 
-	return emails.map((email) => userByEmail.get(email) ?? null);
-}
+// 	return emails.map((email) => userByEmail.get(email) ?? null);
+// }
 
-export async function getUsersByNicknames(nicknames: string[]): Promise<Array<UserDoc | null>> {
-	const users = await UserModel.find({ nickname: { $in: nicknames } }).lean();
+// export async function getUsersByNicknames(nicknames: string[]): Promise<Array<UserDoc | null>> {
+// 	const users = await UserModel.find({ nickname: { $in: nicknames } }).lean();
 
-	const userByNickname = new Map<string, UserDoc>();
-	for (const user of users) {
-		userByNickname.set(user.nickname, user);
-	}
+// 	const userByNickname = new Map<string, UserDoc>();
+// 	for (const user of users) {
+// 		userByNickname.set(user.nickname, user);
+// 	}
 
-	return nicknames.map((nickname) => userByNickname.get(nickname) ?? null);
-}
+// 	return nicknames.map((nickname) => userByNickname.get(nickname) ?? null);
+// }
 
 export async function updateUserById(userId: UserId, user: UserUpdate): Promise<UserDoc | null> {
 	return await UserModel.findOneAndUpdate({ _id: userId }, user, { new: true }).lean();

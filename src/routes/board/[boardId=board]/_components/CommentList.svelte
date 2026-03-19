@@ -35,7 +35,9 @@
 		<p><b>[{comment.displayName}]</b> {comment.content}</p>
 		<div class="container">
 			<p>{CommonUtils.parseDate(comment.createdAt)}</p>
-			<Permission {user} ownerId={comment.userId} minRole="moderator">{@render DeleteBtn(comment)}</Permission>
+			<Permission {user} ownerId={comment.userId} minRole="moderator"
+				>{@render DeleteBtn(comment)}</Permission
+			>
 		</div>
 	</div>
 {/snippet}

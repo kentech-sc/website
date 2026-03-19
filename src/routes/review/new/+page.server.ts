@@ -43,7 +43,7 @@ export const actions = {
 				message: 'courseId, professorId, year, term, title, score are required'
 			});
 
-		const courseId: CourseId = new Types.ObjectId(courseIdRaw);
+		const courseId: CourseId = courseIdRaw;
 		const professorId: ProfessorId = new Types.ObjectId(professorIdRaw);
 
 		if (!ReviewRule.checkReviewYearAndTerm(year, term))

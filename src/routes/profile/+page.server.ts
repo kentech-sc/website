@@ -10,7 +10,7 @@ export const actions = {
 	changeNickname: withActionErrorHandling(async ({ request, locals }) => {
 		const formData = await request.formData();
 		const nickname = (formData.get('nickname') ?? '').toString();
-		await UserService.changeNicknameByEmail(locals.user.email, nickname, locals.user);
+		await UserService.changeNicknameById(locals.user._id, nickname, locals.user);
 		return { nickname };
 	}),
 	changeGroup: withActionErrorHandling(async ({ request, locals }) => {

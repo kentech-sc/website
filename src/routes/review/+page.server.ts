@@ -16,7 +16,7 @@ export const load = withLoadErrorHandling(async ({ url }) => {
 	const toId = toIdRaw ? new Types.ObjectId(toIdRaw) : undefined;
 
 	const courseIdRaw = url.searchParams.get('course');
-	const courseId = courseIdRaw ? new Types.ObjectId(courseIdRaw) : undefined;
+	const courseId = courseIdRaw ?? undefined;
 
 	const professorIdRaw = url.searchParams.get('professor');
 	const professorId = professorIdRaw ? new Types.ObjectId(professorIdRaw) : undefined;

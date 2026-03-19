@@ -6,7 +6,7 @@ const ROLE_HIERARCHY: Record<UserGroup, number> = {
 	[UserGroup.User]: 1,
 	[UserGroup.Moderator]: 2,
 	[UserGroup.Manager]: 3,
-	[UserGroup.Dev]: 4,
+	[UserGroup.Dev]: 4
 };
 
 export function hasMinRole(user: User, minRole: UserGroup): boolean {

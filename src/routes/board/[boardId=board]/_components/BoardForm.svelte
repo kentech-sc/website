@@ -51,7 +51,13 @@
 		<div id="form-div">
 			{@render RadioModule()}
 
-			<input type="text" id="title" name="title" value={post?.title} placeholder="제목을 입력하세요"/>
+			<input
+				type="text"
+				id="title"
+				name="title"
+				value={post?.title}
+				placeholder="제목을 입력하세요"
+			/>
 
 			<!-- <textarea id="content" name="content">{post?.content}</textarea> -->
 			<input class="hidden" type="text" name="content" bind:value={editorHtml} readonly />
@@ -66,7 +72,7 @@
 			{/each}
 
 			<QuillEditor bind:editorHtml bind:uploadedFileMetas initialHtml={post?.content} />
-			
+
 			<div class="right-align">
 				<button type="submit" class="btn-action">{post ? '수정' : '작성'}</button>
 			</div>
@@ -77,16 +83,16 @@
 <style lang="scss">
 	#radio-div {
 		display: flex;
-        width: fit-content;
-        border: 1px solid var(--gray-border);
-        background-color: white;
-        margin-bottom: 0.5rem;
+		width: fit-content;
+		border: 1px solid var(--gray-border);
+		background-color: white;
+		margin-bottom: 0.5rem;
 
 		label {
 			word-break: keep-all;
 			padding: 0.3rem 0.9rem;
 			cursor: pointer;
-			text-align:center;
+			text-align: center;
 			border-right: 1px solid var(--gray-border);
 			transition: all 0.2s ease-in-out;
 
@@ -97,13 +103,12 @@
 			&:hover {
 				background-color: var(--secondary-bg);
 			}
-
 		}
 
 		input {
 			display: none;
 
-			&:checked + label{
+			&:checked + label {
 				background-color: var(--secondary);
 				color: var(--tertiary-text);
 				font-weight: bold;
@@ -131,6 +136,5 @@
 		// 	height: 50vh;
 		// 	resize: vertical;
 		// }
-		
 	}
 </style>

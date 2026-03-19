@@ -3,9 +3,9 @@ import type { ReviewDoc } from '$lib/types/review.type.js';
 
 const ReviewSchema = new mongoose.Schema<ReviewDoc>(
 	{
-		courseId: { type: mongoose.Schema.Types.ObjectId, required: true },
+		courseId: { type: String, required: true },
 		professorId: { type: mongoose.Schema.Types.ObjectId, required: true },
-		userId: { type: mongoose.Schema.Types.ObjectId, required: true },
+		userId: { type: String, required: true },
 		year: { type: Number, required: true },
 		term: { type: Number, required: true },
 		title: { type: String, required: true },

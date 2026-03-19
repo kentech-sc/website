@@ -1,17 +1,15 @@
-import type { UpdateQuery, Types } from 'mongoose';
+import type { UpdateQuery } from 'mongoose';
 
-export type CourseId = Types.ObjectId;
+export type CourseId = string;
 
 export interface CourseCreate {
-	code: string;
+	_id: CourseId;
 	name: string;
 	content: string;
 }
 
-export interface CourseDoc extends CourseCreate {
-	_id: CourseId;
-}
+export type CourseDoc = CourseCreate;
 
 export type Course = CourseDoc;
 
-export type CourseUpdate = UpdateQuery<Pick<CourseDoc, 'code' | 'name' | 'content'>>;
+export type CourseUpdate = UpdateQuery<Pick<CourseDoc, 'name' | 'content'>>;

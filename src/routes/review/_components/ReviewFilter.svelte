@@ -13,7 +13,7 @@
 		<select id="course" bind:value={selectedCourse}>
 			<option value="">전체</option>
 			{#each courses as course (course._id)}
-				<option value={course._id}>[{course.code}] {course.name}</option>
+				<option value={course._id}>[{course._id}] {course.name}</option>
 			{/each}
 		</select>
 	</div>

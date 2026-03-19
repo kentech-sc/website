@@ -4,7 +4,12 @@
 	import type { UserGroup } from '$lib/types/user.type.js';
 	import { hasMinRole, isOwner } from '$lib/common/permission.js';
 
-	let { user, minRole, ownerId, children }: {
+	let {
+		user,
+		minRole,
+		ownerId,
+		children
+	}: {
 		user: User;
 		minRole?: UserGroup;
 		ownerId?: unknown;
@@ -13,7 +18,7 @@
 
 	const allowed = $derived(
 		(ownerId !== undefined && isOwner(user, ownerId)) ||
-		(minRole !== undefined && hasMinRole(user, minRole))
+			(minRole !== undefined && hasMinRole(user, minRole))
 	);
 </script>
 

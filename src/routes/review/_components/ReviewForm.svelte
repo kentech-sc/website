@@ -47,7 +47,7 @@
 				{#each Array.from({ length: new Date().getFullYear() - 2021 }, (_, i) => 22 + i) as year (year)}
 					<option value={year}>{year}년도</option>
 				{/each}
-			</select>			
+			</select>
 		</div>
 		<div class="select_group">
 			<label for="term">개설 학기</label>
@@ -57,7 +57,7 @@
 				<option value="2">{ReviewService.translatedTerm[2]}학기</option>
 				<option value="3">{ReviewService.translatedTerm[3]}학기</option>
 				<option value="4">{ReviewService.translatedTerm[4]}학기</option>
-			</select>			
+			</select>
 		</div>
 	</div>
 {/snippet}
@@ -69,7 +69,7 @@
 			<select id="courseId" name="courseId" required value={review?.courseId.toString()}>
 				<option value="">선택</option>
 				{#each courses as course (course._id)}
-					<option value={course._id}>[{course.code}] {course.name}</option>
+					<option value={course._id}>[{course._id}] {course.name}</option>
 				{/each}
 			</select>
 		</div>
@@ -171,9 +171,9 @@
 	>
 		<div id="form-div" class="container-col">
 			<div class="input-row">
-                {@render CourseInputs()}
-				{@render TermInputs()}   
-            </div>
+				{@render CourseInputs()}
+				{@render TermInputs()}
+			</div>
 			{@render TitleInput()}
 			{@render CommentInput()}
 			{@render ScoreInputs()}
@@ -188,7 +188,6 @@
 	#form-div {
 		width: stretch;
 		align-items: flex-start;
-		
 
 		& > *:not(label, button) {
 			margin-bottom: 1rem;
@@ -207,7 +206,7 @@
 			margin-left: 0.2rem;
 			margin-bottom: 0.2rem;
 		}
-		
+
 		input {
 			width: stretch;
 		}
@@ -225,71 +224,71 @@
 		}
 
 		.input-row {
-		width: 100%;
-		display: flex;
-		justify-content: space-between; 
-		gap: 2rem;
-		flex-wrap: wrap;
-		margin-bottom: 1rem;
+			width: 100%;
+			display: flex;
+			justify-content: space-between;
+			gap: 2rem;
+			flex-wrap: wrap;
+			margin-bottom: 1rem;
 		}
 	}
 
-    #score-container {
-        width: 100%;
-        display: flex;
-        flex-direction: column;
-        gap: 1.5rem;
-        margin-bottom: 1rem;
-    }
+	#score-container {
+		width: 100%;
+		display: flex;
+		flex-direction: column;
+		gap: 1.5rem;
+		margin-bottom: 1rem;
+	}
 
-    .slider-row {
-        flex-wrap: wrap;
-        gap: 2rem;
-    }
+	.slider-row {
+		flex-wrap: wrap;
+		gap: 2rem;
+	}
 
-    .score-item {
-        flex: 1;
-        min-width: 200px;
-        display: flex;
-        flex-direction: column;
+	.score-item {
+		flex: 1;
+		min-width: 200px;
+		display: flex;
+		flex-direction: column;
 
-        margin-right: 2rem;
+		margin-right: 2rem;
 
-        .label-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 0.5rem;
+		.label-row {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			margin-bottom: 0.5rem;
 
-            .current-label {
-                color: var(--secondary);
-                font-weight: bold;
-                font-size: 0.95rem;
-            }
-        }
+			.current-label {
+				color: var(--secondary);
+				font-weight: bold;
+				font-size: 0.95rem;
+			}
+		}
 
-        input[type='range'] {
-            cursor: pointer;
-            accent-color: var(--secondary);
-            margin-bottom: 0.3rem;
-            margin-right: 0.5rem;
-            margin-left: 0.5rem;
-        }
+		input[type='range'] {
+			cursor: pointer;
+			accent-color: var(--secondary);
+			margin-bottom: 0.3rem;
+			margin-right: 0.5rem;
+			margin-left: 0.5rem;
+		}
 
-        .range-guide {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.75rem;
-            color: var(--secondary-text);
-        }
-    }
+		.range-guide {
+			display: flex;
+			justify-content: space-between;
+			font-size: 0.75rem;
+			color: var(--secondary-text);
+		}
+	}
 
-    .satisfaction-item {
-        label {
-            font-size: 0.9rem;
-            font-weight: bold;
-            margin-left: 0.2rem;
-            margin-bottom: 0.5rem;
-        }
-    }
+	.satisfaction-item {
+		label {
+			font-size: 0.9rem;
+			font-weight: bold;
+			margin-left: 0.2rem;
+			margin-bottom: 0.5rem;
+		}
+	}
 </style>

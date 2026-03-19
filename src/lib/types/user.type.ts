@@ -1,4 +1,4 @@
-import type { UpdateQuery, Types } from 'mongoose';
+import type { UpdateQuery } from 'mongoose';
 
 export const UserGroup = {
 	Guest: 'guest',
@@ -19,9 +19,16 @@ export const DisplayType = {
 
 export type DisplayType = (typeof DisplayType)[keyof typeof DisplayType];
 
-export type UserId = Types.ObjectId;
+export type UserId = string;
+
+export interface Profile {
+	id: string;
+	email: string;
+	name: string;
+}
 
 export interface UserCreate {
+	_id: string;
 	email: string;
 	realName: string;
 	nickname: string;
@@ -29,7 +36,6 @@ export interface UserCreate {
 }
 
 export interface UserDoc extends UserCreate {
-	_id: UserId;
 	createdAt: Date;
 	updatedAt: Date;
 

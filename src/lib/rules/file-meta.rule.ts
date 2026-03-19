@@ -1,5 +1,5 @@
 import { fileTypeFromBuffer } from 'file-type';
-import DOMPurify from "isomorphic-dompurify";
+import DOMPurify from 'isomorphic-dompurify';
 
 // -----------------------------
 // 허용된 확장자 + MIME 타입

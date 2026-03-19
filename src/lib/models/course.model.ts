@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 import type { CourseDoc } from '$lib/types/course.type.js';
 
 const CourseSchema = new mongoose.Schema({
-	code: { type: String, required: true, unique: true },
+	_id: { type: String, required: true },
 	name: { type: String, required: true },
 	content: { type: String, required: true }
 });

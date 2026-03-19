@@ -38,7 +38,7 @@ export const actions = {
 		const formData = await request.formData();
 
 		const courseIdRaw = (formData.get('courseId') ?? '').toString();
-		const courseId: CourseId = new Types.ObjectId(courseIdRaw);
+		const courseId: CourseId = courseIdRaw;
 
 		const professorIdRaw = (formData.get('professorId') ?? '').toString();
 		const professorId: ProfessorId = new Types.ObjectId(professorIdRaw);

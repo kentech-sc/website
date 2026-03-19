@@ -1,6 +1,5 @@
 <script lang="ts">
-	let { pageName, toId, fromId }: { pageName: string; toId: string | null; fromId: string | null } =
-		$props();
+	let { pageName, toId, fromId }: { pageName: string; toId?: string; fromId?: string } = $props();
 </script>
 
 {#snippet PrevBtn()}

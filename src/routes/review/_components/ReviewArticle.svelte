@@ -7,7 +7,7 @@
 	import Permission from '../../_components/Permission.svelte';
 
 	import Clock from '@lucide/svelte/icons/clock';
-    import Calendar from '@lucide/svelte/icons/calendar';
+	import Calendar from '@lucide/svelte/icons/calendar';
 
 	let { review, user } = $props();
 
@@ -43,24 +43,24 @@
 {#snippet ReviewerInfo()}
 	<p class="time-info">
 		<span>
-            <Calendar size="1rem" color="var(--gray-text)" />
-            {review.year}년 {ReviewService.translatedTerm[review.term]}학기 수강
-        </span>
-        <span>
-            <Clock size="1rem" color="var(--gray-text)" />
-            {CommonUtils.parseDate(review.createdAt)}
-        </span>
+			<Calendar size="1rem" color="var(--gray-text)" />
+			{review.year}년 {ReviewService.translatedTerm[review.term]}학기 수강
+		</span>
+		<span>
+			<Clock size="1rem" color="var(--gray-text)" />
+			{CommonUtils.parseDate(review.createdAt)}
+		</span>
 	</p>
 {/snippet}
 
 {#snippet ReviewHeader()}
 	<header class="container">
 		<div class="container-col header-content">
-            <p class="sub-text">
-                [{review.courseCode}] {review.courseName} | {review.professorName} 교수님
-            </p>
-            {@render ReviewerInfo()}
-        </div>
+			<p class="sub-text">
+				[{review.courseId}] {review.courseName} | {review.professorName} 교수님
+			</p>
+			{@render ReviewerInfo()}
+		</div>
 
 		<div>
 			<Permission {user} ownerId={review.userId} minRole="manager">
@@ -77,12 +77,17 @@
 	<hr />
 	<div id="score">
 		<div class="container score-labels">
-			<p><b>과제 양:</b> <span class="label-value">{getAmountLabel(review.score.assignment)}</span></p>
-			<p><b>강의 난이도:</b> <span class="label-value">{getDifficultyLabel(review.score.lecture)}</span></p>
+			<p>
+				<b>과제 양:</b> <span class="label-value">{getAmountLabel(review.score.assignment)}</span>
+			</p>
+			<p>
+				<b>강의 난이도:</b>
+				<span class="label-value">{getDifficultyLabel(review.score.lecture)}</span>
+			</p>
 			<p><b>시험 횟수:</b> <span class="label-value">{getAmountLabel(review.score.exam)}</span></p>
 		</div>
 		<div class="container score-satisfaction">
-			<p><b>만족도:</b> <StarRating score={review.score.satisfaction}/></p>
+			<p><b>만족도:</b> <StarRating score={review.score.satisfaction} /></p>
 		</div>
 	</div>
 {/snippet}
@@ -134,8 +139,7 @@
 			align-items: center;
 			gap: 0.3rem;
 		}
-    }
-	
+	}
 
 	#score {
 		margin-top: 1rem;

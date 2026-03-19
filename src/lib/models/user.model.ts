@@ -3,7 +3,8 @@ import type { UserDoc } from '$lib/types/user.type.js';
 
 const UserSchema = new mongoose.Schema(
 	{
-		email: { type: String, required: true, unique: true },
+		_id: { type: String, required: true },
+		email: { type: String, required: true },
 		realName: { type: String, required: true },
 		nickname: { type: String, required: true, unique: true },
 		group: { type: String, required: true, enum: ['user', 'moderator', 'manager', 'dev'] },

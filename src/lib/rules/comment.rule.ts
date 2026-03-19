@@ -9,5 +9,5 @@ export function canCreateComment(commentCreate: CommentCreate): boolean {
 }
 
 export function canEditOrDeleteComment(comment: Comment, user: User): boolean {
-	return comment.userId.equals(user._id) || hasMinRole(user, UserGroup.Moderator);
+	return comment.userId === user._id || hasMinRole(user, UserGroup.Moderator);
 }

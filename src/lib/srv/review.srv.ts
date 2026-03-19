@@ -24,7 +24,6 @@ export const translatedTerm: Record<number, string> = {
 function toReview(reviewDoc: ReviewDoc): Review {
 	return {
 		...reviewDoc,
-		courseCode: null,
 		courseName: null,
 		professorName: null
 	};

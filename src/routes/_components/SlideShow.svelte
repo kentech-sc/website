@@ -1,10 +1,11 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import slide01 from '$assets/slide01.jpg';
 	import slide02 from '$assets/slide02.jpg';
 	import slide03 from '$assets/slide03.png';
 	import leftImg from '$assets/left.png';
 	import rightImg from '$assets/right.png';
-	import mainLogo from '$assets/1.Main_Logo.png'
+	import mainLogo from '$assets/1.Main_Logo.png';
 
 	const slides = [
 		{ title: '~조감도 사진~', image: slide01 },
@@ -13,34 +14,40 @@
 	];
 
 	let current = $state(0);
-	let resetTrigger = $state(0);
+	let timer: ReturnType<typeof setInterval>;
+
+	function startTimer() {
+		timer = setInterval(() => {
+			current = (current + 1) % slides.length;
+		}, 5000);
+	}
+
+	function resetTimer() {
+		clearInterval(timer);
+		startTimer();
+	}
 
 	function prev() {
 		current = (current - 1 + slides.length) % slides.length;
-		resetTrigger++;
+		resetTimer();
 	}
 	function next() {
 		current = (current + 1) % slides.length;
-		resetTrigger++;
+		resetTimer();
 	}
 	function goTo(idx: number) {
 		current = idx;
-		resetTrigger++;
+		resetTimer();
 	}
 
-	$effect(() => {
-		resetTrigger;
-
-		const timer = setInterval(() => {
-			next();
-		}, 5000);
-
+	onMount(() => {
+		startTimer();
 		return () => clearInterval(timer);
-	})
+	});
 </script>
 
 <div class="slideshow">
-	<img src="{mainLogo}" alt="Main Logo" class="center-logo">
+	<img src={mainLogo} alt="Main Logo" class="center-logo" />
 
 	<ul class="slidelist" style="transform: translateX(-{current * 100}%);">
 		{#each slides as slide, idx (idx)}

@@ -10,12 +10,8 @@ export async function getCourseById(courseId: CourseId): Promise<CourseDoc | nul
 	return await CourseModel.findOne({ _id: courseId }).lean();
 }
 
-export async function getCourseByCode(code: string): Promise<CourseDoc | null> {
-	return await CourseModel.findOne({ code }).lean();
-}
-
 export async function getAllCourses(): Promise<CourseDoc[]> {
-	return await CourseModel.find().sort({ code: 1 }).lean();
+	return await CourseModel.find().sort({ _id: 1 }).lean();
 }
 
 export async function getCoursesByIds(courseIds: CourseId[]): Promise<Array<CourseDoc | null>> {

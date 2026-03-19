@@ -11,7 +11,7 @@ import { AWS_BUCKET_NAME, AWS_ID, AWS_SECRET } from '$env/static/private';
 import { MONGO_URI } from '$env/static/private';
 
 import * as UserService from '$lib/srv/user.srv.js';
-import type { User } from '$lib/types/user.type.js';
+import type { User, Profile } from '$lib/types/user.type.js';
 
 import * as DB from '$lib/common/db.js';
 import { FileStorage } from '$lib/common/storage.js';
@@ -40,11 +40,20 @@ export const init: ServerInit = async () => {
 	console.log('[Server Is Ready]');
 };
 
-async function getUser(email: string, name: string): Promise<User> {
-	const user = await UserService.getUserOrNullByEmail(email);
+async function getUser(profile: Profile): Promise<User> {
+	const user = await UserService.getUserOrNullById(profile.id);
+
 	if (!user) {
-		return await UserService.signupUserByEmailAndRealName(email, name);
+		return await UserService.signupUser(profile);
 	} else {
+		if (user.email !== profile.email || user.realName !== profile.name) {
+			user.email = profile.email;
+			user.realName = profile.name;
+			await UserService.updateUserById(user._id, {
+				email: profile.email,
+				realName: profile.name
+			});
+		}
 		return user;
 	}
 }
@@ -52,13 +61,19 @@ async function getUser(email: string, name: string): Promise<User> {
 const authorizationHandle: Handle = async ({ event, resolve }) => {
 	const session = await event.locals.auth();
 
-	if (session?.user?.email && session?.user?.name) {
+	if (session?.user?.id && session?.user?.email && session?.user?.name) {
 		// Authorized
 		if (event.url.pathname.startsWith('/signin')) {
 			redirect(303, '/');
 		}
 
-		const user = await getUser(session?.user?.email, session?.user?.name?.split('/')[0]);
+		const profile: Profile = {
+			id: session.user.id,
+			email: session.user.email,
+			name: session.user.name.split('/')[0]
+		};
+
+		const user = await getUser(profile);
 		event.locals.user = user;
 
 		return await resolve(event);
@@ -81,7 +96,7 @@ const authorizationHandle: Handle = async ({ event, resolve }) => {
 			realName: '',
 			blockedUntil: null,
 			group: 'guest' as const,
-			_id: new Types.ObjectId(),
+			_id: crypto.randomUUID(),
 			createdAt: new Date(),
 			updatedAt: new Date()
 		};

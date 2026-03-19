@@ -1,6 +1,5 @@
 <script lang="ts">
 	import type { ActionResult } from '@sveltejs/kit';
-	import { Types } from 'mongoose';
 
 	import ThumbsUp from '@lucide/svelte/icons/thumbs-up';
 
@@ -36,9 +35,7 @@
 				signersNames.push(displayName);
 			} else if (updatedPetition.signCnt < petition.signCnt) {
 				petition.signCnt = updatedPetition.signCnt;
-				petition.signedBy = petition.signedBy.filter(
-					(id) => !new Types.ObjectId(id).equals(user._id)
-				);
+				petition.signedBy = petition.signedBy.filter((id) => id !== user._id);
 				const displayName = UserService.createDisplayName(user, 'realName');
 				signersNames = signersNames.filter((name) => name !== displayName);
 			}

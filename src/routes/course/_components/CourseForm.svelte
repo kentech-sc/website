@@ -4,13 +4,13 @@
 	import type { ActionResult } from '@sveltejs/kit';
 
 	let formResult = $state<ActionResult | null>(null);
-	let courseCodeInput = $state<HTMLInputElement | null>(null);
+	let courseIdInput = $state<HTMLInputElement | null>(null);
 	let courseNameInput = $state<HTMLInputElement | null>(null);
 	let courseContentInput = $state<HTMLTextAreaElement | null>(null);
 	$effect(() => {
 		if (formResult?.type === 'success') {
-			if (courseCodeInput) {
-				courseCodeInput.value = '';
+			if (courseIdInput) {
+				courseIdInput.value = '';
 			}
 			if (courseNameInput) {
 				courseNameInput.value = '';
@@ -25,12 +25,29 @@
 <section class="container-col module">
 	<CommonForm actionName="addCourse" formName="addCourse" bind:formResult>
 		<div class="container-col">
-			<label for="code">강의 코드</label>
-			<input type="text" id="code" name="code" placeholder="예: EF1001" bind:this={courseCodeInput} />
+			<label for="courseId">강의 코드</label>
+			<input
+				type="text"
+				id="courseId"
+				name="courseId"
+				placeholder="예: EF1001"
+				bind:this={courseIdInput}
+			/>
 			<label for="name">강의명</label>
-			<input type="text" id="name" name="name" placeholder="예: 공학 미적분학 I" bind:this={courseNameInput} />
+			<input
+				type="text"
+				id="name"
+				name="name"
+				placeholder="예: 공학 미적분학 I"
+				bind:this={courseNameInput}
+			/>
 			<label for="content">강의 내용</label>
-			<textarea id="content" name="content" placeholder="강의에 대한 간략한 설명을 입력하세요" bind:this={courseContentInput}></textarea>
+			<textarea
+				id="content"
+				name="content"
+				placeholder="강의에 대한 간략한 설명을 입력하세요"
+				bind:this={courseContentInput}
+			></textarea>
 			<div class="right-align">
 				<button type="submit" class="btn-action">추가하기</button>
 			</div>
@@ -46,9 +63,9 @@
 		align-items: flex-start;
 
 		label {
-        	font-weight: bold;
-        	margin-bottom: 0.5rem;
-    	}
+			font-weight: bold;
+			margin-bottom: 0.5rem;
+		}
 
 		input,
 		textarea {
@@ -64,7 +81,7 @@
 		.right-align {
 			margin-top: 0rem;
 		}
-		
+
 		.btn-action {
 			padding: 0.4rem 1.2rem;
 			font-size: 0.9rem;

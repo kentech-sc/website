@@ -11,14 +11,14 @@ export const load = () => {};
 export const actions = {
 	addCourse: withActionErrorHandling(async ({ request, locals }) => {
 		const formData = await request.formData();
-		const code = (formData.get('code') ?? '').toString();
+		const courseId = (formData.get('courseId') ?? '').toString();
 		const name = (formData.get('name') ?? '').toString();
 		const content = (formData.get('content') ?? '').toString();
 
-		if (!code || !name || !content)
-			return fail(400, { message: 'code, name, content are required' });
+		if (!courseId || !name || !content)
+			return fail(400, { message: 'courseId, name, content are required' });
 
-		const course = await CourseService.createCourse({ code, name, content }, locals.user);
+		const course = await CourseService.createCourse({ _id: courseId, name, content }, locals.user);
 		if (!course) return fail(400, { message: 'course creation failed' });
 
 		return { success: true };

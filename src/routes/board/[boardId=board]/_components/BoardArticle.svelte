@@ -1,6 +1,5 @@
 <script lang="ts">
 	import type { ActionResult } from '@sveltejs/kit';
-	import { Types } from 'mongoose';
 
 	import type { Post } from '$lib/types/post.type.js';
 	import type { User } from '$lib/types/user.type.js';
@@ -27,7 +26,7 @@
 			if (updatedPost.likeCnt > post.likeCnt) {
 				post.likedBy.push(user._id);
 			} else if (updatedPost.likeCnt < post.likeCnt) {
-				post.likedBy = post.likedBy.filter((id) => !new Types.ObjectId(id).equals(user._id));
+				post.likedBy = post.likedBy.filter((id) => id !== user._id);
 			}
 			post.likeCnt = updatedPost.likeCnt;
 		}

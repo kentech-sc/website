@@ -15,7 +15,9 @@
 	import { cubicOut } from 'svelte/easing';
 
 	let menuOpen = $state(false);
-	function closeMenu() { menuOpen = false; }
+	function closeMenu() {
+		menuOpen = false;
+	}
 </script>
 
 {#snippet Logo()}
@@ -40,10 +42,11 @@
 	<div class="container" id="profile">
 		{#if user.group !== 'guest'}
 			<a href="/profile" id="profile-anchor" class="container">
-				<span class="profile-icon"><CircleUserRound_img size="2rem" strokeWidth={1.5} color="white" /></span>
+				<span class="profile-icon"
+					><CircleUserRound_img size="2rem" strokeWidth={1.5} color="white" /></span
+				>
 				<span class="profile-name">{user.nickname}</span>
 			</a>
-			
 		{:else}
 			<a href="/signin" class="btn-anchor">
 				<p>로그인</p>
@@ -81,8 +84,19 @@
 </header>
 
 {#if menuOpen}
-	<div class="backdrop" role="button" tabindex="0" onclick={closeMenu} onkeydown={(e) => e.key === 'Escape' && closeMenu()} transition:fade={{ duration: 200 }}></div>
-	<nav class="mobile-menu" data-sveltekit-preload-data="hover" transition:fly={{ x: 320, duration: 280, easing: cubicOut }}>
+	<div
+		class="backdrop"
+		role="button"
+		tabindex="0"
+		onclick={closeMenu}
+		onkeydown={(e) => e.key === 'Escape' && closeMenu()}
+		transition:fade={{ duration: 200 }}
+	></div>
+	<nav
+		class="mobile-menu"
+		data-sveltekit-preload-data="hover"
+		transition:fly={{ x: 320, duration: 280, easing: cubicOut }}
+	>
 		<a href="/board/notice" onclick={closeMenu}>공지사항</a>
 		<a href="/board/free" onclick={closeMenu}>자유게시판</a>
 		<a href="/review" onclick={closeMenu}>강의평가</a>
@@ -213,11 +227,14 @@
 					padding-left: 0.6rem;
 
 					#profile-anchor {
-						.profile-icon { display: flex; }
-						.profile-name { display: none; }
+						.profile-icon {
+							display: flex;
+						}
+						.profile-name {
+							display: none;
+						}
 					}
 				}
-
 			}
 		}
 
