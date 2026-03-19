@@ -5,7 +5,7 @@
 	import slide03 from '$assets/slide03.png';
 	import leftImg from '$assets/left.png';
 	import rightImg from '$assets/right.png';
-	import mainLogo from '$assets/1.Main_Logo.png';
+	import mainLogo from '$assets/main_logo.png';
 
 	const slides = [
 		{ title: '~조감도 사진~', image: slide01 },

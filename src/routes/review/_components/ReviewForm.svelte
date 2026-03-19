@@ -147,7 +147,7 @@
 			</div>
 		</div>
 		<div class="satisfaction-item">
-			<label>만족도</label>
+			<label for="satisfactionScore">만족도</label>
 			<StarRating interactive bind:score={scores.satisfaction} />
 			<input type="hidden" name="satisfactionScore" value={scores.satisfaction} />
 		</div>
@@ -211,7 +211,7 @@
 			width: stretch;
 		}
 
-		input[type='number'],
+		// input[type='number'],
 		select {
 			width: stretch;
 			margin-right: 1.5rem;

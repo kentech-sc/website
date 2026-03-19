@@ -1,5 +1,5 @@
 <script lang="ts">
-	import favicon from '$assets/top-logo-white.png';
+	import favicon from '$assets/top_logo_white.png';
 
 	import { page } from '$app/state';
 

@@ -28,8 +28,10 @@
 	}
 </script>
 
+<!-- svelte-ignore a11y_no_static_element_interactions -->
 <div class="star-rating" class:interactive onmouseleave={() => (hoveredRating = 0)}>
-	{#each [1, 2, 3, 4, 5] as i}
+	{#each [1, 2, 3, 4, 5] as i (i)}
+		<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
 		<div
 			class="star-wrapper"
 			role={interactive ? 'button' : undefined}

@@ -13,8 +13,8 @@
 
 	let { data } = $props();
 	const reviews = $derived<Review[]>(JSON.parse(data?.reviews || '[]'));
-	const fromId = $derived<string | null>(data?.fromId ?? null);
-	const toId = $derived<string | null>(data?.toId ?? null);
+	const fromId = $derived<string | undefined>(data?.fromId);
+	const toId = $derived<string | undefined>(data?.toId);
 
 	let selectedCourse = $state<string>('');
 	let selectedProfessor = $state<string>('');
