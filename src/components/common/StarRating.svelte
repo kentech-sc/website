@@ -66,8 +66,8 @@
 
 		&.interactive .star-wrapper {
 			cursor: pointer;
-			width: 1.6rem;
-			height: 1.6rem;
+			width: 2rem;
+			height: 2rem;
 			transition: transform 0.1s ease;
 
 			&:hover {

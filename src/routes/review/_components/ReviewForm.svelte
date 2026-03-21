@@ -22,18 +22,18 @@
 	});
 
 	function getAmountLabel(value: number): string {
-		if (value <= 2) return '아주 적음';
-		if (value <= 4) return '적음';
-		if (value <= 6) return '보통';
-		if (value <= 8) return '많음';
+		if (value <= 1) return '아주 적음';
+		if (value <= 2) return '적음';
+		if (value <= 3) return '보통';
+		if (value <= 4) return '많음';
 		return '아주 많음';
 	}
 
 	function getDifficultyLabel(value: number): string {
-		if (value <= 2) return '매우 쉬움';
-		if (value <= 4) return '쉬움';
-		if (value <= 6) return '보통';
-		if (value <= 8) return '어려움';
+		if (value <= 1) return '매우 쉬움';
+		if (value <= 2) return '쉬움';
+		if (value <= 3) return '보통';
+		if (value <= 4) return '어려움';
 		return '매우 어려움';
 	}
 </script>
@@ -41,7 +41,7 @@
 {#snippet TermInputs()}
 	<div class="container">
 		<div class="select_group">
-			<label for="year">개설 년도</label>
+			<label for="year">수강 연도</label>
 			<select id="year" name="year" required value={review?.year}>
 				<option value="">선택</option>
 				{#each Array.from({ length: new Date().getFullYear() - 2021 }, (_, i) => 22 + i) as year (year)}
@@ -50,7 +50,7 @@
 			</select>
 		</div>
 		<div class="select_group">
-			<label for="term">개설 학기</label>
+			<label for="term">수강 학기</label>
 			<select id="term" name="term" required value={review?.term.toString()}>
 				<option value="">선택</option>
 				<option value="1">{ReviewService.translatedTerm[1]}학기</option>
@@ -60,6 +60,16 @@
 			</select>
 		</div>
 	</div>
+{/snippet}
+
+{#snippet TitleInput()}
+	<label for="title">한줄평</label>
+	<input type="text" id="title" name="title" required value={review?.title} maxlength="100" />
+{/snippet}
+
+{#snippet CommentInput()}
+	<label for="comment">내용</label>
+	<textarea id="comment" name="comment">{review?.comment}</textarea>
 {/snippet}
 
 {#snippet CourseInputs()}
@@ -97,8 +107,8 @@
 					type="range"
 					id="assignmentScore"
 					name="assignmentScore"
-					min="0"
-					max="10"
+					min="1"
+					max="5"
 					step="1"
 					bind:value={scores.assignment}
 				/>
@@ -116,8 +126,8 @@
 					type="range"
 					id="lectureScore"
 					name="lectureScore"
-					min="0"
-					max="10"
+					min="1"
+					max="5"
 					step="1"
 					bind:value={scores.lecture}
 				/>
@@ -135,8 +145,8 @@
 					type="range"
 					id="examScore"
 					name="examScore"
-					min="0"
-					max="10"
+					min="1"
+					max="5"
 					step="1"
 					bind:value={scores.exam}
 				/>
@@ -146,22 +156,12 @@
 				</div>
 			</div>
 		</div>
-		<div class="satisfaction-item">
+		<div class="satisfaction-item container-col">
 			<label for="satisfactionScore">만족도</label>
 			<StarRating interactive bind:score={scores.satisfaction} />
 			<input type="hidden" name="satisfactionScore" value={scores.satisfaction} />
 		</div>
 	</div>
-{/snippet}
-
-{#snippet TitleInput()}
-	<label for="title">한줄평</label>
-	<input type="text" id="title" name="title" required value={review?.title} maxlength="100" />
-{/snippet}
-
-{#snippet CommentInput()}
-	<label for="comment">내용</label>
-	<textarea id="comment" name="comment">{review?.comment}</textarea>
 {/snippet}
 
 <section class="module">
@@ -201,10 +201,9 @@
 		label {
 			word-break: keep-all;
 			white-space: nowrap;
-			font-size: 0.9rem;
 			font-weight: bold;
-			margin-left: 0.2rem;
 			margin-bottom: 0.2rem;
+			margin-left: 0.2rem;
 		}
 
 		input {
@@ -260,19 +259,40 @@
 			align-items: center;
 			margin-bottom: 0.5rem;
 
+			label {
+				margin: 0 !important;
+			}
+
 			.current-label {
 				color: var(--secondary);
 				font-weight: bold;
-				font-size: 0.95rem;
 			}
 		}
 
 		input[type='range'] {
+			-webkit-appearance: none;
+			appearance: none;
+
 			cursor: pointer;
-			accent-color: var(--secondary);
-			margin-bottom: 0.3rem;
-			margin-right: 0.5rem;
-			margin-left: 0.5rem;
+			width: 100%;
+			padding: 0.15rem 0.2rem;
+			margin: 0;
+			margin-bottom: 0.4rem;
+
+			background: var(--gray-bg);
+			border-radius: 1rem;
+			border: solid 0.1rem var(--gray-border);
+
+			&::-webkit-slider-thumb {
+				-webkit-appearance: none;
+				appearance: none;
+
+				width: 1.5rem;
+				height: 1rem;
+
+				background: var(--secondary);
+				border-radius: 1rem;
+			}
 		}
 
 		.range-guide {
@@ -284,11 +304,15 @@
 	}
 
 	.satisfaction-item {
+		margin-top: 1rem;
+		justify-content: center;
+		align-items: center;
+
 		label {
-			font-size: 0.9rem;
+			font-size: 1.5rem;
 			font-weight: bold;
-			margin-left: 0.2rem;
-			margin-bottom: 0.5rem;
+			margin-left: 0 !important;
+			margin-bottom: 0.5rem !important;
 		}
 	}
 </style>

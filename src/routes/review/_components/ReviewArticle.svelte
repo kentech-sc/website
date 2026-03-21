@@ -12,18 +12,18 @@
 	let { review, user } = $props();
 
 	function getAmountLabel(value: number): string {
-		if (value <= 2) return '아주 적음';
-		if (value <= 4) return '적음';
-		if (value <= 6) return '보통';
-		if (value <= 8) return '많음';
+		if (value <= 1) return '아주 적음';
+		if (value <= 2) return '적음';
+		if (value <= 3) return '보통';
+		if (value <= 4) return '많음';
 		return '아주 많음';
 	}
 
 	function getDifficultyLabel(value: number): string {
-		if (value <= 2) return '매우 쉬움';
-		if (value <= 4) return '쉬움';
-		if (value <= 6) return '보통';
-		if (value <= 8) return '어려움';
+		if (value <= 1) return '매우 쉬움';
+		if (value <= 2) return '쉬움';
+		if (value <= 3) return '보통';
+		if (value <= 4) return '어려움';
 		return '매우 어려움';
 	}
 </script>

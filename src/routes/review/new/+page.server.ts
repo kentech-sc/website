@@ -49,7 +49,7 @@ export const actions = {
 		if (!ReviewRule.checkReviewYearAndTerm(year, term))
 			return fail(400, { message: '연도 또는 학기 값이 올바르지 않습니다.' });
 		if (!ReviewRule.checkReviewScore(score))
-			return fail(400, { message: '점수는 1에서 10 사이의 값이어야 합니다.' });
+			return fail(400, { message: '점수는 1에서 5 사이의 값이어야 합니다.' });
 
 		const review = await ReviewService.createReview(
 			courseId,

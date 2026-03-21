@@ -20,7 +20,7 @@ export function checkReviewScore(score: {
 	satisfaction: number;
 }): boolean {
 	for (const key in score) {
-		if (score[key as keyof typeof score] < 1 || score[key as keyof typeof score] > 10) return false;
+		if (score[key as keyof typeof score] < 1 || score[key as keyof typeof score] > 5) return false;
 	}
 	return true;
 }
