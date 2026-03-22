@@ -6,14 +6,14 @@
 	// import PanelGroup from './_components/PanelGroup.svelte';
 
 	import { page } from '$app/state';
-	import SlideShow from './_components/SlideShow.svelte';
+	import Slideshow from './_components/Slideshow.svelte';
 
 	let { children } = $props();
 </script>
 
 {#if page.route.id === '/'}
 	<NavBar isMain={true} />
-	<SlideShow />
+	<Slideshow />
 {:else}
 	<NavBar isMain={false} />
 {/if}
