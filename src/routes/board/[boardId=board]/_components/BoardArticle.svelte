@@ -118,7 +118,6 @@
 
 		pre {
 			line-height: 150%;
-			margin-top: 2rem;
 		}
 
 		.delete-post-form {

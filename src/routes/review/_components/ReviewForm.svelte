@@ -1,6 +1,6 @@
 <script lang="ts">
 	import CommonForm from '$components/CommonForm.svelte';
-	import StarRating from '$components/common/StarRating.svelte';
+	import StarRating from '$components/StarRating.svelte';
 
 	import * as ReviewService from '$lib/srv/review.srv.js';
 

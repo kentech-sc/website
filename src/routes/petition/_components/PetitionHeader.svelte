@@ -1,7 +1,7 @@
 <script lang="ts">
 	let { pageType } = $props();
 
-	import LinkButton from '$components/common/LinkButton.svelte';
+	import LinkButton from '$components/LinkButton.svelte';
 
 	import Pen from '@lucide/svelte/icons/pencil';
 	import List from '@lucide/svelte/icons/text';

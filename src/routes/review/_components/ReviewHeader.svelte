@@ -3,7 +3,7 @@
 	import List from '@lucide/svelte/icons/text';
 	import Plus from '@lucide/svelte/icons/plus';
 
-	import LinkButton from '$components/common/LinkButton.svelte';
+	import LinkButton from '$components/LinkButton.svelte';
 
 	let { pageType } = $props();
 </script>
