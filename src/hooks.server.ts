@@ -3,8 +3,6 @@ import type { ActionResult, Handle, HandleServerError, ServerInit } from '@svelt
 import { redirect } from '@sveltejs/kit';
 import { sequence } from '@sveltejs/kit/hooks';
 
-import { Types } from 'mongoose';
-
 import { handle as authenticationHandle } from './auth.js';
 
 import { AWS_BUCKET_NAME, AWS_ID, AWS_SECRET } from '$env/static/private';

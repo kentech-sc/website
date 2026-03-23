@@ -52,6 +52,7 @@
 			quill.root.innerHTML = initialHtml;
 		}
 
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		(quill.getModule('toolbar') as any).addHandler('image', function () {
 			const input = document.createElement('input');
 			input.type = 'file';
