@@ -32,9 +32,9 @@
 
 {#snippet CommentItem(comment: Comment)}
 	<div class="container comment-div">
-		{#if authorId === user._id && comment.displayType === DisplayType.Anonymous}
+		{#if authorId === comment.userId && comment.displayType === DisplayType.Anonymous}
 			<p><b style="color: var(--secondary)">[익명의 글쓴이]</b> {comment.content}</p>
-		{:else if authorId === user._id}
+		{:else if authorId === comment.userId}
 			<p><b style="color: var(--secondary)">[{comment.displayName}]</b> {comment.content}</p>
 		{:else}
 			<p><b>[{comment.displayName}]</b> {comment.content}</p>
