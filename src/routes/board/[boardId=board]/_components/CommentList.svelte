@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { User } from '$lib/types/user.type.js';
+	import { DisplayType, type User, type UserId } from '$lib/types/user.type.js';
 	import type { Comment } from '$lib/types/comment.type.js';
 
 	import type { ActionResult } from '@sveltejs/kit';
@@ -10,7 +10,7 @@
 
 	import { invalidateAll } from '$app/navigation';
 
-	let { comments, user }: { comments: Comment[]; user: User } = $props();
+	let { authorId, comments, user }: { authorId: UserId, comments: Comment[]; user: User } = $props();
 
 	let formResult = $state<ActionResult | null>(null);
 
@@ -32,7 +32,13 @@
 
 {#snippet CommentItem(comment: Comment)}
 	<div class="container comment-div">
-		<p><b>[{comment.displayName}]</b> {comment.content}</p>
+		{#if authorId === user._id && comment.displayType === DisplayType.Anonymous}
+			<p><b style="color: var(--secondary)">[익명의 글쓴이]</b> {comment.content}</p>
+		{:else if authorId === user._id}
+			<p><b style="color: var(--secondary)">[{comment.displayName}]</b> {comment.content}</p>
+		{:else}
+			<p><b>[{comment.displayName}]</b> {comment.content}</p>
+		{/if}
 		<div class="container">
 			<p>{CommonUtils.parseDate(comment.createdAt)}</p>
 			<Permission {user} ownerId={comment.userId} minRole="moderator"

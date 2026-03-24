@@ -22,4 +22,4 @@
 <BoardHeader pageType="detail" />
 <BoardArticle bind:post {user} />
 <FileList {files} />
-<CommentSection {comments} {user} />
+<CommentSection authorId={post.userId} {comments} {user} />

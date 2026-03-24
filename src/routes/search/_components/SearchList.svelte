@@ -10,6 +10,12 @@
 		more
 	}: { results: (Post | Petition | Review)[]; query: string; page: number; more: boolean } =
 		$props();
+
+	function htmlToPlainText(html: string): string {
+		const tmp = document.createElement('div');
+		tmp.innerHTML = html;
+		return tmp.textContent || tmp.innerText || '';
+	}
 </script>
 
 {#snippet ResultItem(result: Post | Petition | Review)}
@@ -17,17 +23,17 @@
 		{#if 'boardId' in result}
 			<a href="/board/{result.boardId}/{result._id}">
 				<h3 class="ellipsis">[게시글] {result.title}</h3>
-				<p class="ellipsis">{result.content}</p>
+				<p class="ellipsis">{htmlToPlainText(result.content)}</p>
 			</a>
 		{:else if 'courseId' in result}
 			<a href="/review/{result._id}">
 				<h3 class="ellipsis">[강의평가] {result.title}</h3>
-				<p class="ellipsis">{result.comment}</p>
+				<p class="ellipsis">{htmlToPlainText(result.comment)}</p>
 			</a>
 		{:else}
 			<a href="/petition/{result._id}">
 				<h3 class="ellipsis">[청원] {result.title}</h3>
-				<p class="ellipsis">{result.content}</p>
+				<p class="ellipsis">{htmlToPlainText(result.content)}</p>
 			</a>
 		{/if}
 	</div>
