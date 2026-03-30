@@ -10,7 +10,8 @@
 
 	import { invalidateAll } from '$app/navigation';
 
-	let { authorId, comments, user }: { authorId: UserId, comments: Comment[]; user: User } = $props();
+	let { authorId, comments, user }: { authorId: UserId; comments: Comment[]; user: User } =
+		$props();
 
 	let formResult = $state<ActionResult | null>(null);
 

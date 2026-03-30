@@ -144,7 +144,7 @@
 	}
 
 	#file-description {
-		margin-top: .5rem;
+		margin-top: 0.5rem;
 		color: var(--gray-text);
 		font-size: 0.75rem;
 	}

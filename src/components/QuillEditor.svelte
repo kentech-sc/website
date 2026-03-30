@@ -69,7 +69,9 @@
 				files.forEach((f) => formData.append('files', f));
 
 				try {
-					const res: ActionResult = deserialize(await (await fetch('?/uploadFile', { method: 'POST', body: formData })).text());
+					const res: ActionResult = deserialize(
+						await (await fetch('?/uploadFile', { method: 'POST', body: formData })).text()
+					);
 
 					if (res.type === 'failure') {
 						alert(`파일 업로드 실패: ${res.data?.message}`);
@@ -91,11 +93,9 @@
 						const imageUrl = fileMeta.path;
 						quill.insertEmbed(range.index, 'image', imageUrl);
 					}
-
 				} catch (error) {
 					alert(error);
 				}
-
 			};
 
 			input.click();

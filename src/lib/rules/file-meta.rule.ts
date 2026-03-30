@@ -12,109 +12,116 @@ const MAX_SIZE_NUM = MAX_FILE_SIZE ? Number(MAX_FILE_SIZE) : 30 * 1024 * 1024;
 export const ALLOWED_EXTENSIONS = ['png', 'jpg', 'jpeg', 'webp', 'pdf', 'docx', 'xlsx', 'svg'];
 
 export const ALLOWED_MIME_TYPES = [
-    'image/png',
-    'image/jpeg',
-    'image/webp',
-    'image/svg+xml',
-    'application/pdf',
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // docx
-    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'       // xlsx
+	'image/png',
+	'image/jpeg',
+	'image/webp',
+	'image/svg+xml',
+	'application/pdf',
+	'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // docx
+	'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' // xlsx
 ];
 
 /**
  * SVG 내부의 위험한 스크립트 및 외부 링크 제거
  */
 export function sanitizeSvg(svgString: string): string {
-    let cleaned = DOMPurify.sanitize(svgString, { 
-        USE_PROFILES: { svg: true, svgFilters: true } 
-    });
+	let cleaned = DOMPurify.sanitize(svgString, {
+		USE_PROFILES: { svg: true, svgFilters: true }
+	});
 
-    // 외부로 나가는 http 링크 추가 방어 (선택 사항)
-    cleaned = cleaned.replace(/href="http[^"]+"/gi, 'href="#"');
-    cleaned = cleaned.replace(/xlink:href="http[^"]+"/gi, 'xlink:href="#"');
+	// 외부로 나가는 http 링크 추가 방어 (선택 사항)
+	cleaned = cleaned.replace(/href="http[^"]+"/gi, 'href="#"');
+	cleaned = cleaned.replace(/xlink:href="http[^"]+"/gi, 'xlink:href="#"');
 
-    return cleaned;
+	return cleaned;
 }
 
 /**
  * 파일 검증 및 전처리 핵심 로직
  */
 export async function validateAndProcessFile(file: File): Promise<{
-    ok: boolean;
-    code?: 'FILE_TOO_LARGE' | 'INVALID_EXTENSION' | 'MIME_MISMATCH' | 'INVALID_FILE_TYPE' | 'INVALID_OFFICE_FILE';
-    mime?: string;
-    sanitizedSvg?: string;
+	ok: boolean;
+	code?:
+		| 'FILE_TOO_LARGE'
+		| 'INVALID_EXTENSION'
+		| 'MIME_MISMATCH'
+		| 'INVALID_FILE_TYPE'
+		| 'INVALID_OFFICE_FILE';
+	mime?: string;
+	sanitizedSvg?: string;
 }> {
-    // 1. 용량 체크 (메모리 버퍼 생성 전 최우선 실행)
-    if (file.size > MAX_SIZE_NUM) {
-        return { ok: false, code: 'FILE_TOO_LARGE' };
-    }
+	// 1. 용량 체크 (메모리 버퍼 생성 전 최우선 실행)
+	if (file.size > MAX_SIZE_NUM) {
+		return { ok: false, code: 'FILE_TOO_LARGE' };
+	}
 
-    // 2. 확장자 체크
-    const fileName = file.name.toLowerCase();
-    const ext = fileName.split('.').pop();
-    if (!ext || !ALLOWED_EXTENSIONS.includes(ext)) {
-        return { ok: false, code: 'INVALID_EXTENSION' };
-    }
+	// 2. 확장자 체크
+	const fileName = file.name.toLowerCase();
+	const ext = fileName.split('.').pop();
+	if (!ext || !ALLOWED_EXTENSIONS.includes(ext)) {
+		return { ok: false, code: 'INVALID_EXTENSION' };
+	}
 
-    // 3. 파일 분석을 위한 버퍼 생성
-    const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
+	// 3. 파일 분석을 위한 버퍼 생성
+	const arrayBuffer = await file.arrayBuffer();
+	const buffer = Buffer.from(arrayBuffer);
 
-    // 4. 매직 넘버(파일 시그니처) 및 브라우저 MIME 분석
-    const detected = await fileTypeFromBuffer(buffer);
-    const mimeFromMagic = detected?.mime;
-    const mimeFromBrowser = file.type;
+	// 4. 매직 넘버(파일 시그니처) 및 브라우저 MIME 분석
+	const detected = await fileTypeFromBuffer(buffer);
+	const mimeFromMagic = detected?.mime;
+	const mimeFromBrowser = file.type;
 
-    // -----------------------------
-    // 분기 처리: SVG
-    // -----------------------------
-    if (ext === 'svg') {
-        // SVG는 바이너리가 아닌 텍스트 기반이므로 브라우저 타입 확인 후 새니타이징
-        if (mimeFromBrowser !== 'image/svg+xml') {
-            return { ok: false, code: 'MIME_MISMATCH' };
-        }
-        const svgText = buffer.toString('utf-8');
-        const safe = sanitizeSvg(svgText);
-        
-        return { ok: true, mime: 'image/svg+xml', sanitizedSvg: safe };
-    }
+	// -----------------------------
+	// 분기 처리: SVG
+	// -----------------------------
+	if (ext === 'svg') {
+		// SVG는 바이너리가 아닌 텍스트 기반이므로 브라우저 타입 확인 후 새니타이징
+		if (mimeFromBrowser !== 'image/svg+xml') {
+			return { ok: false, code: 'MIME_MISMATCH' };
+		}
+		const svgText = buffer.toString('utf-8');
+		const safe = sanitizeSvg(svgText);
 
-    // -----------------------------
-    // 분기 처리: PDF
-    // -----------------------------
-    if (ext === 'pdf') {
-        // PDF는 매직 넘버가 확실함 (application/pdf)
-        if (mimeFromMagic !== 'application/pdf') {
-            return { ok: false, code: 'MIME_MISMATCH' };
-        }
-        return { ok: true, mime: 'application/pdf' };
-    }
+		return { ok: true, mime: 'image/svg+xml', sanitizedSvg: safe };
+	}
 
-    // -----------------------------
-    // 분기 처리: Office (docx, xlsx)
-    // -----------------------------
-    if (ext === 'docx' || ext === 'xlsx') {
-        const expectedMime = ext === 'docx' 
-            ? 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-            : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-        
-        // Office 파일은 zip 기반이라 매직 넘버가 application/zip으로 올 수 있음
-        const isZipBased = mimeFromMagic === 'application/zip';
-        if (mimeFromBrowser !== expectedMime || (mimeFromMagic && !isZipBased)) {
-            return { ok: false, code: 'INVALID_OFFICE_FILE' };
-        }
-        return { ok: true, mime: expectedMime };
-    }
+	// -----------------------------
+	// 분기 처리: PDF
+	// -----------------------------
+	if (ext === 'pdf') {
+		// PDF는 매직 넘버가 확실함 (application/pdf)
+		if (mimeFromMagic !== 'application/pdf') {
+			return { ok: false, code: 'MIME_MISMATCH' };
+		}
+		return { ok: true, mime: 'application/pdf' };
+	}
 
-    // -----------------------------
-    // 분기 처리: 일반 이미지 (PNG, JPG, WEBP)
-    // -----------------------------
-    const isImage = mimeFromMagic && ['image/png', 'image/jpeg', 'image/webp'].includes(mimeFromMagic);
-    if (isImage) {
-        return { ok: true, mime: mimeFromMagic };
-    }
+	// -----------------------------
+	// 분기 처리: Office (docx, xlsx)
+	// -----------------------------
+	if (ext === 'docx' || ext === 'xlsx') {
+		const expectedMime =
+			ext === 'docx'
+				? 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+				: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 
-    // 최종 실패 (ZIP 등 허용되지 않은 파일 포함)
-    return { ok: false, code: 'INVALID_FILE_TYPE' };
+		// Office 파일은 zip 기반이라 매직 넘버가 application/zip으로 올 수 있음
+		const isZipBased = mimeFromMagic === 'application/zip';
+		if (mimeFromBrowser !== expectedMime || (mimeFromMagic && !isZipBased)) {
+			return { ok: false, code: 'INVALID_OFFICE_FILE' };
+		}
+		return { ok: true, mime: expectedMime };
+	}
+
+	// -----------------------------
+	// 분기 처리: 일반 이미지 (PNG, JPG, WEBP)
+	// -----------------------------
+	const isImage =
+		mimeFromMagic && ['image/png', 'image/jpeg', 'image/webp'].includes(mimeFromMagic);
+	if (isImage) {
+		return { ok: true, mime: mimeFromMagic };
+	}
+
+	// 최종 실패 (ZIP 등 허용되지 않은 파일 포함)
+	return { ok: false, code: 'INVALID_FILE_TYPE' };
 }
