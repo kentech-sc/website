@@ -12,7 +12,9 @@ const actions = {
 
 		const fileMetas = await FileMetaService.uploadFiles(files);
 
-		return JSON.stringify(fileMetas);
+		return {
+			fileMetas: JSON.stringify(fileMetas)
+		};
 	}),
 
 	deleteFile: withActionErrorHandling(async ({ request }) => {

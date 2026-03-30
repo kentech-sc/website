@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { ActionResult } from '@sveltejs/kit';
+	import { deserialize } from '$app/forms';
 	import { Types } from 'mongoose';
 
 	import { onMount } from 'svelte';
@@ -25,6 +26,7 @@
 				(fileMeta: FileMeta) => !new Types.ObjectId(fileMeta._id).equals(deletedFileMeta._id)
 			);
 			formResult = null;
+			alert('성공적으로 파일을 삭제했습니다.');
 		}
 	});
 
@@ -66,19 +68,34 @@
 				const formData = new FormData();
 				files.forEach((f) => formData.append('files', f));
 
-				const res = await fetch('?/uploadFile', { method: 'POST', body: formData });
+				try {
+					const res: ActionResult = deserialize(await (await fetch('?/uploadFile', { method: 'POST', body: formData })).text());
 
-				const data = JSON.parse((await res.json()).data);
-				const fileMetas: FileMeta[] = JSON.parse(data[0]);
+					if (res.type === 'failure') {
+						alert(`파일 업로드 실패: ${res.data?.message}`);
+						return;
+					} else if (res.type === 'error') {
+						alert(`파일 업로드 실패: ${res.error?.message}`);
+						return;
+					} else if (res.type === 'redirect') {
+						return;
+					}
 
-				const range = quill.getSelection(true);
+					const fileMetas: FileMeta[] = JSON.parse(res.data?.fileMetas ?? '[]');
 
-				for (const fileMeta of fileMetas) {
-					uploadedFileMetas.push(fileMeta);
-					if (!fileMeta.mime.startsWith('image/')) continue;
-					const imageUrl = fileMeta.path;
-					quill.insertEmbed(range.index, 'image', imageUrl);
+					const range = quill.getSelection(true);
+
+					for (const fileMeta of fileMetas) {
+						uploadedFileMetas.push(fileMeta);
+						if (!fileMeta.mime.startsWith('image/')) continue;
+						const imageUrl = fileMeta.path;
+						quill.insertEmbed(range.index, 'image', imageUrl);
+					}
+
+				} catch (error) {
+					alert(error);
 				}
+
 			};
 
 			input.click();

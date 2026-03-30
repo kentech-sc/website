@@ -43,5 +43,6 @@
 			width: stretch;
 			justify-content: space-between;
 		}
+
 	}
 </style>

@@ -73,6 +73,11 @@
 
 			<QuillEditor bind:editorHtml bind:uploadedFileMetas initialHtml={post?.content} />
 
+			<p id="file-description">
+				용량이 30MB 이하인 파일만 업로드 가능합니다.<br />허용 확장자: PNG, JPG(JPEG), WEBP, SVG,
+				PDF, DOCX, XLSX
+			</p>
+
 			<div class="right-align">
 				<button type="submit" class="btn-action">{post ? '수정' : '작성'}</button>
 			</div>
@@ -136,5 +141,11 @@
 		// 	height: 50vh;
 		// 	resize: vertical;
 		// }
+	}
+
+	#file-description {
+		margin-top: .5rem;
+		color: var(--gray-text);
+		font-size: 0.75rem;
 	}
 </style>
