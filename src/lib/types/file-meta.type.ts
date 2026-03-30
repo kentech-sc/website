@@ -1,4 +1,4 @@
-import type { Types } from 'mongoose';
+import type { Types, UpdateQuery } from 'mongoose';
 
 export type FileId = Types.ObjectId;
 export type FileKey = string;
@@ -9,6 +9,7 @@ export interface FileMetaCreate {
 	size: number;
 	mime: string;
 	ext: string;
+	isTemp: boolean;
 }
 
 export interface FileMetaDoc extends FileMetaCreate {
@@ -19,3 +20,5 @@ export interface FileMetaDoc extends FileMetaCreate {
 export interface FileMeta extends FileMetaDoc {
 	path: string;
 }
+
+export type FileMetaUpdate = UpdateQuery<Pick<FileMetaDoc, 'isTemp'>>;

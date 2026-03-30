@@ -2,11 +2,14 @@
 	import { page } from '$app/state';
 
 	import type { Petition } from '$lib/types/petition.type.js';
+	import type { FileMeta } from '$lib/types/file-meta.type.js';
 
 	import PetitionHeader from '../_components/PetitionHeader.svelte';
 	import PetitionArticle from '../_components/PetitionArticle.svelte';
 	import ResponseArticle from '../_components/ResponseArticle.svelte';
 	import Signers from '../_components/Signers.svelte';
+
+	import FileList from '$components/FileList.svelte';
 
 	const user = JSON.parse(page.data.user);
 
@@ -14,9 +17,11 @@
 
 	let petition = $state<Petition>(JSON.parse(data?.petition ?? '{}'));
 	let signersNames = $state<string[]>(JSON.parse(data?.signersNames ?? '[]'));
+	let files = $state<Array<FileMeta | null>>(JSON.parse(data?.files ?? '[]'));
 </script>
 
 <PetitionHeader pageType="detail" />
 <PetitionArticle bind:petition bind:signersNames {user} />
+<FileList {files} />
 <ResponseArticle bind:petition {user} />
 <Signers {signersNames} />

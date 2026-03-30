@@ -1,4 +1,3 @@
-import * as PostService from '$lib/srv/post.srv.js';
 import * as BoardApplication from '$lib/app/board.app.js';
 
 import { fail, redirect } from '@sveltejs/kit';
@@ -30,23 +29,23 @@ export const actions = {
 		const content = (formData.get('content') ?? '').toString();
 		const displayType = (formData.get('displayType') ?? '').toString();
 
-		const fileMetas = formData.getAll('fileMetas');
-		const files = fileMetas.map((fileMeta) => JSON.parse((fileMeta ?? '').toString())._id);
+		const fileMetas = formData
+			.getAll('fileMetas')
+			.map((fileMeta) => JSON.parse((fileMeta ?? '').toString()));
+		const fileIds = fileMetas.map((fileMeta) => fileMeta._id);
 
 		if (displayType !== 'anonymous' && displayType !== 'nickname' && displayType !== 'realName')
 			return fail(400, { message: 'displayType is invalid' });
 
 		if (!title || !content) return fail(400, { message: 'title, content are required' });
 
-		const post = await PostService.editPostById(
+		const post = await BoardApplication.editPost(
 			postId,
-			{
-				title,
-				content,
-				displayType,
-				files
-			},
-			locals.user
+			title,
+			content,
+			locals.user,
+			displayType,
+			fileIds
 		);
 		redirect(302, '/board/' + params.boardId + '/' + post._id);
 	}),

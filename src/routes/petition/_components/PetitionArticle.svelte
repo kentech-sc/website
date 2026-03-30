@@ -113,6 +113,10 @@
 			width: stretch;
 			align-items: flex-start;
 		}
+
+		pre :global(img) {
+			max-width: 100%;
+		}
 	}
 
 	.delete-form {

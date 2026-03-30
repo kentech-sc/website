@@ -111,7 +111,8 @@ export class FileStorage {
 				name: file.name,
 				size: buffer.length, // 가공된(새니타이징 등) 최종 크기
 				mime: result.mime as string,
-				ext: ext
+				ext: ext,
+				isTemp: true
 			};
 		} catch (_error) {
 			// console.error('[S3_UPLOAD_ERROR]', error);

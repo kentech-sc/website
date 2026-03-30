@@ -24,6 +24,10 @@ export async function getFileMetasByIds(fileIds: FileId[]): Promise<Array<FileMe
 	return fileMetas.map((fileMeta) => (fileMeta ? toFileMeta(fileMeta) : null));
 }
 
+export async function confirmFilesByIds(fileIds: FileId[]): Promise<boolean> {
+	return await FileMetaRepository.confirmFilesByIds(fileIds);
+}
+
 export async function uploadFile(file: File): Promise<FileMeta> {
 	const fileMetaCreate = await FileStorage.uploadFileToStorage(file);
 

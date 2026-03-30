@@ -1,7 +1,6 @@
 <script lang="ts">
 	import type { ActionResult } from '@sveltejs/kit';
 	import { deserialize } from '$app/forms';
-	import { Types } from 'mongoose';
 
 	import { onMount } from 'svelte';
 
@@ -9,26 +8,12 @@
 	import 'quill/dist/quill.snow.css';
 
 	import type { FileMeta } from '$lib/types/file-meta.type';
-	import CommonForm from '$components/CommonForm.svelte';
 
 	let {
 		initialHtml,
 		editorHtml = $bindable(null),
 		uploadedFileMetas = $bindable<FileMeta[]>([])
 	} = $props();
-
-	let formResult = $state<ActionResult | null>(null);
-
-	$effect(() => {
-		if (formResult?.type === 'success') {
-			const deletedFileMeta = JSON.parse(formResult.data?.deletedFileMeta ?? '{}');
-			uploadedFileMetas = uploadedFileMetas.filter(
-				(fileMeta: FileMeta) => !new Types.ObjectId(fileMeta._id).equals(deletedFileMeta._id)
-			);
-			formResult = null;
-			alert('성공적으로 파일을 삭제했습니다.');
-		}
-	});
 
 	let editor = $state<HTMLElement | string>('');
 
@@ -109,16 +94,6 @@
 
 <div class="container-col" id="quill-container">
 	<div id="editor" bind:this={editor}></div>
-
-	{#each uploadedFileMetas as fileMeta, i (fileMeta._id)}
-		<CommonForm formName="delete-file-form-{i}" actionName="deleteFile" bind:formResult>
-			<div class="container" id="form-div">
-				<input type="text" name="fileId" class="hidden" readonly value={fileMeta._id} />
-				<p><b>[{i + 1}]</b> {fileMeta.name}</p>
-				<button type="submit">X</button>
-			</div>
-		</CommonForm>
-	{/each}
 </div>
 
 <style lang="scss">
@@ -131,17 +106,5 @@
 	#editor {
 		width: stretch;
 		min-height: 50vh;
-	}
-
-	#form-div {
-		justify-content: flex-start;
-		background-color: var(--gray-bg);
-		border-bottom: solid 0.1rem var(--gray);
-
-		button {
-			color: red;
-			border: none;
-			background: transparent;
-		}
 	}
 </style>

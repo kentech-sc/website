@@ -41,6 +41,7 @@ export async function createPost(
 	fileIds: FileId[]
 ): Promise<Post> {
 	return await mongoose.connection.transaction(async () => {
+		await FileMetaService.confirmFilesByIds(fileIds);
 		const postCreate: PostCreate = {
 			boardId,
 			title,
@@ -50,6 +51,29 @@ export async function createPost(
 			displayType
 		};
 		return await PostService.createPostByBoardId(postCreate, user);
+	});
+}
+
+export async function editPost(
+	postId: PostId,
+	title: string,
+	content: string,
+	user: User,
+	displayType: DisplayType,
+	fileIds: FileId[]
+): Promise<Post> {
+	return await mongoose.connection.transaction(async () => {
+		await FileMetaService.confirmFilesByIds(fileIds);
+		return await PostService.editPostById(
+			postId,
+			{
+				title,
+				content,
+				displayType,
+				files: fileIds
+			},
+			user
+		);
 	});
 }
 
@@ -78,10 +102,14 @@ export async function deleteCommentAndUpdatePost(commentId: CommentId, user: Use
 	});
 }
 
-export async function deletePostByPostId(postId: PostId, user: User) {
+export async function deletePostById(postId: PostId, user: User) {
 	return await mongoose.connection.transaction(async () => {
 		const deletedPost = await PostService.deletePostById(postId, user);
-		await FileMetaService.deleteFilesByIds(deletedPost.files);
+		const fileMetas = await FileMetaService.getFileMetasByIds(deletedPost.files);
+		const filteredFileIds = fileMetas
+			.filter((fileMeta) => fileMeta !== null)
+			.map((fileMeta) => fileMeta._id);
+		await FileMetaService.deleteFilesByIds(filteredFileIds);
 		await CommentRepository.deleteCommentsByPostId(postId);
 	});
 }

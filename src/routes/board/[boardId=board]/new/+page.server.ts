@@ -30,8 +30,10 @@ export const actions = {
 
 		const displayType = displayTypeRaw as DisplayType;
 
-		const fileMetas = formData.getAll('fileMetas');
-		const files = fileMetas.map((fileMeta) => JSON.parse((fileMeta ?? '').toString())._id);
+		const fileMetas = formData
+			.getAll('fileMetas')
+			.map((fileMeta) => JSON.parse((fileMeta ?? '').toString()));
+		const fileIds = fileMetas.map((fileMeta) => fileMeta._id);
 
 		if (!title || !content) return fail(400, { message: 'title, content are required' });
 
@@ -41,7 +43,7 @@ export const actions = {
 			content,
 			locals.user,
 			displayType,
-			files
+			fileIds
 		);
 
 		redirect(302, '/board/' + params.boardId + '/' + post._id);

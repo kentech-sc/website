@@ -25,6 +25,17 @@ export async function getFileMetasByFileIds(fileIds: FileId[]): Promise<Array<Fi
 	return fileIds.map((fileId) => map.get(fileId.toString()) ?? null);
 }
 
+// export async function updateFileMetaById(fileId: FileId, fileMetaUpdate: FileMetaUpdate): Promise<FileMetaDoc | null> {
+// 	return await FileMetaModel.findOneAndUpdate({ _id: fileId }, fileMetaUpdate, {
+// 		new: true
+// 	}).lean();
+// }
+
+export async function confirmFilesByIds(fileIds: FileId[]): Promise<boolean> {
+	const res = await FileMetaModel.updateMany({ _id: { $in: fileIds } }, { isTemp: false });
+	return res.modifiedCount > 0;
+}
+
 export async function deleteFileMetaById(fileId: FileId): Promise<boolean> {
 	const res = await FileMetaModel.deleteOne({ _id: fileId });
 	return res.deletedCount > 0;

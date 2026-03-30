@@ -1,21 +1,9 @@
 <script lang="ts">
 	import type { FileMeta } from '$lib/types/file-meta.type.js';
 
-	import type { ActionResult } from '@sveltejs/kit';
-
-	import { invalidateAll } from '$app/navigation';
-
 	let { files }: { files: (FileMeta | null)[] } = $props();
 
 	let filteredFiles = $derived(files.filter((file) => file !== null));
-
-	let formResult = $state<ActionResult | null>(null);
-
-	$effect(() => {
-		if (formResult?.type === 'success') {
-			invalidateAll();
-		}
-	});
 </script>
 
 {#snippet FileItem(file: FileMeta, idx: number)}

@@ -7,7 +7,8 @@ const FileMetaSchema = new mongoose.Schema(
 		name: { type: String, required: true },
 		size: { type: Number, required: true },
 		mime: { type: String, required: true },
-		ext: { type: String, required: true }
+		ext: { type: String, required: true },
+		isTemp: { type: Boolean, required: true }
 	},
 	{
 		timestamps: true

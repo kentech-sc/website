@@ -1,7 +1,43 @@
-import type { Petition } from '$lib/types/petition.type.js';
-import type { UserId } from '$lib/types/user.type.js';
+import mongoose from 'mongoose';
+
+import type { Petition, PetitionId } from '$lib/types/petition.type.js';
+import type { User, UserId } from '$lib/types/user.type.js';
 import { DisplayType } from '$lib/types/user.type.js';
+
 import * as UserService from '$lib/srv/user.srv.js';
+import * as PetitionService from '$lib/srv/petition.srv.js';
+import * as FileMetaService from '$lib/srv/file-meta.srv.js';
+
+import type { FileId } from '$lib/types/file-meta.type';
+
+export async function createPetition(
+	title: string,
+	content: string,
+	petitioner: User,
+	fileIds: FileId[]
+) {
+	return await mongoose.connection.transaction(async () => {
+		await FileMetaService.confirmFilesByIds(fileIds);
+		const petition = await PetitionService.createPetition({
+			title,
+			content,
+			petitionerId: petitioner._id,
+			files: fileIds
+		});
+		return petition;
+	});
+}
+
+export async function deletePetitionById(petitionId: PetitionId, user: User) {
+	return await mongoose.connection.transaction(async () => {
+		const deletedPetition = await PetitionService.deletePetitionById(petitionId, user);
+		const fileMetas = await FileMetaService.getFileMetasByIds(deletedPetition.files);
+		const filteredFileIds = fileMetas
+			.filter((fileMeta) => fileMeta !== null)
+			.map((fileMeta) => fileMeta._id);
+		await FileMetaService.deleteFilesByIds(filteredFileIds);
+	});
+}
 
 export async function getSignersRealNamesByPetition(
 	petition: Petition

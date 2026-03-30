@@ -35,7 +35,7 @@ export const actions = {
 		const formData = await request.formData();
 		const postIdRaw = (formData.get('post-id') ?? '').toString();
 		const postId: PostId = new Types.ObjectId(postIdRaw);
-		await PostService.deletePostById(postId, locals.user);
+		await BoardApplication.deletePostById(postId, locals.user);
 		redirect(302, '/board/' + params.boardId);
 	}),
 	likePost: withActionErrorHandling(async ({ request, locals }) => {

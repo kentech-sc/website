@@ -1,5 +1,6 @@
 import * as PetitionService from '$lib/srv/petition.srv.js';
 import * as PetitionApplication from '$lib/app/petition.app.js';
+import * as FileMetaService from '$lib/srv/file-meta.srv.js';
 
 import type { PetitionId } from '$lib/types/petition.type.js';
 
@@ -21,9 +22,12 @@ export const load = withLoadErrorHandling(async ({ params, request }) => {
 
 	const signersNames = await PetitionApplication.getSignersRealNamesByPetition(petition);
 
+	const files = await FileMetaService.getFileMetasByIds(petition.files);
+
 	return {
 		petition: JSON.stringify(petition),
-		signersNames: JSON.stringify(signersNames)
+		signersNames: JSON.stringify(signersNames),
+		files: JSON.stringify(files)
 	};
 });
 
@@ -34,7 +38,7 @@ export const actions = {
 		if (!petitionIdRaw || typeof petitionIdRaw !== 'string')
 			return fail(400, { message: 'petitionId is undefined or invalid' });
 		const petitionId: PetitionId = new Types.ObjectId(petitionIdRaw);
-		await PetitionService.deletePetitionById(petitionId, locals.user);
+		await PetitionApplication.deletePetitionById(petitionId, locals.user);
 		redirect(302, '/petition');
 	}),
 	signPetition: withActionErrorHandling(async ({ request, locals }) => {

@@ -8,7 +8,7 @@
 	import BoardHeader from '../_components/BoardHeader.svelte';
 	import BoardArticle from '../_components/BoardArticle.svelte';
 	import CommentSection from '../_components/CommentSection.svelte';
-	import FileList from '../_components/FileList.svelte';
+	import FileList from '$components/FileList.svelte';
 
 	const user = JSON.parse(page.data.user);
 
