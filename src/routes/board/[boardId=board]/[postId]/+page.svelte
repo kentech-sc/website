@@ -16,10 +16,10 @@
 
 	let post = $state<Post>(JSON.parse(data?.post || '{}'));
 	let comments = $derived<Comment[]>(JSON.parse(data?.comments || '[]'));
-	let files = $derived<Array<FileMeta | null>>(JSON.parse(data?.files || '[]'));
+	let fileMetas = $derived<Array<FileMeta>>(JSON.parse(data?.files || '[]'));
 </script>
 
 <BoardHeader pageType="detail" />
 <BoardArticle bind:post {user} />
-<FileList {files} />
+<FileList {fileMetas} isEditing={false} />
 <CommentSection authorId={post.userId} {comments} {user} />

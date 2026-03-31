@@ -1,4 +1,5 @@
 import * as UserService from '$lib/srv/user.srv.js';
+import * as FileMetaService from '$lib/srv/file-meta.srv.js';
 import type { UserGroup } from '$lib/types/user.type.js';
 
 import { withActionErrorHandling } from '$lib/common/errors.js';
@@ -32,5 +33,11 @@ export const actions = {
 		const email = (formData.get('email') ?? '').toString();
 		await UserService.unblockUserByEmail(email, locals.user);
 		return { email };
-	})
+	}),
+	cleanup: withActionErrorHandling(async ({ request, locals }) => {
+		const formData = await request.formData();
+		const hours = Number(formData.get('hours') ?? 24);
+		const deletedCnt = await FileMetaService.cleanupOrphanedFiles(hours, locals.user);
+		return { deletedCnt };
+	}),
 };

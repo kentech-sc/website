@@ -1,14 +1,25 @@
 <script lang="ts">
-	import type { FileMeta } from '$lib/types/file-meta.type.js';
+	import { Types } from 'mongoose';
 
-	let { files }: { files: (FileMeta | null)[] } = $props();
+	import type { FileId, FileMeta } from '$lib/types/file-meta.type.js';
 
-	let filteredFiles = $derived(files.filter((file) => file !== null));
+	let { fileMetas=$bindable([]), isEditing }: { fileMetas: FileMeta[]; isEditing: boolean } = $props();
+
+	let filteredFiles = $derived<FileMeta[]>(
+		fileMetas.filter(fileMeta => ['pdf', 'docx', 'xlsx'].includes(fileMeta.ext))
+	);
+
+	const deleteFile = (fileId: FileId) => {
+		fileMetas = fileMetas.filter((fileMeta: FileMeta) => !new Types.ObjectId(fileMeta._id).equals(fileId));
+	};
 </script>
 
 {#snippet FileItem(file: FileMeta, idx: number)}
 	<div class="container file-div">
 		<p><b>[{idx + 1}]</b> <a href={file.path}>{file.name}</a></p>
+		{#if isEditing}
+			<button onclick={() => deleteFile(file._id)}>X</button>
+		{/if}
 	</div>
 {/snippet}
 
@@ -28,5 +39,13 @@
 		width: stretch;
 		justify-content: space-between;
 		padding: 0.25rem;
+
+		button {
+			padding: 0;
+			padding-right: .5rem;
+			color: red;
+			border: none;
+			background: transparent;
+		}
 	}
 </style>

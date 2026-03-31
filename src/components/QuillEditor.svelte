@@ -12,7 +12,7 @@
 	let {
 		initialHtml,
 		editorHtml = $bindable(null),
-		uploadedFileMetas = $bindable<FileMeta[]>([])
+		fileMetas = $bindable<FileMeta[]>([])
 	} = $props();
 
 	let editor = $state<HTMLElement | string>('');
@@ -54,6 +54,11 @@
 				files.forEach((f) => formData.append('files', f));
 
 				try {
+
+					if (files.some((f) => f.size > 1 * 1024 * 1024)) {
+						alert('용량이 큰 파일은 오래 걸릴 수 있습니다.');
+					}
+
 					const res: ActionResult = deserialize(
 						await (await fetch('?/uploadFile', { method: 'POST', body: formData })).text()
 					);
@@ -68,15 +73,19 @@
 						return;
 					}
 
-					const fileMetas: FileMeta[] = JSON.parse(res.data?.fileMetas ?? '[]');
+					const uploadedFileMetas: FileMeta[] = JSON.parse(res.data?.fileMetas ?? '[]');
 
 					const range = quill.getSelection(true);
 
-					for (const fileMeta of fileMetas) {
-						uploadedFileMetas.push(fileMeta);
-						if (!fileMeta.mime.startsWith('image/')) continue;
-						const imageUrl = fileMeta.path;
-						quill.insertEmbed(range.index, 'image', imageUrl);
+					for (const fileMeta of uploadedFileMetas) {
+						fileMetas.push(fileMeta);
+
+						if (!fileMeta.mime.startsWith('image/')) {
+							continue;
+						} else {
+							const imageUrl = fileMeta.path;
+							quill.insertEmbed(range.index, 'image', imageUrl);
+						}
 					}
 				} catch (error) {
 					alert(error);

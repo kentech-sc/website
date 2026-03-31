@@ -19,7 +19,6 @@ export interface PetitionCreate {
 	title: string;
 	content: string;
 	petitionerId: UserId;
-	files: FileId[];
 }
 
 export interface PetitionDoc extends PetitionCreate {

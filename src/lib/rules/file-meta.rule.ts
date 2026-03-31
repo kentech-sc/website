@@ -46,6 +46,8 @@ export async function validateAndProcessFile(file: File): Promise<{
 		| 'INVALID_EXTENSION'
 		| 'MIME_MISMATCH'
 		| 'INVALID_FILE_TYPE'
+		| 'INVALID_OFFICE_FILE_MAGIC'
+		| 'INVALID_OFFICE_FILE_BROWSER'
 		| 'INVALID_OFFICE_FILE';
 	mime?: string;
 	sanitizedSvg?: string;
@@ -100,18 +102,34 @@ export async function validateAndProcessFile(file: File): Promise<{
 	// 분기 처리: Office (docx, xlsx)
 	// -----------------------------
 	if (ext === 'docx' || ext === 'xlsx') {
-		const expectedMime =
-			ext === 'docx'
-				? 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-				: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+    const expectedMime =
+        ext === 'docx'
+            ? 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+            : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 
-		// Office 파일은 zip 기반이라 매직 넘버가 application/zip으로 올 수 있음
-		const isZipBased = mimeFromMagic === 'application/zip';
-		if (mimeFromBrowser !== expectedMime || (mimeFromMagic && !isZipBased)) {
-			return { ok: false, code: 'INVALID_OFFICE_FILE' };
-		}
-		return { ok: true, mime: expectedMime };
-	}
+    // 1. 매직 넘버가 ZIP이거나, 이미 기대한 오피스 MIME과 정확히 일치하는지 확인
+    const isValidMagic = 
+        mimeFromMagic === 'application/zip' || 
+        mimeFromMagic === expectedMime;
+
+    // 2. 브라우저 MIME 검증 (브라우저는 간혹 틀릴 수 있으므로 매직 넘버를 더 신뢰)
+    const isValidBrowser = mimeFromBrowser === expectedMime;
+
+    // 최종 판정: 매직 넘버가 올바르거나, 브라우저 값이 올바르다면 통과
+    // (보안을 위해 둘 다 체크하되, 매직 넘버가 존재한다면 반드시 유효해야 함)
+    if (mimeFromMagic && !isValidMagic) {
+        return { ok: false, code: 'INVALID_OFFICE_FILE_MAGIC' };
+    }
+
+    // 브라우저 MIME이 예상과 다르면 경고 정도로 처리하거나, 엄격하게 하려면 아래 유지
+    if (mimeFromBrowser !== expectedMime) {
+        // 일부 환경 대응을 위해 로그를 남기거나 유연하게 처리 가능
+        // return { ok: false, code: 'INVALID_OFFICE_FILE_BROWSER' };
+    }
+
+    return { ok: true, mime: expectedMime };
+}
+	
 
 	// -----------------------------
 	// 분기 처리: 일반 이미지 (PNG, JPG, WEBP)

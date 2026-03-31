@@ -8,7 +8,7 @@ const FileMetaSchema = new mongoose.Schema(
 		size: { type: Number, required: true },
 		mime: { type: String, required: true },
 		ext: { type: String, required: true },
-		isTemp: { type: Boolean, required: true }
+		articleIds: { type: [mongoose.Schema.Types.ObjectId], default: [] }
 	},
 	{
 		timestamps: true
@@ -16,5 +16,6 @@ const FileMetaSchema = new mongoose.Schema(
 );
 
 // FileMetaSchema.index({ key: 1 });
+FileMetaSchema.index({ articleIds: 1 });
 
 export const FileMetaModel = mongoose.model<FileMetaDoc>('FileMeta', FileMetaSchema);

@@ -17,25 +17,20 @@ export async function createPetition(
 	fileIds: FileId[]
 ) {
 	return await mongoose.connection.transaction(async () => {
-		await FileMetaService.confirmFilesByIds(fileIds);
 		const petition = await PetitionService.createPetition({
 			title,
 			content,
 			petitionerId: petitioner._id,
-			files: fileIds
 		});
+		await FileMetaService.linkArticleToFiles(fileIds, petition._id);
 		return petition;
 	});
 }
 
 export async function deletePetitionById(petitionId: PetitionId, user: User) {
 	return await mongoose.connection.transaction(async () => {
-		const deletedPetition = await PetitionService.deletePetitionById(petitionId, user);
-		const fileMetas = await FileMetaService.getFileMetasByIds(deletedPetition.files);
-		const filteredFileIds = fileMetas
-			.filter((fileMeta) => fileMeta !== null)
-			.map((fileMeta) => fileMeta._id);
-		await FileMetaService.deleteFilesByIds(filteredFileIds);
+		await PetitionService.deletePetitionById(petitionId, user);
+		await FileMetaService.unlinkArticleFromAllFiles(petitionId);
 	});
 }
 

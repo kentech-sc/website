@@ -17,11 +17,11 @@
 
 	let petition = $state<Petition>(JSON.parse(data?.petition ?? '{}'));
 	let signersNames = $state<string[]>(JSON.parse(data?.signersNames ?? '[]'));
-	let files = $state<Array<FileMeta | null>>(JSON.parse(data?.files ?? '[]'));
+	let fileMetas = $state<Array<FileMeta>>(JSON.parse(data?.files ?? '[]'));
 </script>
 
 <PetitionHeader pageType="detail" />
 <PetitionArticle bind:petition bind:signersNames {user} />
-<FileList {files} />
+<FileList {fileMetas} isEditing={false} />
 <ResponseArticle bind:petition {user} />
 <Signers {signersNames} />

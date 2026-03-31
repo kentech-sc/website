@@ -7,8 +7,8 @@
 
 	let { data } = $props();
 	const post = $derived<Post>(JSON.parse(data?.post ?? '{}'));
-	const files = $derived<Array<FileMeta | null>>(JSON.parse(data?.files ?? '[]'));
+	const fileMetas = $derived<Array<FileMeta>>(JSON.parse(data?.files ?? '[]'));
 </script>
 
 <BoardHeader pageType="edit" />
-<BoardForm {post} {files} />
+<BoardForm {post} initialFileMetas={fileMetas} />

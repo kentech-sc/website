@@ -5,6 +5,7 @@
 	import ChangeGroupForm from './_components/ChangeGroupForm.svelte';
 	import ChangeNicknameForm from './_components/ChangeNicknameForm.svelte';
 	import Profile from './_components/Profile.svelte';
+	import CleanupForm from './_components/CleanupForm.svelte';
 
 	const user = $derived(JSON.parse(page.data.user ?? '{}'));
 </script>
@@ -16,4 +17,7 @@
 {#if user?.group === 'manager' || user?.group === 'dev'}
 	<BlockForm />
 	<ChangeGroupForm />
+{/if}
+{#if user?.group === 'dev'}
+	<CleanupForm />
 {/if}

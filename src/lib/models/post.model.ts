@@ -11,7 +11,6 @@ const PostSchema = new mongoose.Schema(
 		viewCnt: { type: Number, required: true, default: 0 },
 		commentCnt: { type: Number, required: true, default: 0 },
 		likedBy: { type: [String], required: true, default: [] },
-		files: { type: [mongoose.Schema.Types.ObjectId], default: [] }
 	},
 	{
 		timestamps: true

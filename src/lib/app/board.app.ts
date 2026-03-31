@@ -18,10 +18,10 @@ import * as UserService from '$lib/srv/user.srv.js';
 
 export async function getPostDetailByPostId(
 	postId: PostId
-): Promise<{ post: Post; comments: Comment[]; files: Array<FileMeta | null> }> {
+): Promise<{ post: Post; comments: Comment[]; files: FileMeta[] }> {
 	const postRaw = await PostService.getPostById(postId);
 	const commentsRaw = (await CommentService.getCommentsByPostId(postId)).toReversed();
-	const files = await FileMetaService.getFileMetasByIds(postRaw.files);
+	const files = await FileMetaService.getFileMetasByArticleId(postId);
 
 	const raws = [postRaw, ...commentsRaw];
 	const filled = await UserService.fillDisplayNames(raws);
@@ -41,16 +41,16 @@ export async function createPost(
 	fileIds: FileId[]
 ): Promise<Post> {
 	return await mongoose.connection.transaction(async () => {
-		await FileMetaService.confirmFilesByIds(fileIds);
 		const postCreate: PostCreate = {
 			boardId,
 			title,
 			content,
 			userId: user._id,
-			files: fileIds,
 			displayType
 		};
-		return await PostService.createPostByBoardId(postCreate, user);
+		const post = await PostService.createPostByBoardId(postCreate, user);
+		await FileMetaService.linkArticleToFiles(fileIds, post._id);
+		return post;
 	});
 }
 
@@ -63,17 +63,24 @@ export async function editPost(
 	fileIds: FileId[]
 ): Promise<Post> {
 	return await mongoose.connection.transaction(async () => {
-		await FileMetaService.confirmFilesByIds(fileIds);
+		await FileMetaService.linkArticleToFiles(fileIds, postId);
 		return await PostService.editPostById(
 			postId,
 			{
 				title,
 				content,
 				displayType,
-				files: fileIds
 			},
 			user
 		);
+	});
+}
+
+export async function deletePostById(postId: PostId, user: User) {
+	return await mongoose.connection.transaction(async () => {
+		await PostService.deletePostById(postId, user);
+		await FileMetaService.unlinkArticleFromAllFiles(postId);
+		await CommentRepository.deleteCommentsByPostId(postId);
 	});
 }
 
@@ -99,17 +106,5 @@ export async function deleteCommentAndUpdatePost(commentId: CommentId, user: Use
 	return await mongoose.connection.transaction(async () => {
 		const deletedComment = await CommentService.deleteCommentById(commentId, user);
 		await PostRepository.updatePostById(deletedComment.postId, { $inc: { commentCnt: -1 } });
-	});
-}
-
-export async function deletePostById(postId: PostId, user: User) {
-	return await mongoose.connection.transaction(async () => {
-		const deletedPost = await PostService.deletePostById(postId, user);
-		const fileMetas = await FileMetaService.getFileMetasByIds(deletedPost.files);
-		const filteredFileIds = fileMetas
-			.filter((fileMeta) => fileMeta !== null)
-			.map((fileMeta) => fileMeta._id);
-		await FileMetaService.deleteFilesByIds(filteredFileIds);
-		await CommentRepository.deleteCommentsByPostId(postId);
 	});
 }

@@ -22,7 +22,7 @@ export const load = withLoadErrorHandling(async ({ params, request }) => {
 
 	const signersNames = await PetitionApplication.getSignersRealNamesByPetition(petition);
 
-	const files = await FileMetaService.getFileMetasByIds(petition.files);
+	const files = await FileMetaService.getFileMetasByArticleId(petitionId);
 
 	return {
 		petition: JSON.stringify(petition),

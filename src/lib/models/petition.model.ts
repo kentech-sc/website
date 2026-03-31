@@ -8,7 +8,6 @@ const PetitionSchema = new mongoose.Schema(
 		status: { type: String, default: PetitionStatus.Ongoing },
 		viewCnt: { type: Number, default: 0 },
 		signedBy: { type: [String], default: [] },
-		files: { type: [mongoose.Schema.Types.ObjectId], default: [] },
 		petitionerId: { type: String, required: true },
 		responderId: { type: String, default: null },
 		response: { type: String, default: null },

@@ -11,7 +11,6 @@ export interface PostCreate {
 	title: string;
 	content: string;
 	userId: UserId;
-	files: FileId[];
 	displayType: DisplayType;
 }
 
