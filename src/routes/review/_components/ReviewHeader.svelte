@@ -42,6 +42,7 @@
 
 		.container {
 			width: stretch;
+			justify-content: flex-start;
 			align-items: center;
 			flex-wrap: wrap;
 			gap: 0.5rem;
