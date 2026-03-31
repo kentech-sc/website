@@ -44,6 +44,8 @@
 			width: stretch;
 			justify-content: space-between;
 			align-items: center;
+			flex-wrap: wrap;
+			gap: 0.5rem;
 		}
 	}
 
@@ -56,5 +58,6 @@
 	.btn-group {
 		display: flex;
 		gap: 0.5rem;
+		white-space: nowrap;
 	}
 </style>
