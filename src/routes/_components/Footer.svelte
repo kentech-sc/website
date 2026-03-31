@@ -4,6 +4,8 @@
 	<p>Mail: studentcouncil@kentech.ac.kr</p>
 	<br />
 	<p>Developed by nemovim</p>
+	<br />
+	<a href="/privacy">개인정보처리방침</a>
 </footer>
 
 <style lang="scss">
@@ -25,6 +27,16 @@
 
 		p {
 			font-size: 0.8rem;
+		}
+
+		a {
+			font-size: 0.8rem;
+			color: var(--tertiary-text);
+			text-decoration: underline;
+
+			&:hover {
+				opacity: 0.7;
+			}
 		}
 	}
 </style>
