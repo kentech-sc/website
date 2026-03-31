@@ -42,7 +42,6 @@
 
 		.container {
 			width: stretch;
-			justify-content: space-between;
 			align-items: center;
 			flex-wrap: wrap;
 			gap: 0.5rem;
@@ -59,5 +58,6 @@
 		display: flex;
 		gap: 0.5rem;
 		white-space: nowrap;
+		margin-left: auto;
 	}
 </style>
