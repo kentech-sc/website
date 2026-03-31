@@ -6,6 +6,7 @@
 	<p>Developed by nemovim</p>
 	<br />
 	<a href="/privacy">개인정보처리방침</a>
+	<a href="/terms">서비스 이용약관</a>
 </footer>
 
 <style lang="scss">
