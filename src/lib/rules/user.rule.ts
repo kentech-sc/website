@@ -47,3 +47,11 @@ export function canRemoveUser(user: User): boolean {
 	if (([UserGroup.Dev] as UserGroup[]).includes(user.group)) return true;
 	return false;
 }
+
+export function canDeleteUser(targetUser: User, operatorUser: User): boolean {
+	if (targetUser._id === operatorUser._id) {
+		return true;
+	}
+
+	throw new RuleError('사용자 탈퇴는 본인만 가능합니다.');
+}

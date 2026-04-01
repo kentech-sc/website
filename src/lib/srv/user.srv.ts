@@ -127,11 +127,29 @@ export async function unblockUserByEmail(email: string, operator: User): Promise
 	return await updateUserById(target._id, { blockedUntil: null });
 }
 
-export async function removeUserByEmail(email: string, user: User): Promise<void> {
-	if (!UserRule.canRemoveUser(user)) throw new RuleError('삭제 권한이 없습니다.');
+// export async function removeUserByEmail(email: string, user: User): Promise<void> {
+// 	if (!UserRule.canRemoveUser(user)) throw new RuleError('삭제 권한이 없습니다.');
 
-	const isDeleted = await UserRepository.deleteUserByEmail(email);
-	if (!isDeleted) throw new SrvError('존재하지 않는 사용자입니다.');
+// 	const isDeleted = await UserRepository.deleteUserByEmail(email);
+// 	if (!isDeleted) throw new SrvError('존재하지 않는 사용자입니다.');
+// }
+
+export async function deleteUser(operator: User): Promise<User> {
+	const target = await getUserById(operator._id);
+
+	if (!UserRule.canDeleteUser(target, operator))
+		throw new RuleError('사용자 탈퇴 권한이 없습니다.');
+
+	// 탈퇴 처리: id와 group을 제외한 필드들을 탈퇴한 사용자임을 명시하는 값으로 변경
+	const deletedUserData = {
+		email: `deleted_${target._id}@deleted.com`,
+		realName: '탈퇴한 사용자',
+		nickname: `deleted_${target._id}`,
+		deletedAt: new Date(),
+		blockedUntil: null
+	};
+
+	return await updateUserById(target._id, deletedUserData);
 }
 
 // ========= Fill display names ===============
@@ -162,6 +180,11 @@ export function createDisplayName(
 	displayType: DisplayType,
 	idxByUserId?: Map<string, number>
 ): string {
+	// 탈퇴한 사용자는 모든 표시 타입에서 "탈퇴한 사용자"로 표시
+	if (user.deletedAt) {
+		return '탈퇴한 사용자';
+	}
+
 	switch (displayType) {
 		case DisplayType.Anonymous: {
 			if (!idxByUserId) return AnonymousName;

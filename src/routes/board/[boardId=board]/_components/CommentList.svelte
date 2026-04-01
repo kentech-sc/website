@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { DisplayType, type User, type UserId } from '$lib/types/user.type.js';
+	import { type User, type UserId } from '$lib/types/user.type.js';
 	import type { Comment } from '$lib/types/comment.type.js';
 
 	import type { ActionResult } from '@sveltejs/kit';
@@ -33,9 +33,9 @@
 
 {#snippet CommentItem(comment: Comment)}
 	<div class="container comment-div">
-		{#if authorId === comment.userId && comment.displayType === DisplayType.Anonymous}
-			<p><b style="color: var(--secondary)">[익명의 글쓴이]</b> {comment.content}</p>
-		{:else if authorId === comment.userId}
+		<!-- {#if authorId === comment.userId && comment.displayType === DisplayType.Anonymous}
+			<p><b style="color: var(--secondary)">[익명의 글쓴이]</b> {comment.content}</p> -->
+		{#if authorId === comment.userId}
 			<p><b style="color: var(--secondary)">[{comment.displayName}]</b> {comment.content}</p>
 		{:else}
 			<p><b>[{comment.displayName}]</b> {comment.content}</p>

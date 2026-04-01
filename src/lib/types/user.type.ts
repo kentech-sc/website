@@ -40,8 +40,9 @@ export interface UserDoc extends UserCreate {
 	updatedAt: Date;
 
 	blockedUntil: Date | null;
+	deletedAt: Date | null;
 }
 
 export type User = UserDoc;
 
-export type UserUpdate = UpdateQuery<Pick<UserDoc, 'nickname' | 'group'>>;
+export type UserUpdate = UpdateQuery<Pick<UserDoc, 'nickname' | 'group' | 'deletedAt'>>;

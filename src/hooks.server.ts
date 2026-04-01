@@ -72,6 +72,15 @@ const authorizationHandle: Handle = async ({ event, resolve }) => {
 		};
 
 		const user = await getUser(profile);
+
+		if (user.deletedAt) {
+			// 1. 세션 쿠키 삭제 (SvelteKit 내장 API 사용)
+			event.cookies.delete('authjs.session-token', { path: '/' });
+
+			// 2. 리디렉션 (추가 옵션 없이 깔끔하게 호출)
+			throw redirect(303, '/');
+		}
+
 		event.locals.user = user;
 
 		return await resolve(event);
@@ -93,6 +102,7 @@ const authorizationHandle: Handle = async ({ event, resolve }) => {
 			nickname: '',
 			realName: '',
 			blockedUntil: null,
+			deletedAt: null,
 			group: 'guest' as const,
 			_id: crypto.randomUUID(),
 			createdAt: new Date(),
@@ -115,6 +125,20 @@ export const blockHandle: Handle = async ({ event, resolve }) => {
 				status: 403,
 				error: {
 					message: '차단된 사용자입니다.'
+				}
+			};
+			return new Response(JSON.stringify(result), { status: 403 });
+		}
+	}
+
+	// 탈퇴한 사용자 차단
+	if (user?.deletedAt) {
+		if (event.request.method === 'POST') {
+			const result: ActionResult = {
+				type: 'error',
+				status: 403,
+				error: {
+					message: '탈퇴한 사용자입니다.'
 				}
 			};
 			return new Response(JSON.stringify(result), { status: 403 });
