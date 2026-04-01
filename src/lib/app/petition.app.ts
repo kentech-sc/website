@@ -20,7 +20,7 @@ export async function createPetition(
 		const petition = await PetitionService.createPetition({
 			title,
 			content,
-			petitionerId: petitioner._id,
+			petitionerId: petitioner._id
 		});
 		await FileMetaService.linkArticleToFiles(fileIds, petition._id);
 		return petition;

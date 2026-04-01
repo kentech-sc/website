@@ -11,7 +11,7 @@ const actions = {
 		return {
 			fileMetas: JSON.stringify(fileMetas)
 		};
-	}),
+	})
 };
 
 export default actions;

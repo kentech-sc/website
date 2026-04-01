@@ -27,7 +27,9 @@ export async function getFileMetasByFileIds(fileIds: FileId[]): Promise<Array<Fi
 	return fileIds.map((fileId) => map.get(fileId.toString()) ?? null);
 }
 
-export async function getFileMetasByArticleId(articleId: PostId | PetitionId ): Promise<FileMetaDoc[]> {
+export async function getFileMetasByArticleId(
+	articleId: PostId | PetitionId
+): Promise<FileMetaDoc[]> {
 	const fileMetas = await FileMetaModel.find({ articleIds: articleId }).lean();
 	return fileMetas;
 }
@@ -42,7 +44,10 @@ export async function deleteFileMetasByFileIds(fileIds: FileId[]): Promise<boole
 	return res.deletedCount > 0;
 }
 
-export async function addArticleIdToFile(fileId: FileId, articleId: PostId | PetitionId): Promise<FileMetaDoc | null> {
+export async function addArticleIdToFile(
+	fileId: FileId,
+	articleId: PostId | PetitionId
+): Promise<FileMetaDoc | null> {
 	const updatedFileMeta = await FileMetaModel.findOneAndUpdate(
 		{ _id: fileId },
 		{ $addToSet: { articleIds: articleId } },
@@ -51,7 +56,10 @@ export async function addArticleIdToFile(fileId: FileId, articleId: PostId | Pet
 	return updatedFileMeta;
 }
 
-export async function removeArticleIdFromFile(fileId: FileId, articleId: PostId | PetitionId): Promise<FileMetaDoc | null> {
+export async function removeArticleIdFromFile(
+	fileId: FileId,
+	articleId: PostId | PetitionId
+): Promise<FileMetaDoc | null> {
 	const updatedFileMeta = await FileMetaModel.findOneAndUpdate(
 		{ _id: fileId },
 		{ $pull: { articleIds: articleId } },
@@ -60,7 +68,10 @@ export async function removeArticleIdFromFile(fileId: FileId, articleId: PostId 
 	return updatedFileMeta;
 }
 
-export async function addArticleIdToFiles(fileIds: FileId[], articleId: PostId | PetitionId): Promise<boolean> {
+export async function addArticleIdToFiles(
+	fileIds: FileId[],
+	articleId: PostId | PetitionId
+): Promise<boolean> {
 	const res = await FileMetaModel.updateMany(
 		{ _id: { $in: fileIds } },
 		{ $addToSet: { articleIds: articleId } }
@@ -68,7 +79,10 @@ export async function addArticleIdToFiles(fileIds: FileId[], articleId: PostId |
 	return res.modifiedCount > 0;
 }
 
-export async function removeArticleIdFromFiles(fileIds: FileId[], articleId: PostId | PetitionId): Promise<boolean> {
+export async function removeArticleIdFromFiles(
+	fileIds: FileId[],
+	articleId: PostId | PetitionId
+): Promise<boolean> {
 	const res = await FileMetaModel.updateMany(
 		{ _id: { $in: fileIds } },
 		{ $pull: { articleIds: articleId } }
@@ -76,7 +90,9 @@ export async function removeArticleIdFromFiles(fileIds: FileId[], articleId: Pos
 	return res.modifiedCount > 0;
 }
 
-export async function removeArticleIdFromAllFiles(articleId: PostId | PetitionId): Promise<boolean> {
+export async function removeArticleIdFromAllFiles(
+	articleId: PostId | PetitionId
+): Promise<boolean> {
 	const res = await FileMetaModel.updateMany(
 		{ articleIds: articleId },
 		{ $pull: { articleIds: articleId } }

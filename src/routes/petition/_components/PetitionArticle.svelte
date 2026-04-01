@@ -1,4 +1,6 @@
 <script lang="ts">
+	import '$style/nmu.scss';
+
 	import type { ActionResult } from '@sveltejs/kit';
 
 	import ThumbsUp from '@lucide/svelte/icons/thumbs-up';
@@ -100,7 +102,7 @@
 		{@render ArticleHeader()}
 		<hr />
 		<!-- eslint-disable svelte/no-at-html-tags -->
-		<pre>{@html petition.content}</pre>
+		<pre class="nmu">{@html petition.content}</pre>
 		{@render SignBtn()}
 	</article>
 </section>

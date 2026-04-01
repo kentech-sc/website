@@ -1,4 +1,5 @@
 <script lang="ts">
+	import '$style/nmu.scss';
 	import type { ActionResult } from '@sveltejs/kit';
 
 	import type { Post } from '$lib/types/post.type.js';
@@ -84,7 +85,7 @@
 		{@render ArticleHeader()}
 		<hr />
 		<!-- eslint-disable svelte/no-at-html-tags -->
-		<pre>{@html post.content}</pre>
+		<pre class="nmu">{@html post.content}</pre>
 		{@render LikeBtn()}
 	</article>
 </section>

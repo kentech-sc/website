@@ -3,16 +3,17 @@
 
 	import type { Post } from '$lib/types/post.type.js';
 
-	import QuillEditor from '$components/QuillEditor.svelte';
-	import type { FileMeta } from '$lib/types/file-meta.type';
+	import type { FileMeta, FileId } from '$lib/types/file-meta.type';
 	import FileList from '$components/FileList.svelte';
+	import Editor from '$components/Editor.svelte';
 
-
-	let { post }: { post?: Post; } = $props();
+	let { post }: { post?: Post } = $props();
 
 	let editorHtml = $state('');
-	let fileMetas = $state<FileMeta[]>([]);
 
+	let attachments = $state<FileMeta[]>([]);
+	let imageIds = $state<FileId[]>([]);
+	let fileIds = $derived([...attachments.map((fileMeta) => fileMeta._id), ...imageIds]);
 </script>
 
 <section class="module">
@@ -21,21 +22,15 @@
 			<input type="text" id="title" name="title" placeholder="청원 제목을 입력하세요" />
 
 			<input class="hidden" type="text" name="content" bind:value={editorHtml} readonly />
-			{#each fileMetas as fileMeta (fileMeta._id)}
-				<input
-					class="hidden"
-					type="text"
-					name="fileMetas"
-					value={JSON.stringify(fileMeta)}
-					readonly
-				/>
+			{#each fileIds as fileId (fileId)}
+				<input class="hidden" type="text" name="fileIds" value={fileId} readonly />
 			{/each}
 
-			<QuillEditor bind:editorHtml bind:fileMetas initialHtml={post?.content} />
+			<Editor bind:editorHtml bind:attachments bind:imageIds initialHtml={post?.content} />
 		</div>
 	</CommonForm>
 
-	<FileList {fileMetas} isEditing={true} />
+	<FileList bind:fileMetas={attachments} isEditing={true} />
 
 	<p id="file-description">
 		용량이 30MB 이하인 파일만 업로드 가능합니다.<br />허용 확장자: PNG, JPG(JPEG), WEBP, SVG, PDF,

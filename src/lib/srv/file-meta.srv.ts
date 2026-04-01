@@ -68,7 +68,10 @@ export async function deleteFilesByIds(fileIds: FileId[]): Promise<FileMeta[]> {
 	return await Promise.all(fileIds.map(deleteFileById));
 }
 
-export async function linkArticleToFiles(fileIds: FileId[], articleId: PostId | PetitionId): Promise<boolean> {
+export async function linkArticleToFiles(
+	fileIds: FileId[],
+	articleId: PostId | PetitionId
+): Promise<boolean> {
 	return await mongoose.connection.transaction(async () => {
 		// 먼저 모든 파일에서 해당 게시물 ID 제거
 		await FileMetaRepository.removeArticleIdFromAllFiles(articleId);
@@ -81,35 +84,37 @@ export async function unlinkArticleFromAllFiles(articleId: PostId | PetitionId):
 	return await FileMetaRepository.removeArticleIdFromAllFiles(articleId);
 }
 
-export async function cleanupOrphanedFiles(olderThanHours: number = 24, user: User): Promise<number> {
+export async function cleanupOrphanedFiles(
+	olderThanHours: number = 24,
+	user: User
+): Promise<number> {
+	if (user.group !== UserGroup.Dev) throw new RuleError('개발자만 실행할 수 있습니다.');
 
-	if (user.group !== UserGroup.Dev) throw new RuleError("개발자만 실행할 수 있습니다.");
+	const cutoffTime = new Date(Date.now() - olderThanHours * 60 * 60 * 1000);
 
-    const cutoffTime = new Date(Date.now() - olderThanHours * 60 * 60 * 1000);
-    
-    // 1. 삭제할 대상 목록 조회 (ID와 Key가 필요)
-    const orphanedFiles = await FileMetaRepository.getOrphanedFiles(cutoffTime);
-    if (orphanedFiles.length === 0) return 0;
+	// 1. 삭제할 대상 목록 조회 (ID와 Key가 필요)
+	const orphanedFiles = await FileMetaRepository.getOrphanedFiles(cutoffTime);
+	if (orphanedFiles.length === 0) return 0;
 
-    const deleteResults = await Promise.all(
-        orphanedFiles.map(async (file) => {
-            try {
-                await FileStorage.deleteFileFromStorage(file.key);
-                return file._id; // 성공한 ID만 반환
-            } catch (err) {
-                console.error(`S3 삭제 실패 (건너뜀): ${file.key}`, err);
-                return null; // 실패하면 null
-            }
-        })
-    );
+	const deleteResults = await Promise.all(
+		orphanedFiles.map(async (file) => {
+			try {
+				await FileStorage.deleteFileFromStorage(file.key);
+				return file._id; // 성공한 ID만 반환
+			} catch (err) {
+				console.error(`S3 삭제 실패 (건너뜀): ${file.key}`, err);
+				return null; // 실패하면 null
+			}
+		})
+	);
 
-    // 3. S3 삭제에 성공한 것들만 골라내기
-    const successfulIds = deleteResults.filter(id => id !== null);
+	// 3. S3 삭제에 성공한 것들만 골라내기
+	const successfulIds = deleteResults.filter((id) => id !== null);
 
-    // 4. DB에서 최종 삭제
-    if (successfulIds.length > 0) {
-        await FileMetaRepository.deleteFileMetasByFileIds(successfulIds);
-    }
+	// 4. DB에서 최종 삭제
+	if (successfulIds.length > 0) {
+		await FileMetaRepository.deleteFileMetasByFileIds(successfulIds);
+	}
 
-    return successfulIds.length;
+	return successfulIds.length;
 }

@@ -14,8 +14,8 @@
 	<div class="container">
 		<p>수강했던 강의에 대한 솔직한 후기를 남겨주세요</p>
 
-		{#if pageType === 'list'}
-			<div class="btn-group">
+		<div class="btn-group">
+			{#if pageType === 'list'}
 				<LinkButton href="/course/new">
 					<Plus size="1rem" />
 					<span>강의/교수 추가</span>
@@ -24,13 +24,13 @@
 					<Pen size="1rem" />
 					<span>평가하기</span>
 				</LinkButton>
-			</div>
-		{:else if pageType === 'new' || pageType === 'edit' || pageType === 'detail'}
-			<LinkButton href="/review">
-				<List size="1rem" />
-				<span>목록</span>
-			</LinkButton>
-		{/if}
+			{:else if pageType === 'new' || pageType === 'edit' || pageType === 'detail'}
+				<LinkButton href="/review">
+					<List size="1rem" />
+					<span>목록</span>
+				</LinkButton>
+			{/if}
+		</div>
 	</div>
 	<hr />
 </header>

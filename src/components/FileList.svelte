@@ -3,14 +3,17 @@
 
 	import type { FileId, FileMeta } from '$lib/types/file-meta.type.js';
 
-	let { fileMetas=$bindable([]), isEditing }: { fileMetas: FileMeta[]; isEditing: boolean } = $props();
+	let { fileMetas = $bindable([]), isEditing }: { fileMetas: FileMeta[]; isEditing: boolean } =
+		$props();
 
 	let filteredFiles = $derived<FileMeta[]>(
-		fileMetas.filter(fileMeta => ['pdf', 'docx', 'xlsx'].includes(fileMeta.ext))
+		fileMetas.filter((fileMeta) => ['pdf', 'docx', 'xlsx'].includes(fileMeta.ext))
 	);
 
 	const deleteFile = (fileId: FileId) => {
-		fileMetas = fileMetas.filter((fileMeta: FileMeta) => !new Types.ObjectId(fileMeta._id).equals(fileId));
+		fileMetas = fileMetas.filter(
+			(fileMeta: FileMeta) => !new Types.ObjectId(fileMeta._id).equals(fileId)
+		);
 	};
 </script>
 
@@ -42,7 +45,7 @@
 
 		button {
 			padding: 0;
-			padding-right: .5rem;
+			padding-right: 0.5rem;
 			color: red;
 			border: none;
 			background: transparent;

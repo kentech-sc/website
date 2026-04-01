@@ -39,5 +39,5 @@ export const actions = {
 		const hours = Number(formData.get('hours') ?? 24);
 		const deletedCnt = await FileMetaService.cleanupOrphanedFiles(hours, locals.user);
 		return { deletedCnt };
-	}),
+	})
 };

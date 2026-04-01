@@ -11,4 +11,4 @@
 </script>
 
 <BoardHeader pageType="edit" />
-<BoardForm {post} initialFileMetas={fileMetas} />
+<BoardForm {post} {fileMetas} />

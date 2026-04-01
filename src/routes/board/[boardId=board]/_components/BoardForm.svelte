@@ -5,15 +5,22 @@
 
 	import { DisplayType } from '$lib/types/user.type.js';
 
-	import QuillEditor from '$components/QuillEditor.svelte';
-	import type { FileMeta } from '$lib/types/file-meta.type';
+	import type { FileId, FileMeta } from '$lib/types/file-meta.type';
 	import FileList from '$components/FileList.svelte';
+	import Editor from '$components/Editor.svelte';
 
-	let { post, initialFileMetas = [] }: { post?: Post; initialFileMetas?: FileMeta[] } = $props();
+	let { post, fileMetas = [] }: { post?: Post; fileMetas?: FileMeta[] } = $props();
 
 	let editorHtml = $state('');
-	let fileMetas = $state<FileMeta[]>(initialFileMetas);
-
+	let attachments = $state<FileMeta[]>(
+		fileMetas.filter((fileMeta) => !fileMeta.mime.startsWith('image/'))
+	);
+	let imageIds = $state<FileId[]>(
+		fileMetas
+			.filter((fileMeta) => fileMeta.mime.startsWith('image/'))
+			.map((fileMeta) => fileMeta._id)
+	);
+	let allFileIds = $derived([...attachments.map((fileMeta) => fileMeta._id), ...imageIds]);
 </script>
 
 {#snippet RadioModule()}
@@ -63,21 +70,15 @@
 
 			<!-- <textarea id="content" name="content">{post?.content}</textarea> -->
 			<input class="hidden" type="text" name="content" bind:value={editorHtml} readonly />
-			{#each fileMetas as fileMeta (fileMeta._id)}
-				<input
-					class="hidden"
-					type="text"
-					name="fileMetas"
-					value={JSON.stringify(fileMeta)}
-					readonly
-				/>
+			{#each allFileIds as fileId (fileId)}
+				<input class="hidden" type="text" name="fileIds" value={fileId} readonly />
 			{/each}
 
-			<QuillEditor bind:editorHtml bind:fileMetas initialHtml={post?.content} />
+			<Editor bind:editorHtml bind:attachments bind:imageIds initialHtml={post?.content} />
 		</div>
 	</CommonForm>
 
-	<FileList bind:fileMetas isEditing={true} />
+	<FileList bind:fileMetas={attachments} isEditing={true} />
 
 	<p id="file-description">
 		용량이 30MB 이하인 파일만 업로드 가능합니다.<br />허용 확장자: PNG, JPG(JPEG), WEBP, SVG, PDF,
@@ -154,5 +155,4 @@
 		color: var(--gray-text);
 		font-size: 0.75rem;
 	}
-
 </style>

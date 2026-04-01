@@ -17,7 +17,7 @@
 <section class="module container-col">
 	<CommonForm actionName="cleanup" formName="cleanup" bind:formResult>
 		<div class="container" id="form-div">
-			<input name="hours" type='number' value="0">
+			<input name="hours" type="number" value="0" />
 			<span>시간 지난 파일</span>
 			<button>청소하기</button>
 		</div>
