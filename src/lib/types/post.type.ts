@@ -2,7 +2,6 @@ import type { Types, UpdateQuery } from 'mongoose';
 
 import type { UserId, DisplayType } from './user.type.js';
 import type { BoardId } from './board.type.js';
-import type { FileId } from './file-meta.type.js';
 
 export type PostId = Types.ObjectId;
 

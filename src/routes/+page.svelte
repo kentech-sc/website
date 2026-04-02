@@ -5,10 +5,10 @@
 	import GridSection from './_components/GridSection.svelte';
 
 	let { data } = $props();
-	let reviews = $state<Review[]>(JSON.parse(data?.reviews || '[]'));
-	let freePosts = $state<Post[]>(JSON.parse(data?.freePosts || '[]'));
-	let noticePosts = $state<Post[]>(JSON.parse(data?.noticePosts || '[]'));
-	let petitions = $state<Petition[]>(JSON.parse(data?.petitions || '[]'));
+	let reviews = $derived<Review[]>(JSON.parse(data?.reviews || '[]'));
+	let freePosts = $derived<Post[]>(JSON.parse(data?.freePosts || '[]'));
+	let noticePosts = $derived<Post[]>(JSON.parse(data?.noticePosts || '[]'));
+	let petitions = $derived<Petition[]>(JSON.parse(data?.petitions || '[]'));
 </script>
 
 <div class="primary hidden" id="banner">

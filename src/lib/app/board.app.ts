@@ -69,7 +69,7 @@ export async function editPost(
 			{
 				title,
 				content,
-				displayType,
+				displayType
 			},
 			user
 		);

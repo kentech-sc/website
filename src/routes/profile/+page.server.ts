@@ -34,10 +34,14 @@ export const actions = {
 		await UserService.unblockUserByEmail(email, locals.user);
 		return { email };
 	}),
+	deleteUser: withActionErrorHandling(async ({ locals }) => {
+		await UserService.deleteUser(locals.user);
+		return { userId: locals.user._id };
+	}),
 	cleanup: withActionErrorHandling(async ({ request, locals }) => {
 		const formData = await request.formData();
 		const hours = Number(formData.get('hours') ?? 24);
 		const deletedCnt = await FileMetaService.cleanupOrphanedFiles(hours, locals.user);
 		return { deletedCnt };
-	}),
+	})
 };

@@ -8,7 +8,8 @@ const UserSchema = new mongoose.Schema(
 		realName: { type: String, required: true },
 		nickname: { type: String, required: true, unique: true },
 		group: { type: String, required: true, enum: ['user', 'moderator', 'manager', 'dev'] },
-		blockedUntil: { type: Date, default: null }
+		blockedUntil: { type: Date, default: null },
+		deletedAt: { type: Date, default: null }
 	},
 	{
 		timestamps: true

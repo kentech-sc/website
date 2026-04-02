@@ -1,6 +1,5 @@
 import type { Types, UpdateQuery } from 'mongoose';
 
-import type { FileId } from './file-meta.type.js';
 import type { UserId } from './user.type.js';
 
 export const PetitionStatus = {

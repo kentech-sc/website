@@ -7,7 +7,7 @@ import type { PostId } from '$lib/types/post.type.js';
 
 import { withActionErrorHandling, withLoadErrorHandling } from '$lib/common/errors.js';
 
-import quillActions from '$components/quill-actions.js';
+import editorActions from '$components/editor-actions.js';
 
 export const load = withLoadErrorHandling(async ({ params }) => {
 	const postIdRaw = params.postId;
@@ -29,10 +29,9 @@ export const actions = {
 		const content = (formData.get('content') ?? '').toString();
 		const displayType = (formData.get('displayType') ?? '').toString();
 
-		const fileMetas = formData
-			.getAll('fileMetas')
-			.map((fileMeta) => JSON.parse((fileMeta ?? '').toString()));
-		const fileIds = fileMetas.map((fileMeta) => fileMeta._id);
+		const fileIds = formData
+			.getAll('fileIds')
+			.map((fileId) => new Types.ObjectId(fileId.toString()));
 
 		if (displayType !== 'anonymous' && displayType !== 'nickname' && displayType !== 'realName')
 			return fail(400, { message: 'displayType is invalid' });
@@ -49,5 +48,5 @@ export const actions = {
 		);
 		redirect(302, '/board/' + params.boardId + '/' + post._id);
 	}),
-	...quillActions
+	...editorActions
 };
