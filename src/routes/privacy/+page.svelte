@@ -158,12 +158,12 @@
 				<tbody>
 					<tr>
 						<td>성명</td>
-						<td>KENTECH 정보국장 권우성</td>
+						<td>권우성</td>
 					</tr>
 					<tr>
 						<td>이메일</td>
 						<td>
-							<a href="mailto:studentcouncil@kentech.ac.kr">studentcouncil@kentech.ac.kr</a>
+							<a href="mailto:miniipad03@kentech.ac.kr">miiniipad03@kentech.ac.kr</a>
 						</td>
 					</tr>
 				</tbody>

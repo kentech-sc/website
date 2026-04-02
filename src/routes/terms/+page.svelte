@@ -20,7 +20,7 @@
 		<section>
 			<h3>2. 이용 대상</h3>
 			<p>
-				본 서비스는 <strong>KENTECH 이메일(@kentech.ac.kr) 계정을 보유한 재학생 및 교직원</strong>을
+				본 서비스는 <strong>KENTECH 이메일(@kentech.ac.kr) 계정을 보유한 재학생 및 휴학생</strong>을
 				대상으로 합니다. KENTECH 이메일로 Google OAuth 인증을 완료한 경우에 한해 서비스를 이용할 수
 				있습니다.
 			</p>
