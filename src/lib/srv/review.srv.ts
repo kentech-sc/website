@@ -47,7 +47,7 @@ export async function createReview(
 	if (!ReviewRule.checkReviewYearAndTerm(year, term))
 		throw new RuleError('연도 또는 학기 값이 올바르지 않습니다.');
 	if (!ReviewRule.checkReviewScore(score))
-		throw new RuleError('점수는 1에서 5 사이의 값이어야 합니다.');
+		throw new RuleError('점수는 1에서 10 사이의 값이어야 합니다.');
 	const review: ReviewCreate = {
 		courseId,
 		professorId,
