@@ -42,8 +42,24 @@
 		justify-content: flex-start;
 		margin-bottom: 0.5rem;
 
-		div:nth-child(2) {
-			margin-left: 1rem;
+		select {
+			max-width: 100%;
+		}
+
+		@media (max-width: 768px) {
+			flex-direction: column;
+			align-items: flex-start;
+			gap: 0.5rem;
+
+			div {
+				width: 100%;
+				margin-left: 0;
+			}
+
+			select {
+				width: 100%;
+				min-width: 0;
+			}
 		}
 	}
 </style>

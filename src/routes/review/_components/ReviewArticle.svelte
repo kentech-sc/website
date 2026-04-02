@@ -114,6 +114,17 @@
 			& > div {
 				align-items: flex-start;
 			}
+
+			.header-content {
+				min-width: 0;
+				word-break: break-word;
+			}
+
+			@media (max-width: 768px) {
+				flex-direction: column;
+				align-items: flex-start;
+				gap: 0.5rem;
+			}
 		}
 
 		h2 {
@@ -129,7 +140,8 @@
 	.time-info {
 		display: flex;
 		align-items: center;
-		gap: 1rem;
+		flex-wrap: wrap;
+		gap: 0.5rem 1rem;
 		color: var(--gray-text);
 		font-size: 0.8rem;
 		margin: 0;

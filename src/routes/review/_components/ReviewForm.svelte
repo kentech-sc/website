@@ -196,6 +196,8 @@
 		.select_group {
 			display: flex;
 			flex-direction: column;
+			min-width: 0;
+			flex: 1;
 		}
 
 		label {
@@ -213,7 +215,14 @@
 		// input[type='number'],
 		select {
 			width: stretch;
+			max-width: 100%;
 			margin-right: 1.5rem;
+
+			@media (max-width: 768px) {
+				width: 100%;
+				min-width: 0;
+				margin-right: 0;
+			}
 		}
 
 		textarea {
@@ -229,6 +238,20 @@
 			gap: 2rem;
 			flex-wrap: wrap;
 			margin-bottom: 1rem;
+
+			@media (max-width: 768px) {
+				flex-direction: column;
+				gap: 1rem;
+
+				.container {
+					flex-direction: column;
+					gap: 1rem;
+				}
+
+				.select_group {
+					width: 100%;
+				}
+			}
 		}
 	}
 
@@ -243,6 +266,11 @@
 	.slider-row {
 		flex-wrap: wrap;
 		gap: 2rem;
+
+		@media (max-width: 768px) {
+			flex-direction: column;
+			gap: 1rem;
+		}
 	}
 
 	.score-item {
@@ -252,6 +280,12 @@
 		flex-direction: column;
 
 		margin-right: 2rem;
+
+		@media (max-width: 768px) {
+			min-width: 0;
+			width: 100%;
+			margin-right: 0;
+		}
 
 		.label-row {
 			display: flex;

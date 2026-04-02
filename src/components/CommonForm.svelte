@@ -70,6 +70,7 @@
 		border: none;
 		display: flex;
 		flex-direction: column;
+		min-width: 0;
 	}
 
 	#error-msg {
