@@ -85,6 +85,8 @@ export async function changeNicknameById(
 ): Promise<User> {
 	const target = await getUserById(userId);
 
+	newNickname = newNickname.trim();
+
 	const isDuplicate = (await getUserOrNullByNickname(newNickname)) !== null;
 	if (!UserRule.canChangeNickname(target, newNickname, operator, isDuplicate))
 		throw new RuleError('이름 변경이 불가능합니다.');

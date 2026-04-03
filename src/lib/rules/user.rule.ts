@@ -8,7 +8,6 @@ export function canChangeNickname(
 	operatorUser: User,
 	isDuplicate: boolean
 ): boolean {
-	newNickname = newNickname.trim();
 	if (
 		!(
 			targetUser.email === operatorUser.email ||
@@ -16,9 +15,26 @@ export function canChangeNickname(
 		)
 	)
 		throw new RuleError('이름 변경은 본인만 가능합니다.');
-	if (newNickname.length < 4) throw new RuleError('별명은 4자 이상이어야 합니다.');
+
+	const validRegex = /[^가-힣ㄱ-ㅎㅏ-ㅣa-zA-Z0-9 ]/g;
+	const continuousSpaceRegex = /\s{2,}/;
+
+	if (newNickname.trim() !== newNickname)
+		throw new RuleError('별명의 앞뒤 공백은 제거해주세요.');
+
+	if (continuousSpaceRegex.test(newNickname))
+		throw new RuleError('공백은 연속해서 사용할 수 없습니다.');
+
+	if (validRegex.test(newNickname))
+		throw new RuleError('별명은 한글, 영문, 숫자만 사용할 수 있습니다.');
+
+	if (newNickname.length < 4 || newNickname.length > 20)
+		throw new RuleError('별명은 4자 이상 20자 이하이어야 합니다.');
+
 	if (targetUser.nickname === newNickname) throw new RuleError('변경 사항이 없습니다.');
+
 	if (isDuplicate) throw new RuleError('이미 같은 별명의 사용자가 있습니다.');
+
 	return true;
 }
 
