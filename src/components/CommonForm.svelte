@@ -8,10 +8,10 @@
 		formName,
 		actionName = '',
 		isFile = false,
-		formResult = $bindable(null)
+		formResult = $bindable(null),
+		loading = $bindable<boolean>(false)
 	} = $props();
 
-	let loading = $state<boolean>(false);
 	let errorMsg = $state<string>('');
 
 	function formHandle() {
@@ -28,14 +28,20 @@
 				formResult = result;
 				// await update();
 				errorMsg = '';
+				// 성공 시에도 약간의 지연 후 loading을 false로 설정하여 연타 방지
+				setTimeout(() => {
+					loading = false;
+				}, 200);
 			} else if (result.type === 'redirect') {
 				goto(result.location);
+				// 리디렉션 시에는 loading을 유지
 			} else if (result.type === 'failure') {
 				errorMsg = result.data?.message || '알 수 없는 오류가 발생했습니다.';
+				loading = false;
 			} else if (result.type === 'error') {
 				errorMsg = result.error?.message || '알 수 없는 오류가 발생했습니다.';
+				loading = false;
 			}
-			loading = false;
 		};
 	}
 </script>

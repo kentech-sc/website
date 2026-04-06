@@ -15,6 +15,8 @@
 	let displayType = $state<DisplayType>(DisplayType.Anonymous);
 	let commentTextarea = $state<HTMLTextAreaElement | null>(null);
 
+	let loading = $state<boolean>(false);
+
 	$effect(() => {
 		if (commentFormResult?.type === 'success') {
 			if (commentFormResult.data?.comment && commentTextarea) {
@@ -63,7 +65,7 @@
 		{@render RadioModule()}
 		<div class="container">
 			<textarea name="content" autocomplete="off" bind:this={commentTextarea}></textarea>
-			<button type="submit">작성</button>
+			<button type="submit" class="btn-action">작성</button>
 		</div>
 	</div>
 </CommonForm>

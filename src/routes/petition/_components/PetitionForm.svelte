@@ -10,6 +10,7 @@
 	let { post }: { post?: Post } = $props();
 
 	let editorHtml = $state('');
+	let loading = $state<boolean>(false);
 
 	let attachments = $state<FileMeta[]>([]);
 	let imageIds = $state<FileId[]>([]);
@@ -17,7 +18,7 @@
 </script>
 
 <section class="module">
-	<CommonForm actionName="createPetition" formName="createPetition">
+	<CommonForm actionName="createPetition" formName="createPetition" bind:loading>
 		<div id="form-div">
 			<input type="text" id="title" name="title" placeholder="청원 제목을 입력하세요" />
 
@@ -38,7 +39,7 @@
 	</p>
 
 	<div class="right-align">
-		<button type="submit" class="btn-action" form="createPetition">작성</button>
+		<button type="submit" class="btn-action" form="createPetition" disabled={loading}>작성</button>
 	</div>
 </section>
 

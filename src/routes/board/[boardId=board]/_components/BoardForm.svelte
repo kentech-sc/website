@@ -11,6 +11,8 @@
 
 	let { post, fileMetas = [] }: { post?: Post; fileMetas?: FileMeta[] } = $props();
 
+	let loading = $state<boolean>(false);
+
 	let editorHtml = $state('');
 	let attachments = $state<FileMeta[]>(
 		fileMetas.filter((fileMeta) => !fileMeta.mime.startsWith('image/'))
@@ -56,6 +58,7 @@
 	<CommonForm
 		actionName={post ? 'editPost' : 'createPost'}
 		formName={post ? 'editPost' : 'createPost'}
+		bind:loading
 	>
 		<div id="form-div">
 			{@render RadioModule()}
@@ -86,7 +89,7 @@
 	</p>
 
 	<div class="right-align">
-		<button type="submit" class="btn-action" form={post ? 'editPost' : 'createPost'}>
+		<button type="submit" class="btn-action" form={post ? 'editPost' : 'createPost'} disabled={loading}>
 			{post ? '수정' : '작성'}
 		</button>
 	</div>

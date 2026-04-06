@@ -78,9 +78,16 @@ button.btn-action {
 	font-weight: bold;
 	transition: opacity 0.2s ease;
 
-	&:hover {
+	&:hover:not(:disabled) {
 		opacity: 0.9;
 		text-decoration: none;
+	}
+
+	&:disabled {
+		background-color: var(--gray-border);
+		color: var(--gray-text);
+		cursor: not-allowed;
+		opacity: 0.6;
 	}
 }
 

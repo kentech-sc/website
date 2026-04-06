@@ -5,6 +5,9 @@
 	import List from '@lucide/svelte/icons/text';
 
 	import LinkButton from '$components/LinkButton.svelte';
+	import { hasMinRole } from '$lib/common/permission';
+
+	const user = JSON.parse(page.data.user);
 
 	let { pageType } = $props();
 	const boardId = $derived(page.params.boardId);
@@ -23,7 +26,7 @@
 		{:else if boardId === 'notice'}
 			<p>학생회의 공지사항을 한눈에 확인하세요</p>
 		{/if}
-		{#if pageType === 'list'}
+		{#if pageType === 'list' && (boardId === 'free' || (boardId === 'notice' && hasMinRole(user, 'moderator')))}
 			<LinkButton href="/board/{boardId}/new">
 				<Pen size="1rem" />
 				<span>글쓰기</span>

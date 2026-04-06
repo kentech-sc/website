@@ -98,7 +98,7 @@ export async function createCommentAndUpdatePost(
 			userId,
 			displayType
 		};
-		await CommentService.createCommentByPostId(commentCreate);
+		return await CommentService.createCommentByPostId(commentCreate);
 	});
 }
 
