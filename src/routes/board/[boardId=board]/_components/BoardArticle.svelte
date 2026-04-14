@@ -14,6 +14,7 @@
 	import Eye from '@lucide/svelte/icons/eye';
 	import Message from '@lucide/svelte/icons/message-circle';
 	import Heart from '@lucide/svelte/icons/heart';
+	import DOMPurify from 'isomorphic-dompurify';
 
 	let { post = $bindable<Post>(), user }: { post: Post; user: User } = $props();
 
@@ -85,7 +86,7 @@
 		{@render ArticleHeader()}
 		<hr />
 		<!-- eslint-disable svelte/no-at-html-tags -->
-		<pre class="nmu">{@html post.content}</pre>
+		<pre class="nmu">{@html DOMPurify.sanitize(post.content)}</pre>
 		{@render LikeBtn()}
 	</article>
 </section>

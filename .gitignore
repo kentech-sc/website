@@ -24,3 +24,9 @@ vite.config.ts.timestamp-*
 
 # Claude
 .claude/
+
+# Testing
+.dockerignore
+Dockerfile
+docker-compose.yml
+keygen.ts

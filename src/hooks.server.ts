@@ -92,10 +92,11 @@ const authorizationHandle: Handle = async ({ event, resolve }) => {
 			event.url.pathname.startsWith('/course') ||
 			event.url.pathname.startsWith('/review') ||
 			event.url.pathname.startsWith('/profile') ||
-			/^\/board\/(?:free|notice)\/(?:new|edit)/.test(event.url.pathname)
+			/^\/board\/(?:free|notice)\/(?:new|[^/]+\/edit)\/?$/.test(event.url.pathname)
 		) {
 			redirect(303, '/signin');
 		}
+
 
 		const user = {
 			email: '',
