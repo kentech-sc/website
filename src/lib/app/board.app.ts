@@ -63,8 +63,7 @@ export async function editPost(
 	fileIds: FileId[]
 ): Promise<Post> {
 	return await mongoose.connection.transaction(async () => {
-		await FileMetaService.linkArticleToFiles(fileIds, postId);
-		return await PostService.editPostById(
+		const postEditResult = await PostService.editPostById(
 			postId,
 			{
 				title,
@@ -73,6 +72,8 @@ export async function editPost(
 			},
 			user
 		);
+		await FileMetaService.linkArticleToFiles(fileIds, postId);
+		return postEditResult
 	});
 }
 

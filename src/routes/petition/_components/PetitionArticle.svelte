@@ -15,6 +15,7 @@
 
 	import type { Petition } from '$lib/types/petition.type.js';
 	import type { User } from '$lib/types/user.type.js';
+	import DOMPurify from 'isomorphic-dompurify';
 
 	let {
 		petition = $bindable<Petition>(),
@@ -102,7 +103,7 @@
 		{@render ArticleHeader()}
 		<hr />
 		<!-- eslint-disable svelte/no-at-html-tags -->
-		<pre class="nmu">{@html petition.content}</pre>
+		<pre class="nmu">{@html DOMPurify.sanitize(petition.content)}</pre>
 		{@render SignBtn()}
 	</article>
 </section>
