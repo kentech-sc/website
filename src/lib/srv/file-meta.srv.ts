@@ -6,7 +6,6 @@ import * as FileMetaRepository from '$lib/repo/file-meta.repo.js';
 
 import { RuleError, SrvError } from '$lib/common/errors.js';
 import { FileStorage } from '$lib/common/storage.js';
-import mongoose from 'mongoose';
 import { UserGroup, type User } from '$lib/types/user.type';
 
 function toFileMeta(fileMetaDoc: FileMetaDoc): FileMeta {
@@ -72,12 +71,10 @@ export async function linkArticleToFiles(
 	fileIds: FileId[],
 	articleId: PostId | PetitionId
 ): Promise<boolean> {
-	return await mongoose.connection.transaction(async () => {
-		// 먼저 모든 파일에서 해당 게시물 ID 제거
-		await FileMetaRepository.removeArticleIdFromAllFiles(articleId);
-		// 다시 첨부된 파일만 연결
-		return await FileMetaRepository.addArticleIdToFiles(fileIds, articleId);
-	});
+	// 먼저 모든 파일에서 해당 게시물 ID 제거
+	await FileMetaRepository.removeArticleIdFromAllFiles(articleId);
+	// 다시 첨부된 파일만 연결
+	return await FileMetaRepository.addArticleIdToFiles(fileIds, articleId);
 }
 
 export async function unlinkArticleFromAllFiles(articleId: PostId | PetitionId): Promise<boolean> {
