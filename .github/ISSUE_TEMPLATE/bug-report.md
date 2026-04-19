@@ -1,11 +1,10 @@
 ---
 name: Bug report
 about: 사이트 이용 중 발생한 오류나 의도치 않은 동작을 제보합니다.
-title: "[BUG]"
+title: '[BUG]'
 labels: ''
 assignees: ''
 type: Bug
-
 ---
 
 ## 🛑 버그 요약
@@ -15,6 +14,7 @@ type: Bug
 ## 🎯 기대 결과
 
 ## 💻 환경 정보
+
 - **브라우저**: (예: Chrome, Safari, 삼성 인터넷)
 - **기기**: (예: PC, 아이폰 15, 갤럭시 S24)
 - **로그인 여부**: (예: 로그인 / 비로그인)

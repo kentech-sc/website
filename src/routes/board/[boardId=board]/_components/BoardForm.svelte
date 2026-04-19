@@ -89,7 +89,12 @@
 	</p>
 
 	<div class="right-align">
-		<button type="submit" class="btn-action" form={post ? 'editPost' : 'createPost'} disabled={loading}>
+		<button
+			type="submit"
+			class="btn-action"
+			form={post ? 'editPost' : 'createPost'}
+			disabled={loading}
+		>
 			{post ? '수정' : '작성'}
 		</button>
 	</div>

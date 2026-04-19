@@ -97,7 +97,6 @@ const authorizationHandle: Handle = async ({ event, resolve }) => {
 			redirect(303, '/signin');
 		}
 
-
 		const user = {
 			email: '',
 			nickname: '',
