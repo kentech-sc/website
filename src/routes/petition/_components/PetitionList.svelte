@@ -3,13 +3,14 @@
 
 	import CommonListBtnModule from '$components/CommonListBtnModule.svelte';
 	import MobileListItem from '$components/MobileListItem.svelte';
-	import FileAttachmentIcons from '../../_components/FileAttachmentIcons.svelte';
+	import FileAttachmentIcons from '$components/FileAttachmentIcons.svelte';
 
 	import * as PetitionService from '$lib/srv/petition.srv.js';
 	import * as CommonUtils from '$lib/common/utils.js';
 	import { parseRelativeDate } from '$lib/common/utils.js';
 
-	let { petitions, toId, fromId }: { petitions: Petition[]; toId?: string; fromId?: string } =
+	type FilePresence = Record<string, { hasImage: boolean; hasFile: boolean }>;
+	let { petitions, filePresence, toId, fromId }: { petitions: Petition[]; filePresence: FilePresence; toId?: string; fromId?: string } =
 		$props();
 </script>
 
@@ -21,7 +22,7 @@
 					>[{PetitionService.translatedStatus[petition.status]}]</span
 				>
 				{petition.title}
-				<FileAttachmentIcons hasImage={petition.hasImage} hasFile={petition.hasFile} /></a
+				<FileAttachmentIcons hasImage={filePresence[petition._id.toString()]?.hasImage} hasFile={filePresence[petition._id.toString()]?.hasFile} /></a
 			></td
 		>
 		<td>{petition.petitionerName}</td>
@@ -83,7 +84,7 @@
 					>[{PetitionService.translatedStatus[petition.status]}]</span
 				>
 				<span class="title">{petition.title}</span>
-				<FileAttachmentIcons hasImage={petition.hasImage} hasFile={petition.hasFile} />
+				<FileAttachmentIcons hasImage={filePresence[petition._id.toString()]?.hasImage} hasFile={filePresence[petition._id.toString()]?.hasFile} />
 			{/snippet}
 			{#snippet row2()}
 				<span class="meta"

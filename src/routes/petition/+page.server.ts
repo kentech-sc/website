@@ -18,19 +18,20 @@ export const load = withLoadErrorHandling(async ({ url }) => {
 	const petitionsRaw = petitionsResult.pageItems;
 	const petitions = await PetitionApplication.fillRealNamesForPetitions(petitionsRaw);
 
-	const petitionsWithFiles = await Promise.all(
+	const filePresenceEntries = await Promise.all(
 		petitions.map(async (p) => {
 			const files = await FileMetaService.getFileMetasByArticleId(p._id);
-			return {
-				...p,
+			return [p._id.toString(), {
 				hasImage: files.some((f) => f.mime.startsWith('image/')),
 				hasFile: files.some((f) => !f.mime.startsWith('image/'))
-			};
+			}] as const;
 		})
 	);
+	const filePresence = Object.fromEntries(filePresenceEntries);
 
 	return {
-		petitions: JSON.stringify(petitionsWithFiles),
+		petitions: JSON.stringify(petitions),
+		filePresence: JSON.stringify(filePresence),
 		fromId: petitionsResult.fromId?.toString(),
 		toId: petitionsResult.toId?.toString()
 	};

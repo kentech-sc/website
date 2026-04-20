@@ -25,8 +25,6 @@ export interface PostDoc extends PostCreate {
 export interface Post extends PostDoc {
 	likeCnt: number;
 	displayName: string | null;
-	hasImage?: boolean;
-	hasFile?: boolean;
 }
 
 export type PostUpdate = UpdateQuery<Pick<PostDoc, 'title' | 'content' | 'viewCnt' | 'commentCnt'>>;

@@ -6,9 +6,10 @@
 
 	let { data } = $props();
 	const posts = $derived<Post[]>(JSON.parse(data?.posts ?? '[]'));
-	const fromId = $derived<string | null>(data.fromId ?? null);
-	const toId = $derived<string | null>(data.toId ?? null);
+	const filePresence = $derived(JSON.parse(data?.filePresence ?? '{}'));
+	const fromId = $derived<string | undefined>(data.fromId ?? undefined);
+	const toId = $derived<string | undefined>(data.toId ?? undefined);
 </script>
 
 <BoardHeader pageType="list" />
-<BoardList {posts} {toId} {fromId} />
+<BoardList {posts} {filePresence} {toId} {fromId} />
