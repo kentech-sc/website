@@ -1,5 +1,6 @@
 import * as PostService from '$lib/srv/post.srv.js';
 import * as UserService from '$lib/srv/user.srv.js';
+import * as FileMetaService from '$lib/srv/file-meta.srv.js';
 
 import { BoardId } from '$lib/types/board.type.js';
 import { Types } from 'mongoose';
@@ -27,8 +28,19 @@ export const load = withLoadErrorHandling(async ({ url, params }) => {
 	const postsRaw = postResult.pageItems;
 	const posts = await UserService.fillDisplayNames(postsRaw, true);
 
+	const postsWithFiles = await Promise.all(
+		posts.map(async (p) => {
+			const files = await FileMetaService.getFileMetasByArticleId(p._id);
+			return {
+				...p,
+				hasImage: files.some((f) => f.mime.startsWith('image/')),
+				hasFile: files.some((f) => !f.mime.startsWith('image/'))
+			};
+		})
+	);
+
 	return {
-		posts: JSON.stringify(posts),
+		posts: JSON.stringify(postsWithFiles),
 		fromId: postResult.fromId?.toString(),
 		toId: postResult.toId?.toString()
 	};

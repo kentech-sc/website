@@ -3,6 +3,7 @@
 
 	import CommonListBtnModule from '$components/CommonListBtnModule.svelte';
 	import MobileListItem from '$components/MobileListItem.svelte';
+	import FileAttachmentIcons from '../../_components/FileAttachmentIcons.svelte';
 
 	import * as PetitionService from '$lib/srv/petition.srv.js';
 	import * as CommonUtils from '$lib/common/utils.js';
@@ -19,7 +20,8 @@
 				<span style="color: {PetitionService.colorStatus[petition.status]}"
 					>[{PetitionService.translatedStatus[petition.status]}]</span
 				>
-				{petition.title}</a
+				{petition.title}
+				<FileAttachmentIcons hasImage={petition.hasImage} hasFile={petition.hasFile} /></a
 			></td
 		>
 		<td>{petition.petitionerName}</td>
@@ -81,6 +83,7 @@
 					>[{PetitionService.translatedStatus[petition.status]}]</span
 				>
 				<span class="title">{petition.title}</span>
+				<FileAttachmentIcons hasImage={petition.hasImage} hasFile={petition.hasFile} />
 			{/snippet}
 			{#snippet row2()}
 				<span class="meta"

@@ -40,6 +40,8 @@ export interface Petition extends PetitionDoc {
 
 	petitionerName: string | null;
 	responderName: string | null;
+	hasImage?: boolean;
+	hasFile?: boolean;
 }
 
 export type PetitionUpdate = UpdateQuery<

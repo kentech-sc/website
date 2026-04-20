@@ -3,6 +3,7 @@
 
 	import CommonListBtnModule from '$components/CommonListBtnModule.svelte';
 	import MobileListItem from '$components/MobileListItem.svelte';
+	import FileAttachmentIcons from '../../../_components/FileAttachmentIcons.svelte';
 
 	import type { Post } from '$lib/types/post.type.js';
 
@@ -18,7 +19,7 @@
 	<tr>
 		<td
 			><a href={`/board/${boardId}/${post._id}`}
-				><span class="ellipsis">{post.title}</span><span>[{post.commentCnt}]</span></a
+				><span class="ellipsis">{post.title}</span><FileAttachmentIcons hasImage={post.hasImage} hasFile={post.hasFile} /><span>[{post.commentCnt}]</span></a
 			></td
 		>
 		<td>{post.displayName}</td>
@@ -60,6 +61,7 @@
 		<MobileListItem href={`/board/${boardId}/${post._id}`}>
 			{#snippet row1()}
 				<span class="title">{post.title}</span>
+				<FileAttachmentIcons hasImage={post.hasImage} hasFile={post.hasFile} />
 				{#if post.commentCnt > 0}<span class="comment-cnt">[{post.commentCnt}]</span>{/if}
 			{/snippet}
 			{#snippet row2()}
@@ -90,11 +92,8 @@
 			display: grid;
 			justify-content: start;
 			align-items: center;
-			grid-template-columns: auto auto;
-
-			span:last-child {
-				margin-left: 0.2rem;
-			}
+			grid-template-columns: auto auto auto;
+			gap: 0.2rem;
 		}
 
 		thead > tr > th {
