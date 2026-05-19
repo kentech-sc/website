@@ -9,6 +9,7 @@ export function canEditOrDeletePost(post: Post, user: User): boolean {
 }
 
 export function canCreatePost(post: PostCreate, user: User): boolean {
-	if (post.boardId === BoardId.Notice) return hasMinRole(user, UserGroup.Moderator);
+	if (post.boardId === BoardId.Notice || post.boardId === BoardId.Bylaw)
+		return hasMinRole(user, UserGroup.Moderator);
 	else return true;
 }
