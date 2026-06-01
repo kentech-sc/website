@@ -4,8 +4,11 @@
 
 	import type { FileId, FileMeta } from '$lib/types/file-meta.type.js';
 
-	let { fileMetas = $bindable([]), isEditing }: { fileMetas: FileMeta[]; isEditing: boolean } =
-		$props();
+	let {
+		fileMetas = $bindable([]),
+		isEditing,
+		autoPdf = false
+	}: { fileMetas: FileMeta[]; isEditing: boolean; autoPdf?: boolean } = $props();
 
 	let filteredFiles = $derived<FileMeta[]>(
 		fileMetas.filter((fileMeta) => ['pdf', 'docx', 'xlsx'].includes(fileMeta.ext))
@@ -30,9 +33,9 @@
 	<div class="container file-div">
 		<p><b>[{idx + 1}]</b> <a href={file.path}>{file.name}</a></p>
 		<div class="file-actions">
-			{#if !isEditing && file.ext === 'pdf'}
+			{#if !isEditing && file.ext === 'pdf' && autoPdf}
 				<button class="preview-btn" onclick={() => togglePreview(file._id)}>
-					{openPreviews.has(file._id.toString()) ? '미리보기 닫기' : '미리보기'}
+					{openPreviews.has(file._id.toString()) ? '닫기' : '열기'}
 				</button>
 			{/if}
 			{#if isEditing}
@@ -40,7 +43,7 @@
 			{/if}
 		</div>
 	</div>
-	{#if !isEditing && file.ext === 'pdf' && openPreviews.has(file._id.toString())}
+	{#if !isEditing && file.ext === 'pdf' && autoPdf && !openPreviews.has(file._id.toString())}
 		<iframe src={file.path} title={file.name} class="pdf-viewer"></iframe>
 	{/if}
 {/snippet}

@@ -26,7 +26,7 @@
 
 <BoardHeader pageType="detail" />
 <BoardArticle bind:post {user} />
-<FileList {fileMetas} isEditing={false} />
+<FileList {fileMetas} isEditing={false} autoPdf={config.autoPdfPreview} />
 {#if config.allowComments}
 	<CommentSection authorId={post.userId} {comments} {user} />
 {/if}
