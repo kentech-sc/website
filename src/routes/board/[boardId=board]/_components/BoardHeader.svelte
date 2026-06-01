@@ -18,6 +18,8 @@
 		<h1>자유게시판</h1>
 	{:else if boardId === 'notice'}
 		<h1>공지사항</h1>
+	{:else if boardId === 'bylaw'}
+		<h1>회칙·세칙</h1>
 	{/if}
 
 	<div class="container">
@@ -25,8 +27,10 @@
 			<p>구성원들과 자유로운 대화를 나눠보세요</p>
 		{:else if boardId === 'notice'}
 			<p>학생회의 공지사항을 한눈에 확인하세요</p>
+		{:else if boardId === 'bylaw'}
+			<p>총학생회의 회칙과 세칙을 확인하세요</p>
 		{/if}
-		{#if pageType === 'list' && (boardId === 'free' || (boardId === 'notice' && hasMinRole(user, 'moderator')))}
+		{#if pageType === 'list' && (boardId === 'free' || ((boardId === 'notice' || boardId === 'bylaw') && hasMinRole(user, 'moderator')))}
 			<LinkButton href="/board/{boardId}/new">
 				<Pen size="1rem" />
 				<span>글쓰기</span>
