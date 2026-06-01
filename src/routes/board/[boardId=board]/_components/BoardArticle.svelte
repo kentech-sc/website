@@ -4,6 +4,8 @@
 
 	import type { Post } from '$lib/types/post.type.js';
 	import type { User } from '$lib/types/user.type.js';
+	import { BOARD_CONFIG } from '$lib/types/board.type.js';
+	import type { BoardId } from '$lib/types/board.type.js';
 
 	import * as CommonUtils from '$lib/common/utils.js';
 
@@ -17,6 +19,8 @@
 	import DOMPurify from 'isomorphic-dompurify';
 
 	let { post = $bindable<Post>(), user }: { post: Post; user: User } = $props();
+
+	const config = $derived(BOARD_CONFIG[post.boardId as BoardId]);
 
 	let likeFormResult = $state<ActionResult | null>(null);
 
@@ -74,7 +78,9 @@
 				>
 				<span><Eye size="1rem" color="var(--gray-text)" />{post.viewCnt}</span>
 				<span><Message size="1rem" color="var(--gray-text)" />{post.commentCnt}</span>
-				<span><Heart size="1rem" color="var(--gray-text)" />{post.likeCnt}</span>
+				{#if config.allowLikes}
+					<span><Heart size="1rem" color="var(--gray-text)" />{post.likeCnt}</span>
+				{/if}
 			</p>
 		</div>
 		<Permission {user} ownerId={post.userId} minRole="moderator">{@render BtnGroup()}</Permission>
@@ -87,7 +93,9 @@
 		<hr />
 		<!-- eslint-disable svelte/no-at-html-tags -->
 		<pre class="nmu">{@html DOMPurify.sanitize(post.content)}</pre>
-		{@render LikeBtn()}
+		{#if config.allowLikes}
+			{@render LikeBtn()}
+		{/if}
 	</article>
 </section>
 
