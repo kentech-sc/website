@@ -13,7 +13,12 @@
 	import { parseRelativeDate } from '$lib/common/utils.js';
 
 	type FilePresence = Record<string, { hasImage: boolean; hasFile: boolean }>;
-	let { posts, filePresence, toId, fromId }: {
+	let {
+		posts,
+		filePresence,
+		toId,
+		fromId
+	}: {
 		posts: Post[];
 		filePresence: FilePresence;
 		toId?: string;
@@ -93,7 +98,8 @@
 			{/snippet}
 			{#snippet row2()}
 				<span class="meta">
-					{post.displayName} · 조회 {post.viewCnt}{#if config.allowLikes} · 추천 {post.likeCnt}{/if}
+					{post.displayName} · 조회 {post.viewCnt}{#if config.allowLikes}
+						· 추천 {post.likeCnt}{/if}
 				</span>
 				<span class="time">{parseRelativeDate(post.createdAt)}</span>
 			{/snippet}
