@@ -32,6 +32,8 @@
 
 		<a href="/board/free">자유게시판</a>
 
+		<a href="/board/bylaw">회칙·세칙</a>
+
 		<a href="/review">강의평가</a>
 
 		<a href="/petition">청원</a>
@@ -99,6 +101,7 @@
 	>
 		<a href="/board/notice" onclick={closeMenu}>공지사항</a>
 		<a href="/board/free" onclick={closeMenu}>자유게시판</a>
+		<a href="/board/bylaw" onclick={closeMenu}>회칙·세칙</a>
 		<a href="/review" onclick={closeMenu}>강의평가</a>
 		<a href="/petition" onclick={closeMenu}>청원</a>
 		<hr />

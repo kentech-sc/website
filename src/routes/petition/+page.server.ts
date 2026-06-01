@@ -1,5 +1,6 @@
 import * as PetitionApplication from '$lib/app/petition.app.js';
 import * as PetitionService from '$lib/srv/petition.srv.js';
+import * as FileMetaService from '$lib/srv/file-meta.srv.js';
 import { Types } from 'mongoose';
 
 import { withLoadErrorHandling } from '$lib/common/errors.js';
@@ -17,8 +18,20 @@ export const load = withLoadErrorHandling(async ({ url }) => {
 	const petitionsRaw = petitionsResult.pageItems;
 	const petitions = await PetitionApplication.fillRealNamesForPetitions(petitionsRaw);
 
+	const filePresenceEntries = await Promise.all(
+		petitions.map(async (p) => {
+			const files = await FileMetaService.getFileMetasByArticleId(p._id);
+			return [p._id.toString(), {
+				hasImage: files.some((f) => f.mime.startsWith('image/')),
+				hasFile: files.some((f) => !f.mime.startsWith('image/'))
+			}] as const;
+		})
+	);
+	const filePresence = Object.fromEntries(filePresenceEntries);
+
 	return {
 		petitions: JSON.stringify(petitions),
+		filePresence: JSON.stringify(filePresence),
 		fromId: petitionsResult.fromId?.toString(),
 		toId: petitionsResult.toId?.toString()
 	};

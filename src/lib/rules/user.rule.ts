@@ -19,8 +19,7 @@ export function canChangeNickname(
 	const validRegex = /[^가-힣ㄱ-ㅎㅏ-ㅣa-zA-Z0-9 ]/g;
 	const continuousSpaceRegex = /\s{2,}/;
 
-	if (newNickname.trim() !== newNickname)
-		throw new RuleError('별명의 앞뒤 공백은 제거해주세요.');
+	if (newNickname.trim() !== newNickname) throw new RuleError('별명의 앞뒤 공백은 제거해주세요.');
 
 	if (continuousSpaceRegex.test(newNickname))
 		throw new RuleError('공백은 연속해서 사용할 수 없습니다.');

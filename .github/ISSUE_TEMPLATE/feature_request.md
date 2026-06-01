@@ -1,16 +1,16 @@
 ---
 name: Feature request
 about: 새로운 아이디어나 개선이 필요한 기능을 제안합니다.
-title: "[Feature]"
+title: '[Feature]'
 labels: ''
 assignees: ''
 type: Feature
-
 ---
 
 ## 💡 기능 요약
 
 ## 🚀 제안 배경
+
 - **현재 상황**: (예: 지금은 강의평가 목록에 강의명이 나오지 않아 불편합니다.)
 - **필요한 이유**: (예: 원하는 강의의 평가를 보려면 직접 들어가 보거나 필터링 해야 합니다.)
 

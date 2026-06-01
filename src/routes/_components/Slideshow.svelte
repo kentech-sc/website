@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import slide01 from '$assets/slideshow/slide01.jpg';
-	import slide02 from '$assets/slideshow/slide02.jpg';
-	import slide03 from '$assets/slideshow/slide03.png';
-	import leftImg from '$assets/slideshow/left.png';
-	import rightImg from '$assets/slideshow/right.png';
-	import mainLogo from '$assets/slideshow/4th_sc_logo.png';
+	import slide01 from '$assets/slideshow/slide01.webp';
+	import slide02 from '$assets/slideshow/slide02.webp';
+	import slide03 from '$assets/slideshow/slide03.webp';
+	import leftImg from '$assets/slideshow/left.webp';
+	import rightImg from '$assets/slideshow/right.webp';
+	import mainLogo from '$assets/slideshow/4th_sc_logo.webp';
 
 	const slides = [
 		{ title: '~조감도 사진~', image: slide01 },

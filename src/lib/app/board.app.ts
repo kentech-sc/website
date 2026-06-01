@@ -73,7 +73,7 @@ export async function editPost(
 			user
 		);
 		await FileMetaService.linkArticleToFiles(fileIds, postId);
-		return postEditResult
+		return postEditResult;
 	});
 }
 

@@ -3,22 +3,25 @@
 
 	import CommonListBtnModule from '$components/CommonListBtnModule.svelte';
 	import MobileListItem from '$components/MobileListItem.svelte';
+	import FileAttachmentIcons from '$components/FileAttachmentIcons.svelte';
 
 	import type { Post } from '$lib/types/post.type.js';
 
 	import * as CommonUtils from '$lib/common/utils.js';
 	import { parseRelativeDate } from '$lib/common/utils.js';
 
-	let { posts, toId, fromId } = $props();
+	type FilePresence = Record<string, { hasImage: boolean; hasFile: boolean }>;
+	let { posts, filePresence, toId, fromId }: { posts: Post[]; filePresence: FilePresence; toId?: string; fromId?: string } = $props();
 
 	const boardId = $derived(page.params.boardId);
 </script>
 
 {#snippet ListItem(post: Post)}
+	{@const fp = filePresence[post._id.toString()]}
 	<tr>
 		<td
 			><a href={`/board/${boardId}/${post._id}`}
-				><span class="ellipsis">{post.title}</span><span>[{post.commentCnt}]</span></a
+				><span class="ellipsis">{post.title}</span><FileAttachmentIcons hasImage={fp?.hasImage} hasFile={fp?.hasFile} /><span>[{post.commentCnt}]</span></a
 			></td
 		>
 		<td>{post.displayName}</td>
@@ -60,6 +63,7 @@
 		<MobileListItem href={`/board/${boardId}/${post._id}`}>
 			{#snippet row1()}
 				<span class="title">{post.title}</span>
+				<FileAttachmentIcons hasImage={filePresence[post._id.toString()]?.hasImage} hasFile={filePresence[post._id.toString()]?.hasFile} />
 				{#if post.commentCnt > 0}<span class="comment-cnt">[{post.commentCnt}]</span>{/if}
 			{/snippet}
 			{#snippet row2()}
@@ -90,11 +94,8 @@
 			display: grid;
 			justify-content: start;
 			align-items: center;
-			grid-template-columns: auto auto;
-
-			span:last-child {
-				margin-left: 0.2rem;
-			}
+			grid-template-columns: auto auto auto;
+			gap: 0.2rem;
 		}
 
 		thead > tr > th {
