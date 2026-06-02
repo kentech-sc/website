@@ -2,7 +2,8 @@ import {
 	S3Client,
 	PutObjectCommand,
 	DeleteObjectCommand,
-	HeadObjectCommand
+	HeadObjectCommand,
+	GetObjectCommand
 } from '@aws-sdk/client-s3';
 import { randomUUID } from 'crypto';
 
@@ -117,6 +118,13 @@ export class FileStorage {
 			// console.error('[S3_UPLOAD_ERROR]', error);
 			throw new SrvError('S3_COMMUNICATION_FAILURE');
 		}
+	}
+
+	static async getFileBytes(key: string): Promise<Uint8Array> {
+		const command = new GetObjectCommand({ Bucket: this.#BUCKET_NAME, Key: key });
+		const response = await this.#storage.send(command);
+		if (!response.Body) throw new SrvError('FILE_NOT_FOUND');
+		return response.Body.transformToByteArray();
 	}
 
 	static async deleteFileFromStorage(key: string): Promise<void> {

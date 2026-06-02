@@ -22,11 +22,18 @@
 
 	const boardId = $derived(page.params.boardId as BoardId);
 	const config = $derived(BOARD_CONFIG[boardId]);
+
+	const pdfFiles = $derived(config.autoPdfPreview ? fileMetas.filter((f) => f.ext === 'pdf') : []);
+	const attachmentFiles = $derived(
+		config.autoPdfPreview ? fileMetas.filter((f) => f.ext !== 'pdf') : fileMetas
+	);
 </script>
 
 <BoardHeader pageType="detail" />
-<BoardArticle bind:post {user} />
-<FileList {fileMetas} isEditing={false} autoPdf={config.autoPdfPreview} />
+<BoardArticle bind:post {user} {pdfFiles} />
+{#if attachmentFiles.length > 0}
+	<FileList fileMetas={attachmentFiles} isEditing={false} />
+{/if}
 {#if config.allowComments}
 	<CommentSection authorId={post.userId} {comments} {user} />
 {/if}

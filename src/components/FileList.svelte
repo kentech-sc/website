@@ -3,12 +3,10 @@
 	import { SvelteSet } from 'svelte/reactivity';
 
 	import type { FileId, FileMeta } from '$lib/types/file-meta.type.js';
+	import PdfViewer from '$components/PdfViewer.svelte';
 
-	let {
-		fileMetas = $bindable([]),
-		isEditing,
-		autoPdf = false
-	}: { fileMetas: FileMeta[]; isEditing: boolean; autoPdf?: boolean } = $props();
+	let { fileMetas = $bindable([]), isEditing }: { fileMetas: FileMeta[]; isEditing: boolean } =
+		$props();
 
 	let filteredFiles = $derived<FileMeta[]>(
 		fileMetas.filter((fileMeta) => ['pdf', 'docx', 'xlsx'].includes(fileMeta.ext))
@@ -29,32 +27,27 @@
 	};
 </script>
 
-{#snippet FileItem(file: FileMeta, idx: number)}
-	<div class="container file-div">
-		<p><b>[{idx + 1}]</b> <a href={file.path}>{file.name}</a></p>
-		<div class="file-actions">
-			{#if !isEditing && file.ext === 'pdf' && autoPdf}
-				<button class="preview-btn" onclick={() => togglePreview(file._id)}>
-					{openPreviews.has(file._id.toString()) ? '닫기' : '열기'}
-				</button>
-			{/if}
-			{#if isEditing}
-				<button class="delete-btn" onclick={() => deleteFile(file._id)}>X</button>
-			{/if}
-		</div>
-	</div>
-	{#if !isEditing && file.ext === 'pdf' && autoPdf && !openPreviews.has(file._id.toString())}
-		<iframe src={file.path} title={file.name} class="pdf-viewer"></iframe>
-	{/if}
-{/snippet}
-
 {#if filteredFiles.length !== 0}
 	<div class="module">
 		<h3>첨부파일</h3>
-
 		{#each filteredFiles as file, idx (idx)}
 			<hr />
-			{@render FileItem(file, idx)}
+			<div class="container file-div">
+				<p><b>[{idx + 1}]</b> <a href={file.path}>{file.name}</a></p>
+				<div class="file-actions">
+					{#if !isEditing && file.ext === 'pdf'}
+						<button class="preview-btn" onclick={() => togglePreview(file._id)}>
+							{openPreviews.has(file._id.toString()) ? '닫기' : '미리보기'}
+						</button>
+					{/if}
+					{#if isEditing}
+						<button class="delete-btn" onclick={() => deleteFile(file._id)}>X</button>
+					{/if}
+				</div>
+			</div>
+			{#if !isEditing && file.ext === 'pdf' && openPreviews.has(file._id.toString())}
+				<PdfViewer pdfKey={file.key} />
+			{/if}
 		{/each}
 	</div>
 {/if}
@@ -89,17 +82,9 @@
 		.delete-btn {
 			padding: 0;
 			padding-right: 0.5rem;
-			color: red;
+			color: var(--error);
 			border: none;
 			background: transparent;
 		}
-	}
-
-	.pdf-viewer {
-		width: 100%;
-		height: 600px;
-		border: solid 0.05rem var(--gray-border);
-		border-radius: 0.3rem;
-		margin-top: 0.25rem;
 	}
 </style>

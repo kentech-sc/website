@@ -47,6 +47,7 @@
 		"@tiptap/starter-kit": "^3.22.0",
 		"file-type": "^21.1.1",
 		"isomorphic-dompurify": "^2.33.0",
-		"mongoose": "^8.18.0"
+		"mongoose": "^8.18.0",
+		"pdfjs-dist": "^6.0.227"
 	}
 }
