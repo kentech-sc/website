@@ -44,7 +44,7 @@ export const actions = {
 		if (locals.user.group === 'guest')
 			return fail(403, { message: '게스트 유저는 좋아요를 누를 수 없습니다.' });
 		const config = BOARD_CONFIG[params.boardId as BoardId];
-		if (!config.allowLikes)
+		if (!config?.allowLikes)
 			return fail(403, { message: '이 게시판은 좋아요를 지원하지 않습니다.' });
 		const formData = await request.formData();
 		const postIdRaw = (formData.get('post-id') ?? '').toString();
@@ -56,7 +56,7 @@ export const actions = {
 		if (locals.user.group === 'guest')
 			return fail(403, { message: '게스트 유저는 좋아요를 취소할 수 없습니다.' });
 		const config = BOARD_CONFIG[params.boardId as BoardId];
-		if (!config.allowLikes)
+		if (!config?.allowLikes)
 			return fail(403, { message: '이 게시판은 좋아요를 지원하지 않습니다.' });
 		const formData = await request.formData();
 		const postIdRaw = (formData.get('post-id') ?? '').toString();
@@ -68,7 +68,7 @@ export const actions = {
 		if (locals.user.group === 'guest')
 			return fail(403, { message: '게스트 유저는 댓글을 작성할 수 없습니다.' });
 		const config = BOARD_CONFIG[params.boardId as BoardId];
-		if (!config.allowComments)
+		if (!config?.allowComments)
 			return fail(403, { message: '이 게시판은 댓글을 지원하지 않습니다.' });
 
 		const postIdRaw = params.postId;
@@ -98,7 +98,7 @@ export const actions = {
 		if (locals.user.group === 'guest')
 			return fail(403, { message: '게스트 유저는 댓글을 삭제할 수 없습니다.' });
 		const config = BOARD_CONFIG[params.boardId as BoardId];
-		if (!config.allowComments)
+		if (!config?.allowComments)
 			return fail(403, { message: '이 게시판은 댓글을 지원하지 않습니다.' });
 		const formData = await request.formData();
 		const commentIdRaw = (formData.get('comment-id') ?? '').toString();

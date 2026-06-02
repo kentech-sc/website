@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { onMount, tick } from 'svelte';
+	// 워커를 Vite가 번들링하도록 위임 → pdfjs-dist 버전과 자동 동기화 (static 벤더링 불필요)
+	import workerSrc from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 
 	let { pdfKey }: { pdfKey: string } = $props();
 
@@ -13,7 +15,7 @@
 	onMount(async () => {
 		try {
 			const pdfjsLib = await import('pdfjs-dist');
-			pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs';
+			pdfjsLib.GlobalWorkerOptions.workerSrc = workerSrc;
 
 			const proxyUrl = `/api/pdf?key=${encodeURIComponent(pdfKey)}`;
 			const pdf = await pdfjsLib.getDocument({ url: proxyUrl }).promise;

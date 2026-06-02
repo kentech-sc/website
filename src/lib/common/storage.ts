@@ -120,11 +120,20 @@ export class FileStorage {
 		}
 	}
 
-	static async getFileBytes(key: string): Promise<Uint8Array> {
+	static async getFileStream(key: string): Promise<{
+		stream: ReadableStream;
+		contentType?: string;
+		contentLength?: number;
+	}> {
 		const command = new GetObjectCommand({ Bucket: this.#BUCKET_NAME, Key: key });
 		const response = await this.#storage.send(command);
 		if (!response.Body) throw new SrvError('FILE_NOT_FOUND');
-		return response.Body.transformToByteArray();
+		// 전체를 메모리에 적재하지 않고 스트림으로 흘려보낸다 (Vercel 응답 본문 한도 회피)
+		return {
+			stream: response.Body.transformToWebStream(),
+			contentType: response.ContentType,
+			contentLength: response.ContentLength
+		};
 	}
 
 	static async deleteFileFromStorage(key: string): Promise<void> {
