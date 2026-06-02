@@ -10,7 +10,12 @@
 	import { parseRelativeDate } from '$lib/common/utils.js';
 
 	type FilePresence = Record<string, { hasImage: boolean; hasFile: boolean }>;
-	let { petitions, filePresence, toId, fromId }: { petitions: Petition[]; filePresence: FilePresence; toId?: string; fromId?: string } =
+	let {
+		petitions,
+		filePresence,
+		toId,
+		fromId
+	}: { petitions: Petition[]; filePresence: FilePresence; toId?: string; fromId?: string } =
 		$props();
 </script>
 
@@ -22,7 +27,10 @@
 					>[{PetitionService.translatedStatus[petition.status]}]</span
 				>
 				{petition.title}
-				<FileAttachmentIcons hasImage={filePresence[petition._id.toString()]?.hasImage} hasFile={filePresence[petition._id.toString()]?.hasFile} /></a
+				<FileAttachmentIcons
+					hasImage={filePresence[petition._id.toString()]?.hasImage}
+					hasFile={filePresence[petition._id.toString()]?.hasFile}
+				/></a
 			></td
 		>
 		<td>{petition.petitionerName}</td>
@@ -84,7 +92,10 @@
 					>[{PetitionService.translatedStatus[petition.status]}]</span
 				>
 				<span class="title">{petition.title}</span>
-				<FileAttachmentIcons hasImage={filePresence[petition._id.toString()]?.hasImage} hasFile={filePresence[petition._id.toString()]?.hasFile} />
+				<FileAttachmentIcons
+					hasImage={filePresence[petition._id.toString()]?.hasImage}
+					hasFile={filePresence[petition._id.toString()]?.hasFile}
+				/>
 			{/snippet}
 			{#snippet row2()}
 				<span class="meta"

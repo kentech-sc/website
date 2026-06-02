@@ -6,14 +6,27 @@
 	import FileAttachmentIcons from '$components/FileAttachmentIcons.svelte';
 
 	import type { Post } from '$lib/types/post.type.js';
+	import { BOARD_CONFIG } from '$lib/common/board-config.js';
+	import type { BoardId } from '$lib/types/board.type.js';
 
 	import * as CommonUtils from '$lib/common/utils.js';
 	import { parseRelativeDate } from '$lib/common/utils.js';
 
 	type FilePresence = Record<string, { hasImage: boolean; hasFile: boolean }>;
-	let { posts, filePresence, toId, fromId }: { posts: Post[]; filePresence: FilePresence; toId?: string; fromId?: string } = $props();
+	let {
+		posts,
+		filePresence,
+		toId,
+		fromId
+	}: {
+		posts: Post[];
+		filePresence: FilePresence;
+		toId?: string;
+		fromId?: string;
+	} = $props();
 
-	const boardId = $derived(page.params.boardId);
+	const boardId = $derived(page.params.boardId as BoardId);
+	const config = $derived(BOARD_CONFIG[boardId]);
 </script>
 
 {#snippet ListItem(post: Post)}
@@ -21,24 +34,36 @@
 	<tr>
 		<td
 			><a href={`/board/${boardId}/${post._id}`}
-				><span class="ellipsis">{post.title}</span><FileAttachmentIcons hasImage={fp?.hasImage} hasFile={fp?.hasFile} /><span>[{post.commentCnt}]</span></a
+				><span class="ellipsis">{post.title}</span><FileAttachmentIcons
+					hasImage={fp?.hasImage}
+					hasFile={fp?.hasFile}
+				/><span>[{post.commentCnt}]</span></a
 			></td
 		>
 		<td>{post.displayName}</td>
 		<td>{CommonUtils.parseDate(post.createdAt)}</td>
 		<td>{post.viewCnt}</td>
-		<td>{post.likeCnt}</td>
+		{#if config.allowLikes}
+			<td>{post.likeCnt}</td>
+		{/if}
 	</tr>
 {/snippet}
 
 <section class="container-col module">
 	<table>
 		<colgroup>
-			<col style="width:60%" />
-			<col style="width:12%" />
-			<col style="width:16%" />
-			<col style="width:6%" />
-			<col style="width:6%" />
+			{#if config.allowLikes}
+				<col style="width:60%" />
+				<col style="width:12%" />
+				<col style="width:16%" />
+				<col style="width:6%" />
+				<col style="width:6%" />
+			{:else}
+				<col style="width:66%" />
+				<col style="width:12%" />
+				<col style="width:16%" />
+				<col style="width:6%" />
+			{/if}
 		</colgroup>
 		<thead>
 			<tr>
@@ -46,7 +71,9 @@
 				<th>작성자</th>
 				<th>작성일</th>
 				<th>조회수</th>
-				<th>좋아요</th>
+				{#if config.allowLikes}
+					<th>좋아요</th>
+				{/if}
 			</tr>
 		</thead>
 		<tbody>
@@ -63,11 +90,17 @@
 		<MobileListItem href={`/board/${boardId}/${post._id}`}>
 			{#snippet row1()}
 				<span class="title">{post.title}</span>
-				<FileAttachmentIcons hasImage={filePresence[post._id.toString()]?.hasImage} hasFile={filePresence[post._id.toString()]?.hasFile} />
+				<FileAttachmentIcons
+					hasImage={filePresence[post._id.toString()]?.hasImage}
+					hasFile={filePresence[post._id.toString()]?.hasFile}
+				/>
 				{#if post.commentCnt > 0}<span class="comment-cnt">[{post.commentCnt}]</span>{/if}
 			{/snippet}
 			{#snippet row2()}
-				<span class="meta">{post.displayName} · 조회 {post.viewCnt} · 추천 {post.likeCnt}</span>
+				<span class="meta">
+					{post.displayName} · 조회 {post.viewCnt}{#if config.allowLikes}
+						· 추천 {post.likeCnt}{/if}
+				</span>
 				<span class="time">{parseRelativeDate(post.createdAt)}</span>
 			{/snippet}
 		</MobileListItem>

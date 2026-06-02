@@ -31,10 +31,13 @@ export const load = withLoadErrorHandling(async ({ url, params }) => {
 	const filePresenceEntries = await Promise.all(
 		posts.map(async (p) => {
 			const files = await FileMetaService.getFileMetasByArticleId(p._id);
-			return [p._id.toString(), {
-				hasImage: files.some((f) => f.mime.startsWith('image/')),
-				hasFile: files.some((f) => !f.mime.startsWith('image/'))
-			}] as const;
+			return [
+				p._id.toString(),
+				{
+					hasImage: files.some((f) => f.mime.startsWith('image/')),
+					hasFile: files.some((f) => !f.mime.startsWith('image/'))
+				}
+			] as const;
 		})
 	);
 	const filePresence = Object.fromEntries(filePresenceEntries);

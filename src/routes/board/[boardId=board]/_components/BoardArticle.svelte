@@ -4,11 +4,16 @@
 
 	import type { Post } from '$lib/types/post.type.js';
 	import type { User } from '$lib/types/user.type.js';
+	import { BOARD_CONFIG } from '$lib/common/board-config.js';
+	import type { BoardId } from '$lib/types/board.type.js';
 
 	import * as CommonUtils from '$lib/common/utils.js';
 
 	import CommonForm from '$components/CommonForm.svelte';
 	import Permission from '../../../_components/Permission.svelte';
+	import PdfViewer from '$components/PdfViewer.svelte';
+
+	import type { FileMeta } from '$lib/types/file-meta.type.js';
 
 	import Clock from '@lucide/svelte/icons/clock';
 	import Eye from '@lucide/svelte/icons/eye';
@@ -16,7 +21,13 @@
 	import Heart from '@lucide/svelte/icons/heart';
 	import DOMPurify from 'isomorphic-dompurify';
 
-	let { post = $bindable<Post>(), user }: { post: Post; user: User } = $props();
+	let {
+		post = $bindable<Post>(),
+		user,
+		pdfFiles = []
+	}: { post: Post; user: User; pdfFiles?: FileMeta[] } = $props();
+
+	const config = $derived(BOARD_CONFIG[post.boardId as BoardId]);
 
 	let likeFormResult = $state<ActionResult | null>(null);
 
@@ -74,7 +85,9 @@
 				>
 				<span><Eye size="1rem" color="var(--gray-text)" />{post.viewCnt}</span>
 				<span><Message size="1rem" color="var(--gray-text)" />{post.commentCnt}</span>
-				<span><Heart size="1rem" color="var(--gray-text)" />{post.likeCnt}</span>
+				{#if config.allowLikes}
+					<span><Heart size="1rem" color="var(--gray-text)" />{post.likeCnt}</span>
+				{/if}
 			</p>
 		</div>
 		<Permission {user} ownerId={post.userId} minRole="moderator">{@render BtnGroup()}</Permission>
@@ -84,10 +97,26 @@
 <section class="container-col module">
 	<article>
 		{@render ArticleHeader()}
-		<hr />
-		<!-- eslint-disable svelte/no-at-html-tags -->
-		<pre class="nmu">{@html DOMPurify.sanitize(post.content)}</pre>
-		{@render LikeBtn()}
+		{#if !config.autoPdfPreview || post.content.trim()}
+			<hr />
+			<!-- eslint-disable svelte/no-at-html-tags -->
+			<pre class="nmu">{@html DOMPurify.sanitize(post.content)}</pre>
+		{/if}
+		{#if config.autoPdfPreview && pdfFiles.length > 0}
+			{#if !post.content.trim()}
+				<hr />
+			{/if}
+			{#each pdfFiles as file (file._id)}
+				<div class="pdf-file-header">
+					<span class="pdf-filename">{file.name}</span>
+					<a href={file.path} download={file.name} class="pdf-download">다운로드</a>
+				</div>
+				<PdfViewer pdfKey={file.key} />
+			{/each}
+		{/if}
+		{#if config.allowLikes}
+			{@render LikeBtn()}
+		{/if}
 	</article>
 </section>
 
@@ -134,6 +163,30 @@
 	header {
 		width: stretch;
 		justify-content: space-between;
+	}
+
+	.pdf-file-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 0.3rem 0;
+		margin-bottom: 0.25rem;
+		font-size: 0.85rem;
+		color: var(--gray-text);
+
+		.pdf-download {
+			color: var(--secondary);
+			text-decoration: none;
+			font-size: 0.8rem;
+			border: solid 0.05rem var(--gray-border);
+			border-radius: 0.3rem;
+			padding: 0.1rem 0.5rem;
+			flex-shrink: 0;
+
+			&:hover {
+				background-color: var(--secondary-bg);
+			}
+		}
 	}
 
 	#like-btn {

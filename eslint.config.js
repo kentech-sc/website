@@ -11,6 +11,8 @@ const gitignorePath = fileURLToPath(new URL('./.gitignore', import.meta.url));
 
 export default ts.config(
 	includeIgnoreFile(gitignorePath),
+	// 빌드 산출물/벤더 파일은 lint 대상에서 제외 (.prettierignore와 동일하게 static 무시)
+	{ ignores: ['static/**'] },
 	js.configs.recommended,
 	...ts.configs.recommended,
 	...svelte.configs.recommended,

@@ -5,6 +5,8 @@ import type { CommentId } from '$lib/types/comment.type.js';
 import type { PostId } from '$lib/types/post.type.js';
 
 import { DisplayType } from '$lib/types/user.type.js';
+import { BOARD_CONFIG } from '$lib/common/board-config.js';
+import type { BoardId } from '$lib/types/board.type.js';
 
 import { withActionErrorHandling, withLoadErrorHandling } from '$lib/common/errors.js';
 
@@ -38,18 +40,24 @@ export const actions = {
 		await BoardApplication.deletePostById(postId, locals.user);
 		redirect(302, '/board/' + params.boardId);
 	}),
-	likePost: withActionErrorHandling(async ({ request, locals }) => {
+	likePost: withActionErrorHandling(async ({ request, locals, params }) => {
 		if (locals.user.group === 'guest')
 			return fail(403, { message: '게스트 유저는 좋아요를 누를 수 없습니다.' });
+		const config = BOARD_CONFIG[params.boardId as BoardId];
+		if (!config?.allowLikes)
+			return fail(403, { message: '이 게시판은 좋아요를 지원하지 않습니다.' });
 		const formData = await request.formData();
 		const postIdRaw = (formData.get('post-id') ?? '').toString();
 		const postId: PostId = new Types.ObjectId(postIdRaw);
 		const post = await PostService.likePostById(postId, locals.user._id);
 		return { post: JSON.stringify(post) };
 	}),
-	unlikePost: withActionErrorHandling(async ({ request, locals }) => {
+	unlikePost: withActionErrorHandling(async ({ request, locals, params }) => {
 		if (locals.user.group === 'guest')
 			return fail(403, { message: '게스트 유저는 좋아요를 취소할 수 없습니다.' });
+		const config = BOARD_CONFIG[params.boardId as BoardId];
+		if (!config?.allowLikes)
+			return fail(403, { message: '이 게시판은 좋아요를 지원하지 않습니다.' });
 		const formData = await request.formData();
 		const postIdRaw = (formData.get('post-id') ?? '').toString();
 		const postId: PostId = new Types.ObjectId(postIdRaw);
@@ -59,6 +67,9 @@ export const actions = {
 	createComment: withActionErrorHandling(async ({ request, locals, params }) => {
 		if (locals.user.group === 'guest')
 			return fail(403, { message: '게스트 유저는 댓글을 작성할 수 없습니다.' });
+		const config = BOARD_CONFIG[params.boardId as BoardId];
+		if (!config?.allowComments)
+			return fail(403, { message: '이 게시판은 댓글을 지원하지 않습니다.' });
 
 		const postIdRaw = params.postId;
 		const postId: PostId = new Types.ObjectId(postIdRaw);
@@ -83,35 +94,16 @@ export const actions = {
 
 		return { comment: JSON.stringify(comment) };
 	}),
-	// editComment: async ({ request, locals }) => {
-	// 	const formData = await request.formData();
-	// 	const commentIdRaw = (formData.get('comment-id') ?? '').toString();
-	// 	const content = (formData.get('content') ?? '').toString();
-	// 	const commentId: CommentId = new Types.ObjectId(commentIdRaw);
-	// 	const comment = await BoardService.editCommentById(commentId, { content }, locals.user);
-	// 	return { comment: JSON.stringify(comment) };
-	// },
-	deleteComment: withActionErrorHandling(async ({ request, locals }) => {
+	deleteComment: withActionErrorHandling(async ({ request, locals, params }) => {
 		if (locals.user.group === 'guest')
 			return fail(403, { message: '게스트 유저는 댓글을 삭제할 수 없습니다.' });
+		const config = BOARD_CONFIG[params.boardId as BoardId];
+		if (!config?.allowComments)
+			return fail(403, { message: '이 게시판은 댓글을 지원하지 않습니다.' });
 		const formData = await request.formData();
 		const commentIdRaw = (formData.get('comment-id') ?? '').toString();
 		const commentId: CommentId = new Types.ObjectId(commentIdRaw);
 		await BoardApplication.deleteCommentAndUpdatePost(commentId, locals.user);
 		return { commentIdRaw };
 	})
-	// likeComment: async ({ request, locals }) => {
-	// 	const formData = await request.formData();
-	// 	const commentIdRaw = (formData.get('comment-id') ?? '').toString();
-	// 	const commentId: CommentId = new Types.ObjectId(commentIdRaw);
-	// 	await BoardService.likeCommentById(commentId, locals.user._id);
-	// 	return { commentIdRaw };
-	// },
-	// unlikeComment: async ({ request, locals }) => {
-	// 	const formData = await request.formData();
-	// 	const commentIdRaw = (formData.get('comment-id') ?? '').toString();
-	// 	const commentId: CommentId = new Types.ObjectId(commentIdRaw);
-	// 	await BoardService.unlikeCommentById(commentId, locals.user._id);
-	// 	return { commentIdRaw };
-	// }
 };

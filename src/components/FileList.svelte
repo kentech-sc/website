@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { Types } from 'mongoose';
+	import { SvelteSet } from 'svelte/reactivity';
 
 	import type { FileId, FileMeta } from '$lib/types/file-meta.type.js';
+	import PdfViewer from '$components/PdfViewer.svelte';
 
 	let { fileMetas = $bindable([]), isEditing }: { fileMetas: FileMeta[]; isEditing: boolean } =
 		$props();
@@ -15,24 +17,37 @@
 			(fileMeta: FileMeta) => !new Types.ObjectId(fileMeta._id).equals(fileId)
 		);
 	};
-</script>
 
-{#snippet FileItem(file: FileMeta, idx: number)}
-	<div class="container file-div">
-		<p><b>[{idx + 1}]</b> <a href={file.path}>{file.name}</a></p>
-		{#if isEditing}
-			<button onclick={() => deleteFile(file._id)}>X</button>
-		{/if}
-	</div>
-{/snippet}
+	const openPreviews = new SvelteSet<string>();
+
+	const togglePreview = (fileId: FileId) => {
+		const key = fileId.toString();
+		if (openPreviews.has(key)) openPreviews.delete(key);
+		else openPreviews.add(key);
+	};
+</script>
 
 {#if filteredFiles.length !== 0}
 	<div class="module">
 		<h3>첨부파일</h3>
-
 		{#each filteredFiles as file, idx (idx)}
 			<hr />
-			{@render FileItem(file, idx)}
+			<div class="container file-div">
+				<p><b>[{idx + 1}]</b> <a href={file.path}>{file.name}</a></p>
+				<div class="file-actions">
+					{#if !isEditing && file.ext === 'pdf'}
+						<button class="preview-btn" onclick={() => togglePreview(file._id)}>
+							{openPreviews.has(file._id.toString()) ? '닫기' : '미리보기'}
+						</button>
+					{/if}
+					{#if isEditing}
+						<button class="delete-btn" onclick={() => deleteFile(file._id)}>X</button>
+					{/if}
+				</div>
+			</div>
+			{#if !isEditing && file.ext === 'pdf' && openPreviews.has(file._id.toString())}
+				<PdfViewer pdfKey={file.key} />
+			{/if}
 		{/each}
 	</div>
 {/if}
@@ -43,10 +58,31 @@
 		justify-content: space-between;
 		padding: 0.25rem;
 
-		button {
+		.file-actions {
+			display: flex;
+			gap: 0.5rem;
+			align-items: center;
+			flex-shrink: 0;
+		}
+
+		.preview-btn {
+			padding: 0.1rem 0.5rem;
+			font-size: 0.8rem;
+			border: solid 0.05rem var(--gray-border);
+			border-radius: 0.3rem;
+			background: transparent;
+			color: var(--secondary);
+			cursor: pointer;
+
+			&:hover {
+				background-color: var(--secondary-bg);
+			}
+		}
+
+		.delete-btn {
 			padding: 0;
 			padding-right: 0.5rem;
-			color: red;
+			color: var(--error);
 			border: none;
 			background: transparent;
 		}

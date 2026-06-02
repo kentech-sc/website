@@ -1,0 +1,16 @@
+# 모든 텍스트 파일은 저장소에 LF로 저장하고, 체크아웃 시에도 LF로 둔다.
+# (Windows의 core.autocrlf=true 와 무관하게 작업트리를 LF로 유지 → prettier/eslint 통과)
+* text=auto eol=lf
+
+# 바이너리 파일은 줄바꿈 변환 대상에서 제외
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.ico binary
+*.gif binary
+*.pdf binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
