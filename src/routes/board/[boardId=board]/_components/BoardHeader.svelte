@@ -6,7 +6,7 @@
 
 	import LinkButton from '$components/LinkButton.svelte';
 	import { hasMinRole } from '$lib/common/permission';
-	import { BOARD_CONFIG } from '$lib/types/board.type.js';
+	import { BOARD_CONFIG } from '$lib/common/board-config.js';
 	import type { BoardId } from '$lib/types/board.type.js';
 
 	const user = JSON.parse(page.data.user);

@@ -4,7 +4,7 @@
 	import type { Post } from '$lib/types/post.type.js';
 	import type { Comment } from '$lib/types/comment.type.js';
 	import type { FileMeta } from '$lib/types/file-meta.type.js';
-	import { BOARD_CONFIG } from '$lib/types/board.type.js';
+	import { BOARD_CONFIG } from '$lib/common/board-config.js';
 	import type { BoardId } from '$lib/types/board.type.js';
 
 	import BoardHeader from '../_components/BoardHeader.svelte';

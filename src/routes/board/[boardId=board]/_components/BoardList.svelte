@@ -6,7 +6,7 @@
 	import FileAttachmentIcons from '$components/FileAttachmentIcons.svelte';
 
 	import type { Post } from '$lib/types/post.type.js';
-	import { BOARD_CONFIG } from '$lib/types/board.type.js';
+	import { BOARD_CONFIG } from '$lib/common/board-config.js';
 	import type { BoardId } from '$lib/types/board.type.js';
 
 	import * as CommonUtils from '$lib/common/utils.js';

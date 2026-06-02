@@ -5,7 +5,7 @@ import type { CommentId } from '$lib/types/comment.type.js';
 import type { PostId } from '$lib/types/post.type.js';
 
 import { DisplayType } from '$lib/types/user.type.js';
-import { BOARD_CONFIG } from '$lib/types/board.type.js';
+import { BOARD_CONFIG } from '$lib/common/board-config.js';
 import type { BoardId } from '$lib/types/board.type.js';
 
 import { withActionErrorHandling, withLoadErrorHandling } from '$lib/common/errors.js';
