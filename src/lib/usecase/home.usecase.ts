@@ -10,7 +10,9 @@ import * as ProfessorService from '$lib/services/professor.service.js';
 import * as ReviewService from '$lib/services/review.service.js';
 import * as UserService from '$lib/services/user.service.js';
 
-async function fillReviewsForHome(reviews: Awaited<ReturnType<typeof ReviewService.getReviewPage>>['items']) {
+async function fillReviewsForHome(
+	reviews: Awaited<ReturnType<typeof ReviewService.getReviewPage>>['items']
+) {
 	const withCourseInfo = await CourseService.attachCourseInfo(reviews);
 	return await ProfessorService.attachProfessorInfo(withCourseInfo);
 }

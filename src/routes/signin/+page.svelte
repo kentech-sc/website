@@ -17,4 +17,3 @@
 		height: 50vh;
 	}
 </style>
-

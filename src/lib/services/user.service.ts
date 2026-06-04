@@ -54,10 +54,7 @@ export async function signupUser(profile: Profile): Promise<User> {
 	});
 }
 
-export async function updateUserById(
-	userId: UserId,
-	userUpdate: UserUpdate
-): Promise<User> {
+export async function updateUserById(userId: UserId, userUpdate: UserUpdate): Promise<User> {
 	const updatedUser = await UserRepository.updateUserById(userId, userUpdate);
 	if (!updatedUser) throw new AppError(APP_ERROR.NOT_FOUND, '존재하지 않는 사용자입니다.');
 	return updatedUser;
@@ -72,9 +69,7 @@ export async function changeNicknameById(
 	const normalizedNickname = newNickname.trim();
 	const isDuplicateNickname = (await findUserByNickname(normalizedNickname)) !== null;
 
-	assertRule(
-		UserRule.canChangeNickname(target, normalizedNickname, operator, isDuplicateNickname)
-	);
+	assertRule(UserRule.canChangeNickname(target, normalizedNickname, operator, isDuplicateNickname));
 
 	return await updateUserById(target._id, { nickname: normalizedNickname });
 }

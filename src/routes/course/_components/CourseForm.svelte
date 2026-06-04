@@ -29,7 +29,13 @@
 				bind:this={courseIdInput}
 			/>
 			<label for="name">강의명</label>
-			<input type="text" id="name" name="name" placeholder="예: 공학 미적분학 I" bind:this={courseNameInput} />
+			<input
+				type="text"
+				id="name"
+				name="name"
+				placeholder="예: 공학 미적분학 I"
+				bind:this={courseNameInput}
+			/>
 			<label for="content">강의 내용</label>
 			<textarea
 				id="content"

@@ -48,7 +48,10 @@ export function canUnsignPetition(petition: Petition, user: User): RuleResult {
 	}
 
 	if (petition.status === PetitionStatus.Answered || petition.status === PetitionStatus.Expired) {
-		return ruleFail(APP_ERROR.INVALID_STATE, '답변되었거나 만료된 청원은 서명을 취소할 수 없습니다.');
+		return ruleFail(
+			APP_ERROR.INVALID_STATE,
+			'답변되었거나 만료된 청원은 서명을 취소할 수 없습니다.'
+		);
 	}
 
 	if (!petition.signedBy.includes(user._id)) {

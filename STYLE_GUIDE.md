@@ -63,6 +63,7 @@
 - 일반 UI 치수에 `vw`, `vh`를 사용하지 않는다.
 
 ### 예
+
 - `padding`, `margin`, `gap`, `font-size`, `border-radius`, 고정 폭/높이 -> `rem`
 - 내부 비율, 가득 채우기 -> `%`
 - hero, slideshow, viewport 레이아웃 -> `vw`, `vh`
@@ -90,6 +91,7 @@
 - `* { margin: 0; padding: 0; }` 같은 과한 전역 reset은 피한다.
 
 ### 권장 예
+
 - `box-sizing: border-box`
 - `html`, `body`, heading, `p`, list 계열의 `margin: 0`
 - `ul`, `ol`의 `padding: 0`과 `list-style: none`
@@ -121,6 +123,7 @@
 - 이름은 모양이 아니라 역할 기준으로 짓는다.
 
 ### 좋은 예
+
 - `board-article`
 - `article-header`
 - `article-meta`
@@ -130,6 +133,7 @@
 - `action-row`
 
 ### 나쁜 예
+
 - `box1`
 - `left-area`
 - `blue-button`
@@ -140,6 +144,7 @@
 - 상태 class는 `is-`, `has-`, `can-` 접두사를 사용한다.
 
 ### 예
+
 - `is-active`
 - `is-open`
 - `is-disabled`
@@ -165,12 +170,14 @@
 - 로컬 클래스는 해당 컴포넌트 역할에 맞게 둔다.
 
 ### 전역 예
+
 - `container`
 - `container-col`
 - `module`
 - `btn-action`
 
 ### 로컬 예
+
 - `article-header`
 - `sign-button`
 - `response-actions`

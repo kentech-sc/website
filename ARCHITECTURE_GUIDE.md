@@ -31,10 +31,12 @@
 ## 3. import 규칙
 
 1. client
+
 - `shared`, `types`만 import한다.
 - `usecase`, `service`, `rules`, `repositories`, `server`는 import하지 않는다.
 
 2. server entry
+
 - `usecase`, `shared`, `types`, `server`만 import한다.
 - `service`, `rules`, `repositories`는 import하지 않는다.
 - server entry 예시:
@@ -45,14 +47,17 @@
   - `hooks.server.ts`
 
 3. usecase
+
 - `service`, `shared`, `types`만 import한다.
 - `repositories`를 직접 import하지 않는다.
 
 4. service
+
 - `rules`, `repositories`, `shared`, `types`를 import한다.
 - 서버 전용 인프라가 필요할 때만 `server`를 import한다.
 
 5. rules
+
 - throw하지 않는다.
 - 아래 둘 중 하나만 반환한다.
   - `boolean`
@@ -67,27 +72,32 @@
 - 상수 이름은 `SCREAMING_SNAKE_CASE`를 사용한다.
 
 ### collection 이름
+
 - array나 set 이름은 자료구조를 드러내기보다 그냥 복수형을 사용한다.
 - 예: `ids`, `names`, `users`
 - 같은 의미의 array와 set이 함께 있으면 접미사로 구분한다.
 - 예: `idArr`, `idSet`
 
 ### map 이름
+
 - map 이름은 `[key]To[value]` 형태를 사용한다.
 - 예: `nameToUser`, `userIdToProfile`
 
 ### 함수 이름
+
 - collection을 반환하거나 다루는 함수명도 그냥 복수형을 사용한다.
 - 예: `getUserIds`, `findUsers`
 - `List`, `Array`, `Set` 같은 자료구조 이름을 함수명에 붙이지 않는다.
 
 ### Date 값
+
 - `Date` 값은 앱 전역에서 기본적으로 ISO string으로 다룬다.
 - `types`, `shared`, `repositories`, `services`, `usecase`, `server entry` 경계 밖으로 raw `Date` 인스턴스를 내보내지 않는다.
 - 예: `createdAt`, `updatedAt`, `deletedAt`, `answeredAt` 같은 값은 타입과 반환값에서 ISO string으로 둔다.
 - 실제 `Date` 객체는 DB query, 비교, 계산처럼 필요한 내부 구현에서만 잠깐 사용하고, 반환 직전에 다시 ISO string으로 변환한다.
 
 ### ObjectId 값
+
 - `ObjectId` 값은 앱 전역에서 기본적으로 string으로 다룬다.
 - POJO를 유지해야 하므로 `types`, `shared`, `repositories`, `services`, `usecase`, `server entry` 경계 밖으로 raw `ObjectId` 인스턴스를 내보내지 않는다.
 - 예: `_id`, `userId`, `postId`, `petitionId`, `courseId`, `professorId`, `fileId` 같은 값은 타입과 반환값에서 string으로 둔다.
@@ -98,18 +108,22 @@
 - repository는 DB CRUD / query만 다루고, 각 메서드의 반환 계약을 명확히 유지한다.
 
 ### create
+
 - `create...`는 생성된 결과를 반환한다.
 
 ### read
+
 - `null` 또는 `[]`가 결과로 나올 수 있으면 `find` 키워드를 사용한다.
 - `find...`는 `null` 또는 `[]`를 그대로 반환한다.
 - `null` 또는 `[]`가 절대 나오지 않으면 `get` 키워드를 사용한다.
 - `get...`은 반드시 결과가 있다고 가정하는 조회에만 사용한다.
 
 ### update
+
 - `update...`는 `updatedDoc` 또는 `null`을 반환한다.
 
 ### delete
+
 - `delete...`는 성공/실패 여부인 `boolean`을 반환한다.
 
 ## 6. transaction / error
@@ -134,6 +148,7 @@
   - capability, owner 예외, 상태 조건을 조합해서 최종 권한을 판단한다.
 
 ### 예시 capability
+
 - `board.free.write`
 - `board.notice.write`
 - `board.bylaw.write`
@@ -182,6 +197,7 @@
 - status가 필요하지 않은 폼은 message만 표시한다.
 
 ### status 기본 정책
+
 - `400`
   - 입력 오류로 본다.
   - 현재 화면에서 message만 표시한다.
@@ -205,10 +221,12 @@
 - flash 타입은 `kind + message`를 사용한다.
 
 ### server 이동
+
 - server redirect가 필요한 경우 `server/flash.ts`를 사용한다.
 - cookie에 flash를 저장하고 다음 요청에서 1회 읽고 지운다.
 
 ### client 이동
+
 - client `goto(...)`가 필요한 경우 `shared/flash.ts`를 사용한다.
 - `sessionStorage`에 flash를 저장하고 다음 화면에서 1회 읽고 지운다.
 - flash 메시지는 client에서 새로 하드코딩하지 않는다.
@@ -221,6 +239,7 @@
 - 각 화면은 `404` 이동 URL, 성공 후 추가 동작, 편집 종료 같은 화면별 차이만 `afterSuccess`, `afterConflict`로 지정한다.
 
 ### 현재 적용 기준
+
 - `404`에서 목록 이동이 필요한 board / petition 상세 action은 client flash를 남기고 이동한다.
 - `409`는 현재 화면을 재조회한다.
 - `400`, `403`은 각 폼에서 message를 유지한다.

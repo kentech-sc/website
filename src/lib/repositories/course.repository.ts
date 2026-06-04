@@ -15,9 +15,7 @@ export async function findCourses(): Promise<CourseEntity[]> {
 	return toPojo<CourseEntity[]>(await CourseModel.find().sort({ _id: 1 }).lean());
 }
 
-export async function findCoursesByIds(
-	courseIds: CourseId[]
-): Promise<Array<CourseEntity | null>> {
+export async function findCoursesByIds(courseIds: CourseId[]): Promise<Array<CourseEntity | null>> {
 	const courses = await CourseModel.find({ _id: { $in: courseIds } }).lean();
 	const courseIdToCourse = new Map(courses.map((course) => [course._id.toString(), course]));
 

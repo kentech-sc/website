@@ -23,9 +23,7 @@ export async function findUserByNickname(nickname: string): Promise<UserEntity |
 	return toPojo<UserEntity | null>(await UserModel.findOne({ nickname }).lean());
 }
 
-export async function findUsersByIds(
-	userIds: UserId[]
-): Promise<Array<UserEntity | null>> {
+export async function findUsersByIds(userIds: UserId[]): Promise<Array<UserEntity | null>> {
 	const users = toPojo<UserEntity[]>(await UserModel.find({ _id: { $in: userIds } }).lean());
 
 	const userIdToUser = new Map<string, UserEntity>();
@@ -60,10 +58,7 @@ export async function findUsersByIds(
 // 	return nicknames.map((nickname) => userByNickname.get(nickname) ?? null);
 // }
 
-export async function updateUserById(
-	userId: UserId,
-	user: UserUpdate
-): Promise<UserEntity | null> {
+export async function updateUserById(userId: UserId, user: UserUpdate): Promise<UserEntity | null> {
 	return toPojo<UserEntity | null>(
 		await UserModel.findOneAndUpdate({ _id: userId }, user, { new: true }).lean()
 	);

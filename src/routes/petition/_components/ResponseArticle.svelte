@@ -47,7 +47,9 @@
 						<p>{petition.responderName} | {parseDate(petition.answeredAt)}</p>
 					</div>
 					{#if permissions.canEditResponse}
-						<button class="edit-button" type="button" onclick={() => (isEditing = true)}>수정</button>
+						<button class="edit-button" type="button" onclick={() => (isEditing = true)}
+							>수정</button
+						>
 					{/if}
 					{#if permissions.canDeleteResponse}
 						<div class="delete-form">

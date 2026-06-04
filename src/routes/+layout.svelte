@@ -17,7 +17,7 @@
 	let navigationKey = $derived(`${page.url.pathname}${page.url.search}`);
 
 	$effect(() => {
-		navigationKey;
+		void navigationKey;
 
 		flash = data.flash ?? null;
 

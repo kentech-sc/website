@@ -6,10 +6,7 @@ import { assertRule } from '$lib/server/errors.js';
 import * as ProfessorRepository from '$lib/repositories/professor.repository.js';
 import * as ProfessorRule from '$lib/rules/professor.rule.js';
 
-export async function createProfessor(
-	professor: ProfessorCreate,
-	user: User
-): Promise<Professor> {
+export async function createProfessor(professor: ProfessorCreate, user: User): Promise<Professor> {
 	assertRule(ProfessorRule.canManageProfessor(user));
 
 	const duplicate = await ProfessorRepository.findProfessorByName(professor.name);

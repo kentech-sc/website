@@ -54,7 +54,9 @@
 					>
 					{petition.title}
 				</h2>
-				<p>{petition.petitionerName} | {parseDate(petition.createdAt)} | 조회수 {petition.viewCnt}</p>
+				<p>
+					{petition.petitionerName} | {parseDate(petition.createdAt)} | 조회수 {petition.viewCnt}
+				</p>
 			</div>
 			{#if permissions.canDelete}
 				<div class="delete-form">

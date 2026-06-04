@@ -32,7 +32,9 @@
 <article class="module">
 	<header class="container">
 		<div class="container-col header-content">
-			<p class="sub-text">[{review.courseId}] {review.courseName} | {review.professorName} 교수님</p>
+			<p class="sub-text">
+				[{review.courseId}] {review.courseName} | {review.professorName} 교수님
+			</p>
 			<p class="time-info">
 				<span>
 					<Calendar size="1rem" color="var(--gray-text)" />
@@ -69,7 +71,9 @@
 	<hr />
 	<div id="score">
 		<div class="container score-labels">
-			<p><b>과제 양:</b> <span class="label-value">{getAmountLabel(review.score.assignment)}</span></p>
+			<p>
+				<b>과제 양:</b> <span class="label-value">{getAmountLabel(review.score.assignment)}</span>
+			</p>
 			<p>
 				<b>강의 난이도:</b>
 				<span class="label-value">{getDifficultyLabel(review.score.lecture)}</span>

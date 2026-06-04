@@ -1,7 +1,12 @@
 import { error, fail, isRedirect } from '@sveltejs/kit';
 import type { Action, ServerLoadEvent } from '@sveltejs/kit';
 
-import { APP_ERROR, type AppErrorCode, type AppErrorType, type RuleResult } from '$lib/shared/rule.js';
+import {
+	APP_ERROR,
+	type AppErrorCode,
+	type AppErrorType,
+	type RuleResult
+} from '$lib/shared/rule.js';
 
 export { APP_ERROR };
 

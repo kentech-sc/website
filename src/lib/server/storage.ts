@@ -157,7 +157,10 @@ export class FileStorage {
 			}
 		} catch (err) {
 			if (err instanceof AppError) throw err;
-			throw new AppError(APP_ERROR.INTERNAL, '스토리지에서 파일을 삭제하는 중 오류가 발생했습니다.');
+			throw new AppError(
+				APP_ERROR.INTERNAL,
+				'스토리지에서 파일을 삭제하는 중 오류가 발생했습니다.'
+			);
 		}
 	}
 }

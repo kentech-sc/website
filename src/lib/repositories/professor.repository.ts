@@ -3,15 +3,11 @@ import type { ProfessorId, ProfessorCreate, ProfessorEntity } from '$lib/types/p
 import { ProfessorModel } from '$lib/models/professor.model.js';
 import { toPojo } from '$lib/shared/utils.js';
 
-export async function createProfessor(
-	professor: ProfessorCreate
-): Promise<ProfessorEntity> {
+export async function createProfessor(professor: ProfessorCreate): Promise<ProfessorEntity> {
 	return toPojo<ProfessorEntity>((await ProfessorModel.create(professor)).toObject());
 }
 
-export async function findProfessorByName(
-	professorName: string
-): Promise<ProfessorEntity | null> {
+export async function findProfessorByName(professorName: string): Promise<ProfessorEntity | null> {
 	return toPojo<ProfessorEntity | null>(
 		await ProfessorModel.findOne({ name: professorName }).lean()
 	);
@@ -32,8 +28,6 @@ export async function findProfessorsByIds(
 	}
 
 	return toPojo<Array<ProfessorEntity | null>>(
-		professorIds.map(
-			(professorId) => professorIdToProfessor.get(professorId.toString()) ?? null
-		)
+		professorIds.map((professorId) => professorIdToProfessor.get(professorId.toString()) ?? null)
 	);
 }

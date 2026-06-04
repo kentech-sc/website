@@ -97,7 +97,9 @@
 				/>
 			{/snippet}
 			{#snippet row2()}
-				<span class="meta">{petition.petitionerName} · 조회 {petition.viewCnt} · 동의 {petition.signCnt}</span>
+				<span class="meta"
+					>{petition.petitionerName} · 조회 {petition.viewCnt} · 동의 {petition.signCnt}</span
+				>
 				<span class="time">{parseRelativeDate(petition.createdAt)}</span>
 			{/snippet}
 		</MobileListItem>

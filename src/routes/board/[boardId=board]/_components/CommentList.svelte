@@ -27,11 +27,7 @@
 				<p>{parseDate(comment.createdAt)}</p>
 				{#if commentPermissions[comment._id]?.canDelete}
 					<div class="delete-comment-form">
-						<CommonForm
-							actionName="deleteComment"
-							formName="deleteComment"
-							policy="reload"
-						>
+						<CommonForm actionName="deleteComment" formName="deleteComment" policy="reload">
 							<input type="hidden" name="comment-id" value={comment._id} />
 							<button type="submit">삭제</button>
 						</CommonForm>

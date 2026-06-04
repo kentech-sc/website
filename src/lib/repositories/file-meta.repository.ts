@@ -5,9 +5,7 @@ import type { PetitionId } from '$lib/types/petition.type.js';
 import { FileMetaModel } from '$lib/models/file-meta.model.js';
 import { toPojo } from '$lib/shared/utils.js';
 
-export async function createFileMeta(
-	fileMetaCreate: FileMetaCreate
-): Promise<FileMetaEntity> {
+export async function createFileMeta(fileMetaCreate: FileMetaCreate): Promise<FileMetaEntity> {
 	const fileMeta = (await FileMetaModel.create(fileMetaCreate)).toObject();
 	return toPojo<FileMetaEntity>(fileMeta);
 }

@@ -24,16 +24,12 @@ export async function getFileMetaById(fileId: FileId): Promise<FileMeta> {
 	return toFileMeta(fileMeta);
 }
 
-export async function findFileMetasByIds(
-	fileIds: FileId[]
-): Promise<Array<FileMeta | null>> {
+export async function findFileMetasByIds(fileIds: FileId[]): Promise<Array<FileMeta | null>> {
 	const fileMetas = await FileMetaRepository.findFileMetasByFileIds(fileIds);
 	return fileMetas.map((fileMeta) => (fileMeta ? toFileMeta(fileMeta) : null));
 }
 
-export async function getFileMetasByArticleId(
-	articleId: PostId | PetitionId
-): Promise<FileMeta[]> {
+export async function getFileMetasByArticleId(articleId: PostId | PetitionId): Promise<FileMeta[]> {
 	const fileMetas = await FileMetaRepository.findFileMetasByArticleId(articleId);
 	return fileMetas.map((fileMeta) => toFileMeta(fileMeta));
 }
@@ -81,16 +77,11 @@ export async function linkArticleToFiles(
 	return await FileMetaRepository.addArticleIdToFiles(fileIds, articleId);
 }
 
-export async function unlinkArticleFromAllFiles(
-	articleId: PostId | PetitionId
-): Promise<boolean> {
+export async function unlinkArticleFromAllFiles(articleId: PostId | PetitionId): Promise<boolean> {
 	return await FileMetaRepository.removeArticleIdFromAllFiles(articleId);
 }
 
-export async function cleanupOrphanedFiles(
-	olderThanHours = 24,
-	user: User
-): Promise<number> {
+export async function cleanupOrphanedFiles(olderThanHours = 24, user: User): Promise<number> {
 	assertRule(FileMetaRule.canCleanupOrphanedFiles(user));
 
 	const cutoffTime = new Date(Date.now() - olderThanHours * 60 * 60 * 1000);

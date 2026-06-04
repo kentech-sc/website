@@ -10,6 +10,7 @@
 		type ActionSimpleCallback,
 		type CommonFormPolicy
 	} from '$lib/shared/action-result.js';
+	import type { Snippet } from 'svelte';
 
 	let {
 		children,
@@ -22,7 +23,7 @@
 		afterSuccess,
 		afterConflict
 	}: {
-		children: any;
+		children: Snippet;
 		formName?: string;
 		actionName?: string;
 		isFile?: boolean;
