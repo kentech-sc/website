@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { signOut } from '@auth/sveltekit/client';
-	import User from '@lucide/svelte/icons/user';
 	import LogOut from '@lucide/svelte/icons/log-out';
+	import User from '@lucide/svelte/icons/user';
 
 	let { user } = $props();
 </script>
@@ -43,18 +43,18 @@
 
 	{#if !user}
 		<div class="login-required">
-			<p>로그인이 필요합니다</p>
+			<p>로그인이 필요합니다.</p>
 		</div>
 	{/if}
 </section>
 
 <style lang="scss">
 	.profile-card {
-		background: white;
-		border: 1px solid #e5e7eb;
+		background: var(--surface-elevated);
+		border: 0.1rem solid var(--gray-border);
 		border-radius: 0.5rem;
 		padding: 1.5rem;
-		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+		box-shadow: 0 0.1rem 0.3rem var(--shadow-color);
 	}
 
 	.profile-header {
@@ -63,7 +63,7 @@
 		gap: 1rem;
 		margin-bottom: 1.5rem;
 		padding-bottom: 1rem;
-		border-bottom: 1px solid #e5e7eb;
+		border-bottom: 0.1rem solid var(--gray-border);
 
 		.avatar {
 			display: flex;
@@ -71,25 +71,25 @@
 			justify-content: center;
 			width: 3rem;
 			height: 3rem;
-			background: #3b82f6;
+			background: var(--secondary);
 			border-radius: 50%;
-			color: white;
+			color: var(--tertiary-text);
 		}
 
 		.profile-info {
 			flex: 1;
 
 			h2 {
-				margin: 0 0 0.25rem 0;
+				margin: 0 0 0.25rem;
 				font-size: 1.25rem;
 				font-weight: 600;
-				color: #1f2937;
+				color: var(--text);
 			}
 
 			.user-id {
 				margin: 0;
 				font-size: 0.875rem;
-				color: #6b7280;
+				color: var(--gray-text);
 				font-family: monospace;
 			}
 		}
@@ -106,23 +106,23 @@
 			justify-content: space-between;
 			align-items: center;
 			padding: 0.5rem;
-			background: #f9fafb;
-			border-radius: 0.375rem;
+			background: var(--gray-bg);
+			border-radius: 0.4rem;
 
 			.label {
 				font-size: 0.875rem;
-				color: #6b7280;
+				color: var(--gray-text);
 				font-weight: 500;
 			}
 
 			.value {
 				font-size: 0.875rem;
-				color: #1f2937;
+				color: var(--text);
 				font-weight: 500;
 
 				&.badge {
-					background: #dbeafe;
-					color: #1e40af;
+					background: var(--secondary-bg);
+					color: var(--secondary);
 					padding: 0.25rem 0.5rem;
 					border-radius: 0.25rem;
 					font-size: 0.75rem;
@@ -140,16 +140,16 @@
 			gap: 0.5rem;
 			width: 100%;
 			padding: 0.625rem 1rem;
-			background: #ef4444;
-			color: white;
+			background: var(--error);
+			color: var(--tertiary-text);
 			border: none;
-			border-radius: 0.375rem;
+			border-radius: 0.4rem;
 			font-size: 0.875rem;
 			font-weight: 500;
 			cursor: pointer;
 
 			&:hover {
-				background: #dc2626;
+				background: var(--error-strong-hover);
 			}
 		}
 	}
@@ -157,7 +157,7 @@
 	.login-required {
 		text-align: center;
 		padding: 2rem;
-		color: #6b7280;
+		color: var(--gray-text);
 		font-style: italic;
 	}
 

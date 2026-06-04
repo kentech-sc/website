@@ -1,15 +1,16 @@
 <script lang="ts">
-	import * as ReviewService from '$lib/srv/review.srv.js';
-	import * as CommonUtils from '$lib/common/utils.js';
+	import Calendar from '@lucide/svelte/icons/calendar';
+	import Clock from '@lucide/svelte/icons/clock';
 
 	import CommonForm from '$components/CommonForm.svelte';
 	import StarRating from '$components/StarRating.svelte';
-	import Permission from '../../_components/Permission.svelte';
 
-	import Clock from '@lucide/svelte/icons/clock';
-	import Calendar from '@lucide/svelte/icons/calendar';
+	import type { Review, ReviewPermissions } from '$lib/types/review.type.js';
 
-	let { review, user } = $props();
+	import { parseDate } from '$lib/shared/utils.js';
+	import { translatedTerm } from '$lib/shared/view.js';
+
+	let { review, permissions }: { review: Review; permissions: ReviewPermissions } = $props();
 
 	function getAmountLabel(value: number): string {
 		if (value <= 1) return '아주 적음';
@@ -28,58 +29,47 @@
 	}
 </script>
 
-{#snippet BtnGroup()}
-	<div class="container" id="btn-group">
-		<a href="{review._id}/edit" class="btn-anchor">수정</a>
-		<div class="delete-form">
-			<CommonForm actionName="deleteReview" formName="deleteReview">
-				<input type="hidden" name="review-id" value={review._id} />
-				<button type="submit">삭제</button>
-			</CommonForm>
-		</div>
-	</div>
-{/snippet}
-
-{#snippet ReviewerInfo()}
-	<p class="time-info">
-		<span>
-			<Calendar size="1rem" color="var(--gray-text)" />
-			{review.year}년 {ReviewService.translatedTerm[review.term]}학기 수강
-		</span>
-		<span>
-			<Clock size="1rem" color="var(--gray-text)" />
-			{CommonUtils.parseDate(review.createdAt)}
-		</span>
-	</p>
-{/snippet}
-
-{#snippet ReviewHeader()}
+<article class="module">
 	<header class="container">
 		<div class="container-col header-content">
-			<p class="sub-text">
-				[{review.courseId}] {review.courseName} | {review.professorName} 교수님
+			<p class="sub-text">[{review.courseId}] {review.courseName} | {review.professorName} 교수님</p>
+			<p class="time-info">
+				<span>
+					<Calendar size="1rem" color="var(--gray-text)" />
+					{review.year}년 {translatedTerm[review.term]}학기 수강
+				</span>
+				<span>
+					<Clock size="1rem" color="var(--gray-text)" />
+					{parseDate(review.createdAt)}
+				</span>
 			</p>
-			{@render ReviewerInfo()}
 		</div>
 
-		<div>
-			<Permission {user} ownerId={review.userId} minRole="manager">
-				{@render BtnGroup()}
-			</Permission>
-		</div>
+		{#if permissions.canEdit || permissions.canDelete}
+			<div id="btn-group" class="container">
+				{#if permissions.canEdit}
+					<a href="{review._id}/edit" class="btn-anchor">수정</a>
+				{/if}
+				{#if permissions.canDelete}
+					<div class="delete-form">
+						<CommonForm actionName="deleteReview" formName="deleteReview">
+							<input type="hidden" name="review-id" value={review._id} />
+							<button type="submit">삭제</button>
+						</CommonForm>
+					</div>
+				{/if}
+			</div>
+		{/if}
 	</header>
-{/snippet}
+	<hr />
 
-{#snippet ReviewContents()}
 	<h2>"{review.title}"</h2>
 	<hr />
 	<pre>{review.comment}</pre>
 	<hr />
 	<div id="score">
 		<div class="container score-labels">
-			<p>
-				<b>과제 양:</b> <span class="label-value">{getAmountLabel(review.score.assignment)}</span>
-			</p>
+			<p><b>과제 양:</b> <span class="label-value">{getAmountLabel(review.score.assignment)}</span></p>
 			<p>
 				<b>강의 난이도:</b>
 				<span class="label-value">{getDifficultyLabel(review.score.lecture)}</span>
@@ -90,12 +80,6 @@
 			<p><b>만족도:</b> <StarRating score={review.score.satisfaction} /></p>
 		</div>
 	</div>
-{/snippet}
-
-<article class="module">
-	{@render ReviewHeader()}
-	<hr />
-	{@render ReviewContents()}
 </article>
 
 <style lang="scss">
@@ -108,7 +92,7 @@
 	}
 
 	article {
-		width: stretch;
+		width: 100%;
 
 		header {
 			& > div {

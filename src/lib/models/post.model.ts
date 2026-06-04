@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
-import type { PostDoc } from '$lib/types/post.type.js';
+import type { PostEntity } from '$lib/types/post.type.js';
 
-const PostSchema = new mongoose.Schema(
+const PostSchema = new mongoose.Schema<PostEntity>(
 	{
 		boardId: { type: String, required: true },
 		userId: { type: String, required: true },
@@ -19,4 +19,4 @@ const PostSchema = new mongoose.Schema(
 
 PostSchema.index({ title: 'text', content: 'text' });
 
-export const PostModel = mongoose.model<PostDoc>('Post', PostSchema);
+export const PostModel = mongoose.model('Post', PostSchema);

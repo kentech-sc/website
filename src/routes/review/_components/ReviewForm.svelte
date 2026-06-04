@@ -2,11 +2,11 @@
 	import CommonForm from '$components/CommonForm.svelte';
 	import StarRating from '$components/StarRating.svelte';
 
-	import * as ReviewService from '$lib/srv/review.srv.js';
-
-	import type { Review } from '$lib/types/review.type.js';
-	import type { Professor } from '$lib/types/prof.type.js';
 	import type { Course } from '$lib/types/course.type.js';
+	import type { Professor } from '$lib/types/professor.type.js';
+	import type { Review } from '$lib/types/review.type.js';
+
+	import { translatedTerm } from '$lib/shared/view.js';
 
 	let {
 		professors,
@@ -14,11 +14,26 @@
 		review
 	}: { professors: Professor[]; courses: Course[]; review?: Review } = $props();
 
+	let initializedFor = $state<string | null>(null);
 	let scores = $state({
-		assignment: review?.score.assignment ?? 5,
-		lecture: review?.score.lecture ?? 5,
-		exam: review?.score.exam ?? 5,
-		satisfaction: review?.score.satisfaction ?? 10
+		assignment: 5,
+		lecture: 5,
+		exam: 5,
+		satisfaction: 10
+	});
+
+	$effect(() => {
+		const formKey = review?._id ?? 'new';
+
+		if (initializedFor === formKey) return;
+
+		initializedFor = formKey;
+		scores = {
+			assignment: review?.score.assignment ?? 5,
+			lecture: review?.score.lecture ?? 5,
+			exam: review?.score.exam ?? 5,
+			satisfaction: review?.score.satisfaction ?? 10
+		};
 	});
 
 	function getAmountLabel(value: number): string {
@@ -38,132 +53,6 @@
 	}
 </script>
 
-{#snippet TermInputs()}
-	<div class="container">
-		<div class="select_group">
-			<label for="year">수강 연도</label>
-			<select id="year" name="year" required value={review?.year}>
-				<option value="">선택</option>
-				{#each Array.from({ length: new Date().getFullYear() - 2021 }, (_, i) => 22 + i) as year (year)}
-					<option value={year}>{year}년도</option>
-				{/each}
-			</select>
-		</div>
-		<div class="select_group">
-			<label for="term">수강 학기</label>
-			<select id="term" name="term" required value={review?.term.toString()}>
-				<option value="">선택</option>
-				<option value="1">{ReviewService.translatedTerm[1]}학기</option>
-				<option value="2">{ReviewService.translatedTerm[2]}학기</option>
-				<option value="3">{ReviewService.translatedTerm[3]}학기</option>
-				<option value="4">{ReviewService.translatedTerm[4]}학기</option>
-			</select>
-		</div>
-	</div>
-{/snippet}
-
-{#snippet TitleInput()}
-	<label for="title">한줄평</label>
-	<input type="text" id="title" name="title" required value={review?.title} maxlength="100" />
-{/snippet}
-
-{#snippet CommentInput()}
-	<label for="comment">내용</label>
-	<textarea id="comment" name="comment">{review?.comment}</textarea>
-{/snippet}
-
-{#snippet CourseInputs()}
-	<div class="container">
-		<div class="select_group">
-			<label for="courseId">강의 코드</label>
-			<select id="courseId" name="courseId" required value={review?.courseId.toString()}>
-				<option value="">선택</option>
-				{#each courses as course (course._id)}
-					<option value={course._id}>[{course._id}] {course.name}</option>
-				{/each}
-			</select>
-		</div>
-		<div class="select_group">
-			<label for="professorId">담당 교수님</label>
-			<select id="professorId" name="professorId" required value={review?.professorId.toString()}>
-				<option value="">선택</option>
-				{#each professors as professor (professor._id)}
-					<option value={professor._id}>{professor.name} 교수님</option>
-				{/each}
-			</select>
-		</div>
-	</div>
-{/snippet}
-
-{#snippet ScoreInputs()}
-	<div id="score-container">
-		<div class="container slider-row">
-			<div class="score-item">
-				<div class="label-row">
-					<label for="assignmentScore">과제 양</label>
-					<span class="current-label">{getAmountLabel(scores.assignment)}</span>
-				</div>
-				<input
-					type="range"
-					id="assignmentScore"
-					name="assignmentScore"
-					min="1"
-					max="5"
-					step="1"
-					bind:value={scores.assignment}
-				/>
-				<div class="range-guide">
-					<span>적음</span>
-					<span>많음</span>
-				</div>
-			</div>
-			<div class="score-item">
-				<div class="label-row">
-					<label for="lectureScore">강의 난이도</label>
-					<span class="current-label">{getDifficultyLabel(scores.lecture)}</span>
-				</div>
-				<input
-					type="range"
-					id="lectureScore"
-					name="lectureScore"
-					min="1"
-					max="5"
-					step="1"
-					bind:value={scores.lecture}
-				/>
-				<div class="range-guide">
-					<span>쉬움</span>
-					<span>어려움</span>
-				</div>
-			</div>
-			<div class="score-item">
-				<div class="label-row">
-					<label for="examScore">시험 횟수</label>
-					<span class="current-label">{getAmountLabel(scores.exam)}</span>
-				</div>
-				<input
-					type="range"
-					id="examScore"
-					name="examScore"
-					min="1"
-					max="5"
-					step="1"
-					bind:value={scores.exam}
-				/>
-				<div class="range-guide">
-					<span>적음</span>
-					<span>많음</span>
-				</div>
-			</div>
-		</div>
-		<div class="satisfaction-item container-col">
-			<label for="satisfactionScore">만족도</label>
-			<StarRating interactive bind:score={scores.satisfaction} />
-			<input type="hidden" name="satisfactionScore" value={scores.satisfaction} />
-		</div>
-	</div>
-{/snippet}
-
 <section class="module">
 	<CommonForm
 		actionName={review ? 'editReview' : 'createReview'}
@@ -171,13 +60,129 @@
 	>
 		<div id="form-div" class="container-col">
 			<div class="input-row">
-				{@render CourseInputs()}
-				{@render TermInputs()}
+				<div class="container">
+					<div class="select_group">
+						<label for="courseId">강의 코드</label>
+						<select id="courseId" name="courseId" required value={review?.courseId.toString()}>
+							<option value="">선택</option>
+							{#each courses as course (course._id)}
+								<option value={course._id}>[{course._id}] {course.name}</option>
+							{/each}
+						</select>
+					</div>
+					<div class="select_group">
+						<label for="professorId">담당 교수님</label>
+						<select
+							id="professorId"
+							name="professorId"
+							required
+							value={review?.professorId.toString()}
+						>
+							<option value="">선택</option>
+							{#each professors as professor (professor._id)}
+								<option value={professor._id}>{professor.name} 교수님</option>
+							{/each}
+						</select>
+					</div>
+				</div>
+
+				<div class="container">
+					<div class="select_group">
+						<label for="year">수강 연도</label>
+						<select id="year" name="year" required value={review?.year}>
+							<option value="">선택</option>
+							{#each Array.from({ length: new Date().getFullYear() - 2021 }, (_, i) => 22 + i) as year (year)}
+								<option value={year}>{year}년도</option>
+							{/each}
+						</select>
+					</div>
+					<div class="select_group">
+						<label for="term">수강 학기</label>
+						<select id="term" name="term" required value={review?.term.toString()}>
+							<option value="">선택</option>
+							<option value="1">{translatedTerm[1]}학기</option>
+							<option value="2">{translatedTerm[2]}학기</option>
+							<option value="3">{translatedTerm[3]}학기</option>
+							<option value="4">{translatedTerm[4]}학기</option>
+						</select>
+					</div>
+				</div>
 			</div>
-			{@render TitleInput()}
-			{@render CommentInput()}
-			{@render ScoreInputs()}
-			<div class="right-align">
+
+			<label for="title">한줄평</label>
+			<input type="text" id="title" name="title" required value={review?.title} maxlength="100" />
+
+			<label for="comment">내용</label>
+			<textarea id="comment" name="comment">{review?.comment}</textarea>
+
+			<div id="score-container">
+				<div class="container slider-row">
+					<div class="score-item">
+						<div class="label-row">
+							<label for="assignmentScore">과제 양</label>
+							<span class="current-label">{getAmountLabel(scores.assignment)}</span>
+						</div>
+						<input
+							type="range"
+							id="assignmentScore"
+							name="assignmentScore"
+							min="1"
+							max="5"
+							step="1"
+							bind:value={scores.assignment}
+						/>
+						<div class="range-guide">
+							<span>적음</span>
+							<span>많음</span>
+						</div>
+					</div>
+					<div class="score-item">
+						<div class="label-row">
+							<label for="lectureScore">강의 난이도</label>
+							<span class="current-label">{getDifficultyLabel(scores.lecture)}</span>
+						</div>
+						<input
+							type="range"
+							id="lectureScore"
+							name="lectureScore"
+							min="1"
+							max="5"
+							step="1"
+							bind:value={scores.lecture}
+						/>
+						<div class="range-guide">
+							<span>쉬움</span>
+							<span>어려움</span>
+						</div>
+					</div>
+					<div class="score-item">
+						<div class="label-row">
+							<label for="examScore">시험 횟수</label>
+							<span class="current-label">{getAmountLabel(scores.exam)}</span>
+						</div>
+						<input
+							type="range"
+							id="examScore"
+							name="examScore"
+							min="1"
+							max="5"
+							step="1"
+							bind:value={scores.exam}
+						/>
+						<div class="range-guide">
+							<span>적음</span>
+							<span>많음</span>
+						</div>
+					</div>
+				</div>
+				<div class="satisfaction-item container-col">
+					<label for="satisfactionScore">만족도</label>
+					<StarRating interactive bind:score={scores.satisfaction} />
+					<input type="hidden" name="satisfactionScore" value={scores.satisfaction} />
+				</div>
+			</div>
+
+			<div class="form-actions">
 				<button type="submit" class="btn-action">{review ? '수정하기' : '평가하기'}</button>
 			</div>
 		</div>
@@ -186,7 +191,7 @@
 
 <style lang="scss">
 	#form-div {
-		width: stretch;
+		width: 100%;
 		align-items: flex-start;
 
 		& > *:not(label, button) {
@@ -209,12 +214,11 @@
 		}
 
 		input {
-			width: stretch;
+			width: 100%;
 		}
 
-		// input[type='number'],
 		select {
-			width: stretch;
+			width: 100%;
 			max-width: 100%;
 			margin-right: 1.5rem;
 
@@ -226,7 +230,7 @@
 		}
 
 		textarea {
-			width: stretch;
+			width: 100%;
 			height: 10vh;
 			resize: vertical;
 		}
@@ -275,10 +279,9 @@
 
 	.score-item {
 		flex: 1;
-		min-width: 200px;
+		min-width: 20rem;
 		display: flex;
 		flex-direction: column;
-
 		margin-right: 2rem;
 
 		@media (max-width: 768px) {
@@ -306,13 +309,10 @@
 		input[type='range'] {
 			-webkit-appearance: none;
 			appearance: none;
-
 			cursor: pointer;
 			width: 100%;
 			padding: 0.15rem 0.2rem;
-			margin: 0;
-			margin-bottom: 0.4rem;
-
+			margin: 0 0 0.4rem;
 			background: var(--gray-bg);
 			border-radius: 1rem;
 			border: solid 0.1rem var(--gray-border);
@@ -320,10 +320,8 @@
 			&::-webkit-slider-thumb {
 				-webkit-appearance: none;
 				appearance: none;
-
 				width: 1.5rem;
 				height: 1rem;
-
 				background: var(--secondary);
 				border-radius: 1rem;
 			}
@@ -348,5 +346,12 @@
 			margin-left: 0 !important;
 			margin-bottom: 0.5rem !important;
 		}
+	}
+
+	.form-actions {
+		width: 100%;
+		display: flex;
+		justify-content: flex-end;
+		margin-top: 1rem;
 	}
 </style>

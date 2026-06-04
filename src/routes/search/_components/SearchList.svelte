@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { getPlainTextFromHtml } from '$lib/shared/utils.js';
 	import type { Petition } from '$lib/types/petition.type.js';
 	import type { Post } from '$lib/types/post.type.js';
 	import type { Review } from '$lib/types/review.type.js';
@@ -11,11 +12,13 @@
 	}: { results: (Post | Petition | Review)[]; query: string; page: number; more: boolean } =
 		$props();
 
-	function htmlToPlainText(html: string): string {
-		const tmp = document.createElement('div');
-		tmp.innerHTML = html;
-		return tmp.textContent || tmp.innerText || '';
-	}
+	const getSearchPageHref = (page: number): string => {
+		const searchParams = new URLSearchParams({
+			query,
+			page: page.toString()
+		});
+		return `/search?${searchParams.toString()}`;
+	};
 </script>
 
 {#snippet ResultItem(result: Post | Petition | Review)}
@@ -23,17 +26,17 @@
 		{#if 'boardId' in result}
 			<a href="/board/{result.boardId}/{result._id}">
 				<h3 class="ellipsis">[게시글] {result.title}</h3>
-				<p class="ellipsis">{htmlToPlainText(result.content)}</p>
+				<p class="ellipsis">{getPlainTextFromHtml(result.content)}</p>
 			</a>
 		{:else if 'courseId' in result}
 			<a href="/review/{result._id}">
 				<h3 class="ellipsis">[강의평가] {result.title}</h3>
-				<p class="ellipsis">{htmlToPlainText(result.comment)}</p>
+				<p class="ellipsis">{getPlainTextFromHtml(result.comment)}</p>
 			</a>
 		{:else}
 			<a href="/petition/{result._id}">
 				<h3 class="ellipsis">[청원] {result.title}</h3>
-				<p class="ellipsis">{htmlToPlainText(result.content)}</p>
+				<p class="ellipsis">{getPlainTextFromHtml(result.content)}</p>
 			</a>
 		{/if}
 	</div>
@@ -42,12 +45,12 @@
 {#snippet PaginationBtns()}
 	<div class="container" id="pagination">
 		{#if page > 1}
-			<a href="/search?query={query}&page={page - 1}" class="btn-anchor">이전</a>
+			<a href={getSearchPageHref(page - 1)} class="btn-anchor">이전</a>
 		{:else}
 			<span class="btn-anchor-disabled">이전</span>
 		{/if}
 		{#if more}
-			<a href="/search?query={query}&page={page + 1}" class="btn-anchor">다음</a>
+			<a href={getSearchPageHref(page + 1)} class="btn-anchor">다음</a>
 		{:else}
 			<span class="btn-anchor-disabled">다음</span>
 		{/if}
@@ -68,7 +71,7 @@
 
 <style lang="scss">
 	.result-item {
-		width: stretch;
+		width: 100%;
 		justify-content: flex-start;
 
 		a {

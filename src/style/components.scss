@@ -1,9 +1,5 @@
 @use 'base';
 
-.hidden {
-	display: none;
-}
-
 .container {
 	display: flex;
 	align-items: center;
@@ -17,29 +13,28 @@
 	flex-direction: column;
 }
 
-@mixin Module {
+@mixin module-frame {
 	border-width: 0.1rem;
 	border-style: solid;
-	padding: 1rem;
-	width: stretch;
+	width: 100%;
 	margin-top: 1rem;
 }
 
 .module {
-	@include Module;
+	@include module-frame;
 	border-color: var(--gray-border);
-	background-color: white;
+	background-color: var(--surface-elevated);
 	border-radius: 0.8rem;
-	box-shadow: 0 0.2rem 0.3rem rgba(0, 0, 0, 0.1);
+	box-shadow: 0 0.2rem 0.3rem var(--shadow-color);
 	padding: 1.2rem 1.5rem;
 }
 
 .module_head {
-	@include Module;
+	@include module-frame;
 	border: none;
-	background-color: white;
+	background-color: var(--surface-elevated);
 	border-radius: 0.8rem;
-	padding: 1.2rem 0rem;
+	padding: 1.2rem 0;
 
 	p {
 		font-size: 0.9rem;
@@ -55,12 +50,11 @@
 }
 
 .btn-anchor {
-	@include base.BtnStyle;
+	@include base.btn-style;
 }
 
 .btn-anchor-disabled {
-	@include base.BtnStyle;
-
+	@include base.btn-style;
 	color: var(--gray-text);
 
 	&:hover {
@@ -70,10 +64,10 @@
 
 button.btn-action {
 	background-color: var(--secondary);
-	color: white;
+	color: var(--tertiary-text);
 	border: none;
-	padding: 0.5rem 1.5rem;
-	border-radius: 0.25rem;
+	padding: 0.6rem 1.6rem;
+	border-radius: 0.2rem;
 	font-size: 1rem;
 	font-weight: bold;
 	transition: opacity 0.2s ease;
@@ -91,19 +85,12 @@ button.btn-action {
 	}
 }
 
-.right-align {
-	width: 100%;
-	display: flex;
-	justify-content: flex-end;
-	margin-top: 1rem;
-}
-
 .error {
-	@include Module;
-
+	@include module-frame;
 	color: var(--error-text);
 	background-color: var(--error-bg);
-	border-color: var(--error-text);
+	border-color: var(--error);
+	padding: 1rem;
 
 	&:hover {
 		background-color: var(--error-hover);
@@ -111,11 +98,11 @@ button.btn-action {
 }
 
 .warn {
-	@include Module;
-
+	@include module-frame;
 	color: var(--warn-text);
 	background-color: var(--warn-bg);
-	border-color: var(--warn-text);
+	border-color: var(--warn);
+	padding: 1rem;
 
 	&:hover {
 		background-color: var(--warn-hover);
@@ -123,11 +110,11 @@ button.btn-action {
 }
 
 .success {
-	@include Module;
-
+	@include module-frame;
 	color: var(--success-text);
 	background-color: var(--success-bg);
-	border-color: var(--success-text);
+	border-color: var(--success);
+	padding: 1rem;
 
 	&:hover {
 		background-color: var(--success-hover);
@@ -135,49 +122,13 @@ button.btn-action {
 }
 
 .info {
-	@include Module;
-
+	@include module-frame;
 	color: var(--info-text);
 	background-color: var(--info-bg);
-	border-color: var(--info-text);
+	border-color: var(--info);
+	padding: 1rem;
 
 	&:hover {
 		background-color: var(--info-hover);
-	}
-}
-
-.primary {
-	padding: 1rem;
-
-	color: var(--primary-text);
-	background-color: var(--primary-bg);
-	// border-color: var(--primary-border);
-
-	&:hover {
-		background-color: var(--primary-hover);
-	}
-}
-
-.secondary {
-	padding: 1rem;
-
-	color: var(--secondary-text);
-	background-color: var(--secondary-bg);
-	// border-color: var(--secondary-border);
-
-	&:hover {
-		background-color: var(--secondary-hover);
-	}
-}
-
-.tertiary {
-	padding: 1rem;
-
-	color: var(--tertiary-text);
-	background-color: var(--tertiary-bg);
-	// border-color: var(--tertiary-border);
-
-	&:hover {
-		background-color: var(--tertiary-hover);
 	}
 }

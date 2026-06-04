@@ -3,10 +3,6 @@
 
 	import { page } from '$app/state';
 
-	const user = $derived(JSON.parse(page.data.user ?? '{}'));
-
-	let { isMain = false } = $props();
-
 	import Search_img from '@lucide/svelte/icons/search';
 	import Menu_img from '@lucide/svelte/icons/menu';
 	import X_img from '@lucide/svelte/icons/x';
@@ -14,7 +10,12 @@
 	import { fly, fade } from 'svelte/transition';
 	import { cubicOut } from 'svelte/easing';
 
+	const user = $derived(page.data.user);
+
+	let { isMain = false } = $props();
+
 	let menuOpen = $state(false);
+
 	function closeMenu() {
 		menuOpen = false;
 	}
@@ -29,13 +30,9 @@
 {#snippet Nav()}
 	<nav>
 		<a href="/board/notice">공지사항</a>
-
 		<a href="/board/free">자유게시판</a>
-
 		<a href="/board/bylaw">회칙·세칙</a>
-
 		<a href="/review">강의평가</a>
-
 		<a href="/petition">청원</a>
 	</nav>
 {/snippet}
@@ -44,9 +41,9 @@
 	<div class="container" id="profile">
 		{#if user.group !== 'guest'}
 			<a href="/profile" id="profile-anchor" class="container">
-				<span class="profile-icon"
-					><CircleUserRound_img size="2rem" strokeWidth={1.5} color="white" /></span
-				>
+				<span class="profile-icon">
+					<CircleUserRound_img size="2rem" strokeWidth={1.5} color="white" />
+				</span>
 				<span class="profile-name">{user.nickname}</span>
 			</a>
 		{:else}
@@ -61,9 +58,6 @@
 	<a href="/search" id="search-anchor" class="container">
 		<Search_img size="1.2rem" color="white" />
 	</a>
-	<!-- <div id="search-box">
-		<input class="serach-txt" placeholder="검색어를 입력해 주세요">
-	</div> -->
 {/snippet}
 
 <header class="container" id={isMain ? 'main-nav' : 'sub-nav'} data-sveltekit-preload-data="hover">
@@ -125,10 +119,8 @@
 		justify-content: space-between;
 		position: sticky;
 		top: 0;
-		width: stretch;
-
+		width: 100%;
 		background-color: var(--tertiary);
-
 		border: none;
 		border-bottom: solid white 0.2rem;
 
@@ -145,11 +137,13 @@
 
 			nav {
 				font-size: 1.1rem;
+
 				a {
 					color: var(--tertiary-text);
 					font-weight: bold;
 					padding: 1rem;
 				}
+
 				a:hover {
 					color: var(--white-hover);
 					text-decoration: none;
@@ -233,6 +227,7 @@
 						.profile-icon {
 							display: flex;
 						}
+
 						.profile-name {
 							display: none;
 						}
@@ -278,14 +273,14 @@
 			background-color: white;
 			overflow-y: auto;
 			padding-top: 4.5rem;
-			box-shadow: -4px 0 16px oklch(0 0 0 / 15%);
+			box-shadow: -0.4rem 0 1.6rem oklch(0 0 0 / 15%);
 
 			a {
 				color: black;
 				font-weight: bold;
 				font-size: 1.15rem;
 				padding: 1.2rem 1.8rem;
-				border-bottom: solid var(--gray-border) 1px;
+				border-bottom: solid var(--gray-border) 0.1rem;
 
 				&:hover {
 					background-color: var(--gray-bg);
@@ -295,7 +290,7 @@
 
 			hr {
 				border: none;
-				border-top: solid var(--gray-border) 4px;
+				border-top: solid var(--gray-border) 0.4rem;
 				margin: 0;
 			}
 		}

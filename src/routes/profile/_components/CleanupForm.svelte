@@ -1,16 +1,17 @@
 <script lang="ts">
-	import CommonForm from '$components/CommonForm.svelte';
-	import Trash2 from '@lucide/svelte/icons/trash-2';
-	import Clock from '@lucide/svelte/icons/clock';
-	import type { ActionResult } from '@sveltejs/kit';
 	import { invalidateAll } from '$app/navigation';
+	import type { ActionResult } from '@sveltejs/kit';
+	import Clock from '@lucide/svelte/icons/clock';
+	import Trash2 from '@lucide/svelte/icons/trash-2';
+
+	import CommonForm from '$components/CommonForm.svelte';
 
 	let formResult = $state<ActionResult | null>(null);
 
 	$effect(() => {
 		if (formResult?.type === 'success') {
 			const deletedCnt = formResult.data?.deletedCnt || 0;
-			alert(`${deletedCnt}개의 파일이 삭제되었습니다!`);
+			alert(`${deletedCnt}개의 파일이 삭제되었습니다.`);
 			invalidateAll();
 		}
 	});
@@ -52,28 +53,28 @@
 		flex-direction: column;
 		gap: 1rem;
 		padding: 1rem;
-		background: #fef2f2;
-		border: 1px solid #fecaca;
-		border-radius: 0.375rem;
+		background: var(--error-bg);
+		border: 0.1rem solid var(--error);
+		border-radius: 0.4rem;
 	}
 
 	.form-header {
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
-		color: #dc2626;
+		color: var(--error-text);
 		font-weight: 600;
-		font-size: 0.95rem;
+		font-size: 1rem;
 	}
 
 	.warning-message {
 		display: flex;
-		gap: 0.75rem;
-		padding: 0.75rem;
-		background: #fee2e2;
-		border: 1px solid #fecaca;
-		border-radius: 0.25rem;
-		color: #991b1b;
+		gap: 0.8rem;
+		padding: 0.8rem;
+		background: var(--error-hover);
+		border: 0.1rem solid var(--error);
+		border-radius: 0.3rem;
+		color: var(--error);
 
 		.warning-icon {
 			flex-shrink: 0;
@@ -104,23 +105,23 @@
 		gap: 0.5rem;
 
 		label {
-			font-size: 0.875rem;
-			color: #374151;
+			font-size: 0.9rem;
+			color: var(--text);
 			font-weight: 600;
 		}
 
 		input {
-			padding: 0.5rem 0.75rem;
-			border: 1px solid #d1d5db;
-			border-radius: 0.375rem;
-			background: white;
-			color: #1f2937;
-			font-size: 0.875rem;
+			padding: 0.5rem 0.8rem;
+			border: 0.1rem solid var(--gray-border);
+			border-radius: 0.4rem;
+			background: var(--surface-base);
+			color: var(--text);
+			font-size: 0.9rem;
 
 			&:focus {
 				outline: none;
-				border-color: #dc2626;
-				box-shadow: 0 0 0 1px #dc2626;
+				border-color: var(--error);
+				box-shadow: 0 0 0 0.1rem var(--error-bg);
 			}
 		}
 	}
@@ -129,17 +130,17 @@
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
-		padding: 0.5rem 1rem;
-		background: #dc2626;
-		color: white;
+		padding: 0.6rem 1rem;
+		background: var(--error);
+		color: var(--tertiary-text);
 		border: none;
-		border-radius: 0.375rem;
-		font-size: 0.875rem;
+		border-radius: 0.4rem;
+		font-size: 0.9rem;
 		font-weight: 500;
 		cursor: pointer;
 
 		&:hover {
-			background: #b91c1c;
+			background: var(--error-strong-hover);
 		}
 	}
 

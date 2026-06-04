@@ -1,23 +1,18 @@
 <script lang="ts">
-	import CommonForm from '$components/CommonForm.svelte';
-
 	import type { ActionResult } from '@sveltejs/kit';
+
+	import CommonForm from '$components/CommonForm.svelte';
 
 	let formResult = $state<ActionResult | null>(null);
 	let courseIdInput = $state<HTMLInputElement | null>(null);
 	let courseNameInput = $state<HTMLInputElement | null>(null);
 	let courseContentInput = $state<HTMLTextAreaElement | null>(null);
+
 	$effect(() => {
 		if (formResult?.type === 'success') {
-			if (courseIdInput) {
-				courseIdInput.value = '';
-			}
-			if (courseNameInput) {
-				courseNameInput.value = '';
-			}
-			if (courseContentInput) {
-				courseContentInput.value = '';
-			}
+			if (courseIdInput) courseIdInput.value = '';
+			if (courseNameInput) courseNameInput.value = '';
+			if (courseContentInput) courseContentInput.value = '';
 		}
 	});
 </script>
@@ -34,13 +29,7 @@
 				bind:this={courseIdInput}
 			/>
 			<label for="name">강의명</label>
-			<input
-				type="text"
-				id="name"
-				name="name"
-				placeholder="예: 공학 미적분학 I"
-				bind:this={courseNameInput}
-			/>
+			<input type="text" id="name" name="name" placeholder="예: 공학 미적분학 I" bind:this={courseNameInput} />
 			<label for="content">강의 내용</label>
 			<textarea
 				id="content"
@@ -48,13 +37,13 @@
 				placeholder="강의에 대한 간략한 설명을 입력하세요"
 				bind:this={courseContentInput}
 			></textarea>
-			<div class="right-align">
+			<div class="form-actions">
 				<button type="submit" class="btn-action">추가하기</button>
 			</div>
 		</div>
 	</CommonForm>
 	{#if formResult?.type === 'success'}
-		<p>✅ 강의가 추가되었습니다.</p>
+		<p>강의가 추가되었습니다.</p>
 	{/if}
 </section>
 
@@ -69,7 +58,7 @@
 
 		input,
 		textarea {
-			width: stretch;
+			width: 100%;
 			margin-bottom: 0.5rem;
 		}
 
@@ -78,8 +67,10 @@
 			resize: vertical;
 		}
 
-		.right-align {
-			margin-top: 0rem;
+		.form-actions {
+			width: 100%;
+			display: flex;
+			justify-content: flex-end;
 		}
 
 		.btn-action {

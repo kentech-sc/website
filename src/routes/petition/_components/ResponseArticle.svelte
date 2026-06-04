@@ -1,82 +1,38 @@
 <script lang="ts">
 	import CommonForm from '$components/CommonForm.svelte';
 
-	import type { ActionResult } from '@sveltejs/kit';
-	import { PetitionStatus, type Petition } from '$lib/types/petition.type.js';
-	import type { User } from '$lib/types/user.type.js';
+	import {
+		PetitionStatus,
+		type Petition,
+		type PetitionPermissions
+	} from '$lib/types/petition.type.js';
 
-	import * as CommonUtils from '$lib/common/utils.js';
-	import * as UserService from '$lib/srv/user.srv.js';
+	import { parseDate } from '$lib/shared/utils.js';
 
-	let { petition = $bindable<Petition>(), user }: { petition: Petition; user: User } = $props();
+	let { petition, permissions }: { petition: Petition; permissions: PetitionPermissions } =
+		$props();
 
-	let isEditing = $state<boolean>(false);
-	let formResult = $state<ActionResult | null>(null);
+	let isEditing = $state(false);
 
-	$effect(() => {
-		if (formResult?.type === 'success') {
-			const updatedPetition = JSON.parse(formResult.data?.petition ?? '{}');
-			petition.status = updatedPetition.status;
-			isEditing = false;
-			petition.answeredAt = updatedPetition.answeredAt;
-			petition.response = updatedPetition.response;
-			petition.responderId = updatedPetition.responderId;
-			const displayName = UserService.createDisplayName(user, 'realName');
-			petition.responderName = updatedPetition.responderId ? displayName : null;
-		}
-	});
+	function endEditing() {
+		isEditing = false;
+	}
 </script>
-
-{#snippet ReviewBtn()}
-	<CommonForm actionName="reviewPetition" formName="reviewPetition" bind:formResult>
-		<input type="hidden" name="petition-id" value={petition._id} />
-		<button type="submit">검토하기</button>
-	</CommonForm>
-{/snippet}
-
-{#snippet UnreviewBtn()}
-	<CommonForm actionName="unreviewPetition" formName="unreviewPetition" bind:formResult>
-		<input type="hidden" name="petition-id" value={petition._id} />
-		<button type="submit">검토 취소하기</button>
-	</CommonForm>
-{/snippet}
 
 {#snippet ResponseForm(response: string | null)}
 	<CommonForm
 		formName={response ? 'editResponse' : 'responseToPetition'}
 		actionName={response ? 'editResponse' : 'responseToPetition'}
-		bind:formResult
+		policy={{ kind: 'detail', notFoundRedirectTo: '/petition' }}
+		afterSuccess={endEditing}
+		afterConflict={endEditing}
 	>
 		<input type="hidden" name="petition-id" value={petition._id} />
 		<label for="response">답변</label>
-		<textarea id="response" name="response">{response}</textarea>
+		<textarea id="response" name="response">{response ?? ''}</textarea>
 		<br />
 		<button type="submit">{response ? '수정하기' : '답변하기'}</button>
 	</CommonForm>
-{/snippet}
-
-{#snippet ResponseArticle()}
-	<article>
-		<header class="container">
-			<div class="container-col">
-				<h2><span style="color: purple">[답변]</span> {petition.title}</h2>
-				<p>
-					{petition.responderName} | {CommonUtils.parseDate(petition.answeredAt!)}
-				</p>
-			</div>
-			{#if petition.responderId === user._id}
-				<button id="edit-btn" type="submit" onclick={() => (isEditing = true)}>수정</button>
-				<div class="delete-form">
-					<CommonForm actionName="deleteResponse" formName="deleteResponse" bind:formResult>
-						<input type="hidden" name="petition-id" value={petition._id} />
-						<button type="submit">삭제</button>
-					</CommonForm>
-				</div>
-			{/if}
-		</header>
-		<hr />
-		<pre>{petition.response}</pre>
-	</article>
 {/snippet}
 
 <section class="container-col module" id="response-section">
@@ -84,17 +40,61 @@
 		{#if isEditing}
 			{@render ResponseForm(petition.response)}
 		{:else}
-			{@render ResponseArticle()}
+			<article>
+				<header class="container">
+					<div class="container-col">
+						<h2><span style="color: purple">[답변]</span> {petition.title}</h2>
+						<p>{petition.responderName} | {parseDate(petition.answeredAt)}</p>
+					</div>
+					{#if permissions.canEditResponse}
+						<button class="edit-button" type="button" onclick={() => (isEditing = true)}>수정</button>
+					{/if}
+					{#if permissions.canDeleteResponse}
+						<div class="delete-form">
+							<CommonForm
+								actionName="deleteResponse"
+								formName="deleteResponse"
+								policy={{ kind: 'detail', notFoundRedirectTo: '/petition' }}
+							>
+								<input type="hidden" name="petition-id" value={petition._id} />
+								<button type="submit">삭제</button>
+							</CommonForm>
+						</div>
+					{/if}
+				</header>
+				<hr />
+				<pre>{petition.response}</pre>
+			</article>
 		{/if}
-	{:else if petition.status === PetitionStatus.Pending}
-		{@render ReviewBtn()}
+	{:else if petition.status === PetitionStatus.Pending && permissions.canReview}
+		<CommonForm
+			actionName="reviewPetition"
+			formName="reviewPetition"
+			policy={{ kind: 'detail', notFoundRedirectTo: '/petition' }}
+			afterConflict={endEditing}
+		>
+			<input type="hidden" name="petition-id" value={petition._id} />
+			<button type="submit">검토하기</button>
+		</CommonForm>
 	{:else if petition.status === PetitionStatus.Reviewing}
-		{@render UnreviewBtn()}
-		<br />
-		<hr />
-		{@render ResponseForm(null)}
+		{#if permissions.canUnreview}
+			<CommonForm
+				actionName="unreviewPetition"
+				formName="unreviewPetition"
+				policy={{ kind: 'detail', notFoundRedirectTo: '/petition' }}
+				afterConflict={endEditing}
+			>
+				<input type="hidden" name="petition-id" value={petition._id} />
+				<button type="submit">검토 취소하기</button>
+			</CommonForm>
+		{/if}
+		{#if permissions.canRespond}
+			<br />
+			<hr />
+			{@render ResponseForm(null)}
+		{/if}
 	{:else if petition.status === PetitionStatus.Ongoing}
-		<p>30명 이상이 동의하면 학생회가 검토 후 답변합니다.</p>
+		<p>30명 이상이 동의하면 학생회가 검토하고 답변합니다.</p>
 	{:else if petition.status === PetitionStatus.Expired}
 		<p>청원 기간이 만료되었습니다.</p>
 	{/if}
@@ -102,16 +102,16 @@
 
 <style lang="scss">
 	article {
-		width: stretch;
+		width: 100%;
 
 		header > div {
-			width: stretch;
+			width: 100%;
 			align-items: flex-start;
 		}
 	}
 
-	#edit-btn {
-		margin-right: 0.5rem;
+	.edit-button {
+		margin-right: 0.6rem;
 	}
 
 	.delete-form {

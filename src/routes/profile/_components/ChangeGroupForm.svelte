@@ -1,14 +1,15 @@
 <script lang="ts">
-	import CommonForm from '$components/CommonForm.svelte';
-	import Users from '@lucide/svelte/icons/users';
-	import type { ActionResult } from '@sveltejs/kit';
 	import { invalidateAll } from '$app/navigation';
+	import type { ActionResult } from '@sveltejs/kit';
+	import Users from '@lucide/svelte/icons/users';
+
+	import CommonForm from '$components/CommonForm.svelte';
 
 	let formResult = $state<ActionResult | null>(null);
 
 	$effect(() => {
 		if (formResult?.type === 'success') {
-			alert('권한이 변경되었습니다!');
+			alert('권한이 변경되었습니다.');
 			invalidateAll();
 		}
 	});
@@ -47,23 +48,23 @@
 
 <style lang="scss">
 	.form-block {
-		margin-top: 1.5rem;
+		margin-top: 1.6rem;
 		display: flex;
 		flex-direction: column;
 		gap: 1rem;
 		padding: 1rem;
-		background: #f9fafb;
-		border: 1px solid #e5e7eb;
-		border-radius: 0.375rem;
+		background: var(--gray-bg);
+		border: 0.1rem solid var(--gray-border);
+		border-radius: 0.4rem;
 	}
 
 	.form-header {
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
-		color: #374151;
+		color: var(--text);
 		font-weight: 600;
-		font-size: 0.95rem;
+		font-size: 1rem;
 	}
 
 	.form-content {
@@ -78,29 +79,30 @@
 		gap: 0.5rem;
 
 		label {
-			font-size: 0.875rem;
-			color: #6b7280;
+			font-size: 0.9rem;
+			color: var(--gray-text);
 			font-weight: 500;
 		}
 
 		input,
 		select {
-			height: 2.5rem;
-			padding: 0.5rem 0.75rem;
-			border: 1px solid #d1d5db;
-			border-radius: 0.375rem;
-			background: white;
-			color: #1f2937;
-			font-size: 0.875rem;
+			height: 2.6rem;
+			padding: 0.5rem 0.8rem;
+			border: 0.1rem solid var(--gray-border);
+			border-radius: 0.4rem;
+			background: var(--surface-base);
+			color: var(--text);
+			font-size: 0.9rem;
 
 			&:focus {
 				outline: none;
-				border-color: #3b82f6;
-				box-shadow: 0 0 0 1px #3b82f6;
+				border-color: var(--secondary);
+				box-shadow: 0 0 0 0.1rem var(--secondary-bg);
 			}
 
 			&::placeholder {
-				color: #9ca3af;
+				color: var(--gray-text);
+				opacity: 0.7;
 			}
 		}
 	}
@@ -109,17 +111,17 @@
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
-		padding: 0.5rem 1rem;
-		background: #f59e0b;
-		color: white;
+		padding: 0.6rem 1rem;
+		background: var(--warn);
+		color: var(--tertiary-text);
 		border: none;
-		border-radius: 0.375rem;
-		font-size: 0.875rem;
+		border-radius: 0.4rem;
+		font-size: 0.9rem;
 		font-weight: 500;
 		cursor: pointer;
 
 		&:hover {
-			background: #d97706;
+			background: var(--warn-strong-hover);
 		}
 	}
 

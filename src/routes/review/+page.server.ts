@@ -1,45 +1,40 @@
-import { Types } from 'mongoose';
+import { withLoadErrorHandling } from '$lib/server/errors.js';
+import * as ReviewUsecase from '$lib/usecase/review.usecase.js';
 
-import * as ReviewApplication from '$lib/app/review.app.js';
-
-import * as ReviewService from '$lib/srv/review.srv.js';
-import * as CourseService from '$lib/srv/course.srv.js';
-import * as ProfessorService from '$lib/srv/prof.srv.js';
-
-import { withLoadErrorHandling } from '$lib/common/errors.js';
-
-export const load = withLoadErrorHandling(async ({ url }) => {
-	const fromIdRaw = url.searchParams.get('from');
-	const fromId = fromIdRaw ? new Types.ObjectId(fromIdRaw) : undefined;
-
-	const toIdRaw = url.searchParams.get('to');
-	const toId = toIdRaw ? new Types.ObjectId(toIdRaw) : undefined;
-
+export const load = withLoadErrorHandling(async ({ url, locals }) => {
 	const courseIdRaw = url.searchParams.get('course');
 	const courseId = courseIdRaw ?? undefined;
 
 	const professorIdRaw = url.searchParams.get('professor');
-	const professorId = professorIdRaw ? new Types.ObjectId(professorIdRaw) : undefined;
+	const professorId = professorIdRaw ?? undefined;
 
-	const limit = 10;
-
-	const reviewsResult = await ReviewService.getReviews(limit, {
-		fromId,
-		toId,
+	const page = Math.max(1, Number(url.searchParams.get('page') ?? '1') || 1);
+	const reviewsResult = await ReviewUsecase.getReviewPageView(
+		page,
+		locals.user,
 		courseId,
 		professorId
-	});
-	const reviewsRaw = reviewsResult.pageItems;
-	const reviews = await ReviewApplication.fillReviews(reviewsRaw);
+	);
+	const { courses, professors } = await ReviewUsecase.getReviewFormOptions();
 
-	const courses = await CourseService.getAllCourses();
-	const professors = await ProfessorService.getAllProfessors();
+	const buildHref = (targetPage: number) => {
+		const params = new URLSearchParams();
+		if (courseId) params.set('course', courseId);
+		if (professorId) params.set('professor', professorId);
+		if (targetPage > 1) params.set('page', String(targetPage));
+		const query = params.toString();
+		return query ? `/review?${query}` : '/review';
+	};
 
 	return {
-		reviews: JSON.stringify(reviews),
-		fromId: reviewsResult.fromId?.toString(),
-		toId: reviewsResult.toId?.toString(),
-		courses: JSON.stringify(courses),
-		professors: JSON.stringify(professors)
+		reviews: reviewsResult.reviews,
+		prevHref: reviewsResult.hasPrev ? buildHref(page - 1) : undefined,
+		nextHref: reviewsResult.hasNext ? buildHref(page + 1) : undefined,
+		courses,
+		professors,
+		courseId,
+		professorId,
+		canCreateReview: reviewsResult.canCreateReview,
+		canManageCatalog: reviewsResult.canManageCatalog
 	};
 });

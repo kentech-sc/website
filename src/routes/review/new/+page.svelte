@@ -1,13 +1,13 @@
 <script lang="ts">
 	import type { Course } from '$lib/types/course.type.js';
-	import type { Professor } from '$lib/types/prof.type.js';
+	import type { Professor } from '$lib/types/professor.type.js';
 
 	import ReviewForm from '../_components/ReviewForm.svelte';
 	import ReviewHeader from '../_components/ReviewHeader.svelte';
 
 	let { data } = $props();
-	let courses = $state<Course[]>(JSON.parse(data.courses ?? '[]'));
-	let professors = $state<Professor[]>(JSON.parse(data.professors ?? '[]'));
+	const courses = $derived<Course[]>(data.courses);
+	const professors = $derived<Professor[]>(data.professors);
 </script>
 
 <ReviewHeader pageType="new" />

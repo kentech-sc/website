@@ -6,9 +6,11 @@
 	import BoardHeader from '../../_components/BoardHeader.svelte';
 
 	let { data } = $props();
-	const post = $derived<Post>(JSON.parse(data?.post ?? '{}'));
-	const fileMetas = $derived<Array<FileMeta>>(JSON.parse(data?.files ?? '[]'));
+	const post = $derived<Post>(data.post);
+	const fileMetas = $derived<Array<FileMeta>>(data.files);
 </script>
 
 <BoardHeader pageType="edit" />
-<BoardForm {post} {fileMetas} />
+{#key post._id}
+	<BoardForm {post} {fileMetas} />
+{/key}

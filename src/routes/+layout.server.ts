@@ -1,7 +1,10 @@
 import type { ServerLoadEvent } from '@sveltejs/kit';
 
-export const load = async ({ locals }: ServerLoadEvent): Promise<{ user: string }> => {
+import { consumeServerFlash } from '$lib/server/flash.js';
+
+export const load = async ({ locals, cookies }: ServerLoadEvent) => {
 	return {
-		user: JSON.stringify(locals.user)
+		user: locals.user,
+		flash: consumeServerFlash(cookies)
 	};
 };

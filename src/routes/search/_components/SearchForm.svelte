@@ -15,8 +15,9 @@
 
 <style lang="scss">
 	#form-div {
-		width: stretch;
+		width: 100%;
 		align-items: flex-start;
+
 		input {
 			width: 50%;
 			padding: 0.3rem 0.6rem;

@@ -1,5 +1,3 @@
-import type { UpdateQuery } from 'mongoose';
-
 export type CourseId = string;
 
 export interface CourseCreate {
@@ -8,8 +6,8 @@ export interface CourseCreate {
 	content: string;
 }
 
-export type CourseDoc = CourseCreate;
+export type CourseEntity = CourseCreate;
 
-export type Course = CourseDoc;
+export type Course = CourseEntity;
 
-export type CourseUpdate = UpdateQuery<Pick<CourseDoc, 'name' | 'content'>>;
+export type CourseUpdate = Partial<Pick<CourseEntity, 'name' | 'content'>>;

@@ -1,71 +1,48 @@
-import * as CourseService from '$lib/srv/course.srv.js';
-import * as ProfessorService from '$lib/srv/prof.srv.js';
-import * as ReviewService from '$lib/srv/review.srv.js';
-
 import { fail, redirect } from '@sveltejs/kit';
-import { Types } from 'mongoose';
-
-import { withActionErrorHandling, withLoadErrorHandling } from '$lib/common/errors.js';
 
 import type { CourseId } from '$lib/types/course.type.js';
-import type { ProfessorId } from '$lib/types/prof.type.js';
+import type { ProfessorId } from '$lib/types/professor.type.js';
+import type { ReviewId } from '$lib/types/review.type.js';
+import { withActionErrorHandling, withLoadErrorHandling } from '$lib/server/errors.js';
+import * as ReviewUsecase from '$lib/usecase/review.usecase.js';
 
-import * as ReviewApplication from '$lib/app/review.app.js';
-
-export const load = withLoadErrorHandling(async ({ params }) => {
-	const courses = await CourseService.getAllCourses();
-	const professors = await ProfessorService.getAllProfessors();
-
+export const load = withLoadErrorHandling(async ({ params, locals }) => {
 	const reviewIdRaw = params.reviewId;
-	const reviewId = new Types.ObjectId(reviewIdRaw);
+	if (!reviewIdRaw) throw new Error('리뷰 ID가 필요합니다.');
+	const reviewId: ReviewId = reviewIdRaw;
 
-	const reviewRaw = await ReviewService.getReviewById(reviewId);
-
-	const review = (await ReviewApplication.fillReviews([reviewRaw]))[0];
-
-	return {
-		courses: JSON.stringify(courses),
-		professors: JSON.stringify(professors),
-		review: JSON.stringify(review)
-	};
+	return await ReviewUsecase.getReviewEditData(reviewId, locals.user);
 });
 
 export const actions = {
 	editReview: withActionErrorHandling(async ({ request, locals, params }) => {
 		const reviewIdRaw = params.reviewId;
-		const reviewId = new Types.ObjectId(reviewIdRaw);
+		if (!reviewIdRaw) return fail(400, { message: '리뷰 ID가 필요합니다.' });
+		const reviewId: ReviewId = reviewIdRaw;
 
 		const formData = await request.formData();
-
 		const courseIdRaw = (formData.get('courseId') ?? '').toString();
-		const courseId: CourseId = courseIdRaw;
-
 		const professorIdRaw = (formData.get('professorId') ?? '').toString();
-		const professorId: ProfessorId = new Types.ObjectId(professorIdRaw);
-
 		const year = Number(formData.get('year'));
 		const term = Number(formData.get('term'));
 		const title = (formData.get('title') ?? '').toString();
-
 		const score = {
 			assignment: Number(formData.get('assignmentScore')),
 			lecture: Number(formData.get('lectureScore')),
 			exam: Number(formData.get('examScore')),
 			satisfaction: Number(formData.get('satisfactionScore'))
 		};
-
 		const comment = (formData.get('comment') ?? '').toString();
 
-		if (!courseId || !professorId || !year || !term || !title || !score || !comment)
-			return fail(400, {
-				message: 'courseId, professorId, year, term, title, score, comment are required'
-			});
+		if (!courseIdRaw || !professorIdRaw || !year || !term || !title || !score || !comment) {
+			return fail(400, { message: '강의, 교수, 연도, 학기, 제목, 점수, 내용은 필수입니다.' });
+		}
 
-		const review = await ReviewService.editReviewById(
+		const review = await ReviewUsecase.editReview(
 			reviewId,
 			{
-				courseId,
-				professorId,
+				courseId: courseIdRaw as CourseId,
+				professorId: professorIdRaw as ProfessorId,
 				year,
 				term,
 				title,
@@ -74,6 +51,6 @@ export const actions = {
 			},
 			locals.user
 		);
-		redirect(302, '/review/' + review._id);
+		throw redirect(302, '/review/' + review._id);
 	})
 };

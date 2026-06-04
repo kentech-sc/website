@@ -1,11 +1,11 @@
 import mongoose from 'mongoose';
-import { PetitionStatus, type PetitionDoc } from '$lib/types/petition.type.js';
+import { PetitionStatus, type PetitionEntity } from '$lib/types/petition.type.js';
 
-const PetitionSchema = new mongoose.Schema(
+const PetitionSchema = new mongoose.Schema<PetitionEntity>(
 	{
 		title: { type: String, required: true },
 		content: { type: String, required: true },
-		status: { type: String, default: PetitionStatus.Ongoing },
+		status: { type: String, default: PetitionStatus.Ongoing, enum: Object.values(PetitionStatus) },
 		viewCnt: { type: Number, default: 0 },
 		signedBy: { type: [String], default: [] },
 		petitionerId: { type: String, required: true },
@@ -20,4 +20,4 @@ const PetitionSchema = new mongoose.Schema(
 
 PetitionSchema.index({ title: 'text', content: 'text', response: 'text' });
 
-export const PetitionModel = mongoose.model<PetitionDoc>('Petition', PetitionSchema);
+export const PetitionModel = mongoose.model('Petition', PetitionSchema);

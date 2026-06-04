@@ -1,15 +1,14 @@
 <script lang="ts">
-	import CommonForm from '$components/CommonForm.svelte';
-
 	import type { ActionResult } from '@sveltejs/kit';
+
+	import CommonForm from '$components/CommonForm.svelte';
 
 	let formResult = $state<ActionResult | null>(null);
 	let profNameInput = $state<HTMLInputElement | null>(null);
+
 	$effect(() => {
-		if (formResult?.type === 'success') {
-			if (profNameInput) {
-				profNameInput.value = '';
-			}
+		if (formResult?.type === 'success' && profNameInput) {
+			profNameInput.value = '';
 		}
 	});
 </script>
@@ -25,13 +24,13 @@
 				placeholder="교수님 성함을 입력하세요 (예: 홍길동)"
 				bind:this={profNameInput}
 			/>
-			<div class="right-align">
+			<div class="form-actions">
 				<button type="submit" class="btn-action">추가하기</button>
 			</div>
 		</div>
 	</CommonForm>
 	{#if formResult?.type === 'success'}
-		<p>✅ 교수님이 추가되었습니다.</p>
+		<p>교수님이 추가되었습니다.</p>
 	{/if}
 </section>
 
@@ -45,12 +44,14 @@
 		}
 
 		input {
-			width: stretch;
+			width: 100%;
 			margin-bottom: 0.5rem;
 		}
 
-		.right-align {
-			margin-top: 0rem;
+		.form-actions {
+			width: 100%;
+			display: flex;
+			justify-content: flex-end;
 		}
 
 		.btn-action {

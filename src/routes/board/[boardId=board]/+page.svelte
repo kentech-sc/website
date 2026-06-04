@@ -5,11 +5,12 @@
 	import BoardList from './_components/BoardList.svelte';
 
 	let { data } = $props();
-	const posts = $derived<Post[]>(JSON.parse(data?.posts ?? '[]'));
-	const filePresence = $derived(JSON.parse(data?.filePresence ?? '{}'));
-	const fromId = $derived<string | undefined>(data.fromId ?? undefined);
-	const toId = $derived<string | undefined>(data.toId ?? undefined);
+	const posts = $derived<Post[]>(data.posts);
+	const filePresence = $derived(data.filePresence);
+	const prevHref = $derived<string | undefined>(data.prevHref);
+	const nextHref = $derived<string | undefined>(data.nextHref);
+	const canCreatePost = $derived<boolean>(data.canCreatePost);
 </script>
 
-<BoardHeader pageType="list" />
-<BoardList {posts} {filePresence} {toId} {fromId} />
+<BoardHeader pageType="list" {canCreatePost} />
+<BoardList {posts} {filePresence} {prevHref} {nextHref} />

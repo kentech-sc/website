@@ -5,8 +5,8 @@
 </script>
 
 <div>
-	<h2>에러가 발생했습니다...</h2>
-	<p>발생 경위와 아래의 메시지를 캡쳐해 보내주시면 큰 도움이 됩니다.</p>
+	<h2>오류가 발생했습니다.</h2>
+	<p>문제가 계속되면 아래 메시지와 함께 관리자에게 알려 주세요.</p>
 	{#if error}
 		<p><span style="color: red">[{error.status}]</span> {error.message}</p>
 	{/if}

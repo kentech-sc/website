@@ -1,5 +1,3 @@
-import type { UpdateQuery } from 'mongoose';
-
 export const UserGroup = {
 	Guest: 'guest',
 	User: 'user',
@@ -33,16 +31,19 @@ export interface UserCreate {
 	realName: string;
 	nickname: string;
 	group: UserGroup;
+	points: number;
 }
 
-export interface UserDoc extends UserCreate {
-	createdAt: Date;
-	updatedAt: Date;
+export interface UserEntity extends UserCreate {
+	createdAt: string;
+	updatedAt: string;
 
-	blockedUntil: Date | null;
-	deletedAt: Date | null;
+	blockedUntil: string | null;
+	deletedAt: string | null;
 }
 
-export type User = UserDoc;
+export type User = UserEntity;
 
-export type UserUpdate = UpdateQuery<Pick<UserDoc, 'nickname' | 'group' | 'deletedAt'>>;
+export type UserUpdate = Partial<
+	Pick<UserEntity, 'email' | 'nickname' | 'group' | 'deletedAt' | 'points' | 'blockedUntil'>
+>;

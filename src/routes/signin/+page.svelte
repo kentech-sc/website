@@ -1,4 +1,4 @@
-<script lang="ts">
+﻿<script lang="ts">
 	import GoogleModule from './_components/GoogleModule.svelte';
 </script>
 
@@ -13,7 +13,8 @@
 	}
 
 	section {
-		width: stretch;
+		width: 100%;
 		height: 50vh;
 	}
 </style>
+

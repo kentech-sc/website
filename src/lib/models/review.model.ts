@@ -1,10 +1,10 @@
 import mongoose from 'mongoose';
-import type { ReviewDoc } from '$lib/types/review.type.js';
+import type { ReviewEntity } from '$lib/types/review.type.js';
 
-const ReviewSchema = new mongoose.Schema<ReviewDoc>(
+const ReviewSchema = new mongoose.Schema<ReviewEntity>(
 	{
 		courseId: { type: String, required: true },
-		professorId: { type: mongoose.Schema.Types.ObjectId, required: true },
+		professorId: { type: String, required: true },
 		userId: { type: String, required: true },
 		year: { type: Number, required: true },
 		term: { type: Number, required: true },
@@ -24,4 +24,4 @@ const ReviewSchema = new mongoose.Schema<ReviewDoc>(
 
 ReviewSchema.index({ title: 'text', comment: 'text' });
 
-export const ReviewModel = mongoose.model<ReviewDoc>('Review', ReviewSchema);
+export const ReviewModel = mongoose.model('Review', ReviewSchema);

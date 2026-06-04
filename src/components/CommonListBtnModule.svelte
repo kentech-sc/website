@@ -1,18 +1,18 @@
 <script lang="ts">
-	let { pageName, toId, fromId }: { pageName: string; toId?: string; fromId?: string } = $props();
+	let { prevHref, nextHref }: { prevHref?: string; nextHref?: string } = $props();
 </script>
 
 {#snippet PrevBtn()}
-	{#if toId}
-		<a href={`/${pageName}?to=${toId}`} class="btn-anchor">이전</a>
+	{#if prevHref}
+		<a href={prevHref} class="btn-anchor">이전</a>
 	{:else}
 		<span class="btn-anchor-disabled">이전</span>
 	{/if}
 {/snippet}
 
 {#snippet NextBtn()}
-	{#if fromId}
-		<a href={`/${pageName}?from=${fromId}`} class="btn-anchor">다음</a>
+	{#if nextHref}
+		<a href={nextHref} class="btn-anchor">다음</a>
 	{:else}
 		<span class="btn-anchor-disabled">다음</span>
 	{/if}
