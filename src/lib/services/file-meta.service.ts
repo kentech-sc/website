@@ -1,4 +1,4 @@
-import type { FileId, FileMeta, FileMetaEntity } from '$lib/types/file-meta.type.js';
+import type { FileId, FileMeta, FileMetaCreate, FileMetaEntity } from '$lib/types/file-meta.type.js';
 import type { PetitionId } from '$lib/types/petition.type.js';
 import type { PostId } from '$lib/types/post.type.js';
 import type { User } from '$lib/types/user.type.js';
@@ -11,7 +11,7 @@ import * as FileMetaRepository from '$lib/repositories/file-meta.repository.js';
 import * as FileMetaRule from '$lib/rules/file-meta.rule.js';
 
 function toFileMeta(fileMetaEntity: FileMetaEntity): FileMeta {
-	const path = FileStorage.getFilePathFromKey(fileMetaEntity.key);
+	const path = FileStorage.getUrl(fileMetaEntity.key);
 	return {
 		...fileMetaEntity,
 		path
@@ -35,13 +35,20 @@ export async function getFileMetasByArticleId(articleId: PostId | PetitionId): P
 }
 
 export async function uploadFile(file: File): Promise<FileMeta> {
-	const fileMetaCreate = await FileStorage.uploadFileToStorage(file);
+	const uploadResult = await FileStorage.upload(file);
+	const fileMetaCreate: FileMetaCreate = {
+		key: uploadResult.key,
+		name: uploadResult.filename,
+		size: file.size,
+		mime: uploadResult.contentType,
+		ext: uploadResult.extension,
+	};
 
 	try {
 		const fileMeta = await FileMetaRepository.createFileMeta(fileMetaCreate);
 		return toFileMeta(fileMeta);
 	} catch (error) {
-		await FileStorage.deleteFileFromStorage(fileMetaCreate.key);
+		await FileStorage.remove(fileMetaCreate.key);
 		throw error;
 	}
 }
@@ -57,7 +64,7 @@ export async function deleteFileById(fileId: FileId): Promise<FileMeta> {
 	if (!isDeleted) throw new AppError(APP_ERROR.NOT_FOUND, '이미 삭제된 파일입니다.');
 
 	try {
-		await FileStorage.deleteFileFromStorage(fileMeta.key);
+		await FileStorage.remove(fileMeta.key);
 		return fileMeta;
 	} catch (error) {
 		await FileMetaRepository.createFileMeta(fileMeta);
@@ -91,7 +98,7 @@ export async function cleanupOrphanedFiles(olderThanHours = 24, user: User): Pro
 	const deleteResults = await Promise.all(
 		orphanedFiles.map(async (file) => {
 			try {
-				await FileStorage.deleteFileFromStorage(file.key);
+				await FileStorage.remove(file.key);
 				return file._id;
 			} catch (err) {
 				console.error(`S3 delete failed: ${file.key}`, err);

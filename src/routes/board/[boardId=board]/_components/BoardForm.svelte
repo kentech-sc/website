@@ -89,8 +89,8 @@
 	<FileList bind:fileMetas={attachments} isEditing={true} />
 
 	<p id="file-description">
-		용량이 30MB 이하인 파일만 업로드 가능합니다.<br />허용 확장자: PNG, JPG(JPEG), WEBP, SVG, PDF,
-		DOCX, XLSX
+		용량이 30MB 이하인 파일만 업로드 가능합니다.<br />허용 확장자: PNG, JPG(JPEG), WEBP, PDF,
+		DOCX, XLSX 등
 	</p>
 
 	<div class="form-actions">

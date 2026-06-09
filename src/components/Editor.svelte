@@ -27,12 +27,20 @@
 	import { CustomImage } from './CustomImage.js';
 	import { SvelteSet } from 'svelte/reactivity';
 
+	type SelectionHint = { from: number; to: number };
+	const IMAGE_INSERTION_FAILURE_MESSAGE = '이미지 업로드는 완료됐지만 본문 삽입에 실패했습니다.';
+	const PASTE_IMAGE_BLOCK_MESSAGE = '이미지는 업로드 버튼으로만 추가할 수 있습니다.';
+
 	let element = $state<HTMLElement>();
 	let real_editor = $state.raw<Editor | undefined>();
 	let headingLevel = $state('');
 	let fontSize = $state('16px');
 	let textColor = $state('#000000');
 	let textAlign = $state('left');
+	let editorNotice = $state<string | null>(null);
+	let noticeTimer: ReturnType<typeof setTimeout> | undefined;
+	let fileUploadInput = $state<HTMLInputElement>();
+	let pendingImageInsertSelection = $state<SelectionHint | null>(null);
 
 	let {
 		attachments = $bindable<FileMeta[]>([]),
@@ -41,17 +49,114 @@
 		initialHtml = ''
 	} = $props();
 
+	function showEditorNotice(message: string) {
+		editorNotice = message;
+		if (noticeTimer) clearTimeout(noticeTimer);
+		noticeTimer = setTimeout(() => {
+			editorNotice = null;
+			noticeTimer = undefined;
+		}, 4000);
+	}
+
+	function capturePendingImageInsertSelection() {
+		if (real_editor?.isFocused) {
+			const selection = real_editor.state.selection;
+			pendingImageInsertSelection = { from: selection.from, to: selection.to };
+		} else {
+			pendingImageInsertSelection = null;
+		}
+	}
+
+	function handleUploadButtonMouseDown(event: MouseEvent) {
+		capturePendingImageInsertSelection();
+		event.preventDefault();
+	}
+
+	function prepareFileUpload() {
+		capturePendingImageInsertSelection();
+
+		if (fileUploadInput) {
+			fileUploadInput.value = '';
+			fileUploadInput.click();
+		}
+	}
+
+	function createImageAttrs(fileMeta: FileMeta) {
+		return {
+			src: fileMeta.path,
+			alt: fileMeta.name,
+			fileId: fileMeta._id.toString()
+		};
+	}
+
+	function insertUploadedImages(
+		editor: Editor,
+		fileMetas: FileMeta[],
+		selectionHint: SelectionHint | null,
+		preferEndInsertion = false
+	): boolean {
+		if (fileMetas.length === 0) return true;
+
+		const imageContents = fileMetas.map((fileMeta) => ({
+			type: 'image',
+			attrs: createImageAttrs(fileMeta)
+		}));
+
+		if (
+			selectionHint &&
+			editor.chain().focus().setTextSelection(selectionHint).insertContent(imageContents).run()
+		) {
+			return true;
+		}
+
+		if (!preferEndInsertion && editor.chain().focus().insertContent(imageContents).run()) {
+			return true;
+		}
+
+		if (editor.chain().focus('end').insertContent(imageContents).run()) {
+			return true;
+		}
+
+		const imageType = editor.state.schema.nodes.image;
+		if (!imageType) return false;
+
+		try {
+			let insertPosition = editor.state.doc.content.size;
+			let transaction = editor.state.tr;
+
+			for (const fileMeta of fileMetas) {
+				const imageNode = imageType.create(createImageAttrs(fileMeta));
+				transaction = transaction.insert(insertPosition, imageNode);
+				insertPosition += imageNode.nodeSize;
+			}
+
+			editor.view.dispatch(transaction.scrollIntoView());
+			editor.commands.focus('end');
+			return true;
+		} catch (error) {
+			console.error('Image insert failed:', error);
+			return false;
+		}
+	}
+
 	// 파일 업로드 함수
 	async function handleFileUpload(event: Event) {
 		const target = event.target as HTMLInputElement;
 		const files = Array.from(target.files ?? []);
-		if (!files.length) return;
+		if (!files.length) {
+			pendingImageInsertSelection = null;
+			return;
+		}
 
 		const formData = new FormData();
-		files.forEach((f) => formData.append('files', f));
+		files.forEach((file) => formData.append('files', file));
+
+		const selectionHint = pendingImageInsertSelection;
+		const preferEndInsertion = selectionHint === null;
+		pendingImageInsertSelection = null;
 
 		try {
-			if (files.some((f) => f.size > 1 * 1024 * 1024)) {
+			if (files.some((file) => file.size > 1 * 1024 * 1024)) {
 				alert('용량이 큰 파일은 오래 걸릴 수 있습니다.');
 			}
 
@@ -62,46 +167,54 @@
 			if (res.type === 'failure') {
 				alert(`파일 업로드 실패: ${res.data!.message}`);
 				return;
-			} else if (res.type === 'error') {
+			}
+
+			if (res.type === 'error') {
 				alert(`파일 업로드 실패: ${res.error!.message}`);
 				return;
-			} else if (res.type === 'redirect') {
+			}
+
+			if (res.type === 'redirect') {
 				return;
 			}
 
 			const uploadedFileMetas = res.data!.fileMetas as FileMeta[];
+			const uploadedImageMetas = uploadedFileMetas.filter((fileMeta) =>
+				fileMeta.mime.startsWith('image/')
+			);
+			const uploadedAttachments = uploadedFileMetas.filter(
+				(fileMeta) => !fileMeta.mime.startsWith('image/')
+			);
 
-			// 업로드된 파일들 처리
-			for (const fileMeta of uploadedFileMetas) {
-				if (fileMeta.mime.startsWith('image/')) {
-					// 이미지 파일: CustomImage를 사용하여 fileId와 함께 삽입
-					const imageUrl = fileMeta.path;
-					if (real_editor) {
-						real_editor
-							.chain()
-							.focus()
-							.setImage({
-								src: imageUrl,
-								alt: fileMeta.name,
-								// @ts-expect-error - fileId는 CustomImage에서 사용하는 커스텀 속성
-								fileId: fileMeta._id.toString()
-							})
-							.run();
-					}
-				} else {
-					// 비이미지 파일: 바로 attachments에 추가
-					attachments = [...attachments, fileMeta];
-				}
+			if (uploadedAttachments.length > 0) {
+				attachments = [...attachments, ...uploadedAttachments];
+			}
+
+			if (uploadedImageMetas.length === 0) {
+				return;
+			}
+
+			if (!real_editor) {
+				showEditorNotice(IMAGE_INSERTION_FAILURE_MESSAGE);
+				return;
+			}
+
+			const inserted = insertUploadedImages(
+				real_editor,
+				uploadedImageMetas,
+				selectionHint,
+				preferEndInsertion
+			);
+			if (!inserted) {
+				showEditorNotice(IMAGE_INSERTION_FAILURE_MESSAGE);
 			}
 		} catch (error) {
 			console.error('파일 업로드 오류:', error);
 			alert('파일 업로드에 실패했습니다.');
+		} finally {
+			target.value = '';
 		}
-
-		// input 초기화
-		target.value = '';
 	}
-
 	onMount(() => {
 		const instance = new Editor({
 			element: element,
@@ -126,6 +239,27 @@
 				}),
 				StarterKit
 			],
+			editorProps: {
+				handlePaste: (_view, event) => {
+					const clipboardItems = Array.from(event.clipboardData?.items ?? []);
+					const hasPastedImageFile = clipboardItems.some((item) => item.type.startsWith('image/'));
+					const pastedHtml = event.clipboardData?.getData('text/html') ?? '';
+
+					if (!hasPastedImageFile && !pastedHtml) return false;
+
+					const parsedHtml = pastedHtml ? new DOMParser().parseFromString(pastedHtml, 'text/html') : null;
+					const pastedImages = Array.from(parsedHtml?.querySelectorAll('img') ?? []);
+					const hasBlockedHtmlImage = pastedImages.some(
+						(imageElement) => !imageElement.getAttribute('data-file-id')
+					);
+
+					if (!hasPastedImageFile && !hasBlockedHtmlImage) return false;
+
+					event.preventDefault();
+					alert(PASTE_IMAGE_BLOCK_MESSAGE);
+					return true;
+				}
+			},
 			content: initialHtml,
 			onTransaction: () => {
 				// force re-render so `editor.isActive` works as expected
@@ -188,6 +322,7 @@
 	});
 
 	onDestroy(() => {
+		if (noticeTimer) clearTimeout(noticeTimer);
 		real_editor?.destroy();
 	});
 </script>
@@ -348,15 +483,23 @@
 				type="file"
 				multiple
 				accept="image/*,.pdf,.docx,.xlsx"
+				bind:this={fileUploadInput}
 				onchange={handleFileUpload}
 				style="display: none"
-				id="file-upload"
 			/>
-			<button type="button" onclick={() => document.getElementById('file-upload')?.click()}>
+			<button
+				type="button"
+				onmousedown={handleUploadButtonMouseDown}
+				onclick={prepareFileUpload}
+			>
 				<Upload size="1rem" />
 			</button>
 		</div>
 	</div>
+{/if}
+
+{#if editorNotice}
+	<p class="editor-notice" role="alert">{editorNotice}</p>
 {/if}
 
 <div class="nmu" bind:this={element}></div>
@@ -378,6 +521,12 @@
 		margin-bottom: 0.5rem;
 		padding: 0.25rem;
 		background: var(--gray-bg);
+	}
+
+	.editor-notice {
+		margin: 0 0 0.5rem;
+		color: var(--error-text);
+		font-size: 0.85rem;
 	}
 
 	.button-group {

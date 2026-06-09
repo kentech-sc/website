@@ -1,6 +1,6 @@
 import { fail, redirect } from '@sveltejs/kit';
 
-import editorActions from '$lib/server/editor-actions.js';
+import editorActions, { normalizeEditorContent } from '$lib/server/editor.js';
 import type { PostId } from '$lib/types/post.type.js';
 import { DisplayType } from '$lib/types/user.type.js';
 import { withActionErrorHandling, withLoadErrorHandling } from '$lib/server/errors.js';
@@ -33,13 +33,14 @@ export const actions = {
 		}
 		if (!title || !content) return fail(400, { message: '제목과 내용은 필수입니다.' });
 
+		const normalizedEditor = await normalizeEditorContent(content, fileIds);
 		const post = await BoardUsecase.editPost(
 			postId,
 			title,
-			content,
+			normalizedEditor.content,
 			locals.user,
 			displayTypeRaw as DisplayType,
-			fileIds
+			normalizedEditor.fileIds
 		);
 		throw redirect(302, '/board/' + params.boardId + '/' + post._id);
 	}),
