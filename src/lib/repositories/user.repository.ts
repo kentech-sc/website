@@ -89,7 +89,3 @@ export async function deleteUserById(userId: UserId): Promise<boolean> {
 	const deletedUser = await UserModel.findOneAndUpdate({ _id: userId }, deletedUserUpdate).lean();
 	return deletedUser !== null;
 }
-
-export async function setAllUserPoints() {
-	await UserModel.updateMany({}, { points: 50 });
-}

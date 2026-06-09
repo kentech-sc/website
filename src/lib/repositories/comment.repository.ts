@@ -60,11 +60,3 @@ export async function deleteCommentsByPostId(postId: PostId): Promise<boolean> {
 	const res = await CommentModel.deleteMany({ postId });
 	return res.deletedCount > 0;
 }
-
-export async function convertPostIdsToString() {
-	const comments = (await CommentModel.find().lean()).map(comment => {
-		comment.postId = comment.postId.toString();
-		return comment;
-	});
-	await Promise.all(comments.map(comment => CommentModel.updateOne({ _id: comment._id }, { postId: comment.postId })));
-}
