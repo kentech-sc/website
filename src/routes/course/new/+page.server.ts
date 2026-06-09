@@ -1,12 +1,13 @@
-import * as CourseService from '$lib/srv/course.srv.js';
-import * as ProfessorService from '$lib/srv/prof.srv.js';
-
 import { fail } from '@sveltejs/kit';
 
-import { withActionErrorHandling } from '$lib/common/errors.js';
+import { withActionErrorHandling, withLoadErrorHandling } from '$lib/server/errors.js';
+import * as CourseUsecase from '$lib/usecase/course.usecase.js';
 
-// The below line is essential to prevent rendering the page without server request which leads to skipping the server hooks.
-export const load = () => {};
+export const load = withLoadErrorHandling(async ({ locals }) => {
+	return {
+		permissions: CourseUsecase.getCoursePagePermissions(locals.user)
+	};
+});
 
 export const actions = {
 	addCourse: withActionErrorHandling(async ({ request, locals }) => {
@@ -15,23 +16,20 @@ export const actions = {
 		const name = (formData.get('name') ?? '').toString();
 		const content = (formData.get('content') ?? '').toString();
 
-		if (!courseId || !name || !content)
-			return fail(400, { message: 'courseId, name, content are required' });
+		if (!courseId || !name || !content) {
+			return fail(400, { message: '강의 ID, 이름, 설명은 필수입니다.' });
+		}
 
-		const course = await CourseService.createCourse({ _id: courseId, name, content }, locals.user);
-		if (!course) return fail(400, { message: 'course creation failed' });
-
+		await CourseUsecase.createCourse({ _id: courseId, name, content }, locals.user);
 		return { success: true };
 	}),
 	addProfessor: withActionErrorHandling(async ({ request, locals }) => {
 		const formData = await request.formData();
 		const name = (formData.get('name') ?? '').toString();
 
-		if (!name) return fail(400, { message: 'name is required' });
+		if (!name) return fail(400, { message: '이름은 필수입니다.' });
 
-		const professor = await ProfessorService.createProfessor({ name }, locals.user);
-		if (!professor) return fail(400, { message: 'professor creation failed' });
-
+		await CourseUsecase.createProfessor({ name }, locals.user);
 		return { success: true };
 	})
 };

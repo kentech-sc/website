@@ -24,12 +24,12 @@ export const { handle, signIn, signOut } = SvelteKitAuth({
 	callbacks: {
 		async jwt({ token, user, profile }) {
 			if (user && profile) {
-				token.sub = profile.sub ?? undefined;
+				token.googleSub = profile.sub ?? undefined;
 			}
 			return token;
 		},
 		async session({ session, token }) {
-			session.user.id = token.sub as string;
+			session.user.id = token.googleSub as string;
 			return session;
 		}
 	}

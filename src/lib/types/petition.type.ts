@@ -1,5 +1,3 @@
-import type { Types, UpdateQuery } from 'mongoose';
-
 import type { UserId } from './user.type.js';
 
 export const PetitionStatus = {
@@ -12,7 +10,7 @@ export const PetitionStatus = {
 
 export type PetitionStatus = (typeof PetitionStatus)[keyof typeof PetitionStatus];
 
-export type PetitionId = Types.ObjectId;
+export type PetitionId = string;
 
 export interface PetitionCreate {
 	title: string;
@@ -20,10 +18,10 @@ export interface PetitionCreate {
 	petitionerId: UserId;
 }
 
-export interface PetitionDoc extends PetitionCreate {
+export interface PetitionEntity extends PetitionCreate {
 	_id: PetitionId;
-	createdAt: Date;
-	updatedAt: Date;
+	createdAt: string;
+	updatedAt: string;
 
 	status: PetitionStatus;
 	viewCnt: number;
@@ -32,19 +30,30 @@ export interface PetitionDoc extends PetitionCreate {
 	responderId: UserId | null;
 	response: string | null;
 
-	answeredAt: Date | null;
+	answeredAt: string | null;
 }
 
-export interface Petition extends PetitionDoc {
+export interface Petition extends PetitionEntity {
 	signCnt: number;
 
 	petitionerName: string | null;
 	responderName: string | null;
 }
 
-export type PetitionUpdate = UpdateQuery<
+export interface PetitionPermissions {
+	canDelete: boolean;
+	canSign: boolean;
+	canUnsign: boolean;
+	canReview: boolean;
+	canUnreview: boolean;
+	canRespond: boolean;
+	canEditResponse: boolean;
+	canDeleteResponse: boolean;
+}
+
+export type PetitionUpdate = Partial<
 	Pick<
-		PetitionDoc,
+		PetitionEntity,
 		| 'title'
 		| 'content'
 		| 'status'

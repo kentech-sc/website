@@ -1,15 +1,16 @@
 <script lang="ts">
-	import CommonForm from '$components/CommonForm.svelte';
+	import { invalidateAll } from '$app/navigation';
+	import type { ActionResult } from '@sveltejs/kit';
 	import Ban from '@lucide/svelte/icons/ban';
 	import ShieldCheck from '@lucide/svelte/icons/shield-check';
-	import type { ActionResult } from '@sveltejs/kit';
-	import { invalidateAll } from '$app/navigation';
+
+	import CommonForm from '$components/CommonForm.svelte';
 
 	let formResult = $state<ActionResult | null>(null);
 
 	$effect(() => {
 		if (formResult?.type === 'success') {
-			alert('처리가 완료되었습니다!');
+			alert('처리가 완료되었습니다.');
 			invalidateAll();
 		}
 	});
@@ -88,18 +89,18 @@
 		flex-direction: column;
 		gap: 1rem;
 		padding: 1rem;
-		background: #f9fafb;
-		border: 1px solid #e5e7eb;
-		border-radius: 0.375rem;
+		background: var(--gray-bg);
+		border: 0.1rem solid var(--gray-border);
+		border-radius: 0.4rem;
 	}
 
 	.form-header {
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
-		color: #374151;
+		color: var(--text);
 		font-weight: 600;
-		font-size: 0.95rem;
+		font-size: 1rem;
 	}
 
 	.form-content {
@@ -114,64 +115,59 @@
 		gap: 0.5rem;
 
 		label {
-			font-size: 0.875rem;
-			color: #6b7280;
+			font-size: 0.9rem;
+			color: var(--gray-text);
 			font-weight: 500;
 		}
 
 		input {
-			padding: 0.5rem 0.75rem;
-			border: 1px solid #d1d5db;
-			border-radius: 0.375rem;
-			background: white;
-			color: #1f2937;
-			font-size: 0.875rem;
+			padding: 0.5rem 0.8rem;
+			border: 0.1rem solid var(--gray-border);
+			border-radius: 0.4rem;
+			background: var(--surface-base);
+			color: var(--text);
+			font-size: 0.9rem;
 
 			&:focus {
 				outline: none;
-				border-color: #3b82f6;
-				box-shadow: 0 0 0 1px #3b82f6;
+				border-color: var(--secondary);
+				box-shadow: 0 0 0 0.1rem var(--secondary-bg);
 			}
 
 			&::placeholder {
-				color: #9ca3af;
+				color: var(--gray-text);
+				opacity: 0.7;
 			}
 		}
 	}
 
-	.block-btn {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		padding: 0.5rem 1rem;
-		background: #ef4444;
-		color: white;
-		border: none;
-		border-radius: 0.375rem;
-		font-size: 0.875rem;
-		font-weight: 500;
-		cursor: pointer;
-
-		&:hover {
-			background: #dc2626;
-		}
-	}
-
+	.block-btn,
 	.unblock-btn {
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
-		padding: 0.5rem 1rem;
-		background: #10b981;
-		color: white;
+		padding: 0.6rem 1rem;
+		color: var(--tertiary-text);
 		border: none;
-		border-radius: 0.375rem;
-		font-size: 0.875rem;
+		border-radius: 0.4rem;
+		font-size: 0.9rem;
 		font-weight: 500;
 		cursor: pointer;
+	}
+
+	.block-btn {
+		background: var(--error);
 
 		&:hover {
-			background: #059669;
+			background: var(--error-strong-hover);
+		}
+	}
+
+	.unblock-btn {
+		background: var(--success);
+
+		&:hover {
+			background: var(--success-strong-hover);
 		}
 	}
 

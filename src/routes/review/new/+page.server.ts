@@ -1,21 +1,12 @@
-import * as CourseService from '$lib/srv/course.srv.js';
-import * as ProfessorService from '$lib/srv/prof.srv.js';
-import * as ReviewService from '$lib/srv/review.srv.js';
-import * as ReviewRule from '$lib/rules/review.rule.js';
-
-import { Types } from 'mongoose';
 import { fail, redirect } from '@sveltejs/kit';
 
-import { withActionErrorHandling, withLoadErrorHandling } from '$lib/common/errors.js';
-
 import type { CourseId } from '$lib/types/course.type.js';
-import type { ProfessorId } from '$lib/types/prof.type.js';
+import type { ProfessorId } from '$lib/types/professor.type.js';
+import { withActionErrorHandling, withLoadErrorHandling } from '$lib/server/errors.js';
+import * as ReviewUsecase from '$lib/usecase/review.usecase.js';
 
 export const load = withLoadErrorHandling(async () => {
-	const courses = await CourseService.getAllCourses();
-	const professors = await ProfessorService.getAllProfessors();
-
-	return { courses: JSON.stringify(courses), professors: JSON.stringify(professors) };
+	return await ReviewUsecase.getReviewFormOptions();
 });
 
 export const actions = {
@@ -24,43 +15,35 @@ export const actions = {
 
 		const courseIdRaw = (formData.get('courseId') ?? '').toString();
 		const professorIdRaw = (formData.get('professorId') ?? '').toString();
-
 		const year = Number(formData.get('year'));
 		const term = Number(formData.get('term'));
 		const title = (formData.get('title') ?? '').toString();
-
 		const score = {
 			assignment: Number(formData.get('assignmentScore')),
 			lecture: Number(formData.get('lectureScore')),
 			exam: Number(formData.get('examScore')),
 			satisfaction: Number(formData.get('satisfactionScore'))
 		};
-
 		const comment = (formData.get('comment') ?? '').toString();
 
-		if (!courseIdRaw || !professorIdRaw || !year || !term || !title || !score)
-			return fail(400, {
-				message: 'courseId, professorId, year, term, title, score are required'
-			});
+		if (!courseIdRaw || !professorIdRaw || !year || !term || !title || !score) {
+			return fail(400, { message: '강의, 교수, 연도, 학기, 제목, 점수는 필수입니다.' });
+		}
 
-		const courseId: CourseId = courseIdRaw;
-		const professorId: ProfessorId = new Types.ObjectId(professorIdRaw);
-
-		if (!ReviewRule.checkReviewYearAndTerm(year, term))
-			return fail(400, { message: '연도 또는 학기 값이 올바르지 않습니다.' });
-		if (!ReviewRule.checkReviewScore(score))
-			return fail(400, { message: '점수는 1에서 10 사이의 값이어야 합니다.' });
-
-		const review = await ReviewService.createReview(
-			courseId,
-			professorId,
-			locals.user._id,
-			year,
-			term,
-			title,
-			score,
-			comment
+		const review = await ReviewUsecase.createReview(
+			{
+				courseId: courseIdRaw as CourseId,
+				professorId: professorIdRaw as ProfessorId,
+				userId: locals.user._id,
+				year,
+				term,
+				title,
+				score,
+				comment
+			},
+			locals.user
 		);
-		redirect(302, '/review/' + review._id);
+
+		throw redirect(302, '/review/' + review._id);
 	})
 };

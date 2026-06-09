@@ -1,21 +1,20 @@
 <script lang="ts">
-	import type { Review } from '$lib/types/review.type.js';
-
-	import * as ReviewService from '$lib/srv/review.srv.js';
 	import MobileListItem from '$components/MobileListItem.svelte';
 
-	import * as CommonUtils from '$lib/common/utils.js';
-	import { parseRelativeDate } from '$lib/common/utils.js';
+	import type { Review } from '$lib/types/review.type.js';
 
-	let { reviews } = $props();
+	import { parseDate, parseRelativeDate } from '$lib/shared/utils.js';
+	import { translatedTerm } from '$lib/shared/view.js';
+
+	let { reviews }: { reviews: Review[] } = $props();
 </script>
 
 {#snippet Item(review: Review)}
 	<tr>
 		<td><a href={`/review/${review._id}`}>"{review.title}"</a></td>
 		<td>{review.professorName}</td>
-		<td>{review.year}학년도 {ReviewService.translatedTerm[review.term]}학기</td>
-		<td>{CommonUtils.parseDate(review.createdAt, 'date')}</td>
+		<td>{review.year}학년도 {translatedTerm[review.term]}학기</td>
+		<td>{parseDate(review.createdAt, 'date')}</td>
 	</tr>
 {/snippet}
 
@@ -58,9 +57,7 @@
 				{/snippet}
 				{#snippet row2()}
 					<span class="meta"
-						>{review.professorName} · {review.year}학년도 {ReviewService.translatedTerm[
-							review.term
-						]}학기</span
+						>{review.professorName} · {review.year}학년도 {translatedTerm[review.term]}학기</span
 					>
 					<span class="time">{parseRelativeDate(review.createdAt)}</span>
 				{/snippet}
@@ -71,7 +68,7 @@
 
 <style lang="scss">
 	table {
-		width: stretch;
+		width: 100%;
 
 		th {
 			word-break: keep-all;
@@ -104,10 +101,8 @@
 
 		td:first-child {
 			text-align: left;
-		}
-
-		td:first-child {
 			font-weight: bold;
+
 			a {
 				color: black;
 			}
@@ -126,7 +121,7 @@
 		.mobile-list {
 			display: flex;
 			flex-direction: column;
-			width: stretch;
+			width: 100%;
 
 			.empty {
 				padding: 1rem;

@@ -11,7 +11,6 @@
 	import { deserialize } from '$app/forms';
 	import type { FileMeta, FileId } from '$lib/types/file-meta.type';
 	import { onDestroy, onMount } from 'svelte';
-	import { Types } from 'mongoose';
 
 	import Bold from '@lucide/svelte/icons/bold';
 	import Italic from '@lucide/svelte/icons/italic';
@@ -61,16 +60,16 @@
 			);
 
 			if (res.type === 'failure') {
-				alert(`파일 업로드 실패: ${res.data?.message}`);
+				alert(`파일 업로드 실패: ${res.data!.message}`);
 				return;
 			} else if (res.type === 'error') {
-				alert(`파일 업로드 실패: ${res.error?.message}`);
+				alert(`파일 업로드 실패: ${res.error!.message}`);
 				return;
 			} else if (res.type === 'redirect') {
 				return;
 			}
 
-			const uploadedFileMetas: FileMeta[] = JSON.parse(res.data?.fileMetas ?? '[]');
+			const uploadedFileMetas = res.data!.fileMetas as FileMeta[];
 
 			// 업로드된 파일들 처리
 			for (const fileMeta of uploadedFileMetas) {
@@ -150,7 +149,7 @@
 					});
 
 					// imageIds 업데이트: 현재 사용된 이미지 ID들
-					imageIds = Array.from(currentUsedIds).map((id) => new Types.ObjectId(id));
+					imageIds = Array.from(currentUsedIds);
 				}
 
 				// Update select values based on current cursor position

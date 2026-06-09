@@ -1,32 +1,24 @@
-import * as ReviewApplication from '$lib/app/review.app.js';
-
-import * as ReviewService from '$lib/srv/review.srv.js';
+import { redirect } from '@sveltejs/kit';
 
 import type { ReviewId } from '$lib/types/review.type.js';
+import { withActionErrorHandling, withLoadErrorHandling } from '$lib/server/errors.js';
+import * as ReviewUsecase from '$lib/usecase/review.usecase.js';
 
-import { redirect } from '@sveltejs/kit';
-import { Types } from 'mongoose';
-
-import { withActionErrorHandling, withLoadErrorHandling } from '$lib/common/errors.js';
-
-export const load = withLoadErrorHandling(async ({ params }) => {
+export const load = withLoadErrorHandling(async ({ params, locals }) => {
 	const reviewIdRaw = params.reviewId;
-	const reviewId = new Types.ObjectId(reviewIdRaw);
+	if (!reviewIdRaw) throw new Error('리뷰 ID가 필요합니다.');
+	const reviewId: ReviewId = reviewIdRaw;
 
-	const reviewRaw = await ReviewService.getReviewById(reviewId);
-
-	const review = (await ReviewApplication.fillReviews([reviewRaw]))[0];
-
-	return { review: JSON.stringify(review) };
+	return await ReviewUsecase.getReviewDetail(reviewId, locals.user);
 });
 
 export const actions = {
 	deleteReview: withActionErrorHandling(async ({ request, locals }) => {
 		const formData = await request.formData();
 		const reviewIdRaw = (formData.get('review-id') ?? '').toString();
-		const reviewId: ReviewId = new Types.ObjectId(reviewIdRaw);
+		const reviewId: ReviewId = reviewIdRaw;
 
-		await ReviewService.deleteReviewById(reviewId, locals.user);
-		redirect(302, '/review');
+		await ReviewUsecase.deleteReview(reviewId, locals.user);
+		throw redirect(302, '/review');
 	})
 };

@@ -1,14 +1,14 @@
 import mongoose from 'mongoose';
-import type { FileMetaDoc } from '$lib/types/file-meta.type.js';
+import type { FileMetaEntity } from '$lib/types/file-meta.type.js';
 
-const FileMetaSchema = new mongoose.Schema(
+const FileMetaSchema = new mongoose.Schema<FileMetaEntity>(
 	{
 		key: { type: String, required: true },
 		name: { type: String, required: true },
 		size: { type: Number, required: true },
 		mime: { type: String, required: true },
 		ext: { type: String, required: true },
-		articleIds: { type: [mongoose.Schema.Types.ObjectId], default: [] }
+		articleIds: { type: [String], default: [] }
 	},
 	{
 		timestamps: true
@@ -18,4 +18,4 @@ const FileMetaSchema = new mongoose.Schema(
 // FileMetaSchema.index({ key: 1 });
 FileMetaSchema.index({ articleIds: 1 });
 
-export const FileMetaModel = mongoose.model<FileMetaDoc>('FileMeta', FileMetaSchema);
+export const FileMetaModel = mongoose.model('FileMeta', FileMetaSchema);

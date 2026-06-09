@@ -1,31 +1,53 @@
 import * as Sentry from '@sentry/sveltekit';
-import type { ActionResult, Handle, HandleServerError, ServerInit } from '@sveltejs/kit';
+import type { ActionResult, Cookies, Handle, HandleServerError, ServerInit } from '@sveltejs/kit';
 import { redirect } from '@sveltejs/kit';
 import { sequence } from '@sveltejs/kit/hooks';
 
 import { handle as authenticationHandle } from './auth.js';
 
-import { AWS_BUCKET_NAME, AWS_ID, AWS_SECRET } from '$env/static/private';
-import { MONGO_URI } from '$env/static/private';
+import { AWS_BUCKET_NAME, AWS_ID, AWS_SECRET, MONGO_URI } from '$env/static/private';
 
-import * as UserService from '$lib/srv/user.srv.js';
-import type { User, Profile } from '$lib/types/user.type.js';
-
-import * as DB from '$lib/common/db.js';
-import { FileStorage } from '$lib/common/storage.js';
+import { setServerFlash } from '$lib/server/flash.js';
+import type { Profile } from '$lib/types/user.type.js';
+import * as AuthUsecase from '$lib/usecase/auth.usecase.js';
+import * as DB from '$lib/server/db.js';
+import { FileStorage } from '$lib/server/storage.js';
 
 function checkEnv() {
 	if (MONGO_URI === undefined) {
-		throw new Error('Please set "MONGO_URI" in the .env file!');
+		throw new Error('.env 파일에 "MONGO_URI"를 설정해 주세요.');
 	}
 	if (AWS_BUCKET_NAME === undefined) {
-		throw new Error('Please set "AWS_BUCKET_NAME" in the .env file!');
+		throw new Error('.env 파일에 "AWS_BUCKET_NAME"을(를) 설정해 주세요.');
 	}
 	if (AWS_ID === undefined) {
-		throw new Error('Please set "AWS_ID" in the .env file!');
+		throw new Error('.env 파일에 "AWS_ID"를 설정해 주세요.');
 	}
 	if (AWS_SECRET === undefined) {
-		throw new Error('Please set "AWS_SECRET" in the .env file!');
+		throw new Error('.env 파일에 "AWS_SECRET"을(를) 설정해 주세요.');
+	}
+}
+
+function clearAuthSessionCookies(cookies: Cookies): void {
+	const sessionCookieNames = ['authjs.session-token', '__Secure-authjs.session-token'];
+	const matchedCookieNames = new Set(
+		cookies
+			.getAll()
+			.map(({ name }) => name)
+			.filter((cookieName) =>
+				sessionCookieNames.some(
+					(sessionCookieName) =>
+						cookieName === sessionCookieName || cookieName.startsWith(`${sessionCookieName}.`)
+				)
+			)
+	);
+
+	for (const sessionCookieName of sessionCookieNames) {
+		matchedCookieNames.add(sessionCookieName);
+	}
+
+	for (const cookieName of matchedCookieNames) {
+		cookies.delete(cookieName, { path: '/' });
 	}
 }
 
@@ -38,31 +60,12 @@ export const init: ServerInit = async () => {
 	console.log('[Server Is Ready]');
 };
 
-async function getUser(profile: Profile): Promise<User> {
-	const user = await UserService.getUserOrNullById(profile.id);
-
-	if (!user) {
-		return await UserService.signupUser(profile);
-	} else {
-		if (user.email !== profile.email || user.realName !== profile.name) {
-			user.email = profile.email;
-			user.realName = profile.name;
-			await UserService.updateUserById(user._id, {
-				email: profile.email,
-				realName: profile.name
-			});
-		}
-		return user;
-	}
-}
-
 const authorizationHandle: Handle = async ({ event, resolve }) => {
 	const session = await event.locals.auth();
 
 	if (session?.user?.id && session?.user?.email && session?.user?.name) {
-		// Authorized
 		if (event.url.pathname.startsWith('/signin')) {
-			redirect(303, '/');
+			throw redirect(303, '/');
 		}
 
 		const profile: Profile = {
@@ -71,54 +74,51 @@ const authorizationHandle: Handle = async ({ event, resolve }) => {
 			name: session.user.name.split('/')[0]
 		};
 
-		const user = await getUser(profile);
+		const user = await AuthUsecase.getOrCreateUser(profile);
 
 		if (user.deletedAt) {
-			// 1. 세션 쿠키 삭제 (SvelteKit 내장 API 사용)
-			event.cookies.delete('authjs.session-token', { path: '/' });
-
-			// 2. 리디렉션 (추가 옵션 없이 깔끔하게 호출)
+			setServerFlash(event.cookies, {
+				kind: 'error',
+				message: '탈퇴한 계정은 로그인할 수 없습니다.'
+			});
+			clearAuthSessionCookies(event.cookies);
 			throw redirect(303, '/');
 		}
 
 		event.locals.user = user;
-
-		return await resolve(event);
-	} else {
-		// Unauthorized
-
-		if (
-			event.url.pathname.startsWith('/petition') ||
-			event.url.pathname.startsWith('/course') ||
-			event.url.pathname.startsWith('/review') ||
-			event.url.pathname.startsWith('/profile') ||
-			/^\/board\/(?:free|notice)\/(?:new|[^/]+\/edit)\/?$/.test(event.url.pathname)
-		) {
-			redirect(303, '/signin');
-		}
-
-		const user = {
-			email: '',
-			nickname: '',
-			realName: '',
-			blockedUntil: null,
-			deletedAt: null,
-			group: 'guest' as const,
-			_id: crypto.randomUUID(),
-			createdAt: new Date(),
-			updatedAt: new Date()
-		};
-		event.locals.user = user;
-
 		return await resolve(event);
 	}
+
+	if (
+		event.url.pathname.startsWith('/petition') ||
+		event.url.pathname.startsWith('/course') ||
+		event.url.pathname.startsWith('/review') ||
+		event.url.pathname.startsWith('/profile') ||
+		/^\/board\/(?:free|notice|bylaw)\/(?:new|[^/]+\/edit)\/?$/.test(event.url.pathname)
+	) {
+		throw redirect(303, '/signin');
+	}
+
+	event.locals.user = {
+		email: '',
+		nickname: '',
+		realName: '',
+		blockedUntil: null,
+		deletedAt: null,
+		group: 'guest' as const,
+		_id: 'temp-guest-id',
+		createdAt: new Date().toISOString(),
+		updatedAt: new Date().toISOString(),
+		points: 0
+	};
+
+	return await resolve(event);
 };
 
 export const blockHandle: Handle = async ({ event, resolve }) => {
 	const user = event.locals.user;
 
-	if (user?.blockedUntil && user.blockedUntil > new Date()) {
-		// form action 요청일 경우 차단
+	if (user?.blockedUntil && user.blockedUntil > new Date().toISOString()) {
 		if (event.request.method === 'POST') {
 			const result: ActionResult = {
 				type: 'error',
@@ -131,7 +131,6 @@ export const blockHandle: Handle = async ({ event, resolve }) => {
 		}
 	}
 
-	// 탈퇴한 사용자 차단
 	if (user?.deletedAt) {
 		if (event.request.method === 'POST') {
 			const result: ActionResult = {

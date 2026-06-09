@@ -1,11 +1,10 @@
 <script lang="ts">
-	import * as CommonUtils from '$lib/common/utils.js';
-
-	import * as PetitionService from '$lib/srv/petition.srv.js';
-
-	import type { Review } from '$lib/types/review.type.js';
-	import type { Post } from '$lib/types/post.type.js';
 	import type { Petition } from '$lib/types/petition.type.js';
+	import type { Post } from '$lib/types/post.type.js';
+	import type { Review } from '$lib/types/review.type.js';
+
+	import { parseDate } from '$lib/shared/utils.js';
+	import { translatedStatus, colorStatus } from '$lib/shared/view.js';
 
 	let {
 		title,
@@ -22,13 +21,13 @@
 	<a href="/{link}/{item._id}" class="container grid-item">
 		<span>
 			{#if title === '청원'}
-				<span class={(item as Petition).status}
-					>[{PetitionService.translatedStatus[(item as Petition).status]}]</span
+				<span class={(item as Petition).status} style:color={colorStatus[(item as Petition).status]}
+					>[{translatedStatus[(item as Petition).status]}]</span
 				>
 			{/if}
 			{item.title}
 		</span>
-		<span>{CommonUtils.parseDate(item.createdAt, 'date')}</span>
+		<span>{parseDate(item.createdAt, 'date')}</span>
 	</a>
 {/snippet}
 
@@ -45,6 +44,7 @@
 <style lang="scss">
 	section {
 		margin: 0.5rem;
+		width: auto;
 	}
 
 	h2 {
@@ -59,7 +59,6 @@
 
 	.grid-item {
 		color: black;
-		width: stretch;
 		padding: 0.25rem;
 		justify-content: space-between;
 
@@ -81,22 +80,6 @@
 			background-color: var(--gray-hover);
 			cursor: pointer;
 			text-decoration: none;
-		}
-
-		.ongoing {
-			color: blue;
-		}
-		.pending {
-			color: orange;
-		}
-		.reviewing {
-			color: red;
-		}
-		.answered {
-			color: green;
-		}
-		.expired {
-			color: gray;
 		}
 	}
 </style>

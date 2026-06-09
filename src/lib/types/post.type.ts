@@ -1,9 +1,7 @@
-import type { Types, UpdateQuery } from 'mongoose';
-
 import type { UserId, DisplayType } from './user.type.js';
 import type { BoardId } from './board.type.js';
 
-export type PostId = Types.ObjectId;
+export type PostId = string;
 
 export interface PostCreate {
 	boardId: BoardId;
@@ -13,18 +11,27 @@ export interface PostCreate {
 	displayType: DisplayType;
 }
 
-export interface PostDoc extends PostCreate {
+export interface PostEntity extends PostCreate {
 	_id: PostId;
-	createdAt: Date;
+	createdAt: string;
 
 	viewCnt: number;
 	commentCnt: number;
 	likedBy: UserId[];
 }
 
-export interface Post extends PostDoc {
+export interface Post extends PostEntity {
 	likeCnt: number;
 	displayName: string | null;
 }
 
-export type PostUpdate = UpdateQuery<Pick<PostDoc, 'title' | 'content' | 'viewCnt' | 'commentCnt'>>;
+export interface PostPermissions {
+	canEdit: boolean;
+	canDelete: boolean;
+	canLike: boolean;
+	canUnlike: boolean;
+}
+
+export type PostUpdate = Partial<
+	Pick<PostEntity, 'title' | 'content' | 'viewCnt' | 'commentCnt' | 'displayType'>
+>;

@@ -8,10 +8,10 @@
 	import type { Petition } from '$lib/types/petition.type.js';
 
 	let { data } = $props();
-	const results = $derived<(Post | Review | Petition)[]>(JSON.parse(data?.results ?? '[]'));
-	const query = $derived<string>(data?.query ?? '');
-	const page = $derived<number>(data?.page ?? 1);
-	const more = $derived<boolean>(data?.more ?? false);
+	const results = $derived<(Post | Review | Petition)[]>(data.results);
+	const query = $derived<string>(data.query ?? '');
+	const page = $derived<number>(data.page ?? 1);
+	const more = $derived<boolean>(data.more ?? false);
 </script>
 
 <SearchHeader />

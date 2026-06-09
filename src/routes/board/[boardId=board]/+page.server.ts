@@ -1,48 +1,18 @@
-import * as PostService from '$lib/srv/post.srv.js';
-import * as UserService from '$lib/srv/user.srv.js';
-import * as FileMetaService from '$lib/srv/file-meta.srv.js';
+import { BoardId, type BoardId as BoardIdType } from '$lib/types/board.type.js';
 
-import { BoardId } from '$lib/types/board.type.js';
-import { Types } from 'mongoose';
+import { APP_ERROR } from '$lib/shared/rule.js';
+import { AppError, withLoadErrorHandling } from '$lib/server/errors.js';
+import * as BoardUsecase from '$lib/usecase/board.usecase.js';
 
-import { withLoadErrorHandling } from '$lib/common/errors.js';
+export const load = withLoadErrorHandling(async ({ url, params, locals }) => {
+	const boardIdRaw = params.boardId;
+	if (!Object.values(BoardId).includes(boardIdRaw as BoardIdType)) {
+		throw new AppError(APP_ERROR.BAD_REQUEST, '유효하지 않은 게시판입니다.');
+	}
 
-import { SrvError } from '$lib/common/errors.js';
+	const boardId = boardIdRaw as BoardIdType;
+	const page = Math.max(1, Number(url.searchParams.get('page') ?? '1') || 1);
+	const postResult = await BoardUsecase.getBoardPage(boardId, page, locals.user);
 
-export const load = withLoadErrorHandling(async ({ url, params }) => {
-	const boardId = params.boardId;
-	if (!Object.values(BoardId).includes(boardId as BoardId)) throw new SrvError('boardId missing');
-
-	const fromIdRaw = url.searchParams.get('from');
-	const fromId = fromIdRaw ? new Types.ObjectId(fromIdRaw) : undefined;
-
-	const toIdRaw = url.searchParams.get('to');
-	const toId = toIdRaw ? new Types.ObjectId(toIdRaw) : undefined;
-
-	const limit = 10;
-
-	const postResult = await PostService.getPostsByBoardId(boardId as BoardId, limit, {
-		fromId,
-		toId
-	});
-	const postsRaw = postResult.pageItems;
-	const posts = await UserService.fillDisplayNames(postsRaw, true);
-
-	const filePresenceEntries = await Promise.all(
-		posts.map(async (p) => {
-			const files = await FileMetaService.getFileMetasByArticleId(p._id);
-			return [p._id.toString(), {
-				hasImage: files.some((f) => f.mime.startsWith('image/')),
-				hasFile: files.some((f) => !f.mime.startsWith('image/'))
-			}] as const;
-		})
-	);
-	const filePresence = Object.fromEntries(filePresenceEntries);
-
-	return {
-		posts: JSON.stringify(posts),
-		filePresence: JSON.stringify(filePresence),
-		fromId: postResult.fromId?.toString(),
-		toId: postResult.toId?.toString()
-	};
+	return postResult;
 });

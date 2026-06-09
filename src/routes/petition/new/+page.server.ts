@@ -1,12 +1,9 @@
-import editorActions from '$components/editor-actions.js';
-
 import { fail, redirect } from '@sveltejs/kit';
-import { withActionErrorHandling } from '$lib/common/errors.js';
 
-import * as PetitionApplication from '$lib/app/petition.app.js';
-import { Types } from 'mongoose';
+import editorActions from '$lib/server/editor-actions.js';
+import { withActionErrorHandling } from '$lib/server/errors.js';
+import * as PetitionUsecase from '$lib/usecase/petition.usecase.js';
 
-// The below line is essential to prevent rendering the page without server request which leads to skipping the server hooks.
 export const load = () => {};
 
 export const actions = {
@@ -15,15 +12,12 @@ export const actions = {
 		const title = (formData.get('title') ?? '').toString();
 		const content = (formData.get('content') ?? '').toString();
 
-		if (!title || !content) return fail(400, { message: 'title, content are required' });
+		if (!title || !content) return fail(400, { message: '제목과 내용은 필수입니다.' });
 
-		const fileIds = formData
-			.getAll('fileIds')
-			.map((fileId) => new Types.ObjectId(fileId.toString()));
+		const fileIds = formData.getAll('fileIds').map((fileId) => fileId.toString());
+		const petition = await PetitionUsecase.createPetition(title, content, locals.user, fileIds);
 
-		const petition = await PetitionApplication.createPetition(title, content, locals.user, fileIds);
-
-		redirect(302, '/petition/' + petition._id);
+		throw redirect(302, '/petition/' + petition._id);
 	}),
 	...editorActions
 };

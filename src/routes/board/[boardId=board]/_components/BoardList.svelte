@@ -2,16 +2,18 @@
 	import { page } from '$app/state';
 
 	import CommonListBtnModule from '$components/CommonListBtnModule.svelte';
-	import MobileListItem from '$components/MobileListItem.svelte';
 	import FileAttachmentIcons from '$components/FileAttachmentIcons.svelte';
+	import MobileListItem from '$components/MobileListItem.svelte';
 
+	import type { FilePresence, Page } from '$lib/types/general.type.js';
 	import type { Post } from '$lib/types/post.type.js';
 
-	import * as CommonUtils from '$lib/common/utils.js';
-	import { parseRelativeDate } from '$lib/common/utils.js';
+	import { parseDate, parseRelativeDate } from '$lib/shared/utils.js';
 
-	type FilePresence = Record<string, { hasImage: boolean; hasFile: boolean }>;
-	let { posts, filePresence, toId, fromId }: { posts: Post[]; filePresence: FilePresence; toId?: string; fromId?: string } = $props();
+	let {
+		postPage,
+		filePresence,
+	}: { postPage: Page<Post>; filePresence: FilePresence } = $props();
 
 	const boardId = $derived(page.params.boardId);
 </script>
@@ -19,13 +21,15 @@
 {#snippet ListItem(post: Post)}
 	{@const fp = filePresence[post._id.toString()]}
 	<tr>
-		<td
-			><a href={`/board/${boardId}/${post._id}`}
-				><span class="ellipsis">{post.title}</span><FileAttachmentIcons hasImage={fp?.hasImage} hasFile={fp?.hasFile} /><span>[{post.commentCnt}]</span></a
-			></td
-		>
+		<td>
+			<a href={`/board/${boardId}/${post._id}`}>
+				<span class="ellipsis">{post.title}</span>
+				<FileAttachmentIcons hasImage={fp?.hasImage} hasFile={fp?.hasFile} />
+				<span>[{post.commentCnt}]</span>
+			</a>
+		</td>
 		<td>{post.displayName}</td>
-		<td>{CommonUtils.parseDate(post.createdAt)}</td>
+		<td>{parseDate(post.createdAt)}</td>
 		<td>{post.viewCnt}</td>
 		<td>{post.likeCnt}</td>
 	</tr>
@@ -50,34 +54,39 @@
 			</tr>
 		</thead>
 		<tbody>
-			{#each posts as post (post._id)}
+			{#each postPage.items as post (post._id)}
 				{@render ListItem(post)}
 			{/each}
 		</tbody>
 	</table>
-	<CommonListBtnModule pageName="board/{boardId}" {toId} {fromId} />
+	<CommonListBtnModule currentPage={postPage.currentPage} totalPages={postPage.totalPages} />
 </section>
 
 <section class="container-col module mobile-list">
-	{#each posts as post (post._id)}
+	{#each postPage.items as post (post._id)}
 		<MobileListItem href={`/board/${boardId}/${post._id}`}>
 			{#snippet row1()}
 				<span class="title">{post.title}</span>
-				<FileAttachmentIcons hasImage={filePresence[post._id.toString()]?.hasImage} hasFile={filePresence[post._id.toString()]?.hasFile} />
-				{#if post.commentCnt > 0}<span class="comment-cnt">[{post.commentCnt}]</span>{/if}
+				<FileAttachmentIcons
+					hasImage={filePresence[post._id.toString()]?.hasImage}
+					hasFile={filePresence[post._id.toString()]?.hasFile}
+				/>
+				{#if post.commentCnt > 0}
+					<span class="comment-cnt">[{post.commentCnt}]</span>
+				{/if}
 			{/snippet}
 			{#snippet row2()}
-				<span class="meta">{post.displayName} · 조회 {post.viewCnt} · 추천 {post.likeCnt}</span>
+				<span class="meta">{post.displayName} · 조회 {post.viewCnt} · 좋아요 {post.likeCnt}</span>
 				<span class="time">{parseRelativeDate(post.createdAt)}</span>
 			{/snippet}
 		</MobileListItem>
 	{/each}
-	<CommonListBtnModule pageName="board/{boardId}" {toId} {fromId} />
+	<CommonListBtnModule currentPage={postPage.currentPage} totalPages={postPage.totalPages} />
 </section>
 
 <style lang="scss">
 	table {
-		width: stretch;
+		width: 100%;
 
 		th {
 			word-break: keep-all;
@@ -118,10 +127,8 @@
 
 		td:first-child {
 			text-align: left;
-		}
-
-		td:first-child {
 			font-weight: bold;
+
 			a {
 				color: black;
 

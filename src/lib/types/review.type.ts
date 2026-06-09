@@ -1,10 +1,8 @@
-import type { UpdateQuery, Types } from 'mongoose';
-
 import type { CourseId } from './course.type.js';
-import type { ProfessorId } from './prof.type.js';
+import type { ProfessorId } from './professor.type.js';
 import type { UserId } from './user.type.js';
 
-export type ReviewId = Types.ObjectId;
+export type ReviewId = string;
 
 export interface ReviewCreate {
 	courseId: CourseId;
@@ -22,17 +20,22 @@ export interface ReviewCreate {
 	comment: string;
 }
 
-export interface ReviewDoc extends ReviewCreate {
+export interface ReviewEntity extends ReviewCreate {
 	_id: ReviewId;
-	createdAt: Date;
-	updatedAt: Date;
+	createdAt: string;
+	updatedAt: string;
 }
 
-export interface Review extends ReviewDoc {
+export interface Review extends ReviewEntity {
 	courseName: string | null;
 	professorName: string | null;
 }
 
-export type ReviewUpdate = UpdateQuery<
-	Pick<ReviewDoc, 'year' | 'term' | 'title' | 'score' | 'comment'>
+export interface ReviewPermissions {
+	canEdit: boolean;
+	canDelete: boolean;
+}
+
+export type ReviewUpdate = Partial<
+	Pick<ReviewEntity, 'courseId' | 'professorId' | 'year' | 'term' | 'title' | 'score' | 'comment'>
 >;

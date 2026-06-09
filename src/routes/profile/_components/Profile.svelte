@@ -1,60 +1,60 @@
 <script lang="ts">
 	import { signOut } from '@auth/sveltekit/client';
-	import User from '@lucide/svelte/icons/user';
 	import LogOut from '@lucide/svelte/icons/log-out';
+	import UserIcon from '@lucide/svelte/icons/user';
+	import type { User } from '$lib/types/user.type.js';
 
-	let { user } = $props();
+	let { user }: { user: User } = $props();
 </script>
 
 <section class="profile-card">
 	<div class="profile-header">
 		<div class="avatar">
-			<User size="2rem" />
+			<UserIcon size="2rem" />
 		</div>
 		<div class="profile-info">
-			<h2>{user?.realName || '사용자'}</h2>
-			<p class="user-id">@{user?.email?.split('@')[0]}</p>
+			<h2>{user.realName}</h2>
+			<p class="user-id">@{user.nickname}</p>
 		</div>
 	</div>
 
 	<div class="profile-details">
 		<div class="detail-item">
 			<span class="label">이메일</span>
-			<span class="value">{user?.email}</span>
+			<span class="value">{user.email}</span>
 		</div>
 
 		<div class="detail-item">
 			<span class="label">별명</span>
-			<span class="value">{user?.nickname}</span>
+			<span class="value">{user.nickname}</span>
 		</div>
 
 		<div class="detail-item">
 			<span class="label">권한</span>
-			<span class="value badge">{user?.group}</span>
+			<span class="value badge">{user.group}</span>
+		</div>
+
+		<div class="detail-item">
+			<span class="label">포인트</span>
+			<span class="value">{user.points}점</span>
 		</div>
 	</div>
 
 	<div class="profile-actions">
-		<button class="logout-btn" onclick={() => signOut()}>
+		<button class="error-btn logout-btn" onclick={() => signOut()}>
 			<LogOut size="1rem" />
 			<span>로그아웃</span>
 		</button>
 	</div>
-
-	{#if !user}
-		<div class="login-required">
-			<p>로그인이 필요합니다</p>
-		</div>
-	{/if}
 </section>
 
 <style lang="scss">
 	.profile-card {
-		background: white;
-		border: 1px solid #e5e7eb;
+		background: var(--surface-elevated);
+		border: 0.1rem solid var(--gray-border);
 		border-radius: 0.5rem;
 		padding: 1.5rem;
-		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+		box-shadow: 0 0.1rem 0.3rem var(--shadow-color);
 	}
 
 	.profile-header {
@@ -63,7 +63,7 @@
 		gap: 1rem;
 		margin-bottom: 1.5rem;
 		padding-bottom: 1rem;
-		border-bottom: 1px solid #e5e7eb;
+		border-bottom: 0.1rem solid var(--gray-border);
 
 		.avatar {
 			display: flex;
@@ -71,25 +71,25 @@
 			justify-content: center;
 			width: 3rem;
 			height: 3rem;
-			background: #3b82f6;
+			background: var(--secondary);
 			border-radius: 50%;
-			color: white;
+			color: var(--tertiary-text);
 		}
 
 		.profile-info {
 			flex: 1;
 
 			h2 {
-				margin: 0 0 0.25rem 0;
-				font-size: 1.25rem;
+				margin: 0 0 0.25rem;
+				font-size: 1.2rem;
 				font-weight: 600;
-				color: #1f2937;
+				color: var(--text);
 			}
 
 			.user-id {
 				margin: 0;
-				font-size: 0.875rem;
-				color: #6b7280;
+				font-size: 0.8rem;
+				color: var(--gray-text);
 				font-family: monospace;
 			}
 		}
@@ -106,26 +106,26 @@
 			justify-content: space-between;
 			align-items: center;
 			padding: 0.5rem;
-			background: #f9fafb;
-			border-radius: 0.375rem;
+			background: var(--gray-bg);
+			border-radius: 0.4rem;
 
 			.label {
-				font-size: 0.875rem;
-				color: #6b7280;
+				font-size: 0.8rem;
+				color: var(--gray-text);
 				font-weight: 500;
 			}
 
 			.value {
-				font-size: 0.875rem;
-				color: #1f2937;
+				font-size: 1rem;
+				color: var(--text);
 				font-weight: 500;
 
 				&.badge {
-					background: #dbeafe;
-					color: #1e40af;
+					background: var(--secondary-bg);
+					color: var(--secondary);
 					padding: 0.25rem 0.5rem;
 					border-radius: 0.25rem;
-					font-size: 0.75rem;
+					font-size: 0.8rem;
 					text-transform: uppercase;
 				}
 			}
@@ -134,31 +134,8 @@
 
 	.profile-actions {
 		.logout-btn {
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			gap: 0.5rem;
 			width: 100%;
-			padding: 0.625rem 1rem;
-			background: #ef4444;
-			color: white;
-			border: none;
-			border-radius: 0.375rem;
-			font-size: 0.875rem;
-			font-weight: 500;
-			cursor: pointer;
-
-			&:hover {
-				background: #dc2626;
-			}
 		}
-	}
-
-	.login-required {
-		text-align: center;
-		padding: 2rem;
-		color: #6b7280;
-		font-style: italic;
 	}
 
 	@media (max-width: 768px) {

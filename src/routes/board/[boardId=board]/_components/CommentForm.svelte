@@ -1,68 +1,60 @@
 <script lang="ts">
-	import type { ActionResult } from '@sveltejs/kit';
-	import { invalidateAll } from '$app/navigation';
+	import type { DisplayType, User } from '$lib/types/user.type.js';
+	import { DisplayType as DisplayTypeValue } from '$lib/types/user.type.js';
 
-	import type { User } from '$lib/types/user.type.js';
-	import { DisplayType } from '$lib/types/user.type.js';
-
-	import * as UserService from '$lib/srv/user.srv.js';
+	import { createDisplayName } from '$lib/shared/utils.js';
 
 	import CommonForm from '$components/CommonForm.svelte';
 
 	let { user }: { user: User } = $props();
 
-	let commentFormResult = $state<ActionResult | null>(null);
-	let displayType = $state<DisplayType>(DisplayType.Anonymous);
+	let displayType = $state<DisplayType>(DisplayTypeValue.Anonymous);
 	let commentTextarea = $state<HTMLTextAreaElement | null>(null);
 
-	let loading = $state<boolean>(false);
-
-	$effect(() => {
-		if (commentFormResult?.type === 'success') {
-			if (commentFormResult.data?.comment && commentTextarea) {
-				commentTextarea.value = '';
-			}
-			invalidateAll();
+	function clearCommentTextarea() {
+		if (commentTextarea) {
+			commentTextarea.value = '';
 		}
-	});
+	}
 </script>
 
-{#snippet RadioModule()}
-	<div class="container" id="radio-div">
-		<label for="anonymous">익명</label>
-		<input
-			type="radio"
-			id="anonymous"
-			name="displayType"
-			value={DisplayType.Anonymous}
-			checked
-			bind:group={displayType}
-		/>
-		<label for="nickname">별명</label>
-		<input
-			type="radio"
-			id="nickname"
-			name="displayType"
-			value={DisplayType.Nickname}
-			bind:group={displayType}
-		/>
-		<label for="realName">실명</label>
-		<input
-			type="radio"
-			id="realName"
-			name="displayType"
-			value={DisplayType.RealName}
-			bind:group={displayType}
-		/>
-	</div>
-{/snippet}
-
-<CommonForm actionName="createComment" formName="createComment" bind:formResult={commentFormResult}>
-	<div id="comment-form-div" class="container-col">
+<CommonForm
+	actionName="createComment"
+	formName="createComment"
+	policy="reload"
+	afterSuccess={clearCommentTextarea}
+>
+	<div class="comment-form container-col">
 		<div class="container">
-			<span><b>[{UserService.createDisplayName(user, displayType)}]</b></span>
+			<span><b>[{createDisplayName(user, displayType)}]</b></span>
 		</div>
-		{@render RadioModule()}
+		<div class="display-type-row container">
+			<label for="anonymous">익명</label>
+			<input
+				type="radio"
+				id="anonymous"
+				name="displayType"
+				value={DisplayTypeValue.Anonymous}
+				checked
+				bind:group={displayType}
+			/>
+			<label for="nickname">별명</label>
+			<input
+				type="radio"
+				id="nickname"
+				name="displayType"
+				value={DisplayTypeValue.Nickname}
+				bind:group={displayType}
+			/>
+			<label for="realName">실명</label>
+			<input
+				type="radio"
+				id="realName"
+				name="displayType"
+				value={DisplayTypeValue.RealName}
+				bind:group={displayType}
+			/>
+		</div>
 		<div class="container">
 			<textarea name="content" autocomplete="off" bind:this={commentTextarea}></textarea>
 			<button type="submit" class="btn-action">작성</button>
@@ -71,27 +63,26 @@
 </CommonForm>
 
 <style lang="scss">
-	#comment-form-div {
+	.comment-form {
 		justify-content: space-between;
-		width: stretch;
-
-		padding: 0.25rem;
+		width: 100%;
+		padding: 0.2rem;
 
 		label {
 			word-break: keep-all;
 		}
 
 		& > div {
-			width: stretch;
+			width: 100%;
 			justify-content: flex-start;
-			margin-bottom: 0.5rem;
+			margin-bottom: 0.6rem;
 		}
 
 		input:not([type='radio']),
 		textarea {
-			padding: 0.5rem;
+			padding: 0.6rem;
 			font-size: 1rem;
-			width: stretch;
+			width: 100%;
 		}
 
 		textarea {
@@ -99,16 +90,16 @@
 		}
 
 		button {
-			margin-left: 0.5rem;
+			margin-left: 0.6rem;
 		}
+	}
 
-		#radio-div {
-			justify-content: flex-start;
+	.display-type-row {
+		justify-content: flex-start;
 
-			input {
-				margin-left: 0.5rem;
-				margin-right: 1.5rem;
-			}
+		input {
+			margin-left: 0.6rem;
+			margin-right: 1.6rem;
 		}
 	}
 </style>

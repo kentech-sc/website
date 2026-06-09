@@ -1,103 +1,97 @@
 <script lang="ts">
 	import '$style/nmu.scss';
-	import type { ActionResult } from '@sveltejs/kit';
 
-	import type { Post } from '$lib/types/post.type.js';
+	import type { Post, PostPermissions } from '$lib/types/post.type.js';
 	import type { User } from '$lib/types/user.type.js';
 
-	import * as CommonUtils from '$lib/common/utils.js';
+	import { parseDate } from '$lib/shared/utils.js';
 
 	import CommonForm from '$components/CommonForm.svelte';
-	import Permission from '../../../_components/Permission.svelte';
 
 	import Clock from '@lucide/svelte/icons/clock';
 	import Eye from '@lucide/svelte/icons/eye';
-	import Message from '@lucide/svelte/icons/message-circle';
 	import Heart from '@lucide/svelte/icons/heart';
+	import Message from '@lucide/svelte/icons/message-circle';
 	import DOMPurify from 'isomorphic-dompurify';
 
-	let { post = $bindable<Post>(), user }: { post: Post; user: User } = $props();
-
-	let likeFormResult = $state<ActionResult | null>(null);
+	let { post, user, permissions }: { post: Post; user: User; permissions: PostPermissions } =
+		$props();
 
 	let liked = $derived<boolean>(post.likedBy.includes(user._id));
-
-	$effect(() => {
-		if (likeFormResult?.type === 'success') {
-			const updatedPost = JSON.parse(likeFormResult.data?.post ?? '{}');
-			if (updatedPost.likeCnt > post.likeCnt) {
-				post.likedBy.push(user._id);
-			} else if (updatedPost.likeCnt < post.likeCnt) {
-				post.likedBy = post.likedBy.filter((id) => id !== user._id);
-			}
-			post.likeCnt = updatedPost.likeCnt;
-		}
-	});
 </script>
 
-{#snippet LikeBtn()}
-	<CommonForm
-		actionName={liked ? 'unlikePost' : 'likePost'}
-		formName={liked ? 'unlikePost' : 'likePost'}
-		bind:formResult={likeFormResult}
-	>
-		<input type="hidden" name="post-id" value={post._id} />
-		<button type="submit" class="container" id="like-btn">
-			<Heart size="1.2rem" color="red" fill={liked ? 'red' : 'transparent'} />
+{#snippet LikeButton()}
+	{#if permissions.canLike || permissions.canUnlike}
+		<CommonForm
+			actionName={liked ? 'unlikePost' : 'likePost'}
+			formName={liked ? 'unlikePost' : 'likePost'}
+			policy={{ kind: 'detail', notFoundRedirectTo: `/board/${post.boardId}` }}
+		>
+			<input type="hidden" name="post-id" value={post._id} />
+			<button type="submit" class="container like-button">
+				<Heart size="1.2rem" color="red" fill={liked ? 'red' : 'transparent'} />
+				<span>{post.likeCnt}</span>
+			</button>
+		</CommonForm>
+	{:else}
+		<div class="container like-button">
+			<Heart size="1.2rem" color="red" fill="transparent" />
 			<span>{post.likeCnt}</span>
-		</button>
-	</CommonForm>
+		</div>
+	{/if}
 {/snippet}
 
-{#snippet BtnGroup()}
+{#snippet ActionGroup()}
 	<div class="container">
-		<a href="{post._id}/edit" class="btn-anchor">수정</a>
-		<div class="delete-post-form">
-			<CommonForm actionName="deletePost" formName="deletePost">
-				<input type="hidden" name="post-id" value={post._id} />
-				<button type="submit">삭제</button>
-			</CommonForm>
-		</div>
-	</div>
-{/snippet}
-
-{#snippet ArticleHeader()}
-	<header class="container">
-		<div class="container-col">
-			<h2>{post.title}</h2>
-			<p>{post.displayName}</p>
-			<p>
-				<span
-					><Clock size="1rem" color="var(--gray-text)" />{CommonUtils.parseDate(
-						post.createdAt
-					)}</span
+		{#if permissions.canEdit}
+			<a href="{post._id}/edit" class="btn-anchor">수정</a>
+		{/if}
+		{#if permissions.canDelete}
+			<div class="delete-post-form">
+				<CommonForm
+					actionName="deletePost"
+					formName="deletePost"
+					policy={{ kind: 'detail', notFoundRedirectTo: `/board/${post.boardId}` }}
 				>
-				<span><Eye size="1rem" color="var(--gray-text)" />{post.viewCnt}</span>
-				<span><Message size="1rem" color="var(--gray-text)" />{post.commentCnt}</span>
-				<span><Heart size="1rem" color="var(--gray-text)" />{post.likeCnt}</span>
-			</p>
-		</div>
-		<Permission {user} ownerId={post.userId} minRole="moderator">{@render BtnGroup()}</Permission>
-	</header>
+					<input type="hidden" name="post-id" value={post._id} />
+					<button type="submit" class="delete-btn">삭제</button>
+				</CommonForm>
+			</div>
+		{/if}
+	</div>
 {/snippet}
 
 <section class="container-col module">
 	<article>
-		{@render ArticleHeader()}
+		<header class="container">
+			<div class="container-col">
+				<h2>{post.title}</h2>
+				<p>{post.displayName}</p>
+				<p>
+					<span><Clock size="1rem" color="var(--gray-text)" />{parseDate(post.createdAt)}</span>
+					<span><Eye size="1rem" color="var(--gray-text)" />{post.viewCnt}</span>
+					<span><Message size="1rem" color="var(--gray-text)" />{post.commentCnt}</span>
+					<span><Heart size="1rem" color="var(--gray-text)" />{post.likeCnt}</span>
+				</p>
+			</div>
+			{#if permissions.canEdit || permissions.canDelete}
+				{@render ActionGroup()}
+			{/if}
+		</header>
 		<hr />
 		<!-- eslint-disable svelte/no-at-html-tags -->
 		<pre class="nmu">{@html DOMPurify.sanitize(post.content)}</pre>
-		{@render LikeBtn()}
+		{@render LikeButton()}
 	</article>
 </section>
 
 <style lang="scss">
 	article {
-		width: stretch;
+		width: 100%;
 
 		header > div {
 			align-items: flex-start;
-			padding-bottom: 0.5rem;
+			padding-bottom: 0.6rem;
 
 			p:last-child {
 				display: flex;
@@ -114,12 +108,12 @@
 			}
 
 			h2 + p {
-				line-height: 250%;
+				line-height: 2.5;
 			}
 		}
 
 		pre {
-			line-height: 150%;
+			line-height: 1.5;
 		}
 
 		.delete-post-form {
@@ -132,19 +126,23 @@
 	}
 
 	header {
-		width: stretch;
+		width: 100%;
 		justify-content: space-between;
 	}
 
-	#like-btn {
+	.like-button {
 		border: solid 0.05rem var(--gray-border);
-		border-radius: 0.5rem;
-		padding: 0.15rem 0.5rem;
+		border-radius: 0.6rem;
+		padding: 0.2rem 0.6rem;
 		width: fit-content;
-		margin-top: 0.5rem;
+		margin-top: 0.6rem;
 
 		span {
 			margin-left: 0.2rem;
 		}
+	}
+
+	.delete-btn {
+		font-weight: bold;
 	}
 </style>

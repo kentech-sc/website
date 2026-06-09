@@ -1,53 +1,45 @@
-// import * as PostService from '$lib/srv/post.srv.js';
-import * as BoardApplication from '$lib/app/board.app.js';
-
 import { fail, redirect } from '@sveltejs/kit';
 
+import editorActions from '$lib/server/editor-actions.js';
+import { BoardId, type BoardId as BoardIdType } from '$lib/types/board.type.js';
+import { APP_ERROR } from '$lib/shared/rule.js';
 import { DisplayType } from '$lib/types/user.type.js';
+import { AppError, withActionErrorHandling } from '$lib/server/errors.js';
+import * as BoardUsecase from '$lib/usecase/board.usecase.js';
 
-import { withActionErrorHandling } from '$lib/common/errors.js';
-
-import { SrvError } from '$lib/common/errors.js';
-import { BoardId } from '$lib/types/board.type.js';
-
-import editorActions from '$components/editor-actions.js';
-
-import { Types } from 'mongoose';
-
-// The below line is essential to prevent rendering the page without server request which leads to skipping the server hooks.
 export const load = () => {};
 
 export const actions = {
 	createPost: withActionErrorHandling(async ({ request, locals, params }) => {
-		const boardId = params.boardId;
-		if (!Object.values(BoardId).includes(boardId as BoardId)) throw new SrvError('boardId missing');
+		const boardIdRaw = params.boardId;
+		if (!Object.values(BoardId).includes(boardIdRaw as BoardIdType)) {
+			throw new AppError(APP_ERROR.BAD_REQUEST, '유효하지 않은 게시판입니다.');
+		}
 
 		const formData = await request.formData();
 		const title = (formData.get('title') ?? '').toString();
 		const content = (formData.get('content') ?? '').toString();
 		const displayTypeRaw = (formData.get('displayType') ?? '').toString();
 
-		if (!Object.values(DisplayType).includes(displayTypeRaw as DisplayType))
-			return fail(400, { message: 'displayType is invalid' });
+		if (!Object.values(DisplayType).includes(displayTypeRaw as DisplayType)) {
+			return fail(400, { message: '표시 방식이 올바르지 않습니다.' });
+		}
 
-		const displayType = displayTypeRaw as DisplayType;
+		if (!title || !content) {
+			return fail(400, { message: '제목과 내용은 필수입니다.' });
+		}
 
-		const fileIds = formData
-			.getAll('fileIds')
-			.map((fileId) => new Types.ObjectId(fileId.toString()));
-
-		if (!title || !content) return fail(400, { message: 'title, content are required' });
-
-		const post = await BoardApplication.createPost(
-			boardId as BoardId,
+		const fileIds = formData.getAll('fileIds').map((fileId) => fileId.toString());
+		const post = await BoardUsecase.createPost(
+			boardIdRaw as BoardIdType,
 			title,
 			content,
 			locals.user,
-			displayType,
+			displayTypeRaw as DisplayType,
 			fileIds
 		);
 
-		redirect(302, '/board/' + params.boardId + '/' + post._id);
+		throw redirect(302, '/board/' + params.boardId + '/' + post._id);
 	}),
 	...editorActions
 };

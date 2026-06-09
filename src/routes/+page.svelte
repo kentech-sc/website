@@ -1,27 +1,18 @@
 <script lang="ts">
-	import type { Review } from '$lib/types/review.type.js';
-	import type { Post } from '$lib/types/post.type.js';
 	import type { Petition } from '$lib/types/petition.type.js';
+	import type { Post } from '$lib/types/post.type.js';
+	import type { Review } from '$lib/types/review.type.js';
+
 	import GridSection from './_components/GridSection.svelte';
 
 	let { data } = $props();
-	let reviews = $derived<Review[]>(JSON.parse(data?.reviews || '[]'));
-	let freePosts = $derived<Post[]>(JSON.parse(data?.freePosts || '[]'));
-	let noticePosts = $derived<Post[]>(JSON.parse(data?.noticePosts || '[]'));
-	let petitions = $derived<Petition[]>(JSON.parse(data?.petitions || '[]'));
+
+	const reviews = $derived<Review[]>(data.reviews);
+	const freePosts = $derived<Post[]>(data.freePosts);
+	const noticePosts = $derived<Post[]>(data.noticePosts);
+	const petitions = $derived<Petition[]>(data.petitions);
+
 </script>
-
-<div class="primary hidden" id="banner">
-	<p>(대충 배너)</p>
-</div>
-
-<div class="secondary hidden" id="calendar">
-	<p>(대충 달력)</p>
-</div>
-
-<div class="tertiary hidden" id="photo">
-	<p>(대충 사진)</p>
-</div>
 
 <div id="grid-container">
 	<GridSection title="공지사항" items={noticePosts.slice(0, 5)} link="board/notice" />
@@ -31,18 +22,14 @@
 </div>
 
 <style lang="scss">
-	#banner,
-	#calendar,
-	#photo {
-		width: stretch;
-		margin-top: 1rem;
-	}
-
 	#grid-container {
-		max-width: stretch;
-		width: stretch;
+		width: 100%;
 		display: grid;
 		grid-template-columns: repeat(2, minmax(0, 1fr));
 		margin-top: 1rem;
+
+		@media (max-width: 768px) {
+			grid-template-columns: 1fr;
+		}
 	}
 </style>

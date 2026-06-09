@@ -1,9 +1,7 @@
-import type { Types, UpdateQuery } from 'mongoose';
-
 import type { UserId, DisplayType } from './user.type.js';
 import type { PostId } from './post.type.js';
 
-export type CommentId = Types.ObjectId;
+export type CommentId = string;
 
 export interface CommentCreate {
 	postId: PostId;
@@ -12,16 +10,22 @@ export interface CommentCreate {
 	displayType: DisplayType;
 }
 
-export interface CommentDoc extends CommentCreate {
+export interface CommentEntity extends CommentCreate {
 	_id: CommentId;
 	createdAt: Date;
 
 	likedBy: UserId[];
 }
 
-export interface Comment extends CommentDoc {
+export interface Comment extends CommentEntity {
 	likeCnt: number;
 	displayName: string | null;
 }
 
-export type CommentUpdate = UpdateQuery<Pick<CommentDoc, 'content'>>;
+export interface CommentPermissions {
+	canDelete: boolean;
+}
+
+export type CommentPermissionMap = Record<string, CommentPermissions>;
+
+export type CommentUpdate = Partial<Pick<CommentEntity, 'content'>>;

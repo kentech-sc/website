@@ -1,28 +1,34 @@
 <script lang="ts">
 	import CommonForm from '$components/CommonForm.svelte';
-
-	import type { Post } from '$lib/types/post.type.js';
-
-	import { DisplayType } from '$lib/types/user.type.js';
+	import Editor from '$components/Editor.svelte';
+	import FileList from '$components/FileList.svelte';
 
 	import type { FileId, FileMeta } from '$lib/types/file-meta.type';
-	import FileList from '$components/FileList.svelte';
-	import Editor from '$components/Editor.svelte';
+	import type { Post } from '$lib/types/post.type.js';
+	import { DisplayType } from '$lib/types/user.type.js';
 
 	let { post, fileMetas = [] }: { post?: Post; fileMetas?: FileMeta[] } = $props();
 
 	let loading = $state<boolean>(false);
-
 	let editorHtml = $state('');
-	let attachments = $state<FileMeta[]>(
-		fileMetas.filter((fileMeta) => !fileMeta.mime.startsWith('image/'))
-	);
-	let imageIds = $state<FileId[]>(
-		fileMetas
+	let attachments = $state<FileMeta[]>([]);
+	let imageIds = $state<FileId[]>([]);
+	let initializedFor = $state<string | null>(null);
+
+	const allFileIds = $derived([...attachments.map((fileMeta) => fileMeta._id), ...imageIds]);
+
+	$effect(() => {
+		const formKey = post?._id ?? 'new';
+
+		if (initializedFor === formKey) return;
+
+		initializedFor = formKey;
+		editorHtml = post?.content ?? '';
+		attachments = fileMetas.filter((fileMeta) => !fileMeta.mime.startsWith('image/'));
+		imageIds = fileMetas
 			.filter((fileMeta) => fileMeta.mime.startsWith('image/'))
-			.map((fileMeta) => fileMeta._id)
-	);
-	let allFileIds = $derived([...attachments.map((fileMeta) => fileMeta._id), ...imageIds]);
+			.map((fileMeta) => fileMeta._id);
+	});
 </script>
 
 {#snippet RadioModule()}
@@ -71,10 +77,9 @@
 				placeholder="제목을 입력하세요"
 			/>
 
-			<!-- <textarea id="content" name="content">{post?.content}</textarea> -->
-			<input class="hidden" type="text" name="content" bind:value={editorHtml} readonly />
+			<input type="hidden" name="content" bind:value={editorHtml} readonly />
 			{#each allFileIds as fileId (fileId)}
-				<input class="hidden" type="text" name="fileIds" value={fileId} readonly />
+				<input type="hidden" name="fileIds" value={fileId} readonly />
 			{/each}
 
 			<Editor bind:editorHtml bind:attachments bind:imageIds initialHtml={post?.content} />
@@ -88,7 +93,7 @@
 		DOCX, XLSX
 	</p>
 
-	<div class="right-align">
+	<div class="form-actions">
 		<button
 			type="submit"
 			class="btn-action"
@@ -104,8 +109,8 @@
 	#radio-div {
 		display: flex;
 		width: fit-content;
-		border: 1px solid var(--gray-border);
-		background-color: white;
+		border: 0.1rem solid var(--gray-border);
+		background-color: var(--surface-base);
 		margin-bottom: 0.5rem;
 
 		label {
@@ -113,7 +118,7 @@
 			padding: 0.3rem 0.9rem;
 			cursor: pointer;
 			text-align: center;
-			border-right: 1px solid var(--gray-border);
+			border-right: 0.1rem solid var(--gray-border);
 			transition: all 0.2s ease-in-out;
 
 			&:last-child {
@@ -127,15 +132,14 @@
 
 		input {
 			display: none;
+			margin-left: 0.25rem;
+			margin-right: 2rem;
 
 			&:checked + label {
 				background-color: var(--secondary);
 				color: var(--tertiary-text);
 				font-weight: bold;
 			}
-
-			margin-left: 0.25rem;
-			margin-right: 2rem;
 		}
 	}
 
@@ -144,23 +148,25 @@
 	}
 
 	#form-div {
-		width: stretch;
+		width: 100%;
 		align-items: flex-start;
 
 		input:not([type='radio']) {
-			width: stretch;
+			width: 100%;
 			margin-bottom: 0.5rem;
 		}
-
-		// textarea {
-		// 	height: 50vh;
-		// 	resize: vertical;
-		// }
 	}
 
 	#file-description {
 		margin-top: 0.5rem;
 		color: var(--gray-text);
 		font-size: 0.75rem;
+	}
+
+	.form-actions {
+		width: 100%;
+		display: flex;
+		justify-content: flex-end;
+		margin-top: 1rem;
 	}
 </style>

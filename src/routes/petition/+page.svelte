@@ -5,11 +5,12 @@
 	import PetitionList from './_components/PetitionList.svelte';
 
 	let { data } = $props();
-	const petitions = $derived<Petition[]>(JSON.parse(data?.petitions || '[]'));
-	const filePresence = $derived(JSON.parse(data?.filePresence ?? '{}'));
-	const fromId = $derived<string | undefined>(data?.fromId);
-	const toId = $derived<string | undefined>(data?.toId);
+	const petitions = $derived<Petition[]>(data.petitions);
+	const filePresence = $derived(data.filePresence);
+	const currentPage = $derived<number>(data.currentPage);
+	const totalPages = $derived<number>(data.totalPages);
+	const canCreatePetition = $derived<boolean>(data.canCreatePetition);
 </script>
 
-<PetitionHeader pageType="list" />
-<PetitionList {petitions} {filePresence} {toId} {fromId} />
+<PetitionHeader pageType="list" {canCreatePetition} />
+<PetitionList {petitions} {filePresence} {currentPage} {totalPages} />

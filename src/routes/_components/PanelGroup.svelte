@@ -28,7 +28,7 @@
 
 <style lang="scss">
 	#panel-group {
-		height: stretch;
+		height: 100%;
 		margin-right: 1rem;
 
 		aside {

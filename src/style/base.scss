@@ -1,46 +1,81 @@
-* {
-	// font-family: 'NanumBarunpen';
-	font-family: 'NanumGothic', '맑은고딕';
-	padding: 0;
-	margin: 0;
-	line-height: 1.4;
+*,
+*::before,
+*::after {
 	box-sizing: border-box;
+	font-family: 'NanumGothic', 'Malgun Gothic', sans-serif;
 }
 
 html {
-	font-size: 16px;
-	background-color: white;
-	height: stretch;
-	// letter-spacing: 0.0rem;
+	font-size: 1rem;
+	background-color: var(--surface-base);
+	min-height: 100%;
 }
 
-@media (max-width: 1200px) {
+@media (max-width: 75rem) {
 	html {
-		font-size: 14px;
+		font-size: 0.875rem;
 	}
 }
 
-@media (max-width: 800px) {
+@media (max-width: 50rem) {
 	html {
-		font-size: 12px;
+		font-size: 0.75rem;
 	}
 }
 
-@media (max-width: 600px) {
+@media (max-width: 37.5rem) {
 	html {
-		font-size: 10px;
+		font-size: 0.625rem;
 	}
 }
 
 body {
-	background-color: white;
+	margin: 0;
+	background-color: var(--surface-base);
+	color: var(--text);
 	display: flex;
 	flex-direction: column;
-	min-height: stretch;
+	min-height: 100vh;
+	line-height: 1.4;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+ul,
+ol,
+dl,
+dd,
+figure,
+blockquote {
+	margin: 0;
+}
+
+ul,
+ol {
+	padding: 0;
+}
+
+fieldset,
+button,
+input,
+textarea,
+select {
+	margin: 0;
+}
+
+fieldset {
+	min-width: 0;
+	padding: 0;
+	border: 0;
 }
 
 a {
-	text-decoration-line: none;
+	text-decoration: none;
 	color: var(--secondary);
 }
 
@@ -71,42 +106,50 @@ u {
 
 table {
 	border-collapse: collapse;
+	border-spacing: 0;
 }
 
 th,
 td {
-	border: solid var(--gray-border) 0.05rem;
+	border: solid 0.05rem var(--gray-border);
 	background-color: var(--gray-bg);
 }
 
-@mixin BtnStyle {
-	color: black;
-	padding: 0.25rem 0.75rem;
-	border: solid var(--gray-border) 0.05rem;
-	// border-radius: 0.5rem;
-	background-color: white;
+@mixin btn-style {
+	color: var(--text);
+	padding: 0.2rem 0.8rem;
+	border: solid 0.05rem var(--gray-border);
+	background-color: var(--surface-base);
 	font-size: 1rem;
 	font-weight: bold;
 	word-break: keep-all;
 
 	&:hover {
 		cursor: pointer;
-		background-color: var(--white-hover);
+		background-color: var(--surface-hover);
 		text-decoration: none;
 	}
 }
 
 button,
 label.button {
-	@include BtnStyle;
+	@include btn-style;
+}
+
+button,
+input,
+textarea,
+select {
+	font: inherit;
+	color: inherit;
 }
 
 textarea,
 input,
 select {
 	font-size: 0.85rem;
-	background-color: white;
-	padding: 0.25rem 0.5rem;
+	background-color: var(--surface-base);
+	padding: 0.2rem 0.4rem;
 	border: 0.05rem solid var(--gray-border);
 }
 
@@ -115,12 +158,13 @@ select {
 }
 
 pre {
+	margin: 0;
 	white-space: break-spaces;
 	word-break: break-all;
 }
 
 hr {
-	width: stretch;
-	margin: 0.5rem 0;
+	width: 100%;
+	margin: 0.6rem 0;
 	border: solid 0.05rem var(--gray-border);
 }

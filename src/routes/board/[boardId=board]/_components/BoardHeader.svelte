@@ -5,32 +5,30 @@
 	import List from '@lucide/svelte/icons/text';
 
 	import LinkButton from '$components/LinkButton.svelte';
-	import { hasMinRole } from '$lib/common/permission';
 
-	const user = JSON.parse(page.data.user);
+	let { pageType, canCreatePost = false }: { pageType: string; canCreatePost?: boolean } = $props();
 
-	let { pageType } = $props();
 	const boardId = $derived(page.params.boardId);
+
+	const title = $derived.by(() => {
+		if (boardId === 'free') return '자유게시판';
+		if (boardId === 'notice') return '공지사항';
+		return '회칙·세칙';
+	});
+
+	const description = $derived.by(() => {
+		if (boardId === 'free') return '구성원들과 자유로운 대화를 나눠보세요';
+		if (boardId === 'notice') return '학생회의 공지사항을 한눈에 확인하세요';
+		return '총학생회의 회칙과 세칙을 확인하세요';
+	});
 </script>
 
 <header class="container-col module_head">
-	{#if boardId === 'free'}
-		<h1>자유게시판</h1>
-	{:else if boardId === 'notice'}
-		<h1>공지사항</h1>
-	{:else if boardId === 'bylaw'}
-		<h1>회칙·세칙</h1>
-	{/if}
+	<h1>{title}</h1>
 
 	<div class="container">
-		{#if boardId === 'free'}
-			<p>구성원들과 자유로운 대화를 나눠보세요</p>
-		{:else if boardId === 'notice'}
-			<p>학생회의 공지사항을 한눈에 확인하세요</p>
-		{:else if boardId === 'bylaw'}
-			<p>총학생회의 회칙과 세칙을 확인하세요</p>
-		{/if}
-		{#if pageType === 'list' && (boardId === 'free' || ((boardId === 'notice' || boardId === 'bylaw') && hasMinRole(user, 'moderator')))}
+		<p>{description}</p>
+		{#if pageType === 'list' && canCreatePost}
 			<LinkButton href="/board/{boardId}/new">
 				<Pen size="1rem" />
 				<span>글쓰기</span>
@@ -48,10 +46,10 @@
 <style lang="scss">
 	header {
 		align-items: flex-start;
-		width: stretch;
+		width: 100%;
 
 		div {
-			width: stretch;
+			width: 100%;
 			justify-content: space-between;
 		}
 	}

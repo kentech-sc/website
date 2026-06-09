@@ -38,7 +38,7 @@
 
 <style lang="scss">
 	#filter-div {
-		width: stretch;
+		width: 100%;
 		justify-content: flex-start;
 		margin-bottom: 0.5rem;
 

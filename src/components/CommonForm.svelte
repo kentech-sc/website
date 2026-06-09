@@ -1,53 +1,115 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { goto } from '$app/navigation';
+	import { goto, invalidateAll } from '$app/navigation';
 	import type { ActionResult } from '@sveltejs/kit';
+
+	import { setClientFlash } from '$lib/shared/flash.js';
+	import {
+		getActionResultMessage,
+		isDetailPolicy,
+		type ActionSimpleCallback,
+		type CommonFormPolicy
+	} from '$lib/shared/action-result.js';
+	import type { Snippet } from 'svelte';
 
 	let {
 		children,
 		formName,
 		actionName = '',
 		isFile = false,
-		formResult = $bindable(null),
-		loading = $bindable<boolean>(false)
+		formResult = $bindable<ActionResult | null>(null),
+		loading = $bindable<boolean>(false),
+		policy = 'inline',
+		afterSuccess,
+		afterConflict
+	}: {
+		children: Snippet;
+		formName?: string;
+		actionName?: string;
+		isFile?: boolean;
+		formResult?: ActionResult | null;
+		loading?: boolean;
+		policy?: CommonFormPolicy;
+		afterSuccess?: ActionSimpleCallback;
+		afterConflict?: ActionSimpleCallback;
 	} = $props();
 
-	let errorMsg = $state<string>('');
+	let errorMsg = $derived(
+		formResult?.type === 'failure' || formResult?.type === 'error'
+			? getActionResultMessage(formResult)
+			: ''
+	);
+
+	function shouldInvalidateOnSuccess(currentPolicy: CommonFormPolicy): boolean {
+		return currentPolicy === 'reload' || isDetailPolicy(currentPolicy);
+	}
+
+	function shouldInvalidateOnNotFound(currentPolicy: CommonFormPolicy): boolean {
+		return currentPolicy === 'reload';
+	}
+
+	function shouldInvalidateOnConflict(currentPolicy: CommonFormPolicy): boolean {
+		return currentPolicy === 'reload' || isDetailPolicy(currentPolicy);
+	}
 
 	function formHandle() {
 		loading = true;
-		return async ({
-			// update,
-			result
-		}: {
-			// update: () => Promise<void>;
-			result: ActionResult;
-		}) => {
-			console.log(result.type);
+
+		return async ({ result }: { result: ActionResult }) => {
+			if (result.type === 'redirect') {
+				try {
+					await goto(result.location);
+				} finally {
+					loading = false;
+				}
+				return;
+			}
+
+			formResult = result;
+
 			if (result.type === 'success') {
-				formResult = result;
-				// await update();
-				errorMsg = '';
-				// 성공 시에도 약간의 지연 후 loading을 false로 설정하여 연타 방지
+				await afterSuccess?.();
+
+				if (shouldInvalidateOnSuccess(policy)) {
+					await invalidateAll();
+				}
+
 				setTimeout(() => {
 					loading = false;
 				}, 200);
-			} else if (result.type === 'redirect') {
-				goto(result.location);
-				// 리디렉션 시에는 loading을 유지
-			} else if (result.type === 'failure') {
-				errorMsg = result.data?.message || '알 수 없는 오류가 발생했습니다.';
-				loading = false;
-			} else if (result.type === 'error') {
-				errorMsg = result.error?.message || '알 수 없는 오류가 발생했습니다.';
-				loading = false;
+				return;
 			}
+
+			if (result.type === 'failure') {
+				const message = getActionResultMessage(result);
+
+				if (result.status === 404) {
+					if (isDetailPolicy(policy)) {
+						setClientFlash({ kind: 'error', message });
+						await goto(policy.notFoundRedirectTo);
+						return;
+					}
+
+					if (shouldInvalidateOnNotFound(policy)) {
+						await invalidateAll();
+					}
+				}
+
+				if (result.status === 409) {
+					await afterConflict?.();
+
+					if (shouldInvalidateOnConflict(policy)) {
+						await invalidateAll();
+					}
+				}
+			}
+
+			loading = false;
 		};
 	}
 </script>
 
-<div id="common-form-div">
-	<!-- data-sveltekit-replacestate -->
+<div class="common-form">
 	<form
 		method="POST"
 		{...formName ? { id: formName } : {}}
@@ -55,33 +117,30 @@
 		{...isFile ? { enctype: 'multipart/form-data' } : {}}
 		use:enhance={formHandle}
 	>
-		<fieldset disabled={loading} id="common-form-content">
+		<fieldset disabled={loading} class="common-form-content">
 			{@render children()}
 		</fieldset>
 	</form>
 
 	{#if errorMsg}
-		<p id="error-msg" class="error">
+		<p class="error error-message">
 			{errorMsg}
 		</p>
 	{/if}
 </div>
 
 <style lang="scss">
-	#common-form-div {
-		width: stretch;
+	.common-form {
+		width: 100%;
 	}
 
-	fieldset {
-		border: none;
+	.common-form-content {
 		display: flex;
 		flex-direction: column;
 		min-width: 0;
 	}
 
-	#error-msg {
-		border-right: none;
-		border-left: none;
-		padding: 0.5rem;
+	.error-message {
+		justify-content: left;
 	}
 </style>

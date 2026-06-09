@@ -1,6 +1,4 @@
-<script lang="ts">
-	import { Types } from 'mongoose';
-
+﻿<script lang="ts">
 	import type { FileId, FileMeta } from '$lib/types/file-meta.type.js';
 
 	let { fileMetas = $bindable([]), isEditing }: { fileMetas: FileMeta[]; isEditing: boolean } =
@@ -11,9 +9,7 @@
 	);
 
 	const deleteFile = (fileId: FileId) => {
-		fileMetas = fileMetas.filter(
-			(fileMeta: FileMeta) => !new Types.ObjectId(fileMeta._id).equals(fileId)
-		);
+		fileMetas = fileMetas.filter((fileMeta: FileMeta) => fileMeta._id !== fileId);
 	};
 </script>
 
@@ -39,7 +35,7 @@
 
 <style lang="scss">
 	.file-div {
-		width: stretch;
+		width: 100%;
 		justify-content: space-between;
 		padding: 0.25rem;
 

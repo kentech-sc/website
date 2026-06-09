@@ -1,8 +1,7 @@
-import type { Types, UpdateQuery } from 'mongoose';
 import type { PostId } from './post.type';
 import type { PetitionId } from './petition.type';
 
-export type FileId = Types.ObjectId;
+export type FileId = string;
 export type FileKey = string;
 
 export interface FileMetaCreate {
@@ -13,14 +12,14 @@ export interface FileMetaCreate {
 	ext: string;
 }
 
-export interface FileMetaDoc extends FileMetaCreate {
+export interface FileMetaEntity extends FileMetaCreate {
 	_id: FileId;
 	articleIds: Array<PostId | PetitionId>;
-	createdAt: Date;
+	createdAt: string;
 }
 
-export interface FileMeta extends FileMetaDoc {
+export interface FileMeta extends FileMetaEntity {
 	path: string;
 }
 
-export type FileMetaUpdate = UpdateQuery<Pick<FileMetaDoc, 'articleIds'>>;
+export type FileMetaUpdate = Partial<Pick<FileMetaEntity, 'articleIds'>>;

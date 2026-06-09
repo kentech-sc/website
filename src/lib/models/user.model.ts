@@ -1,15 +1,16 @@
 import mongoose from 'mongoose';
-import type { UserDoc } from '$lib/types/user.type.js';
+import { UserGroup, type UserEntity } from '$lib/types/user.type.js';
 
-const UserSchema = new mongoose.Schema(
+const UserSchema = new mongoose.Schema<UserEntity>(
 	{
 		_id: { type: String, required: true },
 		email: { type: String, required: true },
 		realName: { type: String, required: true },
 		nickname: { type: String, required: true, unique: true },
-		group: { type: String, required: true, enum: ['user', 'moderator', 'manager', 'dev'] },
+		group: { type: String, required: true, enum: Object.values(UserGroup) },
 		blockedUntil: { type: Date, default: null },
-		deletedAt: { type: Date, default: null }
+		deletedAt: { type: Date, default: null },
+		points: { type: Number, default: 0 }
 	},
 	{
 		timestamps: true
@@ -20,4 +21,4 @@ const UserSchema = new mongoose.Schema(
 UserSchema.index({ realName: 1 });
 // UserSchema.index({ nickname: 1 });
 
-export const UserModel = mongoose.model<UserDoc>('User', UserSchema);
+export const UserModel = mongoose.model('User', UserSchema);

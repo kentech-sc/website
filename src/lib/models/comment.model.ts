@@ -1,9 +1,9 @@
 import mongoose from 'mongoose';
-import type { CommentDoc } from '$lib/types/comment.type.js';
+import type { CommentEntity } from '$lib/types/comment.type.js';
 
-const CommentSchema = new mongoose.Schema(
+const CommentSchema = new mongoose.Schema<CommentEntity>(
 	{
-		postId: { type: mongoose.Schema.Types.ObjectId, required: true },
+		postId: { type: String, required: true },
 		userId: { type: String, required: true },
 		displayType: { type: String, required: true },
 		content: { type: String, required: true },
@@ -17,4 +17,4 @@ const CommentSchema = new mongoose.Schema(
 CommentSchema.index({ postId: 1, createdAt: -1 });
 CommentSchema.index({ content: 'text' });
 
-export const CommentModel = mongoose.model<CommentDoc>('Comment', CommentSchema);
+export const CommentModel = mongoose.model('Comment', CommentSchema);

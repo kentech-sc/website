@@ -1,17 +1,18 @@
-<script lang="ts">
-	let { pageType } = $props();
+﻿<script lang="ts">
+	import List from '@lucide/svelte/icons/text';
+	import Pen from '@lucide/svelte/icons/pencil';
 
 	import LinkButton from '$components/LinkButton.svelte';
 
-	import Pen from '@lucide/svelte/icons/pencil';
-	import List from '@lucide/svelte/icons/text';
+	let { pageType, canCreatePetition = false }: { pageType: string; canCreatePetition?: boolean } =
+		$props();
 </script>
 
 <header class="container-col module_head">
 	<h1>청원</h1>
 	<div class="container">
 		<p>더 나은 학교를 위해 소중한 의견을 제안해 주세요</p>
-		{#if pageType === 'list'}
+		{#if pageType === 'list' && canCreatePetition}
 			<LinkButton href="/petition/new">
 				<Pen size="1rem" />
 				<span>청원하기</span>
@@ -29,10 +30,10 @@
 <style lang="scss">
 	header {
 		align-items: flex-start;
-		width: stretch;
+		width: 100%;
 
 		.container {
-			width: stretch;
+			width: 100%;
 			justify-content: space-between;
 			align-items: center;
 		}

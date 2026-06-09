@@ -1,29 +1,14 @@
-import * as ReviewService from '$lib/srv/review.srv.js';
-import * as UserService from '$lib/srv/user.srv.js';
-import * as PetitionService from '$lib/srv/petition.srv.js';
-import * as PostService from '$lib/srv/post.srv.js';
-import * as ReviewApplication from '$lib/app/review.app.js';
+import * as HomeUsecase from '$lib/usecase/home.usecase.js';
+// import { convertProfessorIdsToString } from '$lib/repositories/review.repository.js';
+// import { setAllUserPoints } from '$lib/repositories/user.repository.js';
+// import { convertPostIdsToString } from '$lib/repositories/post.repository.js';
+// import { convertArticleIdsToStringInFileMetas } from '$lib/repositories/file-meta.repository.js';
+
 
 export const load = async () => {
-	const reviewsResult = await ReviewService.getReviews();
-	const reviewsRaw = reviewsResult.pageItems;
-	const reviews = await ReviewApplication.fillReviews(reviewsRaw);
-
-	const freePostsResult = await PostService.getPostsByBoardId('free');
-	const freePostsRaw = freePostsResult.pageItems;
-	const freePosts = await UserService.fillDisplayNames(freePostsRaw);
-
-	const noticePostsResult = await PostService.getPostsByBoardId('notice');
-	const noticePostsRaw = noticePostsResult.pageItems;
-	const noticePosts = await UserService.fillDisplayNames(noticePostsRaw);
-
-	const petitionsResult = await PetitionService.getPetitions();
-	const petitionsRaw = petitionsResult.pageItems;
-
-	return {
-		freePosts: JSON.stringify(freePosts),
-		noticePosts: JSON.stringify(noticePosts),
-		reviews: JSON.stringify(reviews),
-		petitions: JSON.stringify(petitionsRaw)
-	};
+	// await convertProfessorIdsToString();
+	// await setAllUserPoints();
+	// await convertPostIdsToString();
+	// await convertArticleIdsToStringInFileMetas();
+	return await HomeUsecase.getHomeData();
 };
