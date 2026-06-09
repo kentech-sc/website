@@ -94,9 +94,7 @@ export async function likePostById(postId: PostId, user: User): Promise<Post> {
 	}
 
 	const updatedPost = await PostRepository.likePostById(postId, user._id);
-	if (!updatedPost) {
-		throw new AppError(APP_ERROR.NOT_FOUND, '존재하지 않는 게시글입니다.');
-	}
+	if (!updatedPost) throw new AppError(APP_ERROR.NOT_FOUND, '존재하지 않는 게시글입니다.');
 
 	return toPost(updatedPost);
 }

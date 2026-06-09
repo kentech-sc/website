@@ -14,8 +14,8 @@
 
 	let { data } = $props();
 	const reviews = $derived<Review[]>(data.reviews);
-	const prevHref = $derived<string | undefined>(data.prevHref);
-	const nextHref = $derived<string | undefined>(data.nextHref);
+	const currentPage = $derived<number>(data.currentPage);
+	const totalPages = $derived<number>(data.totalPages);
 	const canCreateReview = $derived<boolean>(data.canCreateReview);
 	const canManageCatalog = $derived<boolean>(data.canManageCatalog);
 	let selectedCourse = $derived<string>(data.courseId ?? '');
@@ -49,5 +49,5 @@
 <section class="container-col module">
 	<ReviewFilter {courses} {professors} bind:selectedCourse bind:selectedProfessor />
 	<ReviewList {reviews} />
-	<CommonListBtnModule {prevHref} {nextHref} />
+	<CommonListBtnModule {currentPage} {totalPages} />
 </section>

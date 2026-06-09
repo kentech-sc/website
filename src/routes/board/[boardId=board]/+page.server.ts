@@ -12,13 +12,7 @@ export const load = withLoadErrorHandling(async ({ url, params, locals }) => {
 
 	const boardId = boardIdRaw as BoardIdType;
 	const page = Math.max(1, Number(url.searchParams.get('page') ?? '1') || 1);
-	const result = await BoardUsecase.getBoardPage(boardId, page, locals.user);
+	const postResult = await BoardUsecase.getBoardPage(boardId, page, locals.user);
 
-	return {
-		posts: result.posts,
-		filePresence: result.filePresence,
-		prevHref: result.hasPrev ? `/board/${boardId}?page=${page - 1}` : undefined,
-		nextHref: result.hasNext ? `/board/${boardId}?page=${page + 1}` : undefined,
-		canCreatePost: result.canCreatePost
-	};
+	return postResult;
 });

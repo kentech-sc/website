@@ -8,8 +8,8 @@ export const load = withLoadErrorHandling(async ({ url, locals }) => {
 	return {
 		petitions: petitionsResult.petitions,
 		filePresence: petitionsResult.filePresence,
-		prevHref: petitionsResult.hasPrev ? `/petition?page=${page - 1}` : undefined,
-		nextHref: petitionsResult.hasNext ? `/petition?page=${page + 1}` : undefined,
+		currentPage: petitionsResult.currentPage,
+		totalPages: petitionsResult.totalPages,
 		canCreatePetition: petitionsResult.canCreatePetition
 	};
 });

@@ -7,10 +7,10 @@
 	let { data } = $props();
 	const petitions = $derived<Petition[]>(data.petitions);
 	const filePresence = $derived(data.filePresence);
-	const prevHref = $derived<string | undefined>(data.prevHref);
-	const nextHref = $derived<string | undefined>(data.nextHref);
+	const currentPage = $derived<number>(data.currentPage);
+	const totalPages = $derived<number>(data.totalPages);
 	const canCreatePetition = $derived<boolean>(data.canCreatePetition);
 </script>
 
 <PetitionHeader pageType="list" {canCreatePetition} />
-<PetitionList {petitions} {filePresence} {prevHref} {nextHref} />
+<PetitionList {petitions} {filePresence} {currentPage} {totalPages} />

@@ -35,6 +35,8 @@ export async function getReviewPageView(
 
 	return {
 		reviews: await fillReviews(reviewsResult.items),
+		currentPage: reviewsResult.currentPage,
+		totalPages: reviewsResult.totalPages,
 		hasPrev: reviewsResult.hasPrev,
 		hasNext: reviewsResult.hasNext,
 		canCreateReview: hasCapability(user, 'review.write'),

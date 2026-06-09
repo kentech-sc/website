@@ -17,19 +17,10 @@ export const load = withLoadErrorHandling(async ({ url, locals }) => {
 	);
 	const { courses, professors } = await ReviewUsecase.getReviewFormOptions();
 
-	const buildHref = (targetPage: number) => {
-		const params = new URLSearchParams();
-		if (courseId) params.set('course', courseId);
-		if (professorId) params.set('professor', professorId);
-		if (targetPage > 1) params.set('page', String(targetPage));
-		const query = params.toString();
-		return query ? `/review?${query}` : '/review';
-	};
-
 	return {
 		reviews: reviewsResult.reviews,
-		prevHref: reviewsResult.hasPrev ? buildHref(page - 1) : undefined,
-		nextHref: reviewsResult.hasNext ? buildHref(page + 1) : undefined,
+		currentPage: reviewsResult.currentPage,
+		totalPages: reviewsResult.totalPages,
 		courses,
 		professors,
 		courseId,

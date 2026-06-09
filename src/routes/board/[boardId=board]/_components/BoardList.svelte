@@ -5,17 +5,15 @@
 	import FileAttachmentIcons from '$components/FileAttachmentIcons.svelte';
 	import MobileListItem from '$components/MobileListItem.svelte';
 
-	import type { FilePresence } from '$lib/types/general.type.js';
+	import type { FilePresence, Page } from '$lib/types/general.type.js';
 	import type { Post } from '$lib/types/post.type.js';
 
 	import { parseDate, parseRelativeDate } from '$lib/shared/utils.js';
 
 	let {
-		posts,
+		postPage,
 		filePresence,
-		prevHref,
-		nextHref
-	}: { posts: Post[]; filePresence: FilePresence; prevHref?: string; nextHref?: string } = $props();
+	}: { postPage: Page<Post>; filePresence: FilePresence } = $props();
 
 	const boardId = $derived(page.params.boardId);
 </script>
@@ -56,16 +54,16 @@
 			</tr>
 		</thead>
 		<tbody>
-			{#each posts as post (post._id)}
+			{#each postPage.items as post (post._id)}
 				{@render ListItem(post)}
 			{/each}
 		</tbody>
 	</table>
-	<CommonListBtnModule {prevHref} {nextHref} />
+	<CommonListBtnModule currentPage={postPage.currentPage} totalPages={postPage.totalPages} />
 </section>
 
 <section class="container-col module mobile-list">
-	{#each posts as post (post._id)}
+	{#each postPage.items as post (post._id)}
 		<MobileListItem href={`/board/${boardId}/${post._id}`}>
 			{#snippet row1()}
 				<span class="title">{post.title}</span>
@@ -83,7 +81,7 @@
 			{/snippet}
 		</MobileListItem>
 	{/each}
-	<CommonListBtnModule {prevHref} {nextHref} />
+	<CommonListBtnModule currentPage={postPage.currentPage} totalPages={postPage.totalPages} />
 </section>
 
 <style lang="scss">

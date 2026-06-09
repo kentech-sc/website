@@ -32,22 +32,22 @@
 	--info: oklch(0.6 0.3 210);
 
 	--error-text: var(--error);
-	--error-bg: oklch(from var(--error) 1 0.02 h);
+	--error-bg: oklch(from var(--error) 1 0.04 h);
 	--error-hover: oklch(from var(--error-bg) calc(l - 0.05) c h);
 	--error-strong-hover: oklch(from var(--error) calc(l - 0.08) c h);
 
 	--warn-text: var(--warn);
-	--warn-bg: oklch(from var(--warn) 1 0.02 h);
+	--warn-bg: oklch(from var(--warn) 1 0.04 h);
 	--warn-hover: oklch(from var(--warn-bg) calc(l - 0.05) c h);
 	--warn-strong-hover: oklch(from var(--warn) calc(l - 0.08) c h);
 
 	--success-text: var(--success);
-	--success-bg: oklch(from var(--success) 1 0.02 h);
+	--success-bg: oklch(from var(--success) 1 0.04 h);
 	--success-hover: oklch(from var(--success-bg) calc(l - 0.05) c h);
 	--success-strong-hover: oklch(from var(--success) calc(l - 0.08) c h);
 
 	--info-text: var(--info);
-	--info-bg: oklch(from var(--info) 1 0.02 h);
+	--info-bg: oklch(from var(--info) 1 0.04 h);
 	--info-hover: oklch(from var(--info-bg) calc(l - 0.05) c h);
 	--info-strong-hover: oklch(from var(--info) calc(l - 0.08) c h);
 }

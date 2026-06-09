@@ -24,13 +24,13 @@ export async function getBoardPage(boardId: BoardId, page: number, user: User) {
 	const skip = (page - 1) * limit;
 
 	const postResult = await PostService.getPostPageByBoardId(boardId, limit, skip);
-	const posts = await UserService.fillDisplayNames(postResult.items, true);
+	postResult.items = await UserService.fillDisplayNames(postResult.items, true);
 
 	const filePresenceEntries = await Promise.all(
-		posts.map(async (post) => {
+		postResult.items.map(async (post) => {
 			const files = await FileMetaService.getFileMetasByArticleId(post._id);
 			return [
-				post._id.toString(),
+				post._id,
 				{
 					hasImage: files.some((file) => file.mime.startsWith('image/')),
 					hasFile: files.some((file) => !file.mime.startsWith('image/'))
@@ -45,10 +45,8 @@ export async function getBoardPage(boardId: BoardId, page: number, user: User) {
 		(boardId === 'bylaw' && hasCapability(user, 'board.bylaw.write'));
 
 	return {
-		posts,
+		postPage: postResult,
 		filePresence: Object.fromEntries(filePresenceEntries) as FilePresence,
-		hasPrev: postResult.hasPrev,
-		hasNext: postResult.hasNext,
 		canCreatePost
 	};
 }

@@ -12,10 +12,14 @@
 	let {
 		petitions,
 		filePresence,
-		prevHref,
-		nextHref
-	}: { petitions: Petition[]; filePresence: FilePresence; prevHref?: string; nextHref?: string } =
-		$props();
+		currentPage,
+		totalPages
+	}: {
+		petitions: Petition[];
+		filePresence: FilePresence;
+		currentPage: number;
+		totalPages: number;
+	} = $props();
 </script>
 
 {#snippet PetitionItem(petition: Petition)}
@@ -80,7 +84,7 @@
 			{/each}
 		</tbody>
 	</table>
-	<CommonListBtnModule {prevHref} {nextHref} />
+	<CommonListBtnModule {currentPage} {totalPages} />
 </section>
 
 <section class="container-col module mobile-list">
@@ -104,7 +108,7 @@
 			{/snippet}
 		</MobileListItem>
 	{/each}
-	<CommonListBtnModule {prevHref} {nextHref} />
+	<CommonListBtnModule {currentPage} {totalPages} />
 </section>
 
 <style lang="scss">

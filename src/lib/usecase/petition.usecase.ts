@@ -70,6 +70,8 @@ export async function getPetitionPageView(page: number, user: User) {
 	return {
 		petitions,
 		filePresence: Object.fromEntries(filePresenceEntries) as FilePresence,
+		currentPage: petitionsResult.currentPage,
+		totalPages: petitionsResult.totalPages,
 		hasPrev: petitionsResult.hasPrev,
 		hasNext: petitionsResult.hasNext,
 		canCreatePetition: hasCapability(user, 'petition.write')

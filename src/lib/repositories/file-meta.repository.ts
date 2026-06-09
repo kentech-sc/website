@@ -120,3 +120,17 @@ export async function findOrphanedFiles(cutoffTime: Date): Promise<FileMetaEntit
 // 	});
 // 	return res.deletedCount;
 // }
+
+export async function convertArticleIdsToStringInFileMetas() {
+	const fileMetas = await FileMetaModel.find().lean();
+
+	await Promise.all(
+		fileMetas.map(async (fileMeta) => {
+			const articleIdsAsString = fileMeta.articleIds.map((id) => id.toString());
+			await FileMetaModel.updateOne(
+				{ _id: fileMeta._id },
+				{ $set: { articleIds: articleIdsAsString } }
+			);
+		})
+	);
+}
