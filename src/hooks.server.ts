@@ -7,6 +7,7 @@ import { handle as authenticationHandle } from './auth.js';
 
 import { AWS_BUCKET_NAME, AWS_ID, AWS_SECRET, MONGO_URI } from '$env/static/private';
 
+import { setServerFlash } from '$lib/server/flash.js';
 import type { Profile } from '$lib/types/user.type.js';
 import * as AuthUsecase from '$lib/usecase/auth.usecase.js';
 import * as DB from '$lib/server/db.js';
@@ -76,6 +77,10 @@ const authorizationHandle: Handle = async ({ event, resolve }) => {
 		const user = await AuthUsecase.getOrCreateUser(profile);
 
 		if (user.deletedAt) {
+			setServerFlash(event.cookies, {
+				kind: 'error',
+				message: '탈퇴한 계정은 로그인할 수 없습니다.'
+			});
 			clearAuthSessionCookies(event.cookies);
 			throw redirect(303, '/');
 		}

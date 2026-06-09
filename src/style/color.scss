@@ -49,4 +49,5 @@
 	--info-text: var(--info);
 	--info-bg: oklch(from var(--info) 1 0.02 h);
 	--info-hover: oklch(from var(--info-bg) calc(l - 0.05) c h);
+	--info-strong-hover: oklch(from var(--info) calc(l - 0.08) c h);
 }

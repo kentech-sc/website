@@ -35,7 +35,7 @@
 				/>
 			</div>
 
-			<button type="submit" class="submit-btn">
+			<button type="submit" class="info-btn submit-btn">
 				<User size="1rem" />
 				<span>변경하기</span>
 			</button>
@@ -47,7 +47,6 @@
 	.nickname-form {
 		display: flex;
 		flex-direction: column;
-		gap: 1rem;
 	}
 
 	.form-header {
@@ -73,7 +72,7 @@
 		gap: 0.6rem;
 
 		label {
-			font-size: 1rem;
+			font-size: 0.8rem;
 			color: var(--gray-text);
 			font-weight: 500;
 		}
@@ -84,7 +83,7 @@
 			border-radius: 0.6rem;
 			background: var(--gray-bg);
 			color: var(--text);
-			font-size: 1rem;
+			font-size: 0.8rem;
 			transition:
 				border-color 0.2s ease,
 				box-shadow 0.2s ease,
@@ -104,24 +103,6 @@
 		}
 	}
 
-	.submit-btn {
-		display: flex;
-		align-items: center;
-		gap: 0.6rem;
-		padding: 0.6rem 1rem;
-		background: var(--secondary);
-		color: var(--tertiary-text);
-		border: none;
-		border-radius: 0.4rem;
-		font-size: 0.9rem;
-		font-weight: 500;
-		cursor: pointer;
-		white-space: nowrap;
-
-		&:hover {
-			background: var(--secondary-strong-hover);
-		}
-	}
 
 	@media (max-width: 768px) {
 		.form-content {

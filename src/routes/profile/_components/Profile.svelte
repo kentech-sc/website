@@ -1,51 +1,51 @@
 <script lang="ts">
 	import { signOut } from '@auth/sveltekit/client';
 	import LogOut from '@lucide/svelte/icons/log-out';
-	import User from '@lucide/svelte/icons/user';
+	import UserIcon from '@lucide/svelte/icons/user';
+	import type { User } from '$lib/types/user.type.js';
 
-	let { user } = $props();
+	let { user }: { user: User } = $props();
 </script>
 
 <section class="profile-card">
 	<div class="profile-header">
 		<div class="avatar">
-			<User size="2rem" />
+			<UserIcon size="2rem" />
 		</div>
 		<div class="profile-info">
-			<h2>{user?.realName || '사용자'}</h2>
-			<p class="user-id">@{user?.email?.split('@')[0]}</p>
+			<h2>{user.realName}</h2>
+			<p class="user-id">@{user.nickname}</p>
 		</div>
 	</div>
 
 	<div class="profile-details">
 		<div class="detail-item">
 			<span class="label">이메일</span>
-			<span class="value">{user?.email}</span>
+			<span class="value">{user.email}</span>
 		</div>
 
 		<div class="detail-item">
 			<span class="label">별명</span>
-			<span class="value">{user?.nickname}</span>
+			<span class="value">{user.nickname}</span>
 		</div>
 
 		<div class="detail-item">
 			<span class="label">권한</span>
-			<span class="value badge">{user?.group}</span>
+			<span class="value badge">{user.group}</span>
+		</div>
+
+		<div class="detail-item">
+			<span class="label">포인트</span>
+			<span class="value">{user.points}점</span>
 		</div>
 	</div>
 
 	<div class="profile-actions">
-		<button class="logout-btn" onclick={() => signOut()}>
+		<button class="error-btn logout-btn" onclick={() => signOut()}>
 			<LogOut size="1rem" />
 			<span>로그아웃</span>
 		</button>
 	</div>
-
-	{#if !user}
-		<div class="login-required">
-			<p>로그인이 필요합니다.</p>
-		</div>
-	{/if}
 </section>
 
 <style lang="scss">
@@ -81,14 +81,14 @@
 
 			h2 {
 				margin: 0 0 0.25rem;
-				font-size: 1.25rem;
+				font-size: 1.2rem;
 				font-weight: 600;
 				color: var(--text);
 			}
 
 			.user-id {
 				margin: 0;
-				font-size: 0.875rem;
+				font-size: 0.8rem;
 				color: var(--gray-text);
 				font-family: monospace;
 			}
@@ -110,13 +110,13 @@
 			border-radius: 0.4rem;
 
 			.label {
-				font-size: 0.875rem;
+				font-size: 0.8rem;
 				color: var(--gray-text);
 				font-weight: 500;
 			}
 
 			.value {
-				font-size: 0.875rem;
+				font-size: 1rem;
 				color: var(--text);
 				font-weight: 500;
 
@@ -125,7 +125,7 @@
 					color: var(--secondary);
 					padding: 0.25rem 0.5rem;
 					border-radius: 0.25rem;
-					font-size: 0.75rem;
+					font-size: 0.8rem;
 					text-transform: uppercase;
 				}
 			}
@@ -134,31 +134,8 @@
 
 	.profile-actions {
 		.logout-btn {
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			gap: 0.5rem;
 			width: 100%;
-			padding: 0.625rem 1rem;
-			background: var(--error);
-			color: var(--tertiary-text);
-			border: none;
-			border-radius: 0.4rem;
-			font-size: 0.875rem;
-			font-weight: 500;
-			cursor: pointer;
-
-			&:hover {
-				background: var(--error-strong-hover);
-			}
 		}
-	}
-
-	.login-required {
-		text-align: center;
-		padding: 2rem;
-		color: var(--gray-text);
-		font-style: italic;
 	}
 
 	@media (max-width: 768px) {

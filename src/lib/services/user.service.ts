@@ -50,7 +50,7 @@ export async function signupUser(profile: Profile): Promise<User> {
 		realName: profile.name,
 		nickname,
 		group: UserGroup.User,
-		points: 0
+		points: 50
 	});
 }
 

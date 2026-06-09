@@ -83,3 +83,11 @@ export async function searchReviewsByQuery(
 
 	return { items: toPojo<ReviewEntity[]>(results.slice(0, limit)), more: results.length > limit };
 }
+
+export async function convertProfessorIdsToString() {
+	const reviews = (await ReviewModel.find().lean()).map(review => {
+		review.professorId = review.professorId.toString();
+		return review;
+	});
+	await Promise.all(reviews.map(review => ReviewModel.updateOne({ _id: review._id }, { professorId: review.professorId })));
+}

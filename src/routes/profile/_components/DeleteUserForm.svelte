@@ -25,7 +25,7 @@
 
 <CommonForm actionName="deleteUser" formName="deleteUser" bind:formResult>
 	<div class="delete-form">
-		<div class="warning-message">
+		<div class="warning-message error">
 			<div class="warning-content">
 				<h4>탈퇴 시 주의사항</h4>
 				<ul>
@@ -38,7 +38,7 @@
 		</div>
 
 		<div class="form-actions">
-			<button type="button" class="delete-btn" onclick={handleSubmit}>
+			<button type="button" class="delete-btn error-btn" onclick={handleSubmit}>
 				<Trash2 size="1rem" />
 				<span>탈퇴하기</span>
 			</button>
@@ -56,10 +56,6 @@
 
 	.warning-message {
 		padding: 1rem;
-		background: var(--error-bg);
-		border: 0.1rem solid var(--error);
-		border-radius: 0.4rem;
-		color: var(--error-text);
 
 		h4 {
 			margin: 0 0 0.8rem;
@@ -70,7 +66,7 @@
 		ul {
 			margin: 0;
 			padding-left: 1.4rem;
-			font-size: 0.9rem;
+			font-size: 0.8rem;
 			line-height: 1.4;
 
 			li {
@@ -86,24 +82,6 @@
 	.form-actions {
 		display: flex;
 		justify-content: flex-end;
-	}
-
-	.delete-btn {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		padding: 0.6rem 1rem;
-		background: var(--error);
-		color: var(--tertiary-text);
-		border: none;
-		border-radius: 0.4rem;
-		font-size: 0.9rem;
-		font-weight: 500;
-		cursor: pointer;
-
-		&:hover {
-			background: var(--error-strong-hover);
-		}
 	}
 
 	@media (max-width: 768px) {

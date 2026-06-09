@@ -141,8 +141,6 @@
 	}
 
 	.error-message {
-		border-right: none;
-		border-left: none;
-		padding: 0.6rem;
+		justify-content: left;
 	}
 </style>

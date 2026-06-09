@@ -11,6 +11,7 @@
 	const freePosts = $derived<Post[]>(data.freePosts);
 	const noticePosts = $derived<Post[]>(data.noticePosts);
 	const petitions = $derived<Petition[]>(data.petitions);
+
 </script>
 
 <div id="grid-container">
