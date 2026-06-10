@@ -2,6 +2,7 @@
 	import { signOut } from '@auth/sveltekit/client';
 	import LogOut from '@lucide/svelte/icons/log-out';
 	import UserIcon from '@lucide/svelte/icons/user';
+
 	import type { User } from '$lib/types/user.type.js';
 
 	let { user }: { user: User } = $props();

@@ -1,5 +1,5 @@
-import type { PageServerLoad } from './$types.js';
 import type { UserGroup } from '$lib/types/user.type.js';
+import type { PageServerLoad } from './$types.js';
 
 import { withActionErrorHandling } from '$lib/server/errors.js';
 import * as ProfileUsecase from '$lib/usecase/profile.usecase.js';

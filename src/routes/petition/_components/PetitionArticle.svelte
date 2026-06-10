@@ -4,11 +4,10 @@
 	import ThumbsUp from '@lucide/svelte/icons/thumbs-up';
 	import DOMPurify from 'isomorphic-dompurify';
 
-	import CommonForm from '$components/CommonForm.svelte';
-
 	import type { Petition, PetitionPermissions } from '$lib/types/petition.type.js';
 	import type { User } from '$lib/types/user.type.js';
 
+	import CommonForm from '$components/CommonForm.svelte';
 	import { parseDate } from '$lib/shared/utils.js';
 	import { colorStatus, translatedStatus } from '$lib/shared/view.js';
 
@@ -31,13 +30,13 @@
 			<input type="hidden" name="petition-id" value={petition._id} />
 			<button type="submit" class="container sign-button">
 				<ThumbsUp size="1.2rem" color="skyblue" fill={signed ? 'skyblue' : 'transparent'} />
-				<span>{petition.signCnt}</span>
+				<span>{petition.signedBy.length}</span>
 			</button>
 		</CommonForm>
 	{:else}
 		<div class="container sign-button" aria-disabled="true">
 			<ThumbsUp size="1.2rem" color="skyblue" />
-			<span>{petition.signCnt}</span>
+			<span>{petition.signedBy.length}</span>
 		</div>
 	{/if}
 {/snippet}
@@ -54,9 +53,7 @@
 					>
 					{petition.title}
 				</h2>
-				<p>
-					{petition.petitionerName} | {parseDate(petition.createdAt)} | 조회수 {petition.viewCnt}
-				</p>
+				<p>{petition.petitionerName} | {parseDate(petition.createdAt)} | 조회 {petition.viewCnt}</p>
 			</div>
 			{#if permissions.canDelete}
 				<div class="delete-form">

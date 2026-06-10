@@ -1,14 +1,13 @@
 <script lang="ts">
-	import { browser } from '$app/environment';
-	import { page } from '$app/state';
-
 	import Footer from './_components/Footer.svelte';
 	import NavBar from './_components/NavBar.svelte';
+	import Slideshow from './_components/Slideshow.svelte';
 
-	import { popClientFlash } from '$lib/shared/flash.js';
 	import type { FlashMessage } from '$lib/types/flash.type.js';
 
-	import Slideshow from './_components/Slideshow.svelte';
+	import { browser } from '$app/environment';
+	import { page } from '$app/state';
+	import { popClientFlash } from '$lib/shared/flash.js';
 
 	import '$style/main.scss';
 
@@ -39,7 +38,12 @@
 	{#if flash}
 		<div class={`flash-banner ${flash.kind}`} role="status" aria-live="polite">
 			<p>{flash.message}</p>
-			<button class="{flash.kind}-btn" type="button" aria-label="메시지 닫기" onclick={() => (flash = null)}>닫기</button>
+			<button
+				class="{flash.kind}-btn"
+				type="button"
+				aria-label="메시지 닫기"
+				onclick={() => (flash = null)}>닫기</button
+			>
 		</div>
 	{/if}
 {/snippet}
@@ -81,7 +85,7 @@
 		left: 50%;
 		display: flex;
 		justify-content: space-between;
-		padding-right: .6rem;
+		padding-right: 0.6rem;
 
 		p {
 			margin: 0;

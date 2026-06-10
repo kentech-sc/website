@@ -88,7 +88,7 @@ button.btn-action {
 @mixin flash-frame {
 	display: flex;
 	justify-content: center;
-    align-items: center;
+	align-items: center;
 	padding: 0.5rem 1rem;
 	border-radius: 0.6rem;
 }
@@ -96,11 +96,11 @@ button.btn-action {
 @mixin flash-btn-frame {
 	display: flex;
 	justify-content: center;
-    align-items: center;
+	align-items: center;
 	padding: 0.5rem 1rem;
 	border-radius: 0.5rem;
-    gap: 0.5rem;
-    border: none;
+	gap: 0.5rem;
+	border: none;
 	font-size: 1rem;
 }
 
@@ -114,8 +114,8 @@ button.btn-action {
 
 .error-btn {
 	@include flash-btn-frame;
-    background: var(--error);
-    color: var(--tertiary-text);
+	background: var(--error);
+	color: var(--tertiary-text);
 
 	&:hover {
 		background-color: var(--error-strong-hover);
@@ -132,8 +132,8 @@ button.btn-action {
 
 .warn-btn {
 	@include flash-btn-frame;
-    background: var(--warn);
-    color: var(--tertiary-text);
+	background: var(--warn);
+	color: var(--tertiary-text);
 
 	&:hover {
 		background-color: var(--warn-strong-hover);

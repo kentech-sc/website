@@ -1,4 +1,4 @@
-import type { Review } from '$lib/types/review.type.js';
+import type { ReviewEntity } from '$lib/types/review.type.js';
 import type { User } from '$lib/types/user.type.js';
 
 import { hasCapability, isOwner } from '$lib/shared/permission.js';
@@ -16,7 +16,7 @@ export function canCreateReview(user: User): RuleResult {
 	return ruleFail(APP_ERROR.FORBIDDEN, '리뷰를 작성할 권한이 없습니다.');
 }
 
-export function canEditOrDeleteReview(review: Review, user: User): RuleResult {
+export function canEditOrDeleteReview(review: ReviewEntity, user: User): RuleResult {
 	if (isOwner(user, review.userId) || hasCapability(user, 'review.moderate')) return ok();
 	return ruleFail(APP_ERROR.FORBIDDEN, '리뷰를 수정하거나 삭제할 권한이 없습니다.');
 }

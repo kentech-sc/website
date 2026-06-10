@@ -1,7 +1,7 @@
 ﻿<script lang="ts">
-	import List from '@lucide/svelte/icons/text';
 	import Pen from '@lucide/svelte/icons/pencil';
 	import Plus from '@lucide/svelte/icons/plus';
+	import List from '@lucide/svelte/icons/text';
 
 	import LinkButton from '$components/LinkButton.svelte';
 

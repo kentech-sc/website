@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+
 import type { ReviewEntity } from '$lib/types/review.type.js';
 
 const ReviewSchema = new mongoose.Schema<ReviewEntity>(

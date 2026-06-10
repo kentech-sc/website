@@ -1,15 +1,14 @@
 <script lang="ts">
-	import { page } from '$app/state';
-
-	import FileList from '$components/FileList.svelte';
-
-	import type { FileMeta } from '$lib/types/file-meta.type.js';
-	import type { Petition } from '$lib/types/petition.type.js';
-
 	import PetitionArticle from '../_components/PetitionArticle.svelte';
 	import PetitionHeader from '../_components/PetitionHeader.svelte';
 	import ResponseArticle from '../_components/ResponseArticle.svelte';
 	import Signers from '../_components/Signers.svelte';
+
+	import type { FileMeta } from '$lib/types/file-meta.type.js';
+	import type { Petition } from '$lib/types/petition.type.js';
+
+	import { page } from '$app/state';
+	import FileList from '$components/FileList.svelte';
 
 	const user = $derived(page.data.user);
 

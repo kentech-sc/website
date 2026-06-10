@@ -1,8 +1,8 @@
 <script lang="ts">
-	import type { Petition } from '$lib/types/petition.type.js';
-
 	import PetitionHeader from './_components/PetitionHeader.svelte';
 	import PetitionList from './_components/PetitionList.svelte';
+
+	import type { Petition } from '$lib/types/petition.type.js';
 
 	let { data } = $props();
 	const petitions = $derived<Petition[]>(data.petitions);

@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { page } from '$app/state';
-
 	import BlockForm from './_components/BlockForm.svelte';
 	import ChangeGroupForm from './_components/ChangeGroupForm.svelte';
 	import ChangeNicknameForm from './_components/ChangeNicknameForm.svelte';
 	import CleanupForm from './_components/CleanupForm.svelte';
 	import DeleteUserForm from './_components/DeleteUserForm.svelte';
 	import Profile from './_components/Profile.svelte';
+
+	import { page } from '$app/state';
 
 	const user = $derived(page.data.user);
 	const permissions = $derived(page.data.permissions);

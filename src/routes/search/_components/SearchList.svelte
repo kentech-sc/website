@@ -1,16 +1,21 @@
 <script lang="ts">
+	import type { PetitionEntity } from '$lib/types/petition.type.js';
+	import type { PostEntity } from '$lib/types/post.type.js';
+	import type { ReviewEntity } from '$lib/types/review.type.js';
+
 	import { getPlainTextFromHtml } from '$lib/shared/utils.js';
-	import type { Petition } from '$lib/types/petition.type.js';
-	import type { Post } from '$lib/types/post.type.js';
-	import type { Review } from '$lib/types/review.type.js';
 
 	let {
 		results,
 		query,
 		page,
 		more
-	}: { results: (Post | Petition | Review)[]; query: string; page: number; more: boolean } =
-		$props();
+	}: {
+		results: (PostEntity | PetitionEntity | ReviewEntity)[];
+		query: string;
+		page: number;
+		more: boolean;
+	} = $props();
 
 	const getSearchPageHref = (page: number): string => {
 		const searchParams = new URLSearchParams({
@@ -21,7 +26,7 @@
 	};
 </script>
 
-{#snippet ResultItem(result: Post | Petition | Review)}
+{#snippet ResultItem(result: PostEntity | PetitionEntity | ReviewEntity)}
 	<div class="result-item container">
 		{#if 'boardId' in result}
 			<a href="/board/{result.boardId}/{result._id}">
@@ -30,7 +35,7 @@
 			</a>
 		{:else if 'courseId' in result}
 			<a href="/review/{result._id}">
-				<h3 class="ellipsis">[강의평가] {result.title}</h3>
+				<h3 class="ellipsis">[강의평] {result.title}</h3>
 				<p class="ellipsis">{getPlainTextFromHtml(result.comment)}</p>
 			</a>
 		{:else}

@@ -1,17 +1,30 @@
 import type { CourseId } from '$lib/types/course.type.js';
 import type { ProfessorId } from '$lib/types/professor.type.js';
-import type { Review, ReviewCreate, ReviewId, ReviewUpdate } from '$lib/types/review.type.js';
+import type {
+	ReviewCreate,
+	ReviewId,
+	ReviewUpdate,
+	Review,
+	ReviewEntity
+} from '$lib/types/review.type.js';
 import type { User } from '$lib/types/user.type.js';
-
-import { hasAnyCapability, hasCapability } from '$lib/shared/permission.js';
 
 import * as CourseService from '$lib/services/course.service.js';
 import * as ProfessorService from '$lib/services/professor.service.js';
 import * as ReviewService from '$lib/services/review.service.js';
+import { hasAnyCapability, hasCapability } from '$lib/shared/permission.js';
 
-async function fillReviews(reviews: Review[]) {
-	const withCourseInfo = await CourseService.attachCourseInfo(reviews);
-	return await ProfessorService.attachProfessorInfo(withCourseInfo);
+export async function fillReviews(reviews: ReviewEntity[]): Promise<Review[]> {
+	const [courseIdToCourse, professorIdToProfessor] = await Promise.all([
+		CourseService.findCourseMapByIds(reviews.map((review) => review.courseId)),
+		ProfessorService.findProfessorMapByIds(reviews.map((review) => review.professorId))
+	]);
+
+	return reviews.map((review) => ({
+		...review,
+		courseName: courseIdToCourse.get(review.courseId.toString())?.name ?? null,
+		professorName: professorIdToProfessor.get(review.professorId.toString())?.name ?? null
+	}));
 }
 
 export async function getReviewFormOptions() {

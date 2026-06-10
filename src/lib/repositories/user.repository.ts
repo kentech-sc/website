@@ -15,10 +15,6 @@ export async function findUserByEmail(email: string): Promise<UserEntity | null>
 	return toPojo<UserEntity | null>(await UserModel.findOne({ email }).lean());
 }
 
-// export async function getUsersByRealName(realName: string): Promise<UserEntity[]> {
-// 	return await UserModel.find({ realName }).lean();
-// }
-
 export async function findUserByNickname(nickname: string): Promise<UserEntity | null> {
 	return toPojo<UserEntity | null>(await UserModel.findOne({ nickname }).lean());
 }
@@ -36,48 +32,13 @@ export async function findUsersByIds(userIds: UserId[]): Promise<Array<UserEntit
 	);
 }
 
-// export async function findUsersByEmails(emails: string[]): Promise<Array<UserEntity | null>> {
-// 	const users = await UserModel.find({ email: { $in: emails } }).lean();
-
-// 	const userByEmail = new Map<string, UserEntity>();
-// 	for (const user of users) {
-// 		userByEmail.set(user.email, user);
-// 	}
-
-// 	return emails.map((email) => userByEmail.get(email) ?? null);
-// }
-
-// export async function findUsersByNicknames(nicknames: string[]): Promise<Array<UserEntity | null>> {
-// 	const users = await UserModel.find({ nickname: { $in: nicknames } }).lean();
-
-// 	const userByNickname = new Map<string, UserEntity>();
-// 	for (const user of users) {
-// 		userByNickname.set(user.nickname, user);
-// 	}
-
-// 	return nicknames.map((nickname) => userByNickname.get(nickname) ?? null);
-// }
-
 export async function updateUserById(userId: UserId, user: UserUpdate): Promise<UserEntity | null> {
 	return toPojo<UserEntity | null>(
 		await UserModel.findOneAndUpdate({ _id: userId }, user, { new: true }).lean()
 	);
 }
 
-export async function incrementUserPointsById(
-	userId: UserId,
-	increment: number
-): Promise<UserEntity | null> {
-	return toPojo<UserEntity | null>(
-		await UserModel.findOneAndUpdate(
-			{ _id: userId },
-			{ $inc: { points: increment } },
-			{ returnDocument: 'after' }
-		).lean()
-	);
-}
-
-// 탈퇴 처리: id와 group을 제외한 필드들을 탈퇴한 사용자임을 명시하는 값으로 변경
+// 탈퇴 처리: 핵심 식별자 외 필드를 탈퇴 사용자 값으로 치환한다.
 export async function deleteUserById(userId: UserId): Promise<boolean> {
 	const deletedUserUpdate = {
 		email: `deleted_${userId}@deleted.com`,

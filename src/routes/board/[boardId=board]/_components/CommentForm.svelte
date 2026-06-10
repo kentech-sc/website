@@ -1,10 +1,9 @@
 <script lang="ts">
 	import type { DisplayType, User } from '$lib/types/user.type.js';
-	import { DisplayType as DisplayTypeValue } from '$lib/types/user.type.js';
-
-	import { createDisplayName } from '$lib/shared/utils.js';
 
 	import CommonForm from '$components/CommonForm.svelte';
+	import { createDisplayName } from '$lib/shared/utils.js';
+	import { DisplayType as DisplayTypeValue } from '$lib/types/user.type.js';
 
 	let { user }: { user: User } = $props();
 

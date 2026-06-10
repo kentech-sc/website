@@ -1,9 +1,8 @@
 import type { User, UserGroup } from '$lib/types/user.type.js';
 
-import { hasCapability } from '$lib/shared/permission.js';
-
 import * as FileMetaService from '$lib/services/file-meta.service.js';
 import * as UserService from '$lib/services/user.service.js';
+import { hasCapability } from '$lib/shared/permission.js';
 
 export function getProfilePermissions(user: User) {
 	return {

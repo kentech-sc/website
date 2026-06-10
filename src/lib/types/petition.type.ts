@@ -1,11 +1,11 @@
 import type { UserId } from './user.type.js';
 
 export const PetitionStatus = {
-	Ongoing: 'ongoing', // 아직 진행 중 (기준 미달)
-	Pending: 'pending', // 기준 충족 → 답변 대기
-	Reviewing: 'reviewing', // 답변 대기 → 검토 중
-	Answered: 'answered', // 답변 완료
-	Expired: 'expired' // 기준 미달 + 기간 만료로 종료
+	Ongoing: 'ongoing',
+	Pending: 'pending',
+	Reviewing: 'reviewing',
+	Answered: 'answered',
+	Expired: 'expired'
 } as const;
 
 export type PetitionStatus = (typeof PetitionStatus)[keyof typeof PetitionStatus];
@@ -33,12 +33,10 @@ export interface PetitionEntity extends PetitionCreate {
 	answeredAt: string | null;
 }
 
-export interface Petition extends PetitionEntity {
-	signCnt: number;
-
+export type Petition = PetitionEntity & {
 	petitionerName: string | null;
 	responderName: string | null;
-}
+};
 
 export interface PetitionPermissions {
 	canDelete: boolean;
@@ -50,17 +48,3 @@ export interface PetitionPermissions {
 	canEditResponse: boolean;
 	canDeleteResponse: boolean;
 }
-
-export type PetitionUpdate = Partial<
-	Pick<
-		PetitionEntity,
-		| 'title'
-		| 'content'
-		| 'status'
-		| 'viewCnt'
-		| 'signedBy'
-		| 'responderId'
-		| 'response'
-		| 'answeredAt'
-	>
->;

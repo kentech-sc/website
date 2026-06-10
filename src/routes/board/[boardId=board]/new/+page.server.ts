@@ -1,10 +1,10 @@
 import { fail, redirect } from '@sveltejs/kit';
 
 import editorActions, { normalizeEditorContent } from '$lib/server/editor.js';
-import { BoardId, type BoardId as BoardIdType } from '$lib/types/board.type.js';
-import { APP_ERROR } from '$lib/shared/rule.js';
-import { DisplayType } from '$lib/types/user.type.js';
 import { AppError, withActionErrorHandling } from '$lib/server/errors.js';
+import { APP_ERROR } from '$lib/shared/rule.js';
+import { BoardId, type BoardId as BoardIdType } from '$lib/types/board.type.js';
+import { DisplayType } from '$lib/types/user.type.js';
 import * as BoardUsecase from '$lib/usecase/board.usecase.js';
 
 export const load = () => {};

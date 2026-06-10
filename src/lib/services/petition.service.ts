@@ -1,31 +1,18 @@
 import type { Page } from '$lib/types/general.type.js';
-import {
-	PetitionStatus,
-	type Petition,
-	type PetitionCreate,
-	type PetitionEntity,
-	type PetitionId,
-	type PetitionUpdate
-} from '$lib/types/petition.type.js';
 import type { User } from '$lib/types/user.type.js';
-
-import { createPage } from '$lib/shared/paginate.js';
-import { APP_ERROR } from '$lib/shared/rule.js';
-import { AppError, assertRule } from '$lib/server/errors.js';
 
 import * as PetitionRepository from '$lib/repositories/petition.repository.js';
 import * as PetitionRule from '$lib/rules/petition.rule.js';
+import { AppError, assertRule } from '$lib/server/errors.js';
+import { createPage } from '$lib/shared/paginate.js';
+import { APP_ERROR } from '$lib/shared/rule.js';
+import {
+	type PetitionCreate,
+	type PetitionEntity,
+	type PetitionId
+} from '$lib/types/petition.type.js';
 
-function toPetition(petitionEntity: PetitionEntity): Petition {
-	return {
-		...petitionEntity,
-		signCnt: petitionEntity.signedBy.length,
-		petitionerName: null,
-		responderName: null
-	};
-}
-
-export function getPetitionPermissions(petition: Petition, user: User) {
+export function getPetitionPermissions(petition: PetitionEntity, user: User) {
 	return {
 		canDelete: PetitionRule.canDeletePetition(petition, user).ok,
 		canSign: PetitionRule.canSignPetition(petition, user).ok,
@@ -41,35 +28,29 @@ export function getPetitionPermissions(petition: Petition, user: User) {
 export async function createPetition(
 	petitionCreate: PetitionCreate,
 	user: User
-): Promise<Petition> {
+): Promise<PetitionEntity> {
 	assertRule(PetitionRule.canCreatePetition(user));
-	return toPetition(await PetitionRepository.createPetition(petitionCreate));
+	return await PetitionRepository.createPetition(petitionCreate);
 }
 
-export async function getPetitionById(petitionId: PetitionId): Promise<Petition> {
-	const doc = await PetitionRepository.findPetitionById(petitionId);
-	if (!doc) throw new AppError(APP_ERROR.NOT_FOUND, '존재하지 않는 청원입니다.');
-	return await refreshStatusByPetition(toPetition(doc));
+export async function getPetitionById(petitionId: PetitionId): Promise<PetitionEntity> {
+	const petition = await PetitionRepository.findPetitionById(petitionId);
+	if (!petition) throw new AppError(APP_ERROR.NOT_FOUND, '존재하지 않는 청원입니다.');
+	return await refreshStatusByPetition(petition);
 }
 
-export async function getPetitionPage(limit = 10, skip = 0): Promise<Page<Petition>> {
+export async function getPetitionPage(limit = 10, skip = 0): Promise<Page<PetitionEntity>> {
 	const [result, totalCount] = await Promise.all([
 		PetitionRepository.findRecentPetitions(limit, skip),
 		PetitionRepository.countPetitions()
 	]);
-	return createPage<Petition>(result.map(toPetition), totalCount, limit, skip);
+	return createPage<PetitionEntity>(result, totalCount, limit, skip);
 }
 
-export async function updatePetitionById(
+export async function deletePetitionById(
 	petitionId: PetitionId,
-	petition: PetitionUpdate
-): Promise<Petition> {
-	const updatedPetition = await PetitionRepository.updatePetitionById(petitionId, petition);
-	if (!updatedPetition) throw new AppError(APP_ERROR.NOT_FOUND, '존재하지 않는 청원입니다.');
-	return toPetition(updatedPetition);
-}
-
-export async function deletePetitionById(petitionId: PetitionId, user: User): Promise<Petition> {
+	user: User
+): Promise<PetitionEntity> {
 	const petition = await getPetitionById(petitionId);
 	assertRule(PetitionRule.canDeletePetition(petition, user));
 
@@ -79,13 +60,16 @@ export async function deletePetitionById(petitionId: PetitionId, user: User): Pr
 	return petition;
 }
 
-export async function viewPetitionById(petitionId: PetitionId): Promise<Petition> {
+export async function viewPetitionById(petitionId: PetitionId): Promise<PetitionEntity> {
 	const petition = await PetitionRepository.viewPetitionById(petitionId);
 	if (!petition) throw new AppError(APP_ERROR.NOT_FOUND, '존재하지 않는 청원입니다.');
-	return toPetition(petition);
+	return await refreshStatusByPetition(petition);
 }
 
-export async function signPetitionById(petitionId: PetitionId, user: User): Promise<Petition> {
+export async function signPetitionById(
+	petitionId: PetitionId,
+	user: User
+): Promise<PetitionEntity> {
 	const petition = await getPetitionById(petitionId);
 	assertRule(PetitionRule.canSignPetition(petition, user));
 
@@ -94,10 +78,13 @@ export async function signPetitionById(petitionId: PetitionId, user: User): Prom
 		throw new AppError(APP_ERROR.INVALID_STATE, '청원 상태가 변경되어 서명할 수 없습니다.');
 	}
 
-	return toPetition(updatedPetition);
+	return updatedPetition;
 }
 
-export async function unsignPetitionById(petitionId: PetitionId, user: User): Promise<Petition> {
+export async function unsignPetitionById(
+	petitionId: PetitionId,
+	user: User
+): Promise<PetitionEntity> {
 	const petition = await getPetitionById(petitionId);
 	assertRule(PetitionRule.canUnsignPetition(petition, user));
 
@@ -106,83 +93,117 @@ export async function unsignPetitionById(petitionId: PetitionId, user: User): Pr
 		throw new AppError(APP_ERROR.INVALID_STATE, '청원 상태가 변경되어 서명을 취소할 수 없습니다.');
 	}
 
-	return toPetition(updatedPetition);
+	return updatedPetition;
 }
 
-export async function reviewPetitionById(petitionId: PetitionId, user: User): Promise<Petition> {
+export async function reviewPetitionById(
+	petitionId: PetitionId,
+	user: User
+): Promise<PetitionEntity> {
 	const petition = await getPetitionById(petitionId);
 	assertRule(PetitionRule.canReviewPetition(petition, user));
 
-	return toPetition(await updatePetitionById(petitionId, { status: PetitionStatus.Reviewing }));
+	const updatedPetition = await PetitionRepository.reviewPetitionById(petitionId);
+	if (!updatedPetition) {
+		throw new AppError(APP_ERROR.INVALID_STATE, '청원 상태가 변경되어 검토할 수 없습니다.');
+	}
+
+	return updatedPetition;
 }
 
-export async function unreviewPetitionById(petitionId: PetitionId, user: User): Promise<Petition> {
+export async function unreviewPetitionById(
+	petitionId: PetitionId,
+	user: User
+): Promise<PetitionEntity> {
 	const petition = await getPetitionById(petitionId);
 	assertRule(PetitionRule.canUnreviewPetition(petition, user));
 
-	return toPetition(await updatePetitionById(petitionId, { status: PetitionStatus.Pending }));
+	const updatedPetition = await PetitionRepository.unreviewPetitionById(petitionId);
+	if (!updatedPetition) {
+		throw new AppError(APP_ERROR.INVALID_STATE, '청원 상태가 변경되어 검토를 취소할 수 없습니다.');
+	}
+
+	return updatedPetition;
 }
 
 export async function responseToPetitionById(
 	petitionId: PetitionId,
 	responder: User,
 	response: string
-): Promise<Petition> {
+): Promise<PetitionEntity> {
 	const petition = await getPetitionById(petitionId);
 	assertRule(PetitionRule.canRespondToPetition(petition, responder));
 
-	return await updatePetitionById(petitionId, {
-		responderId: responder._id,
+	const updatedPetition = await PetitionRepository.respondToPetitionById(
+		petitionId,
+		responder._id,
 		response,
-		status: PetitionStatus.Answered,
-		answeredAt: new Date().toISOString()
-	});
+		new Date().toISOString()
+	);
+	if (!updatedPetition) {
+		throw new AppError(APP_ERROR.INVALID_STATE, '청원 상태가 변경되어 응답할 수 없습니다.');
+	}
+
+	return updatedPetition;
 }
 
 export async function reviseResponseById(
 	petitionId: PetitionId,
 	responder: User,
 	response: string
-): Promise<Petition> {
+): Promise<PetitionEntity> {
 	const petition = await getPetitionById(petitionId);
 	assertRule(PetitionRule.canReviseResponse(petition, responder));
 
-	return await updatePetitionById(petitionId, {
+	const updatedPetition = await PetitionRepository.revisePetitionResponseById(
+		petitionId,
+		responder._id,
 		response,
-		responderId: responder._id,
-		answeredAt: new Date().toISOString()
-	});
+		new Date().toISOString()
+	);
+	if (!updatedPetition) {
+		throw new AppError(APP_ERROR.INVALID_STATE, '청원 상태가 변경되어 응답을 수정할 수 없습니다.');
+	}
+
+	return updatedPetition;
 }
 
 export async function deleteResponseById(
 	petitionId: PetitionId,
 	responder: User
-): Promise<Petition> {
+): Promise<PetitionEntity> {
 	const petition = await getPetitionById(petitionId);
 	assertRule(PetitionRule.canDeleteResponse(petition, responder));
 
-	return await updatePetitionById(petitionId, {
-		responderId: null,
-		response: null,
-		status: PetitionStatus.Reviewing,
-		answeredAt: null
-	});
-}
-
-export async function refreshStatusByPetition(petition: Petition): Promise<Petition> {
-	const nextStatus = PetitionRule.getNextStatus(petition);
-	if (nextStatus !== petition.status) {
-		return await updatePetitionById(petition._id, { status: nextStatus });
+	const updatedPetition = await PetitionRepository.deletePetitionResponseById(petitionId);
+	if (!updatedPetition) {
+		throw new AppError(APP_ERROR.INVALID_STATE, '청원 상태가 변경되어 응답을 삭제할 수 없습니다.');
 	}
 
-	return petition;
+	return updatedPetition;
+}
+
+async function refreshStatusByPetition(petition: PetitionEntity): Promise<PetitionEntity> {
+	const nextStatus = PetitionRule.getNextStatus(petition);
+	if (nextStatus === petition.status) return petition;
+
+	const refreshedPetition = await PetitionRepository.refreshPetitionStatusById(
+		petition._id,
+		petition.status,
+		petition.signedBy,
+		nextStatus
+	);
+	if (refreshedPetition) return refreshedPetition;
+
+	const latestPetition = await PetitionRepository.findPetitionById(petition._id);
+	if (!latestPetition) throw new AppError(APP_ERROR.NOT_FOUND, '존재하지 않는 청원입니다.');
+	return latestPetition;
 }
 
 export async function searchPetitionsByQuery(
 	query: string,
 	page = 1,
 	limit = 10
-): Promise<{ items: Petition[]; more: boolean }> {
-	const { items, more } = await PetitionRepository.searchPetitionsByQuery(query, page, limit);
-	return { items: items.map(toPetition), more };
+): Promise<{ items: PetitionEntity[]; more: boolean }> {
+	return await PetitionRepository.searchPetitionsByQuery(query, page, limit);
 }

@@ -1,8 +1,7 @@
 <script lang="ts">
-	import MobileListItem from '$components/MobileListItem.svelte';
-
 	import type { Review } from '$lib/types/review.type.js';
 
+	import MobileListItem from '$components/MobileListItem.svelte';
 	import { parseDate, parseRelativeDate } from '$lib/shared/utils.js';
 	import { translatedTerm } from '$lib/shared/view.js';
 
@@ -13,7 +12,7 @@
 	<tr>
 		<td><a href={`/review/${review._id}`}>"{review.title}"</a></td>
 		<td>{review.professorName}</td>
-		<td>{review.year}학년도 {translatedTerm[review.term]}학기</td>
+		<td>{review.year}년 {translatedTerm[review.term]}학기</td>
 		<td>{parseDate(review.createdAt, 'date')}</td>
 	</tr>
 {/snippet}
@@ -28,7 +27,7 @@
 	<thead>
 		<tr>
 			<th>한줄평</th>
-			<th>교수님</th>
+			<th>교수명</th>
 			<th>수강 학기</th>
 			<th>작성일</th>
 		</tr>
@@ -36,7 +35,7 @@
 	<tbody>
 		{#if reviews.length === 0}
 			<tr>
-				<td colspan="4">작성된 평가가 없습니다.</td>
+				<td colspan="4">작성된 강의평이 없습니다.</td>
 			</tr>
 		{:else}
 			{#each reviews as review (review._id)}
@@ -48,7 +47,7 @@
 
 <div class="mobile-list">
 	{#if reviews.length === 0}
-		<p class="empty">작성된 평가가 없습니다.</p>
+		<p class="empty">작성된 강의평이 없습니다.</p>
 	{:else}
 		{#each reviews as review (review._id)}
 			<MobileListItem href={`/review/${review._id}`}>
@@ -57,7 +56,7 @@
 				{/snippet}
 				{#snippet row2()}
 					<span class="meta"
-						>{review.professorName} · {review.year}학년도 {translatedTerm[review.term]}학기</span
+						>{review.professorName} | {review.year}년 {translatedTerm[review.term]}학기</span
 					>
 					<span class="time">{parseRelativeDate(review.createdAt)}</span>
 				{/snippet}

@@ -9,5 +9,3 @@ export interface ProfessorEntity extends ProfessorCreate {
 }
 
 export type Professor = ProfessorEntity;
-
-export type ProfessorUpdate = Partial<Pick<ProfessorEntity, 'name'>>;

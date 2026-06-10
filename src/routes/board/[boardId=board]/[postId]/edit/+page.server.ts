@@ -1,9 +1,10 @@
 import { fail, redirect } from '@sveltejs/kit';
 
-import editorActions, { normalizeEditorContent } from '$lib/server/editor.js';
 import type { PostId } from '$lib/types/post.type.js';
-import { DisplayType } from '$lib/types/user.type.js';
+
+import editorActions, { normalizeEditorContent } from '$lib/server/editor.js';
 import { withActionErrorHandling, withLoadErrorHandling } from '$lib/server/errors.js';
+import { DisplayType } from '$lib/types/user.type.js';
 import * as BoardUsecase from '$lib/usecase/board.usecase.js';
 
 export const load = withLoadErrorHandling(async ({ params, locals }) => {

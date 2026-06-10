@@ -1,8 +1,8 @@
 <script lang="ts">
-	import type { Review } from '$lib/types/review.type.js';
-
 	import ReviewArticle from '../_components/ReviewArticle.svelte';
 	import ReviewHeader from '../_components/ReviewHeader.svelte';
+
+	import type { Review } from '$lib/types/review.type.js';
 
 	let { data } = $props();
 	const review = $derived<Review>(data.review);

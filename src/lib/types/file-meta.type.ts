@@ -1,5 +1,5 @@
-import type { PostId } from './post.type';
 import type { PetitionId } from './petition.type';
+import type { PostId } from './post.type';
 
 export type FileId = string;
 export type FileKey = string;
@@ -21,5 +21,3 @@ export interface FileMetaEntity extends FileMetaCreate {
 export interface FileMeta extends FileMetaEntity {
 	path: string;
 }
-
-export type FileMetaUpdate = Partial<Pick<FileMetaEntity, 'articleIds'>>;

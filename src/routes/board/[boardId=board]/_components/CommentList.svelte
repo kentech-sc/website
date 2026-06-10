@@ -1,9 +1,8 @@
 <script lang="ts">
-	import CommonForm from '$components/CommonForm.svelte';
-
 	import type { Comment, CommentPermissionMap } from '$lib/types/comment.type.js';
 	import type { UserId } from '$lib/types/user.type.js';
 
+	import CommonForm from '$components/CommonForm.svelte';
 	import { parseDate } from '$lib/shared/utils.js';
 
 	let {

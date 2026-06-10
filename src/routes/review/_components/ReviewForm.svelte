@@ -1,11 +1,10 @@
 <script lang="ts">
-	import CommonForm from '$components/CommonForm.svelte';
-	import StarRating from '$components/StarRating.svelte';
-
 	import type { Course } from '$lib/types/course.type.js';
 	import type { Professor } from '$lib/types/professor.type.js';
 	import type { Review } from '$lib/types/review.type.js';
 
+	import CommonForm from '$components/CommonForm.svelte';
+	import StarRating from '$components/StarRating.svelte';
 	import { translatedTerm } from '$lib/shared/view.js';
 
 	let {
@@ -92,7 +91,7 @@
 						<select id="year" name="year" required value={review?.year}>
 							<option value="">선택</option>
 							{#each Array.from({ length: new Date().getFullYear() - 2021 }, (_, i) => 22 + i) as year (year)}
-								<option value={year}>{year}년도</option>
+								<option value={year}>{year}년</option>
 							{/each}
 						</select>
 					</div>
@@ -109,7 +108,7 @@
 				</div>
 			</div>
 
-			<label for="title">한줄평</label>
+			<label for="title">제목</label>
 			<input type="text" id="title" name="title" required value={review?.title} maxlength="100" />
 
 			<label for="comment">내용</label>

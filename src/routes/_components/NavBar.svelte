@@ -1,14 +1,13 @@
 <script lang="ts">
-	import favicon from '$assets/top_logo_white.png';
+	import CircleUserRound_img from '@lucide/svelte/icons/circle-user-round';
+	import Menu_img from '@lucide/svelte/icons/menu';
+	import Search_img from '@lucide/svelte/icons/search';
+	import X_img from '@lucide/svelte/icons/x';
+	import { cubicOut } from 'svelte/easing';
+	import { fly, fade } from 'svelte/transition';
 
 	import { page } from '$app/state';
-
-	import Search_img from '@lucide/svelte/icons/search';
-	import Menu_img from '@lucide/svelte/icons/menu';
-	import X_img from '@lucide/svelte/icons/x';
-	import CircleUserRound_img from '@lucide/svelte/icons/circle-user-round';
-	import { fly, fade } from 'svelte/transition';
-	import { cubicOut } from 'svelte/easing';
+	import favicon from '$assets/top_logo_white.png';
 
 	const user = $derived(page.data.user);
 

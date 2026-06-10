@@ -1,31 +1,31 @@
 <script lang="ts">
 	import '$style/nmu.scss';
 
-	import StarterKit from '@tiptap/starter-kit';
-	import { Color } from '@tiptap/extension-color';
-	import { TextStyle, FontSize } from '@tiptap/extension-text-style';
-	import TextAlign from '@tiptap/extension-text-align';
-	import { Editor } from '@tiptap/core';
-
-	import type { ActionResult } from '@sveltejs/kit';
-	import { deserialize } from '$app/forms';
-	import type { FileMeta, FileId } from '$lib/types/file-meta.type';
-	import { onDestroy, onMount } from 'svelte';
-
 	import Bold from '@lucide/svelte/icons/bold';
-	import Italic from '@lucide/svelte/icons/italic';
-	import Strikethrough from '@lucide/svelte/icons/strikethrough';
 	import Code from '@lucide/svelte/icons/code';
+	import Code2 from '@lucide/svelte/icons/code-2';
+	import Italic from '@lucide/svelte/icons/italic';
 	import List from '@lucide/svelte/icons/list';
 	import ListOrdered from '@lucide/svelte/icons/list-ordered';
-	import Code2 from '@lucide/svelte/icons/code-2';
 	import Quote from '@lucide/svelte/icons/message-square-quote';
 	import Minus from '@lucide/svelte/icons/minus';
+	import Strikethrough from '@lucide/svelte/icons/strikethrough';
 	import UnderlineIcon from '@lucide/svelte/icons/underline';
 	import Upload from '@lucide/svelte/icons/upload';
+	import { Editor } from '@tiptap/core';
+	import { Color } from '@tiptap/extension-color';
+	import TextAlign from '@tiptap/extension-text-align';
+	import { TextStyle, FontSize } from '@tiptap/extension-text-style';
+	import StarterKit from '@tiptap/starter-kit';
+	import { onDestroy, onMount } from 'svelte';
+	import { SvelteSet } from 'svelte/reactivity';
 
 	import { CustomImage } from './CustomImage.js';
-	import { SvelteSet } from 'svelte/reactivity';
+
+	import type { FileMeta, FileId } from '$lib/types/file-meta.type';
+	import type { ActionResult } from '@sveltejs/kit';
+
+	import { deserialize } from '$app/forms';
 
 	type SelectionHint = { from: number; to: number };
 	const IMAGE_INSERTION_FAILURE_MESSAGE = '이미지 업로드는 완료됐지만 본문 삽입에 실패했습니다.';
@@ -247,7 +247,9 @@
 
 					if (!hasPastedImageFile && !pastedHtml) return false;
 
-					const parsedHtml = pastedHtml ? new DOMParser().parseFromString(pastedHtml, 'text/html') : null;
+					const parsedHtml = pastedHtml
+						? new DOMParser().parseFromString(pastedHtml, 'text/html')
+						: null;
 					const pastedImages = Array.from(parsedHtml?.querySelectorAll('img') ?? []);
 					const hasBlockedHtmlImage = pastedImages.some(
 						(imageElement) => !imageElement.getAttribute('data-file-id')
@@ -487,11 +489,7 @@
 				onchange={handleFileUpload}
 				style="display: none"
 			/>
-			<button
-				type="button"
-				onmousedown={handleUploadButtonMouseDown}
-				onclick={prepareFileUpload}
-			>
+			<button type="button" onmousedown={handleUploadButtonMouseDown} onclick={prepareFileUpload}>
 				<Upload size="1rem" />
 			</button>
 		</div>

@@ -1,8 +1,9 @@
 <script lang="ts">
-	import { invalidateAll } from '$app/navigation';
-	import type { ActionResult } from '@sveltejs/kit';
 	import Trash2 from '@lucide/svelte/icons/trash-2';
 
+	import type { ActionResult } from '@sveltejs/kit';
+
+	import { invalidateAll } from '$app/navigation';
 	import CommonForm from '$components/CommonForm.svelte';
 
 	let submitBtn: HTMLButtonElement;
@@ -27,12 +28,12 @@
 	<div class="delete-form">
 		<div class="warning-message error">
 			<div class="warning-content">
-				<h4>탈퇴 시 주의사항</h4>
+				<h4>탈퇴 전 주의사항</h4>
 				<ul>
 					<li>계정 탈퇴는 되돌릴 수 없습니다.</li>
-					<li>개인정보는 즉시 파기되나, 식별 정보는 6개월간 보관됩니다.</li>
+					<li>개인정보는 즉시 파기되나, 일부 기록 정보는 6개월간 보관됩니다.</li>
 					<li>게시글 및 댓글은 "탈퇴한 사용자"로 표시됩니다.</li>
-					<li>중요한 정보는 탈퇴 전 직접 삭제하시기 바랍니다.</li>
+					<li>중요한 첨부파일은 탈퇴 전 직접 삭제해 주시기 바랍니다.</li>
 				</ul>
 			</div>
 		</div>

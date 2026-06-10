@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+
 import type { CourseEntity } from '$lib/types/course.type.js';
 
 const CourseSchema = new mongoose.Schema<CourseEntity>({

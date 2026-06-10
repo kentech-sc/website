@@ -1,7 +1,6 @@
-import { BoardId, type BoardId as BoardIdType } from '$lib/types/board.type.js';
-
-import { APP_ERROR } from '$lib/shared/rule.js';
 import { AppError, withLoadErrorHandling } from '$lib/server/errors.js';
+import { APP_ERROR } from '$lib/shared/rule.js';
+import { BoardId, type BoardId as BoardIdType } from '$lib/types/board.type.js';
 import * as BoardUsecase from '$lib/usecase/board.usecase.js';
 
 export const load = withLoadErrorHandling(async ({ url, params, locals }) => {

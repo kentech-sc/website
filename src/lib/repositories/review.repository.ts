@@ -1,11 +1,9 @@
-import type { FilterQuery } from 'mongoose';
-
-import type { ReviewEntity, ReviewCreate, ReviewUpdate, ReviewId } from '$lib/types/review.type.js';
 import type { CourseId } from '$lib/types/course.type.js';
 import type { ProfessorId } from '$lib/types/professor.type.js';
+import type { ReviewEntity, ReviewCreate, ReviewUpdate, ReviewId } from '$lib/types/review.type.js';
+import type { FilterQuery } from 'mongoose';
 
 import { ReviewModel } from '$lib/models/review.model.js';
-
 import { toPojo } from '$lib/shared/utils.js';
 
 export async function countReviews(
@@ -54,16 +52,6 @@ export async function updateReviewById(
 
 export async function deleteReviewById(reviewId: ReviewId): Promise<boolean> {
 	const res = await ReviewModel.deleteOne({ _id: reviewId });
-	return res.deletedCount > 0;
-}
-
-export async function deleteAllReviewsByCourseId(courseId: CourseId): Promise<boolean> {
-	const res = await ReviewModel.deleteMany({ courseId });
-	return res.deletedCount > 0;
-}
-
-export async function deleteAllReviewsByProfessorId(professorId: ProfessorId): Promise<boolean> {
-	const res = await ReviewModel.deleteMany({ professorId });
 	return res.deletedCount > 0;
 }
 

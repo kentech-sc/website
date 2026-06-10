@@ -3,7 +3,6 @@ import type { PostId, PostCreate, PostUpdate, PostEntity } from '$lib/types/post
 import type { UserId } from '$lib/types/user.type.js';
 
 import { PostModel } from '$lib/models/post.model.js';
-
 import { toPojo } from '$lib/shared/utils.js';
 
 export async function countPostsByBoardId(boardId: BoardId): Promise<number> {
@@ -67,17 +66,12 @@ export async function deletePostById(postId: PostId): Promise<boolean> {
 	return res.deletedCount > 0;
 }
 
-export async function deleteAllPostsByBoardId(boardId: BoardId): Promise<boolean> {
-	const res = await PostModel.deleteMany({ boardId });
-	return res.deletedCount > 0;
-}
-
 export async function likePostById(postId: PostId, userId: UserId): Promise<PostEntity | null> {
 	return toPojo<PostEntity | null>(
 		await PostModel.findOneAndUpdate(
 			{
 				_id: postId,
-				likedBy: { $ne: userId } // write-guard for UX performance - prevent double liking
+				likedBy: { $ne: userId } // atomic precondition - prevent stale double-like writes
 			},
 			{ $addToSet: { likedBy: userId } },
 			{ returnDocument: 'after' }
@@ -88,7 +82,10 @@ export async function likePostById(postId: PostId, userId: UserId): Promise<Post
 export async function unlikePostById(postId: PostId, userId: UserId): Promise<PostEntity | null> {
 	return toPojo<PostEntity | null>(
 		await PostModel.findOneAndUpdate(
-			{ _id: postId },
+			{
+				_id: postId,
+				likedBy: userId // atomic precondition - prevent stale unlike writes
+			},
 			{ $pull: { likedBy: userId } },
 			{ returnDocument: 'after' }
 		).lean()

@@ -1,4 +1,5 @@
 import type { User } from '$lib/types/user.type.js';
+
 import { hasCapability } from '$lib/shared/permission.js';
 import { APP_ERROR, ok, ruleFail, type RuleResult } from '$lib/shared/rule.js';
 

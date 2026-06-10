@@ -1,19 +1,14 @@
 <script lang="ts">
-	import { page } from '$app/state';
-
-	import CommonListBtnModule from '$components/CommonListBtnModule.svelte';
-	import FileAttachmentIcons from '$components/FileAttachmentIcons.svelte';
-	import MobileListItem from '$components/MobileListItem.svelte';
-
 	import type { FilePresence, Page } from '$lib/types/general.type.js';
 	import type { Post } from '$lib/types/post.type.js';
 
+	import { page } from '$app/state';
+	import CommonListBtnModule from '$components/CommonListBtnModule.svelte';
+	import FileAttachmentIcons from '$components/FileAttachmentIcons.svelte';
+	import MobileListItem from '$components/MobileListItem.svelte';
 	import { parseDate, parseRelativeDate } from '$lib/shared/utils.js';
 
-	let {
-		postPage,
-		filePresence,
-	}: { postPage: Page<Post>; filePresence: FilePresence } = $props();
+	let { postPage, filePresence }: { postPage: Page<Post>; filePresence: FilePresence } = $props();
 
 	const boardId = $derived(page.params.boardId);
 </script>
@@ -31,7 +26,7 @@
 		<td>{post.displayName}</td>
 		<td>{parseDate(post.createdAt)}</td>
 		<td>{post.viewCnt}</td>
-		<td>{post.likeCnt}</td>
+		<td>{post.likedBy.length}</td>
 	</tr>
 {/snippet}
 
@@ -49,7 +44,7 @@
 				<th>제목</th>
 				<th>작성자</th>
 				<th>작성일</th>
-				<th>조회수</th>
+				<th>조회</th>
 				<th>좋아요</th>
 			</tr>
 		</thead>
@@ -76,7 +71,9 @@
 				{/if}
 			{/snippet}
 			{#snippet row2()}
-				<span class="meta">{post.displayName} · 조회 {post.viewCnt} · 좋아요 {post.likeCnt}</span>
+				<span class="meta"
+					>{post.displayName} | 조회 {post.viewCnt} | 좋아요 {post.likedBy.length}</span
+				>
 				<span class="time">{parseRelativeDate(post.createdAt)}</span>
 			{/snippet}
 		</MobileListItem>

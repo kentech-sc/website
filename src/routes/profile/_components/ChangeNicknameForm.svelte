@@ -1,8 +1,9 @@
 <script lang="ts">
-	import { invalidateAll } from '$app/navigation';
-	import type { ActionResult } from '@sveltejs/kit';
 	import User from '@lucide/svelte/icons/user';
 
+	import type { ActionResult } from '@sveltejs/kit';
+
+	import { invalidateAll } from '$app/navigation';
 	import CommonForm from '$components/CommonForm.svelte';
 
 	let formResult = $state<ActionResult | null>(null);
@@ -102,7 +103,6 @@
 			}
 		}
 	}
-
 
 	@media (max-width: 768px) {
 		.form-content {

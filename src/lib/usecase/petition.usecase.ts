@@ -2,42 +2,44 @@ import mongoose from 'mongoose';
 
 import type { FileId } from '$lib/types/file-meta.type.js';
 import type { FilePresence } from '$lib/types/general.type.js';
-import type { Petition, PetitionId } from '$lib/types/petition.type.js';
-import { DisplayType, type User, type UserId } from '$lib/types/user.type.js';
-
-import { hasCapability } from '$lib/shared/permission.js';
-import { createDisplayName } from '$lib/shared/utils.js';
+import type { PetitionId } from '$lib/types/petition.type.js';
+import type { Petition, PetitionEntity } from '$lib/types/petition.type.js';
 
 import * as FileMetaService from '$lib/services/file-meta.service.js';
 import * as PetitionService from '$lib/services/petition.service.js';
 import * as UserService from '$lib/services/user.service.js';
+import { hasCapability } from '$lib/shared/permission.js';
+import { createDisplayName } from '$lib/shared/utils.js';
+import { DisplayType, type User, type UserId } from '$lib/types/user.type.js';
 
-async function getSignersRealNamesByPetition(petition: Petition): Promise<string[]> {
-	const users = await UserService.findUsersByIds(petition.signedBy);
-	return users
-		.map((user) => (user ? createDisplayName(user, DisplayType.RealName) : null))
-		.filter((name): name is string => name !== null);
+function collectPetitionUserIds(
+	petitions: PetitionEntity[],
+	extraUserIds: UserId[] = []
+): Array<UserId> {
+	return [
+		...petitions.map((petition) => petition.petitionerId),
+		...petitions
+			.filter((petition) => petition.responderId !== null)
+			.map((petition) => petition.responderId as UserId),
+		...extraUserIds
+	];
 }
 
-async function fillRealNamesForPetitions(petitions: Petition[]): Promise<Petition[]> {
-	const petitionerIds = petitions.map((petition) => petition.petitionerId);
-	const responderIds = petitions
-		.filter((petition) => petition.responderId !== null)
-		.map((petition) => petition.responderId as UserId);
+export async function findPetitionUserMap(
+	petitions: PetitionEntity[],
+	extraUserIds: UserId[] = []
+): Promise<Map<string, User>> {
+	return await UserService.findUserMapByIds(collectPetitionUserIds(petitions, extraUserIds));
+}
 
-	const petitioners = await UserService.findUsersByIds(petitionerIds);
-	const responders = await UserService.findUsersByIds(responderIds);
-
-	const petitionerByUserId = new Map(
-		petitionerIds.map((id, index) => [id.toString(), petitioners[index]])
-	);
-	const responderByUserId = new Map(
-		responderIds.map((id, index) => [id.toString(), responders[index]])
-	);
-
+export function attachPetitionNames(
+	petitions: PetitionEntity[],
+	userIdToUser: Map<string, User>
+): Petition[] {
 	return petitions.map((petition) => {
-		const petitioner = petitionerByUserId.get(petition.petitionerId.toString());
-		const responder = responderByUserId.get((petition.responderId ?? '').toString());
+		const petitioner = userIdToUser.get(petition.petitionerId.toString());
+		const responder =
+			petition.responderId === null ? undefined : userIdToUser.get(petition.responderId.toString());
 
 		return {
 			...petition,
@@ -47,29 +49,31 @@ async function fillRealNamesForPetitions(petitions: Petition[]): Promise<Petitio
 	});
 }
 
+function getSignerNames(petition: PetitionEntity, userIdToUser: Map<string, User>): string[] {
+	return petition.signedBy
+		.map((userId) => {
+			const user = userIdToUser.get(userId.toString());
+			return user ? createDisplayName(user, DisplayType.RealName) : null;
+		})
+		.filter((name): name is string => name !== null);
+}
+
 export async function getPetitionPageView(page: number, user: User) {
 	const limit = 10;
 	const skip = (page - 1) * limit;
 
 	const petitionsResult = await PetitionService.getPetitionPage(limit, skip);
-	const petitions = await fillRealNamesForPetitions(petitionsResult.items);
-
-	const filePresenceEntries = await Promise.all(
-		petitions.map(async (petition) => {
-			const files = await FileMetaService.getFileMetasByArticleId(petition._id);
-			return [
-				petition._id.toString(),
-				{
-					hasImage: files.some((file) => file.mime.startsWith('image/')),
-					hasFile: files.some((file) => !file.mime.startsWith('image/'))
-				}
-			] as const;
-		})
-	);
+	const [userIdToUser, filePresence] = await Promise.all([
+		findPetitionUserMap(petitionsResult.items),
+		FileMetaService.getFilePresenceByArticleIds(
+			petitionsResult.items.map((petition) => petition._id)
+		)
+	]);
+	const petitions = attachPetitionNames(petitionsResult.items, userIdToUser);
 
 	return {
 		petitions,
-		filePresence: Object.fromEntries(filePresenceEntries) as FilePresence,
+		filePresence: filePresence as FilePresence,
 		currentPage: petitionsResult.currentPage,
 		totalPages: petitionsResult.totalPages,
 		hasPrev: petitionsResult.hasPrev,
@@ -83,14 +87,16 @@ export async function getPetitionDetail(
 	user: User,
 	options?: { incrementView?: boolean }
 ) {
-	if (options?.incrementView !== false) {
-		await PetitionService.viewPetitionById(petitionId);
-	}
-
-	const petitionRaw = await PetitionService.getPetitionById(petitionId);
-	const petition = (await fillRealNamesForPetitions([petitionRaw]))[0];
-	const signersNames = await getSignersRealNamesByPetition(petition);
-	const files = await FileMetaService.getFileMetasByArticleId(petitionId);
+	const petitionRaw =
+		options?.incrementView !== false
+			? await PetitionService.viewPetitionById(petitionId)
+			: await PetitionService.getPetitionById(petitionId);
+	const [userIdToUser, files] = await Promise.all([
+		findPetitionUserMap([petitionRaw], petitionRaw.signedBy),
+		FileMetaService.getFileMetasByArticleId(petitionId)
+	]);
+	const [petition] = attachPetitionNames([petitionRaw], userIdToUser);
+	const signersNames = getSignerNames(petitionRaw, userIdToUser);
 
 	return {
 		petition,

@@ -2,22 +2,21 @@
 	import Calendar from '@lucide/svelte/icons/calendar';
 	import Clock from '@lucide/svelte/icons/clock';
 
-	import CommonForm from '$components/CommonForm.svelte';
-	import StarRating from '$components/StarRating.svelte';
-
 	import type { Review, ReviewPermissions } from '$lib/types/review.type.js';
 
+	import CommonForm from '$components/CommonForm.svelte';
+	import StarRating from '$components/StarRating.svelte';
 	import { parseDate } from '$lib/shared/utils.js';
 	import { translatedTerm } from '$lib/shared/view.js';
 
 	let { review, permissions }: { review: Review; permissions: ReviewPermissions } = $props();
 
 	function getAmountLabel(value: number): string {
-		if (value <= 1) return '아주 적음';
+		if (value <= 1) return '매우 적음';
 		if (value <= 2) return '적음';
 		if (value <= 3) return '보통';
 		if (value <= 4) return '많음';
-		return '아주 많음';
+		return '매우 많음';
 	}
 
 	function getDifficultyLabel(value: number): string {
@@ -72,16 +71,16 @@
 	<div id="score">
 		<div class="container score-labels">
 			<p>
-				<b>과제 양:</b> <span class="label-value">{getAmountLabel(review.score.assignment)}</span>
+				<b>과제 양</b> <span class="label-value">{getAmountLabel(review.score.assignment)}</span>
 			</p>
 			<p>
-				<b>강의 난이도:</b>
+				<b>강의 난이도</b>
 				<span class="label-value">{getDifficultyLabel(review.score.lecture)}</span>
 			</p>
-			<p><b>시험 횟수:</b> <span class="label-value">{getAmountLabel(review.score.exam)}</span></p>
+			<p><b>시험 횟수</b> <span class="label-value">{getAmountLabel(review.score.exam)}</span></p>
 		</div>
 		<div class="container score-satisfaction">
-			<p><b>만족도:</b> <StarRating score={review.score.satisfaction} /></p>
+			<p><b>만족도</b> <StarRating score={review.score.satisfaction} /></p>
 		</div>
 	</div>
 </article>
@@ -123,6 +122,10 @@
 
 	.delete-form {
 		width: fit-content;
+
+		button {
+			font-weight: bold;
+		}
 	}
 
 	.time-info {

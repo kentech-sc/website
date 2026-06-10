@@ -1,9 +1,9 @@
 <script lang="ts">
+	import GridSection from './_components/GridSection.svelte';
+
 	import type { Petition } from '$lib/types/petition.type.js';
 	import type { Post } from '$lib/types/post.type.js';
 	import type { Review } from '$lib/types/review.type.js';
-
-	import GridSection from './_components/GridSection.svelte';
 
 	let { data } = $props();
 
@@ -11,7 +11,6 @@
 	const freePosts = $derived<Post[]>(data.freePosts);
 	const noticePosts = $derived<Post[]>(data.noticePosts);
 	const petitions = $derived<Petition[]>(data.petitions);
-
 </script>
 
 <div id="grid-container">

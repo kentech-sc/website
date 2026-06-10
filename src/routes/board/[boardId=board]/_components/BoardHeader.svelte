@@ -1,9 +1,8 @@
 <script lang="ts">
-	import { page } from '$app/state';
-
 	import Pen from '@lucide/svelte/icons/pencil';
 	import List from '@lucide/svelte/icons/text';
 
+	import { page } from '$app/state';
 	import LinkButton from '$components/LinkButton.svelte';
 
 	let { pageType, canCreatePost = false }: { pageType: string; canCreatePost?: boolean } = $props();

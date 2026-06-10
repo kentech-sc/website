@@ -1,6 +1,7 @@
 <script lang="ts">
-	import { page } from '$app/state';
 	import { SvelteURLSearchParams } from 'svelte/reactivity';
+
+	import { page } from '$app/state';
 
 	type PaginationItem = number | 'ellipsis';
 
@@ -80,21 +81,20 @@
 	}
 
 	.current {
-		border-radius: .5rem;
+		border-radius: 0.5rem;
 		font-weight: bold;
-		border-width: .1rem;
+		border-width: 0.1rem;
 		border-color: var(--black);
 		background-color: var(--gray-bg);
 		pointer-events: none;
 	}
 
 	.others {
-		border-radius: .5rem;
+		border-radius: 0.5rem;
 	}
 
 	.ellipsis {
 		padding: 0 0.2rem;
 		color: var(--gray-text);
 	}
-	
 </style>

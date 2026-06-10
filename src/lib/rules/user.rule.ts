@@ -1,13 +1,18 @@
 import type { User } from '$lib/types/user.type.js';
-import { UserGroup, type UserGroup as UserGroupType } from '$lib/types/user.type.js';
 
 import { hasCapability, isOwner } from '$lib/shared/permission.js';
 import { APP_ERROR, ok, ruleFail, type RuleResult } from '$lib/shared/rule.js';
+import { UserGroup, type UserGroup as UserGroupType } from '$lib/types/user.type.js';
 
 const validNicknameRegex = /^[가-힣a-zA-Z0-9 ]+$/;
 const continuousSpaceRegex = /\s{2,}/;
 const allowedGroups: UserGroupType[] = [UserGroup.User, UserGroup.Moderator, UserGroup.Manager];
 const protectedGroups: UserGroupType[] = [UserGroup.Manager, UserGroup.Dev];
+
+export function canSignup(existingUser: User | null): RuleResult {
+	if (!existingUser) return ok();
+	return ruleFail(APP_ERROR.CONFLICT, '이미 가입한 사용자입니다.');
+}
 
 export function canChangeNickname(
 	targetUser: User,
@@ -24,7 +29,7 @@ export function canChangeNickname(
 	}
 
 	if (continuousSpaceRegex.test(newNickname)) {
-		return ruleFail(APP_ERROR.BAD_REQUEST, '공백을 연속해서 사용할 수 없습니다.');
+		return ruleFail(APP_ERROR.BAD_REQUEST, '공백은 연속해서 사용할 수 없습니다.');
 	}
 
 	if (!validNicknameRegex.test(newNickname)) {
@@ -75,7 +80,7 @@ export function canBlockOrUnblockUser(targetUser: User, operatorUser: User): Rul
 	}
 
 	if (protectedGroups.includes(targetUser.group)) {
-		return ruleFail(APP_ERROR.FORBIDDEN, '관리자와 개발자는 차단 또는 해제할 수 없습니다.');
+		return ruleFail(APP_ERROR.FORBIDDEN, '관리자와 개발자는 차단하거나 해제할 수 없습니다.');
 	}
 
 	return ok();

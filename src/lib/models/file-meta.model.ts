@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+
 import type { FileMetaEntity } from '$lib/types/file-meta.type.js';
 
 const FileMetaSchema = new mongoose.Schema<FileMetaEntity>(

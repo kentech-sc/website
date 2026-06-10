@@ -1,6 +1,6 @@
 ﻿<script lang="ts">
-	import List from '@lucide/svelte/icons/text';
 	import Pen from '@lucide/svelte/icons/pencil';
+	import List from '@lucide/svelte/icons/text';
 
 	import LinkButton from '$components/LinkButton.svelte';
 

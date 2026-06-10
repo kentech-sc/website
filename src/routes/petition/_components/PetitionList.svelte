@@ -1,11 +1,10 @@
 <script lang="ts">
-	import CommonListBtnModule from '$components/CommonListBtnModule.svelte';
-	import FileAttachmentIcons from '$components/FileAttachmentIcons.svelte';
-	import MobileListItem from '$components/MobileListItem.svelte';
-
 	import type { FilePresence } from '$lib/types/general.type.js';
 	import type { Petition } from '$lib/types/petition.type.js';
 
+	import CommonListBtnModule from '$components/CommonListBtnModule.svelte';
+	import FileAttachmentIcons from '$components/FileAttachmentIcons.svelte';
+	import MobileListItem from '$components/MobileListItem.svelte';
 	import { parseDate, parseRelativeDate } from '$lib/shared/utils.js';
 	import { colorStatus, translatedStatus } from '$lib/shared/view.js';
 
@@ -39,7 +38,7 @@
 		<td>{petition.petitionerName}</td>
 		<td>{parseDate(petition.createdAt)}</td>
 		<td>{petition.viewCnt}</td>
-		<td>{petition.signCnt}</td>
+		<td>{petition.signedBy.length}</td>
 	</tr>
 {/snippet}
 
@@ -48,7 +47,7 @@
 		<tr>
 			<td class="response-td">
 				<a href="/petition/{petition._id}#response-section"
-					>↳ <span style="color: purple">[답변]</span> {petition.title}</a
+					>ㄴ <span style="color: purple">[답변]</span> {petition.title}</a
 				>
 			</td>
 			<td>{petition.responderName}</td>
@@ -71,7 +70,7 @@
 		<thead>
 			<tr>
 				<th>제목</th>
-				<th>작성자</th>
+				<th>청원인</th>
 				<th>작성일</th>
 				<th>조회</th>
 				<th>동의</th>
@@ -102,7 +101,8 @@
 			{/snippet}
 			{#snippet row2()}
 				<span class="meta"
-					>{petition.petitionerName} · 조회 {petition.viewCnt} · 동의 {petition.signCnt}</span
+					>{petition.petitionerName} | 조회 {petition.viewCnt} | 동의 {petition.signedBy
+						.length}</span
 				>
 				<span class="time">{parseRelativeDate(petition.createdAt)}</span>
 			{/snippet}

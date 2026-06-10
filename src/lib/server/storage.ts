@@ -1,28 +1,11 @@
-import { APP_ERROR } from '$lib/shared/rule.js';
-import { AppError } from '$lib/server/errors.js';
-
 import { initStorage, type Storage, StorageValidationError } from 'secure-s3-storage';
 
+import { AppError } from '$lib/server/errors.js';
+import { APP_ERROR } from '$lib/shared/rule.js';
+
 const categories = {
-	"files/images": [
-		"jpg",
-		"jpeg",
-		"png",
-		"apng",
-		"webp",
-	],
-	"files/documents": [
-		"pdf",
-		"txt",
-		"md",
-		"json",
-		"csv",
-		"yml",
-		"yaml",
-		"docx",
-		"xlsx",
-		"pptx",
-	],
+	'files/images': ['jpg', 'jpeg', 'png', 'apng', 'webp'],
+	'files/documents': ['pdf', 'txt', 'md', 'json', 'csv', 'yml', 'yaml', 'docx', 'xlsx', 'pptx']
 };
 
 export class FileStorage {
@@ -34,7 +17,7 @@ export class FileStorage {
 		region: string,
 		accessKeyId: string,
 		secretAccessKey: string,
-		maxFileSize: number,
+		maxFileSize: number
 	) {
 		this.maxFileSize = maxFileSize;
 		this.storage = initStorage({
@@ -42,7 +25,7 @@ export class FileStorage {
 			region,
 			accessKeyId,
 			secretAccessKey,
-			categories: categories,
+			categories: categories
 		});
 	}
 

@@ -1,16 +1,15 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
-	import { page } from '$app/state';
-
-	import type { Review } from '$lib/types/review.type.js';
-	import type { Course } from '$lib/types/course.type.js';
-	import type { Professor } from '$lib/types/professor.type.js';
-
-	import CommonListBtnModule from '$components/CommonListBtnModule.svelte';
-
+	import ReviewFilter from './_components/ReviewFilter.svelte';
 	import ReviewHeader from './_components/ReviewHeader.svelte';
 	import ReviewList from './_components/ReviewList.svelte';
-	import ReviewFilter from './_components/ReviewFilter.svelte';
+
+	import type { Course } from '$lib/types/course.type.js';
+	import type { Professor } from '$lib/types/professor.type.js';
+	import type { Review } from '$lib/types/review.type.js';
+
+	import { goto } from '$app/navigation';
+	import { page } from '$app/state';
+	import CommonListBtnModule from '$components/CommonListBtnModule.svelte';
 
 	let { data } = $props();
 	const reviews = $derived<Review[]>(data.reviews);

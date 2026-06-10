@@ -1,6 +1,6 @@
 <script lang="ts">
-	import ImageIcon from '@lucide/svelte/icons/image';
 	import FileTextIcon from '@lucide/svelte/icons/file-text';
+	import ImageIcon from '@lucide/svelte/icons/image';
 
 	let { hasImage, hasFile }: { hasImage?: boolean; hasFile?: boolean } = $props();
 </script>

@@ -1,13 +1,11 @@
 <script lang="ts">
 	import CommonForm from '$components/CommonForm.svelte';
-
+	import { parseDate } from '$lib/shared/utils.js';
 	import {
 		PetitionStatus,
 		type Petition,
 		type PetitionPermissions
 	} from '$lib/types/petition.type.js';
-
-	import { parseDate } from '$lib/shared/utils.js';
 
 	let { petition, permissions }: { petition: Petition; permissions: PetitionPermissions } =
 		$props();

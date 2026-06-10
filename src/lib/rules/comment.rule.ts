@@ -1,4 +1,4 @@
-import type { Comment } from '$lib/types/comment.type.js';
+import type { CommentEntity } from '$lib/types/comment.type.js';
 import type { User } from '$lib/types/user.type.js';
 
 import { hasCapability, isOwner } from '$lib/shared/permission.js';
@@ -16,7 +16,7 @@ export function canCreateComment(content: string, user: User): RuleResult {
 	return ok();
 }
 
-export function canEditOrDeleteComment(comment: Comment, user: User): RuleResult {
+export function canEditOrDeleteComment(comment: CommentEntity, user: User): RuleResult {
 	if (isOwner(user, comment.userId) || hasCapability(user, 'comment.moderate')) return ok();
 	return ruleFail(APP_ERROR.FORBIDDEN, '댓글을 삭제할 권한이 없습니다.');
 }

@@ -1,16 +1,16 @@
 <script lang="ts">
+	import type { ActionResult } from '@sveltejs/kit';
+	import type { Snippet } from 'svelte';
+
 	import { enhance } from '$app/forms';
 	import { goto, invalidateAll } from '$app/navigation';
-	import type { ActionResult } from '@sveltejs/kit';
-
-	import { setClientFlash } from '$lib/shared/flash.js';
 	import {
 		getActionResultMessage,
 		isDetailPolicy,
 		type ActionSimpleCallback,
 		type CommonFormPolicy
 	} from '$lib/shared/action-result.js';
-	import type { Snippet } from 'svelte';
+	import { setClientFlash } from '$lib/shared/flash.js';
 
 	let {
 		children,

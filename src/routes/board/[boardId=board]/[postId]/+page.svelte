@@ -1,13 +1,13 @@
 <script lang="ts">
-	import { page } from '$app/state';
+	import BoardArticle from '../_components/BoardArticle.svelte';
+	import BoardHeader from '../_components/BoardHeader.svelte';
+	import CommentSection from '../_components/CommentSection.svelte';
 
 	import type { Comment } from '$lib/types/comment.type.js';
 	import type { FileMeta } from '$lib/types/file-meta.type.js';
 	import type { Post } from '$lib/types/post.type.js';
 
-	import BoardArticle from '../_components/BoardArticle.svelte';
-	import BoardHeader from '../_components/BoardHeader.svelte';
-	import CommentSection from '../_components/CommentSection.svelte';
+	import { page } from '$app/state';
 	import FileList from '$components/FileList.svelte';
 
 	const user = $derived(page.data.user);

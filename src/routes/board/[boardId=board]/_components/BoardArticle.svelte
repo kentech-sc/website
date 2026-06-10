@@ -1,18 +1,17 @@
 <script lang="ts">
 	import '$style/nmu.scss';
 
-	import type { Post, PostPermissions } from '$lib/types/post.type.js';
-	import type { User } from '$lib/types/user.type.js';
-
-	import { parseDate } from '$lib/shared/utils.js';
-
-	import CommonForm from '$components/CommonForm.svelte';
-
 	import Clock from '@lucide/svelte/icons/clock';
 	import Eye from '@lucide/svelte/icons/eye';
 	import Heart from '@lucide/svelte/icons/heart';
 	import Message from '@lucide/svelte/icons/message-circle';
 	import DOMPurify from 'isomorphic-dompurify';
+
+	import type { Post, PostPermissions } from '$lib/types/post.type.js';
+	import type { User } from '$lib/types/user.type.js';
+
+	import CommonForm from '$components/CommonForm.svelte';
+	import { parseDate } from '$lib/shared/utils.js';
 
 	let { post, user, permissions }: { post: Post; user: User; permissions: PostPermissions } =
 		$props();
@@ -30,13 +29,13 @@
 			<input type="hidden" name="post-id" value={post._id} />
 			<button type="submit" class="container like-button">
 				<Heart size="1.2rem" color="red" fill={liked ? 'red' : 'transparent'} />
-				<span>{post.likeCnt}</span>
+				<span>{post.likedBy.length}</span>
 			</button>
 		</CommonForm>
 	{:else}
 		<div class="container like-button">
 			<Heart size="1.2rem" color="red" fill="transparent" />
-			<span>{post.likeCnt}</span>
+			<span>{post.likedBy.length}</span>
 		</div>
 	{/if}
 {/snippet}
@@ -71,7 +70,7 @@
 					<span><Clock size="1rem" color="var(--gray-text)" />{parseDate(post.createdAt)}</span>
 					<span><Eye size="1rem" color="var(--gray-text)" />{post.viewCnt}</span>
 					<span><Message size="1rem" color="var(--gray-text)" />{post.commentCnt}</span>
-					<span><Heart size="1rem" color="var(--gray-text)" />{post.likeCnt}</span>
+					<span><Heart size="1rem" color="var(--gray-text)" />{post.likedBy.length}</span>
 				</p>
 			</div>
 			{#if permissions.canEdit || permissions.canDelete}
