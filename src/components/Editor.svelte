@@ -550,7 +550,7 @@
 		&:hover {
 			background: var(--primary-bg);
 			color: var(--white);
-			border-color: var(--primary-border);
+			border-color: var(--primary);
 		}
 
 		&:disabled {
@@ -561,7 +561,7 @@
 		&.is-active {
 			background: var(--primary-bg);
 			color: var(--white);
-			border-color: var(--primary-border);
+			border-color: var(--primary);
 		}
 	}
 
@@ -577,7 +577,7 @@
 		transition: all 0.2s;
 
 		&:hover {
-			border-color: var(--primary-border);
+			border-color: var(--primary);
 		}
 	}
 
@@ -590,7 +590,7 @@
 		padding: 0 0.25rem;
 
 		&:hover {
-			border-color: var(--primary-border);
+			border-color: var(--primary);
 		}
 	}
 </style>

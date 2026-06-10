@@ -2,23 +2,30 @@
 	--white: oklch(1 0 0);
 	--text: oklch(0 0 0);
 
-	--primary: oklch(0.74 0.14 228.94);
-	--secondary: oklch(0.57 0.15 246.9);
-	--tertiary: oklch(0.32 0.11 256.8);
-
-	--primary-text: var(--text);
-	--secondary-text: oklch(0.6 0 0);
-	--tertiary-text: var(--white);
-	--primary-border: var(--primary);
-	--primary-bg: oklch(from var(--primary) calc(l + 0.25) calc(c - 0.07) h);
-	--secondary-bg: oklch(from var(--secondary) calc(l + 0.25) calc(c - 0.07) h);
-	--secondary-strong-hover: oklch(from var(--secondary) calc(l - 0.08) c h);
-
 	--gray: oklch(0.6 0 0);
 	--gray-text: var(--gray);
 	--gray-border: oklch(from var(--gray) 0.85 c h);
 	--gray-bg: oklch(from var(--gray) 0.98 c h);
 	--gray-hover: oklch(from var(--gray-bg) calc(l - 0.05) c h);
+
+	--primary: oklch(0.74 0.14 228.94);
+	--secondary: oklch(0.57 0.15 246.9);
+	--tertiary: oklch(0.32 0.11 256.8);
+
+	--primary-text: var(--text);
+	--primary-bg: oklch(from var(--primary) calc(l + 0.25) calc(c - 0.07) h);
+	--primary-hover: oklch(from var(--primary-bg) calc(l - 0.05) c h);
+	--primary-strong-hover: oklch(from var(--primary) calc(l - 0.08) c h);
+
+	--secondary-text: oklch(0.6 0 0);
+	--secondary-bg: oklch(from var(--secondary) calc(l + 0.25) calc(c - 0.07) h);
+	--secondary-hover: oklch(from var(--secondary-bg) calc(l - 0.05) c h);
+	--secondary-strong-hover: oklch(from var(--secondary) calc(l - 0.08) c h);
+
+	--tertiary-text: var(--white);
+	--tertiary-bg: oklch(from var(--tertiary) calc(l + 0.25) calc(c - 0.07) h);
+	--tertiary-hover: oklch(from var(--tertiary-bg) calc(l - 0.05) c h);
+	--tertiary-strong-hover: oklch(from var(--tertiary) calc(l - 0.08) c h);
 
 	--surface-base: var(--white);
 	--surface-elevated: var(--white);
