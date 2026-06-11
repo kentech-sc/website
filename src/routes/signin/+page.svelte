@@ -9,7 +9,7 @@
 
 <style lang="scss">
 	h1 {
-		margin-bottom: 1rem;
+		margin-bottom: 0.6rem;
 	}
 
 	section {

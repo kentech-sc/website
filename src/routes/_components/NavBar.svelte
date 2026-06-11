@@ -41,7 +41,7 @@
 		{#if user.group !== 'guest'}
 			<a href="/profile" id="profile-anchor" class="container">
 				<span class="profile-icon">
-					<CircleUserRound_img size="2rem" strokeWidth={1.5} color="white" />
+					<CircleUserRound_img size="1.6rem" strokeWidth={1.5} color="white" />
 				</span>
 				<span class="profile-name">{user.nickname}</span>
 			</a>
@@ -55,7 +55,7 @@
 
 {#snippet Search()}
 	<a href="/search" id="search-anchor" class="container">
-		<Search_img size="1.2rem" color="white" />
+		<Search_img size="1rem" color="white" />
 	</a>
 {/snippet}
 
@@ -70,9 +70,9 @@
 		{@render Profile()}
 		<button class="hamburger" onclick={() => (menuOpen = !menuOpen)} aria-label="메뉴">
 			{#if menuOpen}
-				<X_img size="1.5rem" color="white" />
+				<X_img size="1.3rem" color="white" />
 			{:else}
-				<Menu_img size="1.5rem" color="white" />
+				<Menu_img size="1.3rem" color="white" />
 			{/if}
 		</button>
 	</div>
@@ -114,7 +114,7 @@
 	header {
 		z-index: 100;
 		margin: 0;
-		padding: 0.8rem 8rem;
+		padding: 0.8rem 6.4rem;
 		justify-content: space-between;
 		position: sticky;
 		top: 0;
@@ -125,22 +125,22 @@
 
 		.nav-left {
 			& > a:first-child {
-				margin-right: 2rem;
+				margin-right: 1.6rem;
 
 				img {
-					width: 8rem;
+					width: 6.4rem;
 					position: relative;
 					top: 0.1rem;
 				}
 			}
 
 			nav {
-				font-size: 1.1rem;
+				font-size: 0.9rem;
 
 				a {
 					color: var(--tertiary-text);
 					font-weight: bold;
-					padding: 1rem;
+					padding: 0.6rem;
 				}
 
 				a:hover {
@@ -151,7 +151,7 @@
 		}
 
 		.nav-right {
-			gap: 0.5rem;
+			gap: 0.4rem;
 
 			#profile {
 				#profile-anchor {
@@ -164,7 +164,7 @@
 
 					.profile-name {
 						font-weight: bold;
-						font-size: 1rem;
+						font-size: 0.8rem;
 						color: var(--tertiary-text);
 					}
 
@@ -175,7 +175,7 @@
 				}
 
 				a.btn-anchor {
-					margin-left: 0.5rem;
+					margin-left: 0.4rem;
 					background: none;
 					border: none;
 					color: var(--tertiary-text);
@@ -188,9 +188,9 @@
 			}
 
 			#search-anchor {
-				padding: 0.2rem 0.5rem;
+				padding: 0.2rem 0.4rem;
 				background-color: var(--secondary);
-				border-radius: 1rem;
+				border-radius: 0.8rem;
 				border: white solid 0.1rem;
 			}
 		}
@@ -210,7 +210,7 @@
 
 	@media (max-width: 768px) {
 		header {
-			padding: 0.8rem 1.2rem;
+			padding: 0.8rem;
 
 			.nav-left nav {
 				display: none;
@@ -237,7 +237,7 @@
 
 		.hamburger {
 			display: flex;
-			padding: 0.6rem;
+			padding: 0.4rem;
 		}
 	}
 
@@ -271,14 +271,14 @@
 			z-index: 99;
 			background-color: white;
 			overflow-y: auto;
-			padding-top: 4.5rem;
+			padding-top: 3.6rem;
 			box-shadow: -0.4rem 0 1.6rem oklch(0 0 0 / 15%);
 
 			a {
 				color: black;
 				font-weight: bold;
-				font-size: 1.15rem;
-				padding: 1.2rem 1.8rem;
+				font-size: 0.9rem;
+				padding: 0.8rem 1.4rem;
 				border-bottom: solid var(--gray-border) 0.1rem;
 
 				&:hover {

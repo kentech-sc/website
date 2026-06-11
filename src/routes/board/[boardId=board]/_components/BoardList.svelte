@@ -94,14 +94,14 @@
 
 	.board-comment-count {
 		color: var(--secondary);
-		font-size: 0.8rem;
+		font-size: 0.7rem;
 	}
 
 	.mobile-list-shell {
 		:global(.board-mobile-comment-count) {
 			flex-shrink: 0;
 			color: var(--secondary);
-			font-size: 0.9rem;
+			font-size: 0.7rem;
 			font-weight: bold;
 		}
 	}

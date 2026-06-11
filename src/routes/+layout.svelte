@@ -77,7 +77,7 @@
 
 	.flash-banner {
 		position: fixed;
-		top: 4rem;
+		top: 3.4rem;
 		z-index: 999;
 		min-width: 40vw;
 		width: fit-content;

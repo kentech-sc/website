@@ -15,11 +15,11 @@
 
 <style lang="scss">
 	div {
-		padding: 2rem;
+		padding: 1.6rem;
 		text-align: center;
 
 		p {
-			margin: 1rem;
+			margin: 0.6rem;
 		}
 	}
 </style>

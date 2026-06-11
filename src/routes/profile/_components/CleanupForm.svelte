@@ -21,13 +21,13 @@
 <CommonForm actionName="cleanup" formName="cleanup" bind:formResult>
 	<div class="form-card form-card-danger cleanup-card">
 		<div class="form-card-header cleanup-header">
-			<Trash2 size="1rem" />
+			<Trash2 size="0.8rem" />
 			<span>미사용 파일 정리</span>
 		</div>
 
 		<div class="cleanup-warning">
 			<div class="cleanup-warning-icon">
-				<Clock size="1.3rem" />
+				<Clock size="1.1rem" />
 			</div>
 			<div class="cleanup-warning-copy">
 				<p>지정한 시간 이상 사용되지 않은 파일을 삭제합니다. 이 작업은 되돌릴 수 없습니다.</p>
@@ -50,7 +50,7 @@
 
 			<div class="form-actions-end">
 				<button type="submit" class="error-btn">
-					<Trash2 size="1rem" />
+					<Trash2 size="0.8rem" />
 					<span>파일 정리하기</span>
 				</button>
 			</div>
@@ -85,7 +85,7 @@
 	}
 
 	.cleanup-warning-copy p {
-		font-size: 0.8rem;
+		font-size: 0.7rem;
 		line-height: 1.5;
 	}
 </style>

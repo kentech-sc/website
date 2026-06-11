@@ -80,7 +80,7 @@
 		input:not([type='radio']),
 		textarea {
 			padding: 0.6rem;
-			font-size: 1rem;
+			font-size: 0.8rem;
 			width: 100%;
 		}
 
@@ -98,7 +98,7 @@
 
 		input {
 			margin-left: 0.6rem;
-			margin-right: 1.6rem;
+			margin-right: 1.2rem;
 		}
 	}
 </style>

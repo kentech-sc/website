@@ -73,7 +73,7 @@
 	}
 
 	.course-description {
-		min-height: 20rem;
+		min-height: 16rem;
 		height: 50vh;
 	}
 
@@ -82,6 +82,6 @@
 	}
 
 	.btn-action {
-		font-size: 0.9rem;
+		font-size: 0.8rem;
 	}
 </style>

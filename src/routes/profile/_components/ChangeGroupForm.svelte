@@ -19,7 +19,7 @@
 <CommonForm actionName="changeGroup" formName="changeGroup" bind:formResult>
 	<div class="form-card group-form-card">
 		<div class="form-card-header">
-			<Users size="1rem" />
+			<Users size="0.8rem" />
 			<span>권한 변경</span>
 		</div>
 
@@ -41,7 +41,7 @@
 
 			<div class="form-actions-end">
 				<button type="submit" class="warn-btn">
-					<Users size="1rem" />
+					<Users size="0.8rem" />
 					<span>권한 변경하기</span>
 				</button>
 			</div>
@@ -51,6 +51,6 @@
 
 <style lang="scss">
 	.group-form-card {
-		margin-top: 1.6rem;
+		margin-top: 1.2rem;
 	}
 </style>

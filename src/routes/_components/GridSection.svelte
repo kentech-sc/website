@@ -43,7 +43,7 @@
 
 <style lang="scss">
 	section {
-		margin: 0.5rem;
+		margin: 0.4rem;
 		width: auto;
 	}
 
@@ -53,7 +53,7 @@
 		align-items: center;
 
 		a {
-			font-size: 0.8rem;
+			font-size: 0.7rem;
 		}
 	}
 

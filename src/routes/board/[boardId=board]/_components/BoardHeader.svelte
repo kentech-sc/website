@@ -31,14 +31,14 @@
 		{#if pageType === 'list' && canCreatePost}
 			<div class="module-head-actions">
 				<LinkButton href="/board/{boardId}/new">
-					<Pen size="1rem" />
+					<Pen size="0.8rem" />
 					<span>글쓰기</span>
 				</LinkButton>
 			</div>
 		{:else if pageType === 'new' || pageType === 'edit' || pageType === 'detail'}
 			<div class="module-head-actions">
 				<LinkButton href="/board/{boardId}">
-					<List size="1rem" />
+					<List size="0.8rem" />
 					<span>목록</span>
 				</LinkButton>
 			</div>

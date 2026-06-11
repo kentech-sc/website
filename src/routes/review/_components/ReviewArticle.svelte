@@ -36,11 +36,11 @@
 			</p>
 			<p class="time-info">
 				<span>
-					<Calendar size="1rem" color="var(--gray-text)" />
+					<Calendar size="0.8rem" color="var(--gray-text)" />
 					{review.year}년 {translatedTerm[review.term]}학기 수강
 				</span>
 				<span>
-					<Clock size="1rem" color="var(--gray-text)" />
+					<Clock size="0.8rem" color="var(--gray-text)" />
 					{parseDate(review.createdAt)}
 				</span>
 			</p>
@@ -110,12 +110,12 @@
 			@media (max-width: 768px) {
 				flex-direction: column;
 				align-items: flex-start;
-				gap: 0.5rem;
+				gap: 0.4rem;
 			}
 		}
 
 		h2 {
-			margin: 1.5rem 0;
+			margin: 1.2rem 0;
 			text-align: center;
 		}
 	}
@@ -132,37 +132,37 @@
 		display: flex;
 		align-items: center;
 		flex-wrap: wrap;
-		gap: 0.5rem 1rem;
+		gap: 0.4rem 0.6rem;
 		color: var(--gray-text);
-		font-size: 0.8rem;
+		font-size: 0.7rem;
 		margin: 0;
 
 		span {
 			display: flex;
 			align-items: center;
-			gap: 0.3rem;
+			gap: 0.2rem;
 		}
 	}
 
 	#score {
-		margin-top: 1rem;
+		margin-top: 0.8rem;
 		display: flex;
 		flex-direction: column;
-		gap: 0.75rem;
+		gap: 0.6rem;
 
 		.score-labels {
-			gap: 2.5rem;
+			gap: 2rem;
 			flex-wrap: wrap;
 		}
 
 		.score-satisfaction {
-			gap: 0.5rem;
+			gap: 0.4rem;
 		}
 
 		p {
 			display: flex;
 			align-items: center;
-			gap: 0.5rem;
+			gap: 0.4rem;
 			margin: 0;
 			white-space: nowrap;
 		}

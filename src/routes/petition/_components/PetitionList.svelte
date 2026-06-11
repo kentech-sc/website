@@ -120,7 +120,7 @@
 	}
 
 	.petition-status {
-		font-size: 0.9rem;
+		font-size: 0.7rem;
 	}
 
 	.petition-response-row td {
@@ -135,7 +135,7 @@
 	.mobile-list-shell {
 		:global(.petition-mobile-status) {
 			flex-shrink: 0;
-			font-size: 0.9rem;
+			font-size: 0.7rem;
 			font-weight: bold;
 		}
 	}

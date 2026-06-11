@@ -120,7 +120,7 @@ td {
 	padding: 0.2rem 0.8rem;
 	border: solid 0.1rem var(--gray-border);
 	background-color: var(--surface-base);
-	font-size: 1rem;
+	font-size: 0.8rem;
 	font-weight: bold;
 	word-break: keep-all;
 	border-radius: 0.4rem;
@@ -148,7 +148,7 @@ select {
 textarea,
 input,
 select {
-	font-size: 1rem;
+	font-size: 0.8rem;
 	background-color: var(--surface-base);
 	padding: 0.2rem 0.4rem;
 	border: 0.1rem solid var(--gray-border);
@@ -156,7 +156,7 @@ select {
 }
 
 select {
-	height: 2rem;
+	height: 1.6rem;
 }
 
 pre {

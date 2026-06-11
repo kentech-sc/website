@@ -28,13 +28,13 @@
 		>
 			<input type="hidden" name="post-id" value={post._id} />
 			<button type="submit" class="container like-button">
-				<Heart size="1.2rem" color="red" fill={liked ? 'red' : 'transparent'} />
+				<Heart size="1rem" color="red" fill={liked ? 'red' : 'transparent'} />
 				<span>{post.likedBy.length}</span>
 			</button>
 		</CommonForm>
 	{:else}
 		<div class="container like-button">
-			<Heart size="1.2rem" color="red" fill="transparent" />
+			<Heart size="1rem" color="red" fill="transparent" />
 			<span>{post.likedBy.length}</span>
 		</div>
 	{/if}
@@ -67,10 +67,10 @@
 				<h2>{post.title}</h2>
 				<p>{post.displayName}</p>
 				<p>
-					<span><Clock size="1rem" color="var(--gray-text)" />{parseDate(post.createdAt)}</span>
-					<span><Eye size="1rem" color="var(--gray-text)" />{post.viewCnt}</span>
-					<span><Message size="1rem" color="var(--gray-text)" />{post.commentCnt}</span>
-					<span><Heart size="1rem" color="var(--gray-text)" />{post.likedBy.length}</span>
+					<span><Clock size="0.8rem" color="var(--gray-text)" />{parseDate(post.createdAt)}</span>
+					<span><Eye size="0.8rem" color="var(--gray-text)" />{post.viewCnt}</span>
+					<span><Message size="0.8rem" color="var(--gray-text)" />{post.commentCnt}</span>
+					<span><Heart size="0.8rem" color="var(--gray-text)" />{post.likedBy.length}</span>
 				</p>
 			</div>
 			{#if permissions.canEdit || permissions.canDelete}
@@ -95,9 +95,9 @@
 			p:last-child {
 				display: flex;
 				align-items: center;
-				gap: 1rem;
+				gap: 0.6rem;
 				color: var(--gray-text);
-				font-size: 0.8rem;
+				font-size: 0.7rem;
 
 				span {
 					display: flex;
@@ -131,7 +131,7 @@
 
 	.like-button {
 		border: solid 0.05rem var(--gray-border);
-		border-radius: 0.6rem;
+		border-radius: 0.4rem;
 		padding: 0.2rem 0.6rem;
 		width: fit-content;
 		margin-top: 0.6rem;

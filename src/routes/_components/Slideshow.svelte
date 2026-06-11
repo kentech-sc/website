@@ -89,7 +89,7 @@
 			transform: translate(-50%, -50%);
 			z-index: 3;
 
-			width: 10rem;
+			width: 8rem;
 
 			filter: brightness(0) invert(1);
 		}
@@ -117,12 +117,12 @@
 			position: absolute;
 			top: 50%;
 			transform: translateY(-50%);
-			width: 6rem;
+			width: 5rem;
 			height: 100%;
 			border: none;
 			background-color: transparent;
 			z-index: 2;
-			padding: 0 1rem;
+			padding: 0 0.6rem;
 
 			img {
 				width: 100%;
@@ -140,12 +140,12 @@
 
 		#left-btn {
 			left: 0;
-			padding-right: 1.4rem;
+			padding-right: 1rem;
 		}
 
 		#right-btn {
 			right: 0;
-			padding-left: 1.4rem;
+			padding-left: 1rem;
 		}
 
 		#slide-pagelist {
@@ -155,17 +155,17 @@
 
 			transform: translate(-50%, -50%);
 
-			margin: 1rem 0;
+			margin: 0.6rem 0;
 
 			li {
 				margin: 0 0.2rem;
 				list-style-type: none;
 
 				button {
-					width: 2.2rem;
-					height: 0.5rem;
+					width: 1.8rem;
+					height: 0.4rem;
 
-					border-radius: 1rem;
+					border-radius: 0.9rem;
 					border: none;
 					background: var(--gray-bg);
 

@@ -19,7 +19,7 @@
 <CommonForm actionName="changeNickname" formName="changeNickname" bind:formResult>
 	<div class="form-card">
 		<div class="form-card-header">
-			<User size="1rem" />
+			<User size="0.8rem" />
 			<span>별명 변경</span>
 		</div>
 
@@ -37,7 +37,7 @@
 			</div>
 
 			<button type="submit" class="info-btn">
-				<User size="1rem" />
+				<User size="0.8rem" />
 				<span>변경하기</span>
 			</button>
 		</div>

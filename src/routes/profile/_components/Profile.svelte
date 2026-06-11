@@ -11,7 +11,7 @@
 <section class="profile-card">
 	<div class="profile-header">
 		<div class="avatar">
-			<UserIcon size="2rem" />
+			<UserIcon size="1.6rem" />
 		</div>
 		<div class="profile-info">
 			<h2>{user.realName}</h2>
@@ -43,7 +43,7 @@
 
 	<div class="profile-actions">
 		<button class="error-btn logout-btn" onclick={() => signOut()}>
-			<LogOut size="1rem" />
+			<LogOut size="0.8rem" />
 			<span>로그아웃</span>
 		</button>
 	</div>
@@ -53,25 +53,25 @@
 	.profile-card {
 		background: var(--surface-elevated);
 		border: 0.1rem solid var(--gray-border);
-		border-radius: 0.5rem;
-		padding: 1.5rem;
+		border-radius: 0.4rem;
+		padding: 1.2rem;
 		box-shadow: 0 0.1rem 0.3rem var(--shadow-color);
 	}
 
 	.profile-header {
 		display: flex;
 		align-items: center;
-		gap: 1rem;
-		margin-bottom: 1.5rem;
-		padding-bottom: 1rem;
+		gap: 0.6rem;
+		margin-bottom: 1.2rem;
+		padding-bottom: 0.6rem;
 		border-bottom: 0.1rem solid var(--gray-border);
 
 		.avatar {
 			display: flex;
 			align-items: center;
 			justify-content: center;
-			width: 3rem;
-			height: 3rem;
+			width: 2.4rem;
+			height: 2.4rem;
 			background: var(--secondary);
 			border-radius: 50%;
 			color: var(--tertiary-text);
@@ -81,15 +81,15 @@
 			flex: 1;
 
 			h2 {
-				margin: 0 0 0.25rem;
-				font-size: 1.2rem;
+				margin: 0 0 0.2rem;
+				font-size: 1rem;
 				font-weight: 600;
 				color: var(--text);
 			}
 
 			.user-id {
 				margin: 0;
-				font-size: 0.8rem;
+				font-size: 0.7rem;
 				color: var(--gray-text);
 				font-family: monospace;
 			}
@@ -99,34 +99,34 @@
 	.profile-details {
 		display: flex;
 		flex-direction: column;
-		gap: 0.75rem;
-		margin-bottom: 1.5rem;
+		gap: 0.6rem;
+		margin-bottom: 1.4rem;
 
 		.detail-item {
 			display: flex;
 			justify-content: space-between;
 			align-items: center;
-			padding: 0.5rem;
+			padding: 0.4rem;
 			background: var(--gray-bg);
 			border-radius: 0.4rem;
 
 			.label {
-				font-size: 0.8rem;
+				font-size: 0.7rem;
 				color: var(--gray-text);
 				font-weight: 500;
 			}
 
 			.value {
-				font-size: 1rem;
+				font-size: 0.8rem;
 				color: var(--text);
 				font-weight: 500;
 
 				&.badge {
 					background: var(--secondary-bg);
 					color: var(--secondary);
-					padding: 0.25rem 0.5rem;
-					border-radius: 0.25rem;
-					font-size: 0.8rem;
+					padding: 0.2rem 0.4rem;
+					border-radius: 0.2rem;
+					font-size: 0.7rem;
 					text-transform: uppercase;
 				}
 			}
@@ -141,17 +141,17 @@
 
 	@media (max-width: 768px) {
 		.profile-card {
-			padding: 1rem;
+			padding: 0.6rem;
 		}
 
 		.profile-header {
 			.avatar {
-				width: 2.5rem;
-				height: 2.5rem;
+				width: 2rem;
+				height: 2rem;
 			}
 
 			h2 {
-				font-size: 1.125rem;
+				font-size: 0.9rem;
 			}
 		}
 	}

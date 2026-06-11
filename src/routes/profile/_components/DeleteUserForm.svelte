@@ -38,7 +38,7 @@
 
 		<div class="form-actions-end">
 			<button type="button" class="error-btn delete-btn" onclick={handleSubmit}>
-				<Trash2 size="1rem" />
+				<Trash2 size="0.8rem" />
 				<span>탈퇴하기</span>
 			</button>
 		</div>
@@ -48,7 +48,7 @@
 
 <style lang="scss">
 	.delete-warning {
-		padding: 1rem;
+		padding: 0.6rem;
 		background: var(--error-bg);
 		border: 0.1rem solid var(--error);
 		border-radius: 0.4rem;
@@ -57,13 +57,13 @@
 
 	.delete-warning h4 {
 		margin-bottom: 0.8rem;
-		font-size: 1rem;
+		font-size: 0.8rem;
 		font-weight: 600;
 	}
 
 	.delete-warning ul {
-		padding-left: 1.4rem;
-		font-size: 0.8rem;
+		padding-left: 1.2rem;
+		font-size: 0.7rem;
 		line-height: 1.5;
 	}
 

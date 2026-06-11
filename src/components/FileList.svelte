@@ -41,7 +41,7 @@
 
 		button {
 			padding: 0;
-			padding-right: 0.5rem;
+			padding-right: 0.4rem;
 			color: red;
 			border: none;
 			background: transparent;

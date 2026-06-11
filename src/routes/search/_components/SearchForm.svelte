@@ -24,7 +24,7 @@
 	.search-input {
 		width: min(100%, 30rem);
 		padding: 0.4rem 0.6rem;
-		font-size: 1.2rem;
+		font-size: 1rem;
 	}
 
 	@media (max-width: 768px) {

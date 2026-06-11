@@ -17,14 +17,14 @@
 		{#if pageType === 'list' && canCreatePetition}
 			<div class="module-head-actions">
 				<LinkButton href="/petition/new">
-					<Pen size="1rem" />
+					<Pen size="0.8rem" />
 					<span>청원하기</span>
 				</LinkButton>
 			</div>
 		{:else if pageType === 'new' || pageType === 'detail'}
 			<div class="module-head-actions">
 				<LinkButton href="/petition">
-					<List size="1rem" />
+					<List size="0.8rem" />
 					<span>목록</span>
 				</LinkButton>
 			</div>

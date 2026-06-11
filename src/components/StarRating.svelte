@@ -66,8 +66,8 @@
 
 		&.interactive .star-wrapper {
 			cursor: pointer;
-			width: 2rem;
-			height: 2rem;
+			width: 1.6rem;
+			height: 1.6rem;
 			transition: transform 0.1s ease;
 
 			&:hover {
@@ -78,8 +78,8 @@
 
 	.star-wrapper {
 		position: relative;
-		width: 1.25rem;
-		height: 1.25rem;
+		width: 1rem;
+		height: 1rem;
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -110,8 +110,8 @@
 	}
 
 	.score-text {
-		margin-left: 0.5rem;
-		font-size: 0.9rem;
+		margin-left: 0.4rem;
+		font-size: 0.8rem;
 		color: var(--secondary-text);
 	}
 </style>

@@ -15,13 +15,13 @@
 		justify-content: center;
 		gap: 0.25rem;
 
-		padding: 0.3rem 0.5rem;
+		padding: 0.2rem 0.4rem;
 		background-color: var(--secondary);
 		color: var(--tertiary-text);
 
-		border-radius: 0.25rem;
+		border-radius: 0.2rem;
 		text-decoration: none;
-		font-size: 1rem;
+		font-size: 0.8rem;
 		transition: opacity 0.2s ease;
 
 		&:hover {

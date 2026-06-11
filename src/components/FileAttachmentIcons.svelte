@@ -8,10 +8,10 @@
 {#if hasImage || hasFile}
 	<span class="file-icons">
 		{#if hasImage}
-			<ImageIcon size="0.9rem" color="var(--gray-text)" />
+			<ImageIcon size="0.7rem" color="var(--gray-text)" />
 		{/if}
 		{#if hasFile}
-			<FileTextIcon size="0.9rem" color="var(--gray-text)" />
+			<FileTextIcon size="0.7rem" color="var(--gray-text)" />
 		{/if}
 	</span>
 {/if}

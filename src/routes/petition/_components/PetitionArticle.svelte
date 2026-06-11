@@ -29,13 +29,13 @@
 		>
 			<input type="hidden" name="petition-id" value={petition._id} />
 			<button type="submit" class="container sign-button">
-				<ThumbsUp size="1.2rem" color="skyblue" fill={signed ? 'skyblue' : 'transparent'} />
+				<ThumbsUp size="1rem" color="skyblue" fill={signed ? 'skyblue' : 'transparent'} />
 				<span>{petition.signedBy.length}</span>
 			</button>
 		</CommonForm>
 	{:else}
 		<div class="container sign-button" aria-disabled="true">
-			<ThumbsUp size="1.2rem" color="skyblue" />
+			<ThumbsUp size="1rem" color="skyblue" />
 			<span>{petition.signedBy.length}</span>
 		</div>
 	{/if}
@@ -99,7 +99,7 @@
 
 	.sign-button {
 		border: solid 0.05rem var(--gray-border);
-		border-radius: 0.6rem;
+		border-radius: 0.4rem;
 		padding: 0.2rem 0.6rem;
 		width: fit-content;
 		margin-top: 0.6rem;

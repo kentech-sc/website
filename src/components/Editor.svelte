@@ -354,28 +354,28 @@
 				onclick={() => editor.chain().focus().toggleBold().run()}
 				class={editor.isActive('bold') ? 'is-active' : ''}
 			>
-				<Bold size="1rem" />
+				<Bold size="0.8rem" />
 			</button>
 			<button
 				type="button"
 				onclick={() => editor.chain().focus().toggleItalic().run()}
 				class={editor.isActive('italic') ? 'is-active' : ''}
 			>
-				<Italic size="1rem" />
+				<Italic size="0.8rem" />
 			</button>
 			<button
 				type="button"
 				onclick={() => editor.chain().focus().toggleStrike().run()}
 				class={editor.isActive('strike') ? 'is-active' : ''}
 			>
-				<Strikethrough size="1rem" />
+				<Strikethrough size="0.8rem" />
 			</button>
 			<button
 				type="button"
 				onclick={() => editor.chain().focus().toggleUnderline().run()}
 				class={editor.isActive('underline') ? 'is-active' : ''}
 			>
-				<UnderlineIcon size="1rem" />
+				<UnderlineIcon size="0.8rem" />
 			</button>
 			<select
 				bind:value={fontSize}
@@ -426,14 +426,14 @@
 				onclick={() => editor.chain().focus().toggleBulletList().run()}
 				class={editor.isActive('bulletList') ? 'is-active' : ''}
 			>
-				<List size="1rem" />
+				<List size="0.8rem" />
 			</button>
 			<button
 				type="button"
 				onclick={() => editor.chain().focus().toggleOrderedList().run()}
 				class={editor.isActive('orderedList') ? 'is-active' : ''}
 			>
-				<ListOrdered size="1rem" />
+				<ListOrdered size="0.8rem" />
 			</button>
 			<!-- <button
 				type="button"
@@ -462,24 +462,24 @@
 				disabled={!editor.can().chain().focus().toggleCode().run()}
 				class={editor.isActive('code') ? 'is-active' : ''}
 			>
-				<Code size="1rem" />
+				<Code size="0.8rem" />
 			</button>
 			<button
 				type="button"
 				onclick={() => editor.chain().focus().toggleCodeBlock().run()}
 				class={editor.isActive('codeBlock') ? 'is-active' : ''}
 			>
-				<Code2 size="1rem" />
+				<Code2 size="0.8rem" />
 			</button>
 			<button
 				type="button"
 				onclick={() => editor.chain().focus().toggleBlockquote().run()}
 				class={editor.isActive('blockquote') ? 'is-active' : ''}
 			>
-				<Quote size="1rem" />
+				<Quote size="0.8rem" />
 			</button>
 			<button type="button" onclick={() => editor.chain().focus().setHorizontalRule().run()}>
-				<Minus size="1rem" />
+				<Minus size="0.8rem" />
 			</button>
 			<input
 				type="file"
@@ -490,7 +490,7 @@
 				style="display: none"
 			/>
 			<button type="button" onmousedown={handleUploadButtonMouseDown} onclick={prepareFileUpload}>
-				<Upload size="1rem" />
+				<Upload size="0.8rem" />
 			</button>
 		</div>
 	</div>
@@ -504,7 +504,7 @@
 
 <style lang="scss">
 	.nmu {
-		padding: 1rem;
+		padding: 0.6rem;
 		border: solid 0.1rem var(--gray-border);
 		position: relative;
 	}
@@ -515,16 +515,16 @@
 
 	.control-group {
 		border: 0.1rem solid var(--gray-border);
-		border-radius: 0.25rem;
-		margin-bottom: 0.5rem;
+		border-radius: 0.2rem;
+		margin-bottom: 0.4rem;
 		padding: 0.25rem;
 		background: var(--gray-bg);
 	}
 
 	.editor-notice {
-		margin: 0 0 0.5rem;
+		margin: 0 0 0.4rem;
 		color: var(--error-text);
-		font-size: 0.85rem;
+		font-size: 0.7rem;
 	}
 
 	.button-group {
@@ -541,7 +541,7 @@
 		justify-content: center;
 		// padding: 0.5rem;
 		border: 1px solid var(--gray-border);
-		border-radius: 0.25rem;
+		border-radius: 0.2rem;
 		background: var(--white);
 		color: var(--text);
 		cursor: pointer;
@@ -569,10 +569,10 @@
 		height: auto;
 		padding: 0;
 		border: 1px solid var(--gray-border);
-		border-radius: 0.25rem;
+		border-radius: 0.2rem;
 		background: var(--white);
 		color: var(--text);
-		font-size: 0.875rem;
+		font-size: 0.7rem;
 		cursor: pointer;
 		transition: all 0.2s;
 
@@ -583,9 +583,9 @@
 
 	input[type='color'] {
 		height: auto;
-		width: 2.5rem;
+		width: 2rem;
 		border: 1px solid var(--gray-border);
-		border-radius: 0.25rem;
+		border-radius: 0.2rem;
 		cursor: pointer;
 		padding: 0 0.25rem;
 

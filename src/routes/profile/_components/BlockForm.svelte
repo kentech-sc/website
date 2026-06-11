@@ -21,7 +21,7 @@
 	<CommonForm actionName="blockUser" formName="blockUser" bind:formResult>
 		<div class="form-card">
 			<div class="form-card-header">
-				<Ban size="1rem" />
+				<Ban size="0.8rem" />
 				<span>사용자 차단</span>
 			</div>
 
@@ -51,7 +51,7 @@
 
 				<div class="form-actions-end">
 					<button type="submit" class="error-btn">
-						<Ban size="1rem" />
+						<Ban size="0.8rem" />
 						<span>차단하기</span>
 					</button>
 				</div>
@@ -62,7 +62,7 @@
 	<CommonForm actionName="unblockUser" formName="unblockUser" bind:formResult>
 		<div class="form-card">
 			<div class="form-card-header">
-				<ShieldCheck size="1rem" />
+				<ShieldCheck size="0.8rem" />
 				<span>차단 해제</span>
 			</div>
 
@@ -80,7 +80,7 @@
 
 				<div class="form-actions-end">
 					<button type="submit" class="success-btn">
-						<ShieldCheck size="1rem" />
+						<ShieldCheck size="0.8rem" />
 						<span>차단 해제하기</span>
 					</button>
 				</div>
@@ -93,6 +93,6 @@
 	.admin-forms {
 		display: flex;
 		flex-direction: column;
-		gap: 1.6rem;
+		gap: 1.2rem;
 	}
 </style>

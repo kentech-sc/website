@@ -210,13 +210,13 @@
 		width: 100%;
 		display: flex;
 		flex-direction: column;
-		gap: 1rem;
+		gap: 0.8rem;
 		align-items: stretch;
 	}
 
 	.review-input-row {
 		display: flex;
-		gap: 2rem;
+		gap: 1.6rem;
 		flex-wrap: wrap;
 	}
 
@@ -224,22 +224,22 @@
 		flex: 1 1 24rem;
 		min-width: 20rem;
 		display: flex;
-		gap: 1.6rem;
+		gap: 1.2rem;
 	}
 
 	.review-comment {
-		min-height: 10rem;
+		min-height: 8rem;
 	}
 
 	.review-score-section {
 		display: flex;
 		flex-direction: column;
-		gap: 1.6rem;
+		gap: 1.2rem;
 	}
 
 	.review-slider-row {
 		display: flex;
-		gap: 2rem;
+		gap: 1.6rem;
 		flex-wrap: wrap;
 	}
 
@@ -253,7 +253,7 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		gap: 1rem;
+		gap: 0.6rem;
 		margin-bottom: 0.6rem;
 	}
 
@@ -274,23 +274,23 @@
 		padding: 0.2rem;
 		margin: 0 0 0.4rem;
 		background: var(--gray-bg);
-		border-radius: 1rem;
+		border-radius: 0.9rem;
 		border: solid 0.1rem var(--gray-border);
 	}
 
 	.review-range::-webkit-slider-thumb {
 		-webkit-appearance: none;
 		appearance: none;
-		width: 1.6rem;
-		height: 1rem;
+		width: 1.3rem;
+		height: 0.8rem;
 		background: var(--secondary);
-		border-radius: 1rem;
+		border-radius: 0.9rem;
 	}
 
 	.review-range-guide {
 		display: flex;
 		justify-content: space-between;
-		font-size: 0.8rem;
+		font-size: 0.7rem;
 		color: var(--secondary-text);
 	}
 
@@ -302,7 +302,7 @@
 	}
 
 	.review-satisfaction label {
-		font-size: 1.4rem;
+		font-size: 1.2rem;
 		font-weight: bold;
 	}
 
@@ -311,7 +311,7 @@
 		.review-input-pair,
 		.review-slider-row {
 			flex-direction: column;
-			gap: 1rem;
+			gap: 0.8rem;
 		}
 
 		.review-input-pair,

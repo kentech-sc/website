@@ -122,7 +122,7 @@
 
 	.display-type-label {
 		word-break: keep-all;
-		padding: 0.4rem 1rem;
+		padding: 0.4rem 0.6rem;
 		cursor: pointer;
 		text-align: center;
 		border-right: 0.1rem solid var(--gray-border);

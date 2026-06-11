@@ -26,19 +26,19 @@
 			{#if pageType === 'list'}
 				{#if canManageCatalog}
 					<LinkButton href="/course/new">
-						<Plus size="1rem" />
+						<Plus size="0.8rem" />
 						<span>강의/교수 추가</span>
 					</LinkButton>
 				{/if}
 				{#if canCreateReview}
 					<LinkButton href="/review/new">
-						<Pen size="1rem" />
+						<Pen size="0.8rem" />
 						<span>평가하기</span>
 					</LinkButton>
 				{/if}
 			{:else if pageType === 'new' || pageType === 'edit' || pageType === 'detail'}
 				<LinkButton href="/review">
-					<List size="1rem" />
+					<List size="0.8rem" />
 					<span>목록</span>
 				</LinkButton>
 			{/if}

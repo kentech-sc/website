@@ -13,8 +13,8 @@
 	.mobile-item {
 		display: flex;
 		flex-direction: column;
-		gap: 0.3rem;
-		padding: 0.7rem 0.8rem;
+		gap: 0.2rem;
+		padding: 0.6rem;
 		border-bottom: solid var(--gray-border) 0.05rem;
 		color: black;
 		width: 100%;
@@ -27,7 +27,7 @@
 		.row1 {
 			display: flex;
 			align-items: center;
-			gap: 0.3rem;
+			gap: 0.2rem;
 
 			:global(.title) {
 				flex: 1;
@@ -35,7 +35,7 @@
 				white-space: nowrap;
 				text-overflow: ellipsis;
 				font-weight: bold;
-				font-size: 1rem;
+				font-size: 0.8rem;
 			}
 		}
 
@@ -43,12 +43,12 @@
 			display: flex;
 			justify-content: space-between;
 			align-items: center;
-			font-size: 0.85rem;
+			font-size: 0.7rem;
 			color: var(--gray-text);
 
 			:global(.time) {
 				flex-shrink: 0;
-				margin-left: 0.5rem;
+				margin-left: 0.4rem;
 			}
 		}
 	}

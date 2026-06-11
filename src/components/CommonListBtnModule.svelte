@@ -72,16 +72,16 @@
 
 <style lang="scss">
 	.pagination {
-		margin-top: 0.5rem;
+		margin-top: 0.4rem;
 		display: flex;
 		flex-wrap: wrap;
 		justify-content: center;
 		align-items: center;
-		gap: 0.3rem;
+		gap: 0.2rem;
 	}
 
 	.current {
-		border-radius: 0.5rem;
+		border-radius: 0.3rem;
 		font-weight: bold;
 		border-width: 0.1rem;
 		border-color: var(--black);
@@ -90,7 +90,7 @@
 	}
 
 	.others {
-		border-radius: 0.5rem;
+		border-radius: 0.3rem;
 	}
 
 	.ellipsis {

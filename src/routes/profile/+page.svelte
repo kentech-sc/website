@@ -42,15 +42,15 @@
 	.profile-container {
 		display: grid;
 		grid-template-columns: 1fr 1fr;
-		gap: 2rem;
+		gap: 1.6rem;
 		max-width: 100rem;
 		margin: 0 auto;
-		padding: 2rem;
+		padding: 1.6rem;
 
 		@media (max-width: 768px) {
 			grid-template-columns: 1fr;
-			gap: 1.6rem;
-			padding: 1rem;
+			gap: 1.2rem;
+			padding: 0.6rem;
 		}
 	}
 
@@ -61,20 +61,20 @@
 	.settings-section {
 		display: flex;
 		flex-direction: column;
-		gap: 1.6rem;
+		gap: 1.2rem;
 	}
 
 	.admin-section,
 	.dev-section {
 		background: var(--surface-elevated);
 		border: 0.1rem solid var(--gray-border);
-		border-radius: 0.5rem;
-		padding: 1.6rem;
+		border-radius: 0.4rem;
+		padding: 1.2rem;
 		box-shadow: 0 0.1rem 0.4rem var(--shadow-color);
 
 		h3 {
-			margin: 0 0 1rem;
-			font-size: 1.1rem;
+			margin: 0 0 0.8rem;
+			font-size: 0.9rem;
 			font-weight: 600;
 			color: var(--text);
 			border-bottom: 0.1rem solid var(--gray-border);

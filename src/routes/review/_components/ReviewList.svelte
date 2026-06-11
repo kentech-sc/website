@@ -75,7 +75,7 @@
 	}
 
 	.mobile-list-shell .empty {
-		padding: 1rem;
+		padding: 0.6rem;
 		color: var(--gray-text);
 	}
 </style>

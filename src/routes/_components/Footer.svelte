@@ -15,7 +15,7 @@
 		margin-top: 1rem;
 		border: none;
 		border-top: solid white 0.2rem;
-		padding: 1.5rem 2rem;
+		padding: 1.2rem 1.6rem;
 
 		color: var(--tertiary-text);
 		background-color: var(--tertiary);
@@ -23,15 +23,15 @@
 
 		h1 {
 			font-weight: bold;
-			font-size: 1rem;
+			font-size: 0.8rem;
 		}
 
 		p {
-			font-size: 0.8rem;
+			font-size: 0.7rem;
 		}
 
 		a {
-			font-size: 0.8rem;
+			font-size: 0.7rem;
 			color: var(--tertiary-text);
 			text-decoration: underline;
 
