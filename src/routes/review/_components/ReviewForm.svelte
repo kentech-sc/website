@@ -57,10 +57,10 @@
 		actionName={review ? 'editReview' : 'createReview'}
 		formName={review ? 'editReview' : 'createReview'}
 	>
-		<div id="form-div" class="container-col">
-			<div class="input-row">
-				<div class="container">
-					<div class="select_group">
+		<div class="review-form">
+			<div class="review-input-row">
+				<div class="review-input-pair">
+					<div class="field-group field-group-strong">
 						<label for="courseId">강의 코드</label>
 						<select id="courseId" name="courseId" required value={review?.courseId.toString()}>
 							<option value="">선택</option>
@@ -69,8 +69,9 @@
 							{/each}
 						</select>
 					</div>
-					<div class="select_group">
-						<label for="professorId">담당 교수님</label>
+
+					<div class="field-group field-group-strong">
+						<label for="professorId">담당 교수</label>
 						<select
 							id="professorId"
 							name="professorId"
@@ -85,8 +86,8 @@
 					</div>
 				</div>
 
-				<div class="container">
-					<div class="select_group">
+				<div class="review-input-pair">
+					<div class="field-group field-group-strong">
 						<label for="year">수강 연도</label>
 						<select id="year" name="year" required value={review?.year}>
 							<option value="">선택</option>
@@ -95,7 +96,8 @@
 							{/each}
 						</select>
 					</div>
-					<div class="select_group">
+
+					<div class="field-group field-group-strong">
 						<label for="term">수강 학기</label>
 						<select id="term" name="term" required value={review?.term.toString()}>
 							<option value="">선택</option>
@@ -108,20 +110,25 @@
 				</div>
 			</div>
 
-			<label for="title">제목</label>
-			<input type="text" id="title" name="title" required value={review?.title} maxlength="100" />
+			<div class="field-group field-group-strong">
+				<label for="title">제목</label>
+				<input type="text" id="title" name="title" required value={review?.title} maxlength="100" />
+			</div>
 
-			<label for="comment">내용</label>
-			<textarea id="comment" name="comment">{review?.comment}</textarea>
+			<div class="field-group field-group-strong">
+				<label for="comment">내용</label>
+				<textarea id="comment" name="comment" class="review-comment">{review?.comment}</textarea>
+			</div>
 
-			<div id="score-container">
-				<div class="container slider-row">
-					<div class="score-item">
-						<div class="label-row">
+			<div class="review-score-section">
+				<div class="review-slider-row">
+					<div class="review-score-item">
+						<div class="review-label-row">
 							<label for="assignmentScore">과제 양</label>
-							<span class="current-label">{getAmountLabel(scores.assignment)}</span>
+							<span class="review-current-label">{getAmountLabel(scores.assignment)}</span>
 						</div>
 						<input
+							class="review-range"
 							type="range"
 							id="assignmentScore"
 							name="assignmentScore"
@@ -130,17 +137,19 @@
 							step="1"
 							bind:value={scores.assignment}
 						/>
-						<div class="range-guide">
+						<div class="review-range-guide">
 							<span>적음</span>
 							<span>많음</span>
 						</div>
 					</div>
-					<div class="score-item">
-						<div class="label-row">
+
+					<div class="review-score-item">
+						<div class="review-label-row">
 							<label for="lectureScore">강의 난이도</label>
-							<span class="current-label">{getDifficultyLabel(scores.lecture)}</span>
+							<span class="review-current-label">{getDifficultyLabel(scores.lecture)}</span>
 						</div>
 						<input
+							class="review-range"
 							type="range"
 							id="lectureScore"
 							name="lectureScore"
@@ -149,17 +158,19 @@
 							step="1"
 							bind:value={scores.lecture}
 						/>
-						<div class="range-guide">
+						<div class="review-range-guide">
 							<span>쉬움</span>
 							<span>어려움</span>
 						</div>
 					</div>
-					<div class="score-item">
-						<div class="label-row">
+
+					<div class="review-score-item">
+						<div class="review-label-row">
 							<label for="examScore">시험 횟수</label>
-							<span class="current-label">{getAmountLabel(scores.exam)}</span>
+							<span class="review-current-label">{getAmountLabel(scores.exam)}</span>
 						</div>
 						<input
+							class="review-range"
 							type="range"
 							id="examScore"
 							name="examScore"
@@ -168,20 +179,26 @@
 							step="1"
 							bind:value={scores.exam}
 						/>
-						<div class="range-guide">
+						<div class="review-range-guide">
 							<span>적음</span>
 							<span>많음</span>
 						</div>
 					</div>
 				</div>
-				<div class="satisfaction-item container-col">
+
+				<div class="review-satisfaction">
 					<label for="satisfactionScore">만족도</label>
 					<StarRating interactive bind:score={scores.satisfaction} />
-					<input type="hidden" name="satisfactionScore" value={scores.satisfaction} />
+					<input
+						type="hidden"
+						name="satisfactionScore"
+						id="satisfactionScore"
+						value={scores.satisfaction}
+					/>
 				</div>
 			</div>
 
-			<div class="form-actions">
+			<div class="form-actions-end">
 				<button type="submit" class="btn-action">{review ? '수정하기' : '평가하기'}</button>
 			</div>
 		</div>
@@ -189,168 +206,117 @@
 </section>
 
 <style lang="scss">
-	#form-div {
-		width: 100%;
-		align-items: flex-start;
-
-		& > *:not(label, button) {
-			margin-bottom: 1rem;
-		}
-
-		.select_group {
-			display: flex;
-			flex-direction: column;
-			min-width: 0;
-			flex: 1;
-		}
-
-		label {
-			word-break: keep-all;
-			white-space: nowrap;
-			font-weight: bold;
-			margin-bottom: 0.2rem;
-			margin-left: 0.2rem;
-		}
-
-		input {
-			width: 100%;
-		}
-
-		select {
-			width: 100%;
-			max-width: 100%;
-			margin-right: 1.5rem;
-
-			@media (max-width: 768px) {
-				width: 100%;
-				min-width: 0;
-				margin-right: 0;
-			}
-		}
-
-		textarea {
-			width: 100%;
-			height: 10vh;
-			resize: vertical;
-		}
-
-		.input-row {
-			width: 100%;
-			display: flex;
-			justify-content: space-between;
-			gap: 2rem;
-			flex-wrap: wrap;
-			margin-bottom: 1rem;
-
-			@media (max-width: 768px) {
-				flex-direction: column;
-				gap: 1rem;
-
-				.container {
-					flex-direction: column;
-					gap: 1rem;
-				}
-
-				.select_group {
-					width: 100%;
-				}
-			}
-		}
-	}
-
-	#score-container {
+	.review-form {
 		width: 100%;
 		display: flex;
 		flex-direction: column;
-		gap: 1.5rem;
-		margin-bottom: 1rem;
+		gap: 1rem;
+		align-items: stretch;
 	}
 
-	.slider-row {
-		flex-wrap: wrap;
+	.review-input-row {
+		display: flex;
 		gap: 2rem;
+		flex-wrap: wrap;
+	}
 
-		@media (max-width: 768px) {
+	.review-input-pair {
+		flex: 1 1 24rem;
+		min-width: 20rem;
+		display: flex;
+		gap: 1.6rem;
+	}
+
+	.review-comment {
+		min-height: 10rem;
+	}
+
+	.review-score-section {
+		display: flex;
+		flex-direction: column;
+		gap: 1.6rem;
+	}
+
+	.review-slider-row {
+		display: flex;
+		gap: 2rem;
+		flex-wrap: wrap;
+	}
+
+	.review-score-item {
+		flex: 1 1 20rem;
+		display: flex;
+		flex-direction: column;
+	}
+
+	.review-label-row {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		gap: 1rem;
+		margin-bottom: 0.6rem;
+	}
+
+	.review-label-row label {
+		font-weight: bold;
+	}
+
+	.review-current-label {
+		color: var(--secondary);
+		font-weight: bold;
+	}
+
+	.review-range {
+		-webkit-appearance: none;
+		appearance: none;
+		cursor: pointer;
+		width: 100%;
+		padding: 0.2rem;
+		margin: 0 0 0.4rem;
+		background: var(--gray-bg);
+		border-radius: 1rem;
+		border: solid 0.1rem var(--gray-border);
+	}
+
+	.review-range::-webkit-slider-thumb {
+		-webkit-appearance: none;
+		appearance: none;
+		width: 1.6rem;
+		height: 1rem;
+		background: var(--secondary);
+		border-radius: 1rem;
+	}
+
+	.review-range-guide {
+		display: flex;
+		justify-content: space-between;
+		font-size: 0.8rem;
+		color: var(--secondary-text);
+	}
+
+	.review-satisfaction {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.6rem;
+	}
+
+	.review-satisfaction label {
+		font-size: 1.4rem;
+		font-weight: bold;
+	}
+
+	@media (max-width: 768px) {
+		.review-input-row,
+		.review-input-pair,
+		.review-slider-row {
 			flex-direction: column;
 			gap: 1rem;
 		}
-	}
 
-	.score-item {
-		flex: 1;
-		min-width: 20rem;
-		display: flex;
-		flex-direction: column;
-		margin-right: 2rem;
-
-		@media (max-width: 768px) {
+		.review-input-pair,
+		.review-score-item {
 			min-width: 0;
-			width: 100%;
-			margin-right: 0;
 		}
-
-		.label-row {
-			display: flex;
-			justify-content: space-between;
-			align-items: center;
-			margin-bottom: 0.5rem;
-
-			label {
-				margin: 0 !important;
-			}
-
-			.current-label {
-				color: var(--secondary);
-				font-weight: bold;
-			}
-		}
-
-		input[type='range'] {
-			-webkit-appearance: none;
-			appearance: none;
-			cursor: pointer;
-			width: 100%;
-			padding: 0.15rem 0.2rem;
-			margin: 0 0 0.4rem;
-			background: var(--gray-bg);
-			border-radius: 1rem;
-			border: solid 0.1rem var(--gray-border);
-
-			&::-webkit-slider-thumb {
-				-webkit-appearance: none;
-				appearance: none;
-				width: 1.5rem;
-				height: 1rem;
-				background: var(--secondary);
-				border-radius: 1rem;
-			}
-		}
-
-		.range-guide {
-			display: flex;
-			justify-content: space-between;
-			font-size: 0.75rem;
-			color: var(--secondary-text);
-		}
-	}
-
-	.satisfaction-item {
-		margin-top: 1rem;
-		justify-content: center;
-		align-items: center;
-
-		label {
-			font-size: 1.5rem;
-			font-weight: bold;
-			margin-left: 0 !important;
-			margin-bottom: 0.5rem !important;
-		}
-	}
-
-	.form-actions {
-		width: 100%;
-		display: flex;
-		justify-content: flex-end;
-		margin-top: 1rem;
 	}
 </style>

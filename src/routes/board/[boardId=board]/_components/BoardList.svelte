@@ -17,10 +17,12 @@
 	{@const fp = filePresence[post._id.toString()]}
 	<tr>
 		<td>
-			<a href={`/board/${boardId}/${post._id}`}>
+			<a class="board-title-link" href={`/board/${boardId}/${post._id}`}>
 				<span class="ellipsis">{post.title}</span>
 				<FileAttachmentIcons hasImage={fp?.hasImage} hasFile={fp?.hasFile} />
-				<span>[{post.commentCnt}]</span>
+				{#if post.commentCnt > 0}
+					<span class="board-comment-count">[{post.commentCnt}]</span>
+				{/if}
 			</a>
 		</td>
 		<td>{post.displayName}</td>
@@ -30,8 +32,8 @@
 	</tr>
 {/snippet}
 
-<section class="container-col module">
-	<table>
+<section class="container-col module desktop-list-shell">
+	<table class="data-table">
 		<colgroup>
 			<col style="width:60%" />
 			<col style="width:12%" />
@@ -57,7 +59,7 @@
 	<CommonListBtnModule currentPage={postPage.currentPage} totalPages={postPage.totalPages} />
 </section>
 
-<section class="container-col module mobile-list">
+<section class="container-col module mobile-list-shell">
 	{#each postPage.items as post (post._id)}
 		<MobileListItem href={`/board/${boardId}/${post._id}`}>
 			{#snippet row1()}
@@ -67,7 +69,7 @@
 					hasFile={filePresence[post._id.toString()]?.hasFile}
 				/>
 				{#if post.commentCnt > 0}
-					<span class="comment-cnt">[{post.commentCnt}]</span>
+					<span class="board-mobile-comment-count">[{post.commentCnt}]</span>
 				{/if}
 			{/snippet}
 			{#snippet row2()}
@@ -82,80 +84,25 @@
 </section>
 
 <style lang="scss">
-	table {
-		width: 100%;
+	.board-title-link {
+		display: grid;
+		justify-content: start;
+		align-items: center;
+		grid-template-columns: auto auto auto;
+		gap: 0.2rem;
+	}
 
-		th {
-			word-break: keep-all;
-		}
+	.board-comment-count {
+		color: var(--secondary);
+		font-size: 0.8rem;
+	}
 
-		td,
-		th {
-			padding: 0.5rem;
-			background-color: white;
-			border: none;
-		}
-
-		td:first-child > a {
-			display: grid;
-			justify-content: start;
-			align-items: center;
-			grid-template-columns: auto auto auto;
-			gap: 0.2rem;
-		}
-
-		thead > tr > th {
-			border-bottom: solid var(--gray-border) 0.1rem;
-		}
-
-		tbody {
-			tr {
-				border-bottom: solid var(--gray-border) 0.1rem;
-			}
-
-			tr:hover > td {
-				background-color: var(--gray-bg);
-			}
-		}
-
-		td:nth-child(n) {
-			text-align: center;
-		}
-
-		td:first-child {
-			text-align: left;
+	.mobile-list-shell {
+		:global(.board-mobile-comment-count) {
+			flex-shrink: 0;
+			color: var(--secondary);
+			font-size: 0.9rem;
 			font-weight: bold;
-
-			a {
-				color: black;
-
-				span:last-child {
-					color: var(--secondary);
-					font-size: 0.8rem;
-				}
-			}
-		}
-	}
-
-	.mobile-list {
-		display: none;
-	}
-
-	@media (max-width: 768px) {
-		section:not(.mobile-list) {
-			display: none;
-		}
-
-		.mobile-list {
-			display: flex;
-			padding: 0;
-
-			:global(.comment-cnt) {
-				flex-shrink: 0;
-				color: var(--secondary);
-				font-size: 0.9rem;
-				font-weight: bold;
-			}
 		}
 	}
 </style>

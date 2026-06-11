@@ -7,8 +7,8 @@
 	} = $props();
 </script>
 
-{#snippet CourseFilter()}
-	<div>
+<div class="filter-row">
+	<div class="field-group filter-field">
 		<label for="course">강의</label>
 		<select id="course" bind:value={selectedCourse}>
 			<option value="">전체</option>
@@ -17,10 +17,8 @@
 			{/each}
 		</select>
 	</div>
-{/snippet}
 
-{#snippet ProfessorFilter()}
-	<div>
+	<div class="field-group filter-field">
 		<label for="professor">교수</label>
 		<select id="professor" bind:value={selectedProfessor}>
 			<option value="">전체</option>
@@ -29,37 +27,28 @@
 			{/each}
 		</select>
 	</div>
-{/snippet}
-
-<div class="container" id="filter-div">
-	{@render CourseFilter()}
-	{@render ProfessorFilter()}
 </div>
 
 <style lang="scss">
-	#filter-div {
+	.filter-row {
 		width: 100%;
+		display: flex;
 		justify-content: flex-start;
-		margin-bottom: 0.5rem;
+		gap: 0.6rem;
+		margin-bottom: 0.6rem;
+	}
 
-		select {
-			max-width: 100%;
+	.filter-field {
+		flex: 0 1 20rem;
+	}
+
+	@media (max-width: 768px) {
+		.filter-row {
+			flex-direction: column;
 		}
 
-		@media (max-width: 768px) {
-			flex-direction: column;
-			align-items: flex-start;
-			gap: 0.5rem;
-
-			div {
-				width: 100%;
-				margin-left: 0;
-			}
-
-			select {
-				width: 100%;
-				min-width: 0;
-			}
+		.filter-field {
+			width: 100%;
 		}
 	}
 </style>

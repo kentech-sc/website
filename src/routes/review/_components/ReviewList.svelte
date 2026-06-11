@@ -17,35 +17,37 @@
 	</tr>
 {/snippet}
 
-<table>
-	<colgroup>
-		<col style="width:55%" />
-		<col style="width:15%" />
-		<col style="width:15%" />
-		<col style="width:15%" />
-	</colgroup>
-	<thead>
-		<tr>
-			<th>한줄평</th>
-			<th>교수명</th>
-			<th>수강 학기</th>
-			<th>작성일</th>
-		</tr>
-	</thead>
-	<tbody>
-		{#if reviews.length === 0}
+<div class="desktop-list-shell">
+	<table class="data-table">
+		<colgroup>
+			<col style="width:55%" />
+			<col style="width:15%" />
+			<col style="width:15%" />
+			<col style="width:15%" />
+		</colgroup>
+		<thead>
 			<tr>
-				<td colspan="4">작성된 강의평이 없습니다.</td>
+				<th>제목</th>
+				<th>교수명</th>
+				<th>수강 학기</th>
+				<th>작성일</th>
 			</tr>
-		{:else}
-			{#each reviews as review (review._id)}
-				{@render Item(review)}
-			{/each}
-		{/if}
-	</tbody>
-</table>
+		</thead>
+		<tbody>
+			{#if reviews.length === 0}
+				<tr class="review-empty-row">
+					<td colspan="4">작성된 강의평이 없습니다.</td>
+				</tr>
+			{:else}
+				{#each reviews as review (review._id)}
+					{@render Item(review)}
+				{/each}
+			{/if}
+		</tbody>
+	</table>
+</div>
 
-<div class="mobile-list">
+<div class="mobile-list-shell">
 	{#if reviews.length === 0}
 		<p class="empty">작성된 강의평이 없습니다.</p>
 	{:else}
@@ -66,66 +68,14 @@
 </div>
 
 <style lang="scss">
-	table {
-		width: 100%;
-
-		th {
-			word-break: keep-all;
-		}
-
-		td,
-		th {
-			padding: 0.5rem;
-			background-color: white;
-			border: none;
-		}
-
-		thead > tr > th {
-			border-bottom: solid var(--gray-border) 0.1rem;
-		}
-
-		tbody {
-			tr {
-				border-bottom: solid var(--gray-border) 0.1rem;
-			}
-
-			tr:hover > td {
-				background-color: var(--gray-bg);
-			}
-		}
-
-		td:nth-child(n) {
-			text-align: center;
-		}
-
-		td:first-child {
-			text-align: left;
-			font-weight: bold;
-
-			a {
-				color: black;
-			}
-		}
+	.review-empty-row td {
+		text-align: center;
+		font-weight: 400;
+		color: var(--gray-text);
 	}
 
-	.mobile-list {
-		display: none;
-	}
-
-	@media (max-width: 768px) {
-		table {
-			display: none;
-		}
-
-		.mobile-list {
-			display: flex;
-			flex-direction: column;
-			width: 100%;
-
-			.empty {
-				padding: 1rem;
-				color: var(--gray-text);
-			}
-		}
+	.mobile-list-shell .empty {
+		padding: 1rem;
+		color: var(--gray-text);
 	}
 </style>

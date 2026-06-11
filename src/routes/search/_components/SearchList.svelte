@@ -27,19 +27,19 @@
 </script>
 
 {#snippet ResultItem(result: PostEntity | PetitionEntity | ReviewEntity)}
-	<div class="result-item container">
+	<div class="search-result container">
 		{#if 'boardId' in result}
-			<a href="/board/{result.boardId}/{result._id}">
+			<a class="search-result-link" href="/board/{result.boardId}/{result._id}">
 				<h3 class="ellipsis">[게시글] {result.title}</h3>
 				<p class="ellipsis">{getPlainTextFromHtml(result.content)}</p>
 			</a>
 		{:else if 'courseId' in result}
-			<a href="/review/{result._id}">
+			<a class="search-result-link" href="/review/{result._id}">
 				<h3 class="ellipsis">[강의평] {result.title}</h3>
 				<p class="ellipsis">{getPlainTextFromHtml(result.comment)}</p>
 			</a>
 		{:else}
-			<a href="/petition/{result._id}">
+			<a class="search-result-link" href="/petition/{result._id}">
 				<h3 class="ellipsis">[청원] {result.title}</h3>
 				<p class="ellipsis">{getPlainTextFromHtml(result.content)}</p>
 			</a>
@@ -48,7 +48,7 @@
 {/snippet}
 
 {#snippet PaginationBtns()}
-	<div class="container" id="pagination">
+	<div class="container search-pagination">
 		{#if page > 1}
 			<a href={getSearchPageHref(page - 1)} class="btn-anchor">이전</a>
 		{:else}
@@ -75,17 +75,17 @@
 </section>
 
 <style lang="scss">
-	.result-item {
+	.search-result {
 		width: 100%;
 		justify-content: flex-start;
-
-		a {
-			color: black;
-			width: 100%;
-		}
 	}
 
-	#pagination {
-		margin-top: 0.5rem;
+	.search-result-link {
+		width: 100%;
+		color: var(--text);
+	}
+
+	.search-pagination {
+		margin-top: 0.6rem;
 	}
 </style>

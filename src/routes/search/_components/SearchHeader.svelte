@@ -1,19 +1,9 @@
-<header class="container-col module_head">
+<header class="container-col module_head module-head-layout">
 	<h1>검색</h1>
 
-	<div class="container">
-		<p>찾고 싶은 내용을 입력해 주세요</p>
+	<div class="module-head-row">
+		<p class="module-head-description">찾고 싶은 내용을 입력해 주세요</p>
 	</div>
+
 	<hr />
 </header>
-
-<style lang="scss">
-	header {
-		align-items: flex-start;
-
-		div {
-			width: 100%;
-			justify-content: space-between;
-		}
-	}
-</style>

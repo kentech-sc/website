@@ -6,26 +6,26 @@
 }
 
 html {
-	font-size: 1rem;
+	font-size: 20px;
 	background-color: var(--surface-base);
 	min-height: 100%;
 }
 
 @media (max-width: 75rem) {
 	html {
-		font-size: 0.875rem;
+		font-size: 15px;
 	}
 }
 
 @media (max-width: 50rem) {
 	html {
-		font-size: 0.75rem;
+		font-size: 12px;
 	}
 }
 
 @media (max-width: 37.5rem) {
 	html {
-		font-size: 0.625rem;
+		font-size: 10px;
 	}
 }
 
@@ -156,7 +156,7 @@ select {
 }
 
 select {
-	height: 1.8rem;
+	height: 2rem;
 }
 
 pre {

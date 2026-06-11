@@ -49,7 +49,7 @@
 
 		@media (max-width: 768px) {
 			grid-template-columns: 1fr;
-			gap: 1.5rem;
+			gap: 1.6rem;
 			padding: 1rem;
 		}
 	}
@@ -61,7 +61,7 @@
 	.settings-section {
 		display: flex;
 		flex-direction: column;
-		gap: 1.5rem;
+		gap: 1.6rem;
 	}
 
 	.admin-section,
@@ -69,8 +69,8 @@
 		background: var(--surface-elevated);
 		border: 0.1rem solid var(--gray-border);
 		border-radius: 0.5rem;
-		padding: 1.5rem;
-		box-shadow: 0 0.1rem 0.3rem var(--shadow-color);
+		padding: 1.6rem;
+		box-shadow: 0 0.1rem 0.4rem var(--shadow-color);
 
 		h3 {
 			margin: 0 0 1rem;
@@ -78,20 +78,7 @@
 			font-weight: 600;
 			color: var(--text);
 			border-bottom: 0.1rem solid var(--gray-border);
-			padding-bottom: 0.5rem;
-		}
-
-		:deep(.module) {
-			margin-bottom: 1rem;
-			border: none;
-			border-radius: 0.4rem;
-			background: var(--surface-elevated);
-			padding: 1.5rem;
-			box-shadow: 0 0.1rem 0.3rem var(--shadow-color);
-
-			&:last-child {
-				margin-bottom: 0;
-			}
+			padding-bottom: 0.6rem;
 		}
 	}
 </style>

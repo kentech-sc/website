@@ -23,12 +23,12 @@
 
 {#snippet PetitionItem(petition: Petition)}
 	<tr>
-		<td class="title-td">
-			<a href="/petition/{petition._id}">
-				<span style="color: {colorStatus[petition.status]}"
+		<td>
+			<a class="petition-title-link" href="/petition/{petition._id}">
+				<span class="petition-status" style="color: {colorStatus[petition.status]}"
 					>[{translatedStatus[petition.status]}]</span
 				>
-				{petition.title}
+				<span>{petition.title}</span>
 				<FileAttachmentIcons
 					hasImage={filePresence[petition._id.toString()]?.hasImage}
 					hasFile={filePresence[petition._id.toString()]?.hasFile}
@@ -44,9 +44,9 @@
 
 {#snippet PetitionResponse(petition: Petition)}
 	{#if petition.answeredAt}
-		<tr>
-			<td class="response-td">
-				<a href="/petition/{petition._id}#response-section"
+		<tr class="petition-response-row">
+			<td>
+				<a class="petition-response-link" href="/petition/{petition._id}#response-section"
 					>ㄴ <span style="color: purple">[답변]</span> {petition.title}</a
 				>
 			</td>
@@ -58,8 +58,8 @@
 	{/if}
 {/snippet}
 
-<section class="container-col module">
-	<table>
+<section class="container-col module desktop-list-shell">
+	<table class="data-table">
 		<colgroup>
 			<col style="width:50%" />
 			<col style="width:16%" />
@@ -86,11 +86,11 @@
 	<CommonListBtnModule {currentPage} {totalPages} />
 </section>
 
-<section class="container-col module mobile-list">
+<section class="container-col module mobile-list-shell">
 	{#each petitions as petition (petition._id)}
 		<MobileListItem href="/petition/{petition._id}">
 			{#snippet row1()}
-				<span class="status" style="color: {colorStatus[petition.status]}"
+				<span class="petition-mobile-status" style="color: {colorStatus[petition.status]}"
 					>[{translatedStatus[petition.status]}]</span
 				>
 				<span class="title">{petition.title}</span>
@@ -112,66 +112,31 @@
 </section>
 
 <style lang="scss">
-	table {
-		width: 100%;
+	.petition-title-link {
+		display: flex;
+		align-items: center;
+		flex-wrap: wrap;
+		gap: 0.2rem;
+	}
 
-		th {
-			word-break: keep-all;
-		}
+	.petition-status {
+		font-size: 0.9rem;
+	}
 
-		td,
-		th {
-			padding: 0.5rem;
-			background-color: white;
-			border: none;
-		}
+	.petition-response-row td {
+		font-weight: 400;
+		color: var(--gray-text);
+	}
 
-		thead > tr > th {
-			border-bottom: solid var(--gray-border) 0.1rem;
-		}
+	.petition-response-link {
+		color: var(--text);
+	}
 
-		tbody {
-			tr {
-				border-bottom: solid var(--gray-border) 0.1rem;
-			}
-
-			tr:hover > td {
-				background-color: var(--gray-bg);
-			}
-		}
-
-		td:nth-child(n) {
-			text-align: center;
-		}
-
-		td:first-child {
-			text-align: left;
+	.mobile-list-shell {
+		:global(.petition-mobile-status) {
+			flex-shrink: 0;
+			font-size: 0.9rem;
 			font-weight: bold;
-
-			a {
-				color: black;
-			}
-		}
-	}
-
-	.mobile-list {
-		display: none;
-	}
-
-	@media (max-width: 768px) {
-		section:not(.mobile-list) {
-			display: none;
-		}
-
-		.mobile-list {
-			display: flex;
-			padding: 0;
-
-			:global(.status) {
-				flex-shrink: 0;
-				font-size: 0.9rem;
-				font-weight: bold;
-			}
 		}
 	}
 </style>

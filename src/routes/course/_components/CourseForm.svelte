@@ -19,69 +19,69 @@
 
 <section class="container-col module">
 	<CommonForm actionName="addCourse" formName="addCourse" bind:formResult>
-		<div class="container-col">
-			<label for="courseId">강의 코드</label>
-			<input
-				type="text"
-				id="courseId"
-				name="courseId"
-				placeholder="예: EF1001"
-				bind:this={courseIdInput}
-			/>
-			<label for="name">강의명</label>
-			<input
-				type="text"
-				id="name"
-				name="name"
-				placeholder="예: 공학 미적분학 I"
-				bind:this={courseNameInput}
-			/>
-			<label for="content">강의 내용</label>
-			<textarea
-				id="content"
-				name="content"
-				placeholder="강의에 대한 간략한 설명을 입력하세요"
-				bind:this={courseContentInput}
-			></textarea>
-			<div class="form-actions">
+		<div class="course-form">
+			<div class="field-group field-group-strong">
+				<label for="courseId">강의 코드</label>
+				<input
+					type="text"
+					id="courseId"
+					name="courseId"
+					placeholder="예: EF1001"
+					bind:this={courseIdInput}
+				/>
+			</div>
+
+			<div class="field-group field-group-strong">
+				<label for="courseName">강의명</label>
+				<input
+					type="text"
+					id="courseName"
+					name="name"
+					placeholder="예: 공학 미적분학 I"
+					bind:this={courseNameInput}
+				/>
+			</div>
+
+			<div class="field-group field-group-strong">
+				<label for="courseContent">강의 내용</label>
+				<textarea
+					id="courseContent"
+					name="content"
+					class="course-description"
+					placeholder="강의에 대한 간단한 설명을 입력해 주세요"
+					bind:this={courseContentInput}
+				></textarea>
+			</div>
+
+			<div class="form-actions-end">
 				<button type="submit" class="btn-action">추가하기</button>
 			</div>
 		</div>
 	</CommonForm>
+
 	{#if formResult?.type === 'success'}
 		<p>강의가 추가되었습니다.</p>
 	{/if}
 </section>
 
 <style lang="scss">
-	div {
-		align-items: flex-start;
+	.course-form {
+		width: 100%;
+		display: flex;
+		flex-direction: column;
+		gap: 0.6rem;
+	}
 
-		label {
-			font-weight: bold;
-			margin-bottom: 0.5rem;
-		}
+	.course-description {
+		min-height: 20rem;
+		height: 50vh;
+	}
 
-		input,
-		textarea {
-			width: 100%;
-			margin-bottom: 0.5rem;
-		}
+	.form-actions-end {
+		margin-top: 0.4rem;
+	}
 
-		textarea {
-			height: 50vh;
-			resize: vertical;
-		}
-
-		.form-actions {
-			width: 100%;
-			display: flex;
-			justify-content: flex-end;
-		}
-
-		.btn-action {
-			padding: 0.4rem 1.2rem;
-			font-size: 0.9rem;
-		}
+	.btn-action {
+		font-size: 0.9rem;
 	}
 </style>

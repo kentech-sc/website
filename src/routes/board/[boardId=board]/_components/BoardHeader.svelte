@@ -22,34 +22,28 @@
 	});
 </script>
 
-<header class="container-col module_head">
+<header class="container-col module_head module-head-layout">
 	<h1>{title}</h1>
 
-	<div class="container">
-		<p>{description}</p>
+	<div class="module-head-row">
+		<p class="module-head-description">{description}</p>
+
 		{#if pageType === 'list' && canCreatePost}
-			<LinkButton href="/board/{boardId}/new">
-				<Pen size="1rem" />
-				<span>글쓰기</span>
-			</LinkButton>
+			<div class="module-head-actions">
+				<LinkButton href="/board/{boardId}/new">
+					<Pen size="1rem" />
+					<span>글쓰기</span>
+				</LinkButton>
+			</div>
 		{:else if pageType === 'new' || pageType === 'edit' || pageType === 'detail'}
-			<LinkButton href="/board/{boardId}">
-				<List size="1rem" />
-				<span>목록</span>
-			</LinkButton>
+			<div class="module-head-actions">
+				<LinkButton href="/board/{boardId}">
+					<List size="1rem" />
+					<span>목록</span>
+				</LinkButton>
+			</div>
 		{/if}
 	</div>
+
 	<hr />
 </header>
-
-<style lang="scss">
-	header {
-		align-items: flex-start;
-		width: 100%;
-
-		div {
-			width: 100%;
-			justify-content: space-between;
-		}
-	}
-</style>

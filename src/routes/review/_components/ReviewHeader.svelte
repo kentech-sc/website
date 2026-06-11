@@ -1,4 +1,4 @@
-﻿<script lang="ts">
+<script lang="ts">
 	import Pen from '@lucide/svelte/icons/pencil';
 	import Plus from '@lucide/svelte/icons/plus';
 	import List from '@lucide/svelte/icons/text';
@@ -16,13 +16,13 @@
 	} = $props();
 </script>
 
-<header class="container-col module_head">
+<header class="container-col module_head module-head-layout">
 	<h1>강의 평가</h1>
 
-	<div class="container">
-		<p>수강했던 강의에 대한 솔직한 후기를 남겨주세요</p>
+	<div class="module-head-row">
+		<p class="module-head-description">수강했던 강의에 대한 솔직한 후기를 남겨주세요</p>
 
-		<div class="btn-group">
+		<div class="module-head-actions">
 			{#if pageType === 'list'}
 				{#if canManageCatalog}
 					<LinkButton href="/course/new">
@@ -44,33 +44,6 @@
 			{/if}
 		</div>
 	</div>
+
 	<hr />
 </header>
-
-<style lang="scss">
-	header {
-		align-items: flex-start;
-		width: 100%;
-
-		.container {
-			width: 100%;
-			justify-content: flex-start;
-			align-items: center;
-			flex-wrap: wrap;
-			gap: 0.5rem;
-		}
-	}
-
-	p {
-		font-size: 0.9rem;
-		font-weight: bold;
-		margin: 0;
-	}
-
-	.btn-group {
-		display: flex;
-		gap: 0.5rem;
-		white-space: nowrap;
-		margin-left: auto;
-	}
-</style>
