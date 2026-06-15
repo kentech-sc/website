@@ -1,3 +1,6 @@
+import mongoose from 'mongoose';
+
+import type { ActivityLogCreate } from '$lib/types/activity-log.type.js';
 import type { CourseId } from '$lib/types/course.type.js';
 import type { Page } from '$lib/types/general.type.js';
 import type { ProfessorId } from '$lib/types/professor.type.js';
@@ -10,9 +13,11 @@ import type {
 } from '$lib/types/review.type.js';
 import type { User } from '$lib/types/user.type.js';
 
+import * as ActivityLogService from '$lib/services/activity-log.service.js';
 import * as CourseService from '$lib/services/course.service.js';
 import * as ProfessorService from '$lib/services/professor.service.js';
 import * as ReviewService from '$lib/services/review.service.js';
+import * as ThrottleService from '$lib/services/throttle.service.js';
 import { hasAnyCapability, hasCapability } from '$lib/shared/permission.js';
 
 export async function fillReviews(reviews: ReviewEntity[]): Promise<Review[]> {
@@ -79,13 +84,57 @@ export async function getReviewEditData(reviewId: ReviewId, user: User) {
 }
 
 export async function createReview(reviewCreate: ReviewCreate, user: User) {
-	return await ReviewService.createReview(reviewCreate, user);
+	return await mongoose.connection.transaction(async () => {
+		await ThrottleService.reserve(user._id, 'article');
+		const review = await ReviewService.createReview(reviewCreate, user);
+		const activityLog: ActivityLogCreate = {
+			actorId: user._id,
+			action: 'create',
+			targetType: 'review',
+			targetId: review._id,
+			parentTargetId: null,
+			cause: 'direct',
+			beforeSnapshot: null,
+			afterSnapshot: review
+		};
+		await ActivityLogService.create(activityLog);
+		return review;
+	});
 }
 
 export async function editReview(reviewId: ReviewId, reviewUpdate: ReviewUpdate, user: User) {
-	return await ReviewService.editReviewById(reviewId, reviewUpdate, user);
+	return await mongoose.connection.transaction(async () => {
+		const beforeReview = await ReviewService.getReviewById(reviewId);
+		const review = await ReviewService.editReviewById(reviewId, reviewUpdate, user);
+		const activityLog: ActivityLogCreate = {
+			actorId: user._id,
+			action: 'edit',
+			targetType: 'review',
+			targetId: review._id,
+			parentTargetId: null,
+			cause: 'direct',
+			beforeSnapshot: beforeReview,
+			afterSnapshot: review
+		};
+		await ActivityLogService.create(activityLog);
+		return review;
+	});
 }
 
 export async function deleteReview(reviewId: ReviewId, user: User) {
-	return await ReviewService.deleteReviewById(reviewId, user);
+	return await mongoose.connection.transaction(async () => {
+		const review = await ReviewService.deleteReviewById(reviewId, user);
+		const activityLog: ActivityLogCreate = {
+			actorId: user._id,
+			action: 'delete',
+			targetType: 'review',
+			targetId: review._id,
+			parentTargetId: null,
+			cause: 'direct',
+			beforeSnapshot: review,
+			afterSnapshot: null
+		};
+		await ActivityLogService.create(activityLog);
+		return review;
+	});
 }

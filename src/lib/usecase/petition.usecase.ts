@@ -1,13 +1,20 @@
 import mongoose from 'mongoose';
 
+import type {
+	ActivityLogCreate,
+	PetitionLogSnapshot,
+	PetitionResponseSnapshot
+} from '$lib/types/activity-log.type.js';
 import type { FileId } from '$lib/types/file-meta.type.js';
 import type { FilePresence } from '$lib/types/general.type.js';
 import type { Page } from '$lib/types/general.type.js';
 import type { PetitionId } from '$lib/types/petition.type.js';
 import type { Petition, PetitionEntity } from '$lib/types/petition.type.js';
 
+import * as ActivityLogService from '$lib/services/activity-log.service.js';
 import * as FileMetaService from '$lib/services/file-meta.service.js';
 import * as PetitionService from '$lib/services/petition.service.js';
+import * as ThrottleService from '$lib/services/throttle.service.js';
 import * as UserService from '$lib/services/user.service.js';
 import { hasCapability } from '$lib/shared/permission.js';
 import { createDisplayName } from '$lib/shared/utils.js';
@@ -59,6 +66,23 @@ function getSignerNames(petition: PetitionEntity, userIdToUser: Map<string, User
 		.filter((name): name is string => name !== null);
 }
 
+async function getPetitionLogSnapshot(petition: PetitionEntity): Promise<PetitionLogSnapshot> {
+	const files = await FileMetaService.getFileMetasByArticleId(petition._id);
+	return {
+		...petition,
+		fileIds: files.map((file) => file._id)
+	};
+}
+
+function toPetitionResponseSnapshot(petition: PetitionEntity): PetitionResponseSnapshot {
+	return {
+		responderId: petition.responderId,
+		response: petition.response,
+		answeredAt: petition.answeredAt,
+		status: petition.status
+	};
+}
+
 export async function getPetitionPage(page: number, user: User) {
 	const limit = 10;
 	const skip = (page - 1) * limit;
@@ -108,6 +132,7 @@ export async function createPetition(
 	fileIds: FileId[]
 ) {
 	return await mongoose.connection.transaction(async () => {
+		await ThrottleService.reserve(petitioner._id, 'article');
 		const petition = await PetitionService.createPetition(
 			{
 				title,
@@ -117,14 +142,38 @@ export async function createPetition(
 			petitioner
 		);
 		await FileMetaService.linkArticleToFiles(fileIds, petition._id);
+		const petitionSnapshot = await getPetitionLogSnapshot(petition);
+		const activityLog: ActivityLogCreate = {
+			actorId: petitioner._id,
+			action: 'create',
+			targetType: 'petition',
+			targetId: petition._id,
+			parentTargetId: null,
+			cause: 'direct',
+			beforeSnapshot: null,
+			afterSnapshot: petitionSnapshot
+		};
+		await ActivityLogService.create(activityLog);
 		return petition;
 	});
 }
 
 export async function deletePetitionById(petitionId: PetitionId, user: User) {
 	return await mongoose.connection.transaction(async () => {
-		await PetitionService.deletePetitionById(petitionId, user);
+		const petition = await PetitionService.deletePetitionById(petitionId, user);
+		const petitionSnapshot = await getPetitionLogSnapshot(petition);
 		await FileMetaService.unlinkArticleFromAllFiles(petitionId);
+		const activityLog: ActivityLogCreate = {
+			actorId: user._id,
+			action: 'delete',
+			targetType: 'petition',
+			targetId: petition._id,
+			parentTargetId: null,
+			cause: 'direct',
+			beforeSnapshot: petitionSnapshot,
+			afterSnapshot: null
+		};
+		await ActivityLogService.create(activityLog);
 	});
 }
 
@@ -145,13 +194,57 @@ export async function unreviewPetition(petitionId: PetitionId, user: User) {
 }
 
 export async function respondToPetition(petitionId: PetitionId, user: User, response: string) {
-	return await PetitionService.responseToPetitionById(petitionId, user, response);
+	return await mongoose.connection.transaction(async () => {
+		const petition = await PetitionService.responseToPetitionById(petitionId, user, response);
+		const activityLog: ActivityLogCreate = {
+			actorId: user._id,
+			action: 'create',
+			targetType: 'petition-response',
+			targetId: petition._id,
+			parentTargetId: null,
+			cause: 'direct',
+			beforeSnapshot: null,
+			afterSnapshot: toPetitionResponseSnapshot(petition)
+		};
+		await ActivityLogService.create(activityLog);
+		return petition;
+	});
 }
 
 export async function editPetitionResponse(petitionId: PetitionId, user: User, response: string) {
-	return await PetitionService.reviseResponseById(petitionId, user, response);
+	return await mongoose.connection.transaction(async () => {
+		const beforePetition = await PetitionService.getPetitionById(petitionId);
+		const petition = await PetitionService.reviseResponseById(petitionId, user, response);
+		const activityLog: ActivityLogCreate = {
+			actorId: user._id,
+			action: 'edit',
+			targetType: 'petition-response',
+			targetId: petition._id,
+			parentTargetId: null,
+			cause: 'direct',
+			beforeSnapshot: toPetitionResponseSnapshot(beforePetition),
+			afterSnapshot: toPetitionResponseSnapshot(petition)
+		};
+		await ActivityLogService.create(activityLog);
+		return petition;
+	});
 }
 
 export async function deletePetitionResponse(petitionId: PetitionId, user: User) {
-	return await PetitionService.deleteResponseById(petitionId, user);
+	return await mongoose.connection.transaction(async () => {
+		const beforePetition = await PetitionService.getPetitionById(petitionId);
+		const petition = await PetitionService.deleteResponseById(petitionId, user);
+		const activityLog: ActivityLogCreate = {
+			actorId: user._id,
+			action: 'delete',
+			targetType: 'petition-response',
+			targetId: petitionId,
+			parentTargetId: null,
+			cause: 'direct',
+			beforeSnapshot: toPetitionResponseSnapshot(beforePetition),
+			afterSnapshot: null
+		};
+		await ActivityLogService.create(activityLog);
+		return petition;
+	});
 }
