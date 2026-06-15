@@ -1,6 +1,7 @@
 <script lang="ts">
-	import { page } from '$app/state';
 	import { SvelteURLSearchParams } from 'svelte/reactivity';
+
+	import { page } from '$app/state';
 
 	type PaginationItem = number | 'ellipsis';
 
@@ -62,7 +63,7 @@
 		{#if item === 'ellipsis'}
 			<span class="ellipsis" aria-hidden="true">...</span>
 		{:else if item === currentPage}
-			<span class="btn-anchor current" aria-current="page">{item}</span>
+			<span class="current" aria-current="page">{item}</span>
 		{:else}
 			<a href={getPageHref(item)} class="btn-anchor others">{item}</a>
 		{/if}
@@ -71,30 +72,42 @@
 
 <style lang="scss">
 	.pagination {
-		margin-top: 0.5rem;
 		display: flex;
 		flex-wrap: wrap;
 		justify-content: center;
 		align-items: center;
-		gap: 0.3rem;
+		margin: 1rem 0;
+		border: solid 0.05rem var(--gray-border);
+		border-radius: 0.4rem;
+		overflow: hidden;
+
+		& > * {
+			padding: 0.2rem 0.8rem;
+			font-size: 0.8rem;
+			text-decoration: none;
+
+			&:not(:last-child) {
+				border-right: solid 0.05rem var(--gray-border);
+			}
+
+			&:not(.ellipsis):hover {
+				background-color: var(--gray-hover);
+			}
+		}
 	}
 
 	.current {
-		border-radius: .5rem;
-		font-weight: bold;
-		border-width: .1rem;
-		border-color: var(--black);
-		background-color: var(--gray-bg);
+		background-color: var(--gray-hover);
 		pointer-events: none;
+		font-weight: bold;
 	}
 
 	.others {
-		border-radius: .5rem;
+		color: black;
 	}
 
 	.ellipsis {
-		padding: 0 0.2rem;
+		pointer-events: none;
 		color: var(--gray-text);
 	}
-	
 </style>

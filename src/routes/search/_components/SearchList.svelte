@@ -1,86 +1,104 @@
 <script lang="ts">
+	import type { Page, SearchEntity } from '$lib/types/general.type.js';
+	import type { PetitionEntity } from '$lib/types/petition.type.js';
+	import type { PostEntity } from '$lib/types/post.type.js';
+	import type { ReviewEntity } from '$lib/types/review.type.js';
+
+	import CommonListPaginationBtn from '$components/CommonListPaginationBtn.svelte';
 	import { getPlainTextFromHtml } from '$lib/shared/utils.js';
-	import type { Petition } from '$lib/types/petition.type.js';
-	import type { Post } from '$lib/types/post.type.js';
-	import type { Review } from '$lib/types/review.type.js';
 
 	let {
-		results,
-		query,
-		page,
-		more
-	}: { results: (Post | Petition | Review)[]; query: string; page: number; more: boolean } =
-		$props();
-
-	const getSearchPageHref = (page: number): string => {
-		const searchParams = new URLSearchParams({
-			query,
-			page: page.toString()
-		});
-		return `/search?${searchParams.toString()}`;
-	};
+		searchPage
+	}: {
+		searchPage: Page<SearchEntity>;
+	} = $props();
 </script>
 
-{#snippet ResultItem(result: Post | Petition | Review)}
-	<div class="result-item container">
-		{#if 'boardId' in result}
-			<a href="/board/{result.boardId}/{result._id}">
-				<h3 class="ellipsis">[게시글] {result.title}</h3>
-				<p class="ellipsis">{getPlainTextFromHtml(result.content)}</p>
-			</a>
-		{:else if 'courseId' in result}
-			<a href="/review/{result._id}">
-				<h3 class="ellipsis">[강의평가] {result.title}</h3>
-				<p class="ellipsis">{getPlainTextFromHtml(result.comment)}</p>
-			</a>
-		{:else}
-			<a href="/petition/{result._id}">
-				<h3 class="ellipsis">[청원] {result.title}</h3>
-				<p class="ellipsis">{getPlainTextFromHtml(result.content)}</p>
-			</a>
-		{/if}
-	</div>
+{#snippet ListItem(item: PostEntity | PetitionEntity | ReviewEntity)}
+	{#if 'boardId' in item}
+		<a class="list-item" href="/board/{item.boardId}/{item._id}">
+			<h3 class="ellipsis"><span class="board-tag">게시글</span>{item.title}</h3>
+			<p class="ellipsis">{getPlainTextFromHtml(item.content)}</p>
+		</a>
+	{:else if 'courseId' in item}
+		<a class="list-item" href="/review/{item._id}">
+			<h3 class="ellipsis"><span class="review-tag">강의평가</span> {item.title}</h3>
+			<p class="ellipsis">{getPlainTextFromHtml(item.comment)}</p>
+		</a>
+	{:else}
+		<a class="list-item" href="/petition/{item._id}">
+			<h3 class="ellipsis"><span class="petition-tag">청원</span> {item.title}</h3>
+			<p class="ellipsis">{getPlainTextFromHtml(item.content)}</p>
+		</a>
+	{/if}
 {/snippet}
 
-{#snippet PaginationBtns()}
-	<div class="container" id="pagination">
-		{#if page > 1}
-			<a href={getSearchPageHref(page - 1)} class="btn-anchor">이전</a>
-		{:else}
-			<span class="btn-anchor-disabled">이전</span>
-		{/if}
-		{#if more}
-			<a href={getSearchPageHref(page + 1)} class="btn-anchor">다음</a>
-		{:else}
-			<span class="btn-anchor-disabled">다음</span>
-		{/if}
-	</div>
-{/snippet}
-
-<section class="container-col module">
-	{#if results.length === 0}
+<section class="module container-col">
+	{#if searchPage.items.length === 0}
 		<p>검색 결과가 없습니다.</p>
 	{:else}
-		{#each results as result (result._id)}
-			{@render ResultItem(result)}
-			<hr />
+		{#each searchPage.items as item (item._id)}
+			{@render ListItem(item)}
 		{/each}
+
+		<CommonListPaginationBtn
+			currentPage={searchPage.currentPage}
+			totalPages={searchPage.totalPages}
+		/>
 	{/if}
-	{@render PaginationBtns()}
 </section>
 
 <style lang="scss">
-	.result-item {
-		width: 100%;
-		justify-content: flex-start;
+	section {
+		margin-top: 1rem;
+		padding: 0;
+		overflow: hidden;
 
-		a {
-			color: black;
+		& > p {
+			padding: 0.8rem 1rem;
 			width: 100%;
 		}
 	}
 
-	#pagination {
-		margin-top: 0.5rem;
+	.list-item {
+		justify-content: flex-start;
+		border-bottom: solid 0.1rem var(--gray-border);
+		padding: 0.8rem 0.8rem;
+		width: 100%;
+		color: var(--black);
+		text-decoration: none;
+
+		&:hover {
+			background-color: var(--gray-bg);
+		}
+
+		h3 {
+			margin-bottom: 0.4rem;
+			font-weight: 600;
+			font-size: 1rem;
+		}
+
+		span {
+			margin-right: 0.4rem;
+			border-radius: 0.4rem;
+			padding: 0.2rem 0.4rem;
+		}
+
+		.board-tag {
+			background-color: var(--success-bg);
+		}
+
+		.petition-tag {
+			background-color: var(--info-bg);
+		}
+
+		.review-tag {
+			background-color: var(--warn-bg);
+		}
+
+		p {
+			padding: 0 0.2rem;
+			font-size: 0.8rem;
+		}
 	}
 </style>

@@ -1,7 +1,5 @@
-<div class="module">
-	<div class="module_head">
-		<h1>&lt;서비스 이용약관&gt;</h1>
-	</div>
+<article class="module">
+	<h1>&lt;서비스 이용약관&gt;</h1>
 
 	<div class="content">
 		<p class="intro">
@@ -97,58 +95,10 @@
 
 		<p class="effective-date">시행일: 2026년 4월 2일</p>
 	</div>
-</div>
+</article>
 
 <style lang="scss">
-	.module_head {
-		text-align: center;
-	}
+	@use '../../style/legal-page';
 
-	.content {
-		padding: 1.5rem 2rem;
-		display: flex;
-		flex-direction: column;
-		gap: 1.5rem;
-
-		.intro {
-			line-height: 1.7;
-		}
-
-		section {
-			display: flex;
-			flex-direction: column;
-			gap: 0.75rem;
-
-			h3 {
-				font-size: 1rem;
-				font-weight: bold;
-				border-left: 3px solid var(--primary);
-				padding-left: 0.6rem;
-			}
-
-			p,
-			li {
-				font-size: 0.9rem;
-				line-height: 1.7;
-				color: var(--gray-text);
-			}
-
-			ul {
-				padding-left: 1.2rem;
-				display: flex;
-				flex-direction: column;
-				gap: 0.3rem;
-			}
-		}
-
-		a {
-			color: var(--primary-text);
-		}
-
-		.effective-date {
-			font-size: 0.85rem;
-			color: var(--gray-text);
-			text-align: right;
-		}
-	}
+	@include legal-page.content-frame;
 </style>

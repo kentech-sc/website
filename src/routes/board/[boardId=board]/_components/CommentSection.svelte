@@ -1,9 +1,9 @@
 <script lang="ts">
-	import type { Comment, CommentPermissionMap } from '$lib/types/comment.type.js';
-	import type { User, UserId } from '$lib/types/user.type.js';
-
 	import CommentForm from './CommentForm.svelte';
 	import CommentList from './CommentList.svelte';
+
+	import type { Comment, CommentPermissionMap } from '$lib/types/comment.type.js';
+	import type { User, UserId } from '$lib/types/user.type.js';
 
 	let {
 		authorId,
@@ -20,9 +20,7 @@
 	} = $props();
 </script>
 
-<section class="container-col module">
-	{#if canCreateComment}
-		<CommentForm {user} />
-	{/if}
-	<CommentList {authorId} {comments} {commentPermissions} />
-</section>
+{#if canCreateComment}
+	<CommentForm {user} />
+{/if}
+<CommentList {authorId} {comments} {commentPermissions} />

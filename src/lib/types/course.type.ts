@@ -9,5 +9,3 @@ export interface CourseCreate {
 export type CourseEntity = CourseCreate;
 
 export type Course = CourseEntity;
-
-export type CourseUpdate = Partial<Pick<CourseEntity, 'name' | 'content'>>;

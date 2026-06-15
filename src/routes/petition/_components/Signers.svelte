@@ -1,13 +1,29 @@
 <script lang="ts">
-	let { signersNames }: { signersNames: string[] } = $props();
+	let { signerNames }: { signerNames: string[] } = $props();
 </script>
 
-<section class="container-col module">
-	{#if signersNames.length === 0}
-		<p>아직 서명자가 없습니다.</p>
-	{:else}
-		{#each signersNames as signerName, idx (idx)}
-			<p><b>[{signerName}]</b> 동의합니다.</p>
+{#if signerNames.length !== 0}
+	<section class="container-col module">
+		{#each signerNames as signerName, idx (idx)}
+			<p><span>{signerName}</span> 동의합니다.</p>
 		{/each}
-	{/if}
-</section>
+	</section>
+{/if}
+
+<style lang="scss">
+	section {
+		align-items: flex-start;
+		width: 100%;
+	}
+
+	p {
+		border-bottom: solid 0.1rem var(--gray-border);
+		padding: 0.4rem;
+		width: 100%;
+		font-size: 0.9rem;
+
+		span {
+			font-weight: 600;
+		}
+	}
+</style>

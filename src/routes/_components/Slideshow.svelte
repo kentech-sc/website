@@ -1,11 +1,12 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+
+	import mainLogo from '$assets/slideshow/4th_sc_logo.webp';
+	import leftImg from '$assets/slideshow/left.webp';
+	import rightImg from '$assets/slideshow/right.webp';
 	import slide01 from '$assets/slideshow/slide01.webp';
 	import slide02 from '$assets/slideshow/slide02.webp';
 	import slide03 from '$assets/slideshow/slide03.webp';
-	import leftImg from '$assets/slideshow/left.webp';
-	import rightImg from '$assets/slideshow/right.webp';
-	import mainLogo from '$assets/slideshow/4th_sc_logo.webp';
 
 	const slides = [
 		{ title: '~조감도 사진~', image: slide01 },
@@ -57,14 +58,14 @@
 		{/each}
 	</ul>
 
-	<button class="control container" id="left-btn" onclick={prev}
-		><img src={leftImg} alt="left" /></button
-	>
-	<button class="control container" id="right-btn" onclick={next}
-		><img src={rightImg} alt="right" /></button
-	>
+	<button class="control container left-btn" onclick={prev}>
+		<img src={leftImg} alt="left" />
+	</button>
+	<button class="control container right-btn" onclick={next}>
+		<img src={rightImg} alt="right" />
+	</button>
 
-	<ul id="slide-pagelist" class="container">
+	<ul class="container slide-pagelist">
 		{#each slides as _, idx (idx)}
 			<li>
 				<button class:selected={current === idx} onclick={() => goTo(idx)} aria-label="slide {idx}"
@@ -88,25 +89,25 @@
 			transform: translate(-50%, -50%);
 			z-index: 3;
 
-			width: 10rem;
-
 			filter: brightness(0) invert(1);
+
+			width: 8rem;
 		}
 
 		.slidelist {
 			display: flex;
-			height: 100%;
 			transition: transform 0.5s ease-in-out;
+			height: 100%;
 			list-style-type: none;
 
 			.slideitem {
-				flex: 0 0 100%;
 				position: relative;
+				flex: 0 0 100%;
 
 				img {
+					display: block;
 					width: 100%;
 					height: 100%;
-					display: block;
 					object-fit: cover;
 				}
 			}
@@ -116,12 +117,12 @@
 			position: absolute;
 			top: 50%;
 			transform: translateY(-50%);
-			width: 6rem;
-			height: 100%;
+			z-index: 2;
 			border: none;
 			background-color: transparent;
-			z-index: 2;
-			padding: 0 1rem;
+			padding: 0 0.6rem;
+			width: 5rem;
+			height: 100%;
 
 			img {
 				width: 100%;
@@ -137,36 +138,36 @@
 			}
 		}
 
-		#left-btn {
+		.left-btn {
 			left: 0;
-			padding-right: 1.4rem;
+			padding-right: 1rem;
 		}
 
-		#right-btn {
+		.right-btn {
 			right: 0;
-			padding-left: 1.4rem;
+			padding-left: 1rem;
 		}
 
-		#slide-pagelist {
+		.slide-pagelist {
 			position: absolute;
 			bottom: 0%;
 			left: 50%;
 
 			transform: translate(-50%, -50%);
 
-			margin: 1rem 0;
+			margin: 0.6rem 0;
 
 			li {
 				margin: 0 0.2rem;
 				list-style-type: none;
 
 				button {
-					width: 2.2rem;
-					height: 0.5rem;
-
-					border-radius: 1rem;
 					border: none;
+
+					border-radius: 0.9rem;
 					background: var(--gray-bg);
+					width: 1.8rem;
+					height: 0.4rem;
 
 					&:hover {
 						background: var(--gray-hover);

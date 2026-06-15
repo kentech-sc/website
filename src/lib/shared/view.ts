@@ -4,7 +4,7 @@ export const translatedStatus: Record<PetitionStatus, string> = {
 	ongoing: '진행 중',
 	pending: '검토 대기',
 	reviewing: '검토 중',
-	answered: '답변 완료',
+	answered: '응답 완료',
 	expired: '기간 만료'
 };
 

@@ -43,24 +43,29 @@
 
 <style lang="scss">
 	section {
-		margin: 0.5rem;
+		margin: 0.4rem;
 		width: auto;
 	}
 
 	h2 {
 		display: flex;
 		justify-content: space-between;
-		align-items: center;
+		align-items: flex-end;
+		font-size: 1.2rem;
 
 		a {
-			font-size: 0.8rem;
+			font-size: 0.7rem;
 		}
 	}
 
 	.grid-item {
-		color: black;
-		padding: 0.25rem;
 		justify-content: space-between;
+		padding: 0.2rem;
+		color: black;
+
+		span {
+			font-size: 0.9rem;
+		}
 
 		span:first-child {
 			overflow: hidden;
@@ -77,8 +82,8 @@
 		}
 
 		&:hover {
-			background-color: var(--gray-hover);
 			cursor: pointer;
+			background-color: var(--gray-hover);
 			text-decoration: none;
 		}
 	}

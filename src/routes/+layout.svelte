@@ -1,14 +1,13 @@
 <script lang="ts">
-	import { browser } from '$app/environment';
-	import { page } from '$app/state';
-
 	import Footer from './_components/Footer.svelte';
 	import NavBar from './_components/NavBar.svelte';
+	import Slideshow from './_components/Slideshow.svelte';
 
-	import { popClientFlash } from '$lib/shared/flash.js';
 	import type { FlashMessage } from '$lib/types/flash.type.js';
 
-	import Slideshow from './_components/Slideshow.svelte';
+	import { browser } from '$app/environment';
+	import { page } from '$app/state';
+	import { popClientFlash } from '$lib/shared/flash.js';
 
 	import '$style/main.scss';
 
@@ -39,18 +38,21 @@
 	{#if flash}
 		<div class={`flash-banner ${flash.kind}`} role="status" aria-live="polite">
 			<p>{flash.message}</p>
-			<button class="{flash.kind}-btn" type="button" aria-label="메시지 닫기" onclick={() => (flash = null)}>닫기</button>
+			<button
+				class="{flash.kind}-btn"
+				type="button"
+				aria-label="메시지 닫기"
+				onclick={() => (flash = null)}>닫기</button
+			>
 		</div>
 	{/if}
 {/snippet}
 
+<NavBar />
+{@render Flash()}
+
 {#if page.route.id === '/'}
-	<NavBar isMain={true} />
-	{@render Flash()}
 	<Slideshow />
-{:else}
-	<NavBar isMain={false} />
-	{@render Flash()}
 {/if}
 
 <div class="layout-shell container">
@@ -67,21 +69,21 @@
 
 		main {
 			flex: 1;
-			max-width: 82.5vw;
+			max-width: 80vw;
 		}
 	}
 
 	.flash-banner {
-		position: fixed;
-		top: 4rem;
-		z-index: 999;
-		min-width: 40vw;
-		width: fit-content;
-		transform: translate(-50%, 0);
-		left: 50%;
 		display: flex;
+		position: fixed;
+		top: 3.4rem;
+		left: 50%;
 		justify-content: space-between;
-		padding-right: .6rem;
+		transform: translate(-50%, 0);
+		z-index: 999;
+		padding-right: 0.6rem;
+		width: fit-content;
+		min-width: 40vw;
 
 		p {
 			margin: 0;

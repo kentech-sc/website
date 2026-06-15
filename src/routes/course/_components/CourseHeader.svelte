@@ -1,11 +1,15 @@
-<header class="container-col module_head">
-	<h1>강의/교수 추가</h1>
-	<p>추가하고 싶은 강의와 교수님의 정보를 정확히 입력해주세요</p>
-	<hr />
-</header>
+<script>
+	import List from '@lucide/svelte/icons/list';
 
-<style lang="scss">
-	header {
-		align-items: flex-start;
-	}
-</style>
+	import CommonHeader from '$components/CommonHeader.svelte';
+
+	const title = '강의/교수 추가';
+	const description = '추가하고 싶은 강의와 교수의 정보를 정확하게 입력해 주세요';
+</script>
+
+<CommonHeader {title} {description}>
+	<a href="/review" class="link-btn">
+		<List size="0.8rem" />
+		<span>목록</span>
+	</a>
+</CommonHeader>

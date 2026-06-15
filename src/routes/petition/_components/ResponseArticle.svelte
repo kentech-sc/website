@@ -1,13 +1,12 @@
 <script lang="ts">
 	import CommonForm from '$components/CommonForm.svelte';
-
+	import InlineActionForm from '$components/InlineActionForm.svelte';
+	import { parseDate } from '$lib/shared/utils.js';
 	import {
 		PetitionStatus,
 		type Petition,
 		type PetitionPermissions
 	} from '$lib/types/petition.type.js';
-
-	import { parseDate } from '$lib/shared/utils.js';
 
 	let { petition, permissions }: { petition: Petition; permissions: PetitionPermissions } =
 		$props();
@@ -53,14 +52,13 @@
 					{/if}
 					{#if permissions.canDeleteResponse}
 						<div class="delete-form">
-							<CommonForm
+							<InlineActionForm
 								actionName="deleteResponse"
-								formName="deleteResponse"
+								hiddenFields={[{ name: 'petition-id', value: petition._id }]}
 								policy={{ kind: 'detail', notFoundRedirectTo: '/petition' }}
 							>
-								<input type="hidden" name="petition-id" value={petition._id} />
-								<button type="submit">삭제</button>
-							</CommonForm>
+								삭제
+							</InlineActionForm>
 						</div>
 					{/if}
 				</header>
@@ -69,26 +67,24 @@
 			</article>
 		{/if}
 	{:else if petition.status === PetitionStatus.Pending && permissions.canReview}
-		<CommonForm
+		<InlineActionForm
 			actionName="reviewPetition"
-			formName="reviewPetition"
+			hiddenFields={[{ name: 'petition-id', value: petition._id }]}
 			policy={{ kind: 'detail', notFoundRedirectTo: '/petition' }}
 			afterConflict={endEditing}
 		>
-			<input type="hidden" name="petition-id" value={petition._id} />
-			<button type="submit">검토하기</button>
-		</CommonForm>
+			검토하기
+		</InlineActionForm>
 	{:else if petition.status === PetitionStatus.Reviewing}
 		{#if permissions.canUnreview}
-			<CommonForm
+			<InlineActionForm
 				actionName="unreviewPetition"
-				formName="unreviewPetition"
+				hiddenFields={[{ name: 'petition-id', value: petition._id }]}
 				policy={{ kind: 'detail', notFoundRedirectTo: '/petition' }}
 				afterConflict={endEditing}
 			>
-				<input type="hidden" name="petition-id" value={petition._id} />
-				<button type="submit">검토 취소하기</button>
-			</CommonForm>
+				검토 취소하기
+			</InlineActionForm>
 		{/if}
 		{#if permissions.canRespond}
 			<br />
@@ -107,8 +103,8 @@
 		width: 100%;
 
 		header > div {
-			width: 100%;
 			align-items: flex-start;
+			width: 100%;
 		}
 	}
 

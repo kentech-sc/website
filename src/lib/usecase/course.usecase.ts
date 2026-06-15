@@ -1,11 +1,10 @@
-import type { User } from '$lib/types/user.type.js';
 import type { CourseCreate } from '$lib/types/course.type.js';
 import type { ProfessorCreate } from '$lib/types/professor.type.js';
-
-import { hasCapability } from '$lib/shared/permission.js';
+import type { User } from '$lib/types/user.type.js';
 
 import * as CourseService from '$lib/services/course.service.js';
 import * as ProfessorService from '$lib/services/professor.service.js';
+import { hasCapability } from '$lib/shared/permission.js';
 
 export function getCoursePagePermissions(user: User) {
 	return {

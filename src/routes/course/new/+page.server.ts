@@ -17,7 +17,7 @@ export const actions = {
 		const content = (formData.get('content') ?? '').toString();
 
 		if (!courseId || !name || !content) {
-			return fail(400, { message: '강의 ID, 이름, 설명은 필수입니다.' });
+			return fail(400, { message: '강의 코드, 이름, 설명은 필수입니다.' });
 		}
 
 		await CourseUsecase.createCourse({ _id: courseId, name, content }, locals.user);

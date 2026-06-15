@@ -1,19 +1,8 @@
-<header class="container-col module_head">
-	<h1>검색</h1>
+<script>
+	import CommonHeader from '$components/CommonHeader.svelte';
 
-	<div class="container">
-		<p>찾고 싶은 내용을 입력해 주세요</p>
-	</div>
-	<hr />
-</header>
+	const title = '검색';
+	const description = '찾고 싶은 내용을 입력해 주세요';
+</script>
 
-<style lang="scss">
-	header {
-		align-items: flex-start;
-
-		div {
-			width: 100%;
-			justify-content: space-between;
-		}
-	}
-</style>
+<CommonHeader {title} {description} />

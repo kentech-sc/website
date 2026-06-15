@@ -1,17 +1,31 @@
 import type { CourseId } from '$lib/types/course.type.js';
+import type { Page } from '$lib/types/general.type.js';
 import type { ProfessorId } from '$lib/types/professor.type.js';
-import type { Review, ReviewCreate, ReviewId, ReviewUpdate } from '$lib/types/review.type.js';
+import type {
+	ReviewCreate,
+	ReviewId,
+	ReviewUpdate,
+	Review,
+	ReviewEntity
+} from '$lib/types/review.type.js';
 import type { User } from '$lib/types/user.type.js';
-
-import { hasAnyCapability, hasCapability } from '$lib/shared/permission.js';
 
 import * as CourseService from '$lib/services/course.service.js';
 import * as ProfessorService from '$lib/services/professor.service.js';
 import * as ReviewService from '$lib/services/review.service.js';
+import { hasAnyCapability, hasCapability } from '$lib/shared/permission.js';
 
-async function fillReviews(reviews: Review[]) {
-	const withCourseInfo = await CourseService.attachCourseInfo(reviews);
-	return await ProfessorService.attachProfessorInfo(withCourseInfo);
+export async function fillReviews(reviews: ReviewEntity[]): Promise<Review[]> {
+	const [courseIdToCourse, professorIdToProfessor] = await Promise.all([
+		CourseService.findCourseMapByIds(reviews.map((review) => review.courseId)),
+		ProfessorService.findProfessorMapByIds(reviews.map((review) => review.professorId))
+	]);
+
+	return reviews.map((review) => ({
+		...review,
+		courseName: courseIdToCourse.get(review.courseId.toString())?.name ?? null,
+		professorName: professorIdToProfessor.get(review.professorId.toString())?.name ?? null
+	}));
 }
 
 export async function getReviewFormOptions() {
@@ -23,7 +37,7 @@ export async function getReviewFormOptions() {
 	return { courses, professors };
 }
 
-export async function getReviewPageView(
+export async function getReviewPage(
 	page: number,
 	user: User,
 	courseId?: CourseId,
@@ -31,14 +45,11 @@ export async function getReviewPageView(
 ) {
 	const limit = 10;
 	const skip = (page - 1) * limit;
-	const reviewsResult = await ReviewService.getReviewPage(limit, skip, professorId, courseId);
+	const reviewPage = await ReviewService.getReviewPage(limit, skip, professorId, courseId);
+	reviewPage.items = await fillReviews(reviewPage.items);
 
 	return {
-		reviews: await fillReviews(reviewsResult.items),
-		currentPage: reviewsResult.currentPage,
-		totalPages: reviewsResult.totalPages,
-		hasPrev: reviewsResult.hasPrev,
-		hasNext: reviewsResult.hasNext,
+		reviewPage: reviewPage as Page<Review>,
 		canCreateReview: hasCapability(user, 'review.write'),
 		canManageCatalog: hasAnyCapability(user, ['course.manage', 'professor.manage'])
 	};

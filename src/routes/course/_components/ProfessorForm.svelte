@@ -1,7 +1,10 @@
 <script lang="ts">
+	import Plus from '@lucide/svelte/icons/plus';
+
 	import type { ActionResult } from '@sveltejs/kit';
 
 	import CommonForm from '$components/CommonForm.svelte';
+	import CommonLabel from '$components/CommonLabel.svelte';
 
 	let formResult = $state<ActionResult | null>(null);
 	let profNameInput = $state<HTMLInputElement | null>(null);
@@ -15,48 +18,38 @@
 
 <section class="container-col module">
 	<CommonForm actionName="addProfessor" formName="addProfessor" bind:formResult>
-		<div class="container-col">
-			<label for="name">교수님 추가</label>
-			<input
-				type="text"
-				id="name"
-				name="name"
-				placeholder="교수님 성함을 입력하세요 (예: 홍길동)"
-				bind:this={profNameInput}
-			/>
-			<div class="form-actions">
-				<button type="submit" class="btn-action">추가하기</button>
-			</div>
+		<div class="professor-form container">
+			<CommonLabel labelFor="professorName" labelString="교수명">
+				<input
+					type="text"
+					id="professorName"
+					name="name"
+					placeholder="교수님의 성함을 입력해 주세요 (예: 홍길동)"
+					bind:this={profNameInput}
+				/>
+			</CommonLabel>
 		</div>
+		<button type="submit" class="action-btn">
+			<Plus size="0.8rem" />추가하기
+		</button>
 	</CommonForm>
+
 	{#if formResult?.type === 'success'}
-		<p>교수님이 추가되었습니다.</p>
+		<p class="success">교수 정보가 추가되었습니다.</p>
 	{/if}
 </section>
 
 <style lang="scss">
-	div {
-		align-items: flex-start;
+	section {
+		gap: 0.6rem;
+	}
 
-		label {
-			font-weight: bold;
-			margin-bottom: 0.5rem;
-		}
+	.professor-form {
+		gap: 0.6rem;
+	}
 
-		input {
-			width: 100%;
-			margin-bottom: 0.5rem;
-		}
-
-		.form-actions {
-			width: 100%;
-			display: flex;
-			justify-content: flex-end;
-		}
-
-		.btn-action {
-			padding: 0.4rem 1.2rem;
-			font-size: 0.9rem;
-		}
+	.action-btn {
+		margin-top: 0.6rem;
+		margin-left: auto;
 	}
 </style>

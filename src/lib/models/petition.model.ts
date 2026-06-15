@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+
 import { PetitionStatus, type PetitionEntity } from '$lib/types/petition.type.js';
 
 const PetitionSchema = new mongoose.Schema<PetitionEntity>(

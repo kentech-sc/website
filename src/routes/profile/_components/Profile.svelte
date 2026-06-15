@@ -2,15 +2,29 @@
 	import { signOut } from '@auth/sveltekit/client';
 	import LogOut from '@lucide/svelte/icons/log-out';
 	import UserIcon from '@lucide/svelte/icons/user';
+
 	import type { User } from '$lib/types/user.type.js';
 
 	let { user }: { user: User } = $props();
+	let logoutLoading = $state(false);
+
+	async function handleSignOut() {
+		if (logoutLoading) return;
+
+		logoutLoading = true;
+
+		try {
+			await signOut();
+		} finally {
+			logoutLoading = false;
+		}
+	}
 </script>
 
-<section class="profile-card">
+<section class="profile-card container-col">
 	<div class="profile-header">
-		<div class="avatar">
-			<UserIcon size="2rem" />
+		<div class="avatar container">
+			<UserIcon size="1.6rem" />
 		</div>
 		<div class="profile-info">
 			<h2>{user.realName}</h2>
@@ -40,57 +54,51 @@
 		</div>
 	</div>
 
-	<div class="profile-actions">
-		<button class="error-btn logout-btn" onclick={() => signOut()}>
-			<LogOut size="1rem" />
-			<span>로그아웃</span>
-		</button>
-	</div>
+	<button
+		class="error-btn logout-btn"
+		disabled={logoutLoading}
+		aria-busy={logoutLoading ? 'true' : 'false'}
+		onclick={handleSignOut}
+	>
+		<LogOut size="0.8rem" />
+		<span>로그아웃</span>
+	</button>
 </section>
 
 <style lang="scss">
 	.profile-card {
-		background: var(--surface-elevated);
-		border: 0.1rem solid var(--gray-border);
-		border-radius: 0.5rem;
-		padding: 1.5rem;
-		box-shadow: 0 0.1rem 0.3rem var(--shadow-color);
+		gap: 1rem;
+
+		& > * {
+			width: stretch;
+		}
 	}
 
 	.profile-header {
 		display: flex;
 		align-items: center;
-		gap: 1rem;
-		margin-bottom: 1.5rem;
-		padding-bottom: 1rem;
+		gap: 0.6rem;
 		border-bottom: 0.1rem solid var(--gray-border);
+		padding-bottom: 0.6rem;
 
 		.avatar {
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			width: 3rem;
-			height: 3rem;
-			background: var(--secondary);
 			border-radius: 50%;
+			background: var(--secondary);
+			width: 2.4rem;
+			height: 2.4rem;
 			color: var(--tertiary-text);
 		}
 
 		.profile-info {
-			flex: 1;
-
 			h2 {
-				margin: 0 0 0.25rem;
-				font-size: 1.2rem;
-				font-weight: 600;
 				color: var(--text);
+				font-weight: 600;
+				font-size: 1rem;
 			}
 
 			.user-id {
-				margin: 0;
-				font-size: 0.8rem;
 				color: var(--gray-text);
-				font-family: monospace;
+				font-size: 0.7rem;
 			}
 		}
 	}
@@ -98,59 +106,34 @@
 	.profile-details {
 		display: flex;
 		flex-direction: column;
-		gap: 0.75rem;
-		margin-bottom: 1.5rem;
+		gap: 0.6rem;
 
 		.detail-item {
 			display: flex;
 			justify-content: space-between;
 			align-items: center;
-			padding: 0.5rem;
-			background: var(--gray-bg);
 			border-radius: 0.4rem;
+			background: var(--gray-bg);
+			padding: 0.4rem 0.6rem;
 
 			.label {
-				font-size: 0.8rem;
 				color: var(--gray-text);
-				font-weight: 500;
+				font-size: 0.7rem;
 			}
 
 			.value {
-				font-size: 1rem;
 				color: var(--text);
 				font-weight: 500;
+				font-size: 0.8rem;
 
 				&.badge {
+					border-radius: 0.4rem;
 					background: var(--secondary-bg);
-					color: var(--secondary);
-					padding: 0.25rem 0.5rem;
-					border-radius: 0.25rem;
-					font-size: 0.8rem;
+					padding: 0.2rem 0.4rem;
+					color: var(--tertiary);
+					font-size: 0.7rem;
 					text-transform: uppercase;
 				}
-			}
-		}
-	}
-
-	.profile-actions {
-		.logout-btn {
-			width: 100%;
-		}
-	}
-
-	@media (max-width: 768px) {
-		.profile-card {
-			padding: 1rem;
-		}
-
-		.profile-header {
-			.avatar {
-				width: 2.5rem;
-				height: 2.5rem;
-			}
-
-			h2 {
-				font-size: 1.125rem;
 			}
 		}
 	}

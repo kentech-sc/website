@@ -1,10 +1,10 @@
 import { fail, redirect } from '@sveltejs/kit';
 
-import editorActions from '$lib/server/editor-actions.js';
-import { BoardId, type BoardId as BoardIdType } from '$lib/types/board.type.js';
-import { APP_ERROR } from '$lib/shared/rule.js';
-import { DisplayType } from '$lib/types/user.type.js';
+import editorActions, { normalizeEditorContent } from '$lib/server/editor.js';
 import { AppError, withActionErrorHandling } from '$lib/server/errors.js';
+import { APP_ERROR } from '$lib/shared/rule.js';
+import { BoardId, type BoardId as BoardIdType } from '$lib/types/board.type.js';
+import { DisplayType } from '$lib/types/user.type.js';
 import * as BoardUsecase from '$lib/usecase/board.usecase.js';
 
 export const load = () => {};
@@ -30,13 +30,14 @@ export const actions = {
 		}
 
 		const fileIds = formData.getAll('fileIds').map((fileId) => fileId.toString());
+		const normalizedEditor = await normalizeEditorContent(content, fileIds);
 		const post = await BoardUsecase.createPost(
 			boardIdRaw as BoardIdType,
 			title,
-			content,
+			normalizedEditor.content,
 			locals.user,
 			displayTypeRaw as DisplayType,
-			fileIds
+			normalizedEditor.fileIds
 		);
 
 		throw redirect(302, '/board/' + params.boardId + '/' + post._id);

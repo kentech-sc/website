@@ -1,5 +1,5 @@
-import type { UserId, DisplayType } from './user.type.js';
 import type { BoardId } from './board.type.js';
+import type { UserId, DisplayType } from './user.type.js';
 
 export type PostId = string;
 
@@ -20,10 +20,7 @@ export interface PostEntity extends PostCreate {
 	likedBy: UserId[];
 }
 
-export interface Post extends PostEntity {
-	likeCnt: number;
-	displayName: string | null;
-}
+export type Post = PostEntity & { displayName: string | null };
 
 export interface PostPermissions {
 	canEdit: boolean;

@@ -1,17 +1,24 @@
 import * as Sentry from '@sentry/sveltekit';
-import type { ActionResult, Cookies, Handle, HandleServerError, ServerInit } from '@sveltejs/kit';
 import { redirect } from '@sveltejs/kit';
 import { sequence } from '@sveltejs/kit/hooks';
 
 import { handle as authenticationHandle } from './auth.js';
 
-import { AWS_BUCKET_NAME, AWS_ID, AWS_SECRET, MONGO_URI } from '$env/static/private';
-
-import { setServerFlash } from '$lib/server/flash.js';
 import type { Profile } from '$lib/types/user.type.js';
-import * as AuthUsecase from '$lib/usecase/auth.usecase.js';
+import type { ActionResult, Cookies, Handle, HandleServerError, ServerInit } from '@sveltejs/kit';
+
+import {
+	AWS_BUCKET_NAME,
+	AWS_ID,
+	AWS_SECRET,
+	MONGO_URI,
+	AWS_BUCKET_REGION,
+	MAX_FILE_SIZE
+} from '$env/static/private';
 import * as DB from '$lib/server/db.js';
+import { setServerFlash } from '$lib/server/flash.js';
 import { FileStorage } from '$lib/server/storage.js';
+import * as AuthUsecase from '$lib/usecase/auth.usecase.js';
 
 function checkEnv() {
 	if (MONGO_URI === undefined) {
@@ -54,7 +61,13 @@ function clearAuthSessionCookies(cookies: Cookies): void {
 export const init: ServerInit = async () => {
 	checkEnv();
 
-	await FileStorage.init(AWS_BUCKET_NAME, AWS_ID, AWS_SECRET);
+	await FileStorage.init(
+		AWS_BUCKET_NAME,
+		AWS_BUCKET_REGION,
+		AWS_ID,
+		AWS_SECRET,
+		Number(MAX_FILE_SIZE)
+	);
 	await DB.init(MONGO_URI);
 
 	console.log('[Server Is Ready]');

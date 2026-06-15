@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+
 import { UserGroup, type UserEntity } from '$lib/types/user.type.js';
 
 const UserSchema = new mongoose.Schema<UserEntity>(

@@ -1,4 +1,6 @@
 <script lang="ts">
+	import CommonLabel from '$components/CommonLabel.svelte';
+
 	let {
 		courses,
 		professors,
@@ -7,59 +9,42 @@
 	} = $props();
 </script>
 
-{#snippet CourseFilter()}
-	<div>
-		<label for="course">강의</label>
+<div class="filter">
+	<CommonLabel labelFor="course" labelString="강의">
 		<select id="course" bind:value={selectedCourse}>
 			<option value="">전체</option>
 			{#each courses as course (course._id)}
 				<option value={course._id}>[{course._id}] {course.name}</option>
 			{/each}
 		</select>
-	</div>
-{/snippet}
+	</CommonLabel>
 
-{#snippet ProfessorFilter()}
-	<div>
-		<label for="professor">교수</label>
+	<CommonLabel labelFor="professor" labelString="교수">
 		<select id="professor" bind:value={selectedProfessor}>
 			<option value="">전체</option>
 			{#each professors as professor (professor._id)}
 				<option value={professor._id}>{professor.name} 교수님</option>
 			{/each}
 		</select>
-	</div>
-{/snippet}
-
-<div class="container" id="filter-div">
-	{@render CourseFilter()}
-	{@render ProfessorFilter()}
+	</CommonLabel>
 </div>
 
 <style lang="scss">
-	#filter-div {
-		width: 100%;
+	.filter {
+		display: flex;
 		justify-content: flex-start;
-		margin-bottom: 0.5rem;
 
-		select {
-			max-width: 100%;
+		gap: 1rem;
+		margin-bottom: 1rem;
+
+		width: 100%;
+
+		& > :global(div:first-child) {
+			width: 28rem;
 		}
 
-		@media (max-width: 768px) {
-			flex-direction: column;
-			align-items: flex-start;
-			gap: 0.5rem;
-
-			div {
-				width: 100%;
-				margin-left: 0;
-			}
-
-			select {
-				width: 100%;
-				min-width: 0;
-			}
+		& > :global(div:last-child) {
+			width: 16rem;
 		}
 	}
 </style>

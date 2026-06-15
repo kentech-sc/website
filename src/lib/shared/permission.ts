@@ -1,4 +1,5 @@
 import type { User } from '$lib/types/user.type.js';
+
 import { UserGroup, type UserGroup as UserGroupType } from '$lib/types/user.type.js';
 
 export type Capability =
@@ -21,7 +22,7 @@ export type Capability =
 	| 'user.manage'
 	| 'system.cleanup';
 
-export const ROLE_CAPABILITIES: Record<UserGroupType, Capability[]> = {
+const ROLE_CAPABILITIES: Record<UserGroupType, Capability[]> = {
 	[UserGroup.Guest]: [],
 	[UserGroup.User]: [
 		'board.free.write',
@@ -81,10 +82,6 @@ export const ROLE_CAPABILITIES: Record<UserGroupType, Capability[]> = {
 		'system.cleanup'
 	]
 };
-
-export function getCapabilities(user: User): Set<Capability> {
-	return new Set(ROLE_CAPABILITIES[user.group]);
-}
 
 export function hasCapability(user: User, capability: Capability): boolean {
 	return ROLE_CAPABILITIES[user.group].includes(capability);

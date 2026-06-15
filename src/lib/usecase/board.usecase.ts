@@ -8,36 +8,34 @@ import type {
 	CommentPermissionMap
 } from '$lib/types/comment.type.js';
 import type { FileId, FileMeta } from '$lib/types/file-meta.type.js';
-import type { FilePresence } from '$lib/types/general.type.js';
-import type { Post, PostCreate, PostId, PostPermissions } from '$lib/types/post.type.js';
+import type { FilePresence, Page } from '$lib/types/general.type.js';
+import type {
+	Post,
+	PostCreate,
+	PostEntity,
+	PostId,
+	PostPermissions
+} from '$lib/types/post.type.js';
 import type { DisplayType, User } from '$lib/types/user.type.js';
-
-import { hasCapability } from '$lib/shared/permission.js';
 
 import * as CommentService from '$lib/services/comment.service.js';
 import * as FileMetaService from '$lib/services/file-meta.service.js';
 import * as PostService from '$lib/services/post.service.js';
 import * as UserService from '$lib/services/user.service.js';
+import { hasCapability } from '$lib/shared/permission.js';
 
 export async function getBoardPage(boardId: BoardId, page: number, user: User) {
 	const limit = 10;
 	const skip = (page - 1) * limit;
 
 	const postResult = await PostService.getPostPageByBoardId(boardId, limit, skip);
-	postResult.items = await UserService.fillDisplayNames(postResult.items, true);
-
-	const filePresenceEntries = await Promise.all(
-		postResult.items.map(async (post) => {
-			const files = await FileMetaService.getFileMetasByArticleId(post._id);
-			return [
-				post._id,
-				{
-					hasImage: files.some((file) => file.mime.startsWith('image/')),
-					hasFile: files.some((file) => !file.mime.startsWith('image/'))
-				}
-			] as const;
-		})
-	);
+	const [userIdToUser, filePresence] = await Promise.all([
+		UserService.findUserMapByIds(postResult.items.map((post) => post.userId)),
+		FileMetaService.getFilePresenceByArticleIds(postResult.items.map((post) => post._id))
+	]);
+	const posts = UserService.attachDisplayNames(postResult.items, userIdToUser, {
+		noIdxForAnon: true
+	});
 
 	const canCreatePost =
 		(boardId === 'free' && hasCapability(user, 'board.free.write')) ||
@@ -45,8 +43,8 @@ export async function getBoardPage(boardId: BoardId, page: number, user: User) {
 		(boardId === 'bylaw' && hasCapability(user, 'board.bylaw.write'));
 
 	return {
-		postPage: postResult,
-		filePresence: Object.fromEntries(filePresenceEntries) as FilePresence,
+		postPage: { ...postResult, items: posts } as Page<Post>,
+		filePresence: filePresence as FilePresence,
 		canCreatePost
 	};
 }
@@ -63,16 +61,17 @@ export async function getPostDetailByPostId(
 	commentPermissions: CommentPermissionMap;
 	canCreateComment: boolean;
 }> {
-	if (options?.incrementView) {
-		await PostService.viewPostById(postId);
-	}
+	const postRaw =
+		options?.incrementView === true
+			? await PostService.viewPostById(postId)
+			: await PostService.getPostById(postId);
+	const [commentsAsc, files] = await Promise.all([
+		CommentService.getCommentsByPostId(postId),
+		FileMetaService.getFileMetasByArticleId(postId)
+	]);
+	const commentsRaw = commentsAsc.toReversed();
 
-	const postRaw = await PostService.getPostById(postId);
-	const commentsRaw = (await CommentService.getCommentsByPostId(postId)).toReversed();
-	const files = await FileMetaService.getFileMetasByArticleId(postId);
-
-	const raws = [postRaw, ...commentsRaw];
-	const filled = await UserService.fillDisplayNames(raws);
+	const filled = await UserService.fillDisplayNames([postRaw, ...commentsRaw]);
 
 	const post = filled[0] as Post;
 	const comments = filled.slice(1) as Comment[];
@@ -96,7 +95,7 @@ export async function createPost(
 	user: User,
 	displayType: DisplayType,
 	fileIds: FileId[]
-): Promise<Post> {
+): Promise<PostEntity> {
 	return await mongoose.connection.transaction(async () => {
 		const postCreate: PostCreate = {
 			boardId,
@@ -118,7 +117,7 @@ export async function editPost(
 	user: User,
 	displayType: DisplayType,
 	fileIds: FileId[]
-): Promise<Post> {
+): Promise<PostEntity> {
 	return await mongoose.connection.transaction(async () => {
 		const post = await PostService.editPostById(
 			postId,

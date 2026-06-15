@@ -1,13 +1,6 @@
 @font-face {
-	font-family: 'NanumGothic';
-	font-weight: 700;
-	src: url('/fonts/nanum-gothic-700.woff2') format('woff2');
-	font-display: swap;
-}
-
-@font-face {
-	font-family: 'NanumGothic';
-	font-weight: 400;
-	src: url('/fonts/nanum-gothic-400.woff2') format('woff2');
+	font-weight: 100 900;
+	src: url('/fonts/PretendardVariable.woff2') format('woff2-variations');
+	font-family: 'Pretendard';
 	font-display: swap;
 }

@@ -39,31 +39,10 @@
 
 <style>
 	.gsi-material-button {
-		user-select: none;
-		appearance: none;
-
-		-moz-user-select: none;
-		-webkit-user-select: none;
-		-ms-user-select: none;
-		-webkit-appearance: none;
-		background-color: WHITE;
-		background-image: none;
-		border: calc(1rem / 16) solid #747775;
-		-webkit-border-radius: calc(20rem / 16);
-		border-radius: calc(10rem / 16);
-		-webkit-box-sizing: border-box;
-		box-sizing: border-box;
-		color: #1f1f1f;
-		cursor: pointer;
-		font-family: 'Roboto', arial, sans-serif;
-		font-size: calc(14rem / 16);
-		height: calc(40rem / 16);
-		letter-spacing: calc(0.25rem / 16);
-		outline: none;
-		overflow: hidden;
-		padding: 0 calc(12rem / 16);
 		position: relative;
-		text-align: center;
+		vertical-align: middle;
+		appearance: none;
+		-webkit-appearance: none;
 		-webkit-transition:
 			background-color 0.218s,
 			border-color 0.218s,
@@ -72,59 +51,80 @@
 			background-color 0.218s,
 			border-color 0.218s,
 			box-shadow 0.218s;
-		vertical-align: middle;
-		white-space: nowrap;
+		cursor: pointer;
+		-webkit-box-sizing: border-box;
+		box-sizing: border-box;
+		outline: none;
+		border: calc(1rem / 16) solid #747775;
+		-webkit-border-radius: calc(20rem / 16);
+		border-radius: calc(10rem / 16);
+		background-image: none;
+		background-color: WHITE;
+		padding: 0 calc(12rem / 16);
 		width: auto;
-		max-width: 400px;
 		min-width: min-content;
+		max-width: 400px;
+		height: calc(40rem / 16);
+		overflow: hidden;
+		color: #1f1f1f;
+		font-size: calc(14rem / 16);
+		font-family: 'Roboto', arial, sans-serif;
+		letter-spacing: calc(0.25rem / 16);
+		user-select: none;
+
+		-moz-user-select: none;
+		-webkit-user-select: none;
+		-ms-user-select: none;
+		text-align: center;
+		white-space: nowrap;
 	}
 
 	.gsi-material-button .gsi-material-button-icon {
-		height: calc(20rem / 16);
 		margin-right: calc(12rem / 16);
-		min-width: calc(20rem / 16);
 		width: calc(20rem / 16);
+		min-width: calc(20rem / 16);
+		height: calc(20rem / 16);
 	}
 
 	.gsi-material-button .gsi-material-button-content-wrapper {
-		-webkit-align-items: center;
-		align-items: center;
 		display: flex;
+		position: relative;
 		-webkit-flex-direction: row;
 		flex-direction: row;
 		-webkit-flex-wrap: nowrap;
 		flex-wrap: nowrap;
-		height: 100%;
 		justify-content: space-between;
-		position: relative;
+		-webkit-align-items: center;
+		align-items: center;
 		width: 100%;
+		height: 100%;
 	}
 
 	.gsi-material-button .gsi-material-button-contents {
 		-webkit-flex-grow: 1;
 		flex-grow: 1;
-		font-family: 'Roboto', arial, sans-serif;
-		font-weight: 500;
-		overflow: hidden;
-		text-overflow: ellipsis;
 		vertical-align: top;
+		overflow: hidden;
+		font-weight: 500;
+		font-family: 'Roboto', arial, sans-serif;
+		text-overflow: ellipsis;
 	}
 
 	.gsi-material-button .gsi-material-button-state {
-		-webkit-transition: opacity 0.218s;
-		transition: opacity 0.218s;
+		position: absolute;
+		top: 0;
+		right: 0;
 		bottom: 0;
 		left: 0;
 		opacity: 0;
-		position: absolute;
-		right: 0;
-		top: 0;
+		-webkit-transition: opacity 0.218s;
+		transition: opacity 0.218s;
 	}
 
 	.gsi-material-button:disabled {
 		cursor: default;
-		background-color: #ffffff61;
 		border-color: #1f1f1f1f;
+		background-color: #ffffff61;
 	}
 
 	.gsi-material-button:disabled .gsi-material-button-contents {
@@ -137,8 +137,8 @@
 
 	.gsi-material-button:not(:disabled):active .gsi-material-button-state,
 	.gsi-material-button:not(:disabled):focus .gsi-material-button-state {
-		background-color: #303030;
 		opacity: 12%;
+		background-color: #303030;
 	}
 
 	.gsi-material-button:not(:disabled):hover {
@@ -151,7 +151,7 @@
 	}
 
 	.gsi-material-button:not(:disabled):hover .gsi-material-button-state {
-		background-color: #303030;
 		opacity: 8%;
+		background-color: #303030;
 	}
 </style>

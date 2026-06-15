@@ -2,122 +2,147 @@
 
 .container {
 	display: flex;
-	align-items: center;
 	justify-content: center;
+	align-items: center;
 }
 
 .container-col {
 	display: flex;
-	align-items: center;
-	justify-content: center;
 	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
+
+.inline-container {
+	display: inline-flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.inline-container-col {
+	display: inline-flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
 }
 
 @mixin module-frame {
 	border-width: 0.1rem;
 	border-style: solid;
 	width: 100%;
-	margin-top: 1rem;
 }
 
 .module {
 	@include module-frame;
+	box-shadow: 0 0.2rem 0.4rem var(--shadow-color);
 	border-color: var(--gray-border);
-	background-color: var(--surface-elevated);
-	border-radius: 0.8rem;
-	box-shadow: 0 0.2rem 0.3rem var(--shadow-color);
-	padding: 1.2rem 1.5rem;
-}
-
-.module_head {
-	@include module-frame;
-	border: none;
-	background-color: var(--surface-elevated);
-	border-radius: 0.8rem;
-	padding: 1.2rem 0;
-
-	p {
-		font-size: 0.9rem;
-		font-weight: bold;
-		margin: 0;
-	}
+	border-radius: 0.6rem;
+	background-color: var(--white);
+	padding: 1rem 1rem;
 }
 
 .ellipsis {
-	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
+	white-space: nowrap;
 }
 
-.btn-anchor {
-	@include base.btn-style;
-}
+@mixin action-btn {
+	display: inline-flex;
+	justify-content: center;
+	align-items: center;
+	gap: 0.2rem;
 
-.btn-anchor-disabled {
-	@include base.btn-style;
-	color: var(--gray-text);
-
-	&:hover {
-		cursor: not-allowed;
-	}
-}
-
-button.btn-action {
-	background-color: var(--secondary);
-	color: var(--tertiary-text);
-	border: none;
-	padding: 0.6rem 1.6rem;
-	border-radius: 0.2rem;
-	font-size: 1rem;
-	font-weight: bold;
 	transition: opacity 0.2s ease;
+
+	border: none;
+	border-radius: 0.2rem;
+
+	background-color: var(--secondary);
+
+	padding: 0.2rem 0.6rem;
+	color: var(--white);
+
+	font-size: 0.9rem;
 
 	&:hover:not(:disabled) {
 		opacity: 0.9;
-		text-decoration: none;
+	}
+
+	&:disabled {
+		opacity: 0.7;
+		cursor: wait;
+	}
+}
+
+button.action-btn {
+	@include action-btn;
+
+	&:hover {
+		background-color: var(--secondary-strong-hover);
 	}
 
 	&:disabled {
 		background-color: var(--gray-border);
 		color: var(--gray-text);
-		cursor: not-allowed;
-		opacity: 0.6;
 	}
+}
+
+a.link-btn {
+	display: inline-flex;
+	justify-content: center;
+	align-items: center;
+
+	gap: 0.2rem;
+	border-radius: 0.2rem;
+
+	background-color: var(--secondary);
+
+	padding: 0.2rem 0.6rem;
+	color: var(--white);
+
+	font-size: 0.9rem;
+	// font-weight: 600;
+	word-break: keep-all;
+
+	&:hover {
+		background-color: var(--secondary-strong-hover);
+		text-decoration: none;
+	}
+}
+
+label.input-label {
+	position: absolute;
+	top: -1.2rem;
+	left: 0.2rem;
+	z-index: 90;
+	color: var(--gray);
+	font-size: 0.8rem;
 }
 
 @mixin flash-frame {
 	display: flex;
 	justify-content: center;
-    align-items: center;
-	padding: 0.5rem 1rem;
-	border-radius: 0.6rem;
-}
-
-@mixin flash-btn-frame {
-	display: flex;
-	justify-content: center;
-    align-items: center;
-	padding: 0.5rem 1rem;
-	border-radius: 0.5rem;
-    gap: 0.5rem;
-    border: none;
-	font-size: 1rem;
+	align-items: center;
+	border-radius: 0.4rem;
+	padding: 0.4rem 0.6rem;
+	font-size: 0.8rem;
 }
 
 .error {
 	@include module-frame;
 	@include flash-frame;
-	color: var(--error-text);
-	background-color: var(--error-bg);
 	border-color: var(--error);
+	background-color: var(--error-bg);
+	color: var(--error-text);
 }
 
 .error-btn {
-	@include flash-btn-frame;
-    background: var(--error);
-    color: var(--tertiary-text);
+	@include action-btn;
+	background: var(--error);
+	color: var(--tertiary-text);
 
-	&:hover {
+	&:hover:not(:disabled) {
 		background-color: var(--error-strong-hover);
 	}
 }
@@ -125,17 +150,17 @@ button.btn-action {
 .warn {
 	@include module-frame;
 	@include flash-frame;
-	color: var(--warn-text);
-	background-color: var(--warn-bg);
 	border-color: var(--warn);
+	background-color: var(--warn-bg);
+	color: var(--warn-text);
 }
 
 .warn-btn {
-	@include flash-btn-frame;
-    background: var(--warn);
-    color: var(--tertiary-text);
+	@include action-btn;
+	background: var(--warn);
+	color: var(--tertiary-text);
 
-	&:hover {
+	&:hover:not(:disabled) {
 		background-color: var(--warn-strong-hover);
 	}
 }
@@ -143,17 +168,17 @@ button.btn-action {
 .success {
 	@include module-frame;
 	@include flash-frame;
-	color: var(--success-text);
-	background-color: var(--success-bg);
 	border-color: var(--success);
+	background-color: var(--success-bg);
+	color: var(--success-text);
 }
 
 .success-btn {
-	@include flash-btn-frame;
+	@include action-btn;
 	background: var(--success);
 	color: var(--tertiary-text);
 
-	&:hover {
+	&:hover:not(:disabled) {
 		background-color: var(--success-strong-hover);
 	}
 }
@@ -161,17 +186,29 @@ button.btn-action {
 .info {
 	@include module-frame;
 	@include flash-frame;
-	color: var(--info-text);
-	background-color: var(--info-bg);
 	border-color: var(--info);
+	background-color: var(--info-bg);
+	color: var(--info-text);
 }
 
 .info-btn {
-	@include flash-btn-frame;
+	@include action-btn;
 	background: var(--info);
 	color: var(--tertiary-text);
 
-	&:hover {
+	&:hover:not(:disabled) {
 		background-color: var(--info-strong-hover);
+	}
+}
+
+@media (min-width: 800px) {
+	.mobile-only {
+		display: none;
+	}
+}
+
+@media (max-width: 800px) {
+	.desktop-only {
+		display: none;
 	}
 }

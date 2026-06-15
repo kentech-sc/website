@@ -106,6 +106,7 @@
 ## 5. repository 메서드 규칙
 
 - repository는 DB CRUD / query만 다루고, 각 메서드의 반환 계약을 명확히 유지한다.
+- stateful mutation에서는 비즈니스 판단을 넣지 않고, 동시성 때문에 필요한 atomic precondition만 query 조건으로 둔다.
 
 ### create
 
@@ -133,6 +134,7 @@
 - 에러는 `AppError` 하나로 통일한다.
 - `APP_ERROR` 상수 객체에 `code + status`를 함께 둔다.
 - service는 `assertRule(...)` 또는 repository 결과를 보고 `AppError`를 throw한다.
+- service가 pre-read와 `assertRule(...)`를 끝낸 뒤 guarded mutation이 실패하면, 기본적으로 stale-state로 보고 `INVALID_STATE`를 던진다.
 - usecase는 보통 `AppError`를 전파한다.
 - server entry는 `AppError`를 HTTP 응답으로 바꾼다.
 

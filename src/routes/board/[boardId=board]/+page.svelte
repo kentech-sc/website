@@ -9,4 +9,4 @@
 </script>
 
 <BoardHeader pageType="list" {canCreatePost} />
-<BoardList {postPage} {filePresence}/>
+<BoardList {postPage} {filePresence} />

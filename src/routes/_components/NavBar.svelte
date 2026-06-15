@@ -1,34 +1,34 @@
 <script lang="ts">
-	import favicon from '$assets/top_logo_white.png';
+	import CircleUserRound from '@lucide/svelte/icons/circle-user-round';
+	import Menu from '@lucide/svelte/icons/menu';
+	import Search from '@lucide/svelte/icons/search';
+	import X_img from '@lucide/svelte/icons/x';
+	import { cubicOut } from 'svelte/easing';
+	import { fly, fade } from 'svelte/transition';
 
 	import { page } from '$app/state';
-
-	import Search_img from '@lucide/svelte/icons/search';
-	import Menu_img from '@lucide/svelte/icons/menu';
-	import X_img from '@lucide/svelte/icons/x';
-	import CircleUserRound_img from '@lucide/svelte/icons/circle-user-round';
-	import { fly, fade } from 'svelte/transition';
-	import { cubicOut } from 'svelte/easing';
+	import favicon from '$assets/top_logo_white.png';
 
 	const user = $derived(page.data.user);
 
-	let { isMain = false } = $props();
+	let isDrawerOpen = $state(false);
 
-	let menuOpen = $state(false);
-
-	function closeMenu() {
-		menuOpen = false;
+	const toggleDrawer = () => {
+		isDrawerOpen = !isDrawerOpen;
+	};
+	function closeDrawer() {
+		isDrawerOpen = false;
 	}
 </script>
 
 {#snippet Logo()}
-	<a href="/" class="container">
-		<img src={favicon} alt="top-logo-white" />
+	<a href="/" class="inline-container logo">
+		<img src={favicon} alt="켄텍 로고 이미지" />
 	</a>
 {/snippet}
 
 {#snippet Nav()}
-	<nav>
+	<nav class="desktop-only">
 		<a href="/board/notice">공지사항</a>
 		<a href="/board/free">자유게시판</a>
 		<a href="/board/bylaw">회칙·세칙</a>
@@ -37,262 +37,214 @@
 	</nav>
 {/snippet}
 
-{#snippet Profile()}
-	<div class="container" id="profile">
+{#snippet ProfileBtn()}
+	<div class="inline-container profile-btn">
 		{#if user.group !== 'guest'}
-			<a href="/profile" id="profile-anchor" class="container">
-				<span class="profile-icon">
-					<CircleUserRound_img size="2rem" strokeWidth={1.5} color="white" />
-				</span>
-				<span class="profile-name">{user.nickname}</span>
+			<a href="/profile" class="inline-container">
+				<CircleUserRound size="1.6rem" strokeWidth={1.5} color="white" class="mobile-only" />
+				<span class="desktop-only">{user.nickname}</span>
 			</a>
 		{:else}
-			<a href="/signin" class="btn-anchor">
+			<a href="/signin">
 				<p>로그인</p>
 			</a>
 		{/if}
 	</div>
 {/snippet}
 
-{#snippet Search()}
-	<a href="/search" id="search-anchor" class="container">
-		<Search_img size="1.2rem" color="white" />
+{#snippet SearchBtn()}
+	<a href="/search" class="inline-container search-btn">
+		<Search size="0.8rem" color="white" />
 	</a>
 {/snippet}
 
-<header class="container" id={isMain ? 'main-nav' : 'sub-nav'} data-sveltekit-preload-data="hover">
+{#snippet DrawerBtn()}
+	<button class="drawer-btn mobile-only inline-container" onclick={toggleDrawer}>
+		{#if isDrawerOpen}
+			<X_img size="1.3rem" color="white" />
+		{:else}
+			<Menu size="1.3rem" color="white" />
+		{/if}
+	</button>
+{/snippet}
+
+{#snippet Drawer()}
+	<div
+		class="backdrop mobile-only"
+		role="button"
+		tabindex="0"
+		onclick={closeDrawer}
+		onkeydown={(e) => e.key === 'Escape' && closeDrawer()}
+		transition:fade={{ duration: 200 }}
+	></div>
+	<nav
+		class="menu mobile-only"
+		data-sveltekit-preload-data="hover"
+		transition:fly={{ x: 300, duration: 200, easing: cubicOut }}
+	>
+		<a href="/board/notice" onclick={closeDrawer}>공지사항</a>
+		<a href="/board/free" onclick={closeDrawer}>자유게시판</a>
+		<a href="/board/bylaw" onclick={closeDrawer}>회칙·세칙</a>
+		<a href="/review" onclick={closeDrawer}>강의평가</a>
+		<a href="/petition" onclick={closeDrawer}>청원</a>
+		<hr />
+		{#if user.group !== 'guest'}
+			<a href="/profile" onclick={closeDrawer}>{user.nickname}</a>
+		{:else}
+			<a href="/signin" onclick={closeDrawer}>로그인</a>
+		{/if}
+	</nav>
+{/snippet}
+
+<header class="container" class:isMain={page.route.id === '/'} data-sveltekit-preload-data="hover">
 	<div class="nav-left container">
 		{@render Logo()}
 		{@render Nav()}
 	</div>
 
 	<div class="nav-right container">
-		{@render Search()}
-		{@render Profile()}
-		<button class="hamburger" onclick={() => (menuOpen = !menuOpen)} aria-label="메뉴">
-			{#if menuOpen}
-				<X_img size="1.5rem" color="white" />
-			{:else}
-				<Menu_img size="1.5rem" color="white" />
-			{/if}
-		</button>
+		{@render SearchBtn()}
+		{@render ProfileBtn()}
+		{@render DrawerBtn()}
 	</div>
 </header>
 
-{#if menuOpen}
-	<div
-		class="backdrop"
-		role="button"
-		tabindex="0"
-		onclick={closeMenu}
-		onkeydown={(e) => e.key === 'Escape' && closeMenu()}
-		transition:fade={{ duration: 200 }}
-	></div>
-	<nav
-		class="mobile-menu"
-		data-sveltekit-preload-data="hover"
-		transition:fly={{ x: 320, duration: 280, easing: cubicOut }}
-	>
-		<a href="/board/notice" onclick={closeMenu}>공지사항</a>
-		<a href="/board/free" onclick={closeMenu}>자유게시판</a>
-		<a href="/board/bylaw" onclick={closeMenu}>회칙·세칙</a>
-		<a href="/review" onclick={closeMenu}>강의평가</a>
-		<a href="/petition" onclick={closeMenu}>청원</a>
-		<hr />
-		{#if user.group !== 'guest'}
-			<a href="/profile" onclick={closeMenu}>{user.nickname}</a>
-		{:else}
-			<a href="/signin" onclick={closeMenu}>로그인</a>
-		{/if}
-	</nav>
+{#if isDrawerOpen}
+	{@render Drawer()}
 {/if}
 
 <style lang="scss">
-	#main-nav {
-		position: fixed;
-	}
-
 	header {
-		z-index: 100;
-		margin: 0;
-		padding: 0.8rem 8rem;
-		justify-content: space-between;
-		position: sticky;
 		top: 0;
-		width: 100%;
-		background-color: var(--tertiary);
+		justify-content: space-between;
+
+		z-index: 100;
+
+		margin: 0;
+
 		border: none;
 		border-bottom: solid white 0.2rem;
 
+		background-color: var(--tertiary);
+		padding: 0.6rem 6.4rem;
+		width: 100%;
+
+		&.isMain {
+			position: fixed;
+		}
+
+		&:not(.isMain) {
+			position: sticky;
+		}
+
 		.nav-left {
-			& > a:first-child {
-				margin-right: 2rem;
+			.logo {
+				margin-right: 1.2rem;
 
 				img {
-					width: 8rem;
 					position: relative;
 					top: 0.1rem;
+					width: 6rem;
 				}
 			}
 
 			nav {
-				font-size: 1.1rem;
+				font-size: 0.9rem;
 
 				a {
-					color: var(--tertiary-text);
-					font-weight: bold;
-					padding: 1rem;
-				}
-
-				a:hover {
-					color: var(--white-hover);
+					padding: 0.6rem;
+					color: var(--white);
+					font-weight: 600;
 					text-decoration: none;
+
+					&:hover {
+						color: var(--white-hover);
+					}
 				}
 			}
 		}
 
 		.nav-right {
-			gap: 0.5rem;
+			gap: 0.4rem;
 
-			#profile {
-				#profile-anchor {
-					gap: 0.4rem;
-					color: var(--tertiary-text);
+			.profile-btn {
+				a {
+					border-radius: 0.2rem;
+					padding: 0.2rem 0.4rem;
 
-					.profile-icon {
-						display: none;
-					}
+					color: var(--white);
+					font-weight: 600;
+					font-size: 0.8rem;
 
-					.profile-name {
-						font-weight: bold;
-						font-size: 1rem;
-						color: var(--tertiary-text);
-					}
+					text-decoration: none;
 
 					&:hover {
 						color: var(--white-hover);
-						text-decoration: none;
-					}
-				}
-
-				a.btn-anchor {
-					margin-left: 0.5rem;
-					background: none;
-					border: none;
-					color: var(--tertiary-text);
-
-					&:hover {
-						color: var(--white-hover);
-						text-decoration: none;
 					}
 				}
 			}
 
-			#search-anchor {
-				padding: 0.2rem 0.5rem;
+			.search-btn {
+				border-radius: 0.4rem;
 				background-color: var(--secondary);
-				border-radius: 1rem;
-				border: white solid 0.1rem;
-			}
-		}
-	}
+				padding: 0.2rem 0.4rem;
 
-	.hamburger {
-		display: none;
-		background: none;
-		border: none;
-		padding: 0.3rem;
-		cursor: pointer;
-
-		&:hover {
-			background: none;
-		}
-	}
-
-	@media (max-width: 768px) {
-		header {
-			padding: 0.8rem 1.2rem;
-
-			.nav-left nav {
-				display: none;
-			}
-
-			.nav-right {
-				gap: 0.8rem;
-
-				#profile {
-					padding-left: 0.6rem;
-
-					#profile-anchor {
-						.profile-icon {
-							display: flex;
-						}
-
-						.profile-name {
-							display: none;
-						}
-					}
+				&:hover {
+					background-color: var(--secondary-strong-hover);
 				}
 			}
 		}
+	}
 
-		.hamburger {
-			display: flex;
-			padding: 0.6rem;
-		}
+	.drawer-btn {
+		border: none;
+		background: none;
+		padding: 0.2rem;
 	}
 
 	.backdrop {
-		display: none;
+		display: block;
+		position: fixed;
+		z-index: 98;
+		cursor: default;
+		inset: 0;
+		background-color: oklch(0 0 0 / 20%);
 	}
 
-	.mobile-menu {
-		display: none;
-	}
+	.menu {
+		display: flex;
+		position: fixed;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		flex-direction: column;
+		z-index: 99;
+		box-shadow: -0.4rem 0 1.6rem oklch(0 0 0 / 15%);
 
-	@media (max-width: 768px) {
-		.backdrop {
-			display: block;
-			position: fixed;
-			inset: 0;
-			z-index: 98;
-			background-color: oklch(0 0 0 / 50%);
-			cursor: default;
+		background-color: white;
+		padding-top: 3.6rem;
+
+		width: 75vw;
+		max-width: 300px;
+		overflow-y: auto;
+
+		a {
+			border-bottom: solid var(--gray-border) 0.1rem;
+			padding: 0.8rem 1.4rem;
+			color: black;
+			font-weight: 600;
+			font-size: 0.9rem;
+			text-decoration: none;
+
+			&:hover {
+				background-color: var(--gray-bg);
+			}
 		}
 
-		.mobile-menu {
-			display: flex;
-			flex-direction: column;
-			position: fixed;
-			top: 0;
-			right: 0;
-			bottom: 0;
-			width: 75vw;
-			max-width: 320px;
-			z-index: 99;
-			background-color: white;
-			overflow-y: auto;
-			padding-top: 4.5rem;
-			box-shadow: -0.4rem 0 1.6rem oklch(0 0 0 / 15%);
-
-			a {
-				color: black;
-				font-weight: bold;
-				font-size: 1.15rem;
-				padding: 1.2rem 1.8rem;
-				border-bottom: solid var(--gray-border) 0.1rem;
-
-				&:hover {
-					background-color: var(--gray-bg);
-					text-decoration: none;
-				}
-			}
-
-			hr {
-				border: none;
-				border-top: solid var(--gray-border) 0.4rem;
-				margin: 0;
-			}
+		hr {
+			margin: 0;
+			border: none;
+			border-top: solid var(--gray-border) 0.2rem;
 		}
 	}
 </style>

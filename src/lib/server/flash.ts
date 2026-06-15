@@ -1,6 +1,5 @@
-import type { Cookies } from '@sveltejs/kit';
-
 import type { FlashMessage } from '$lib/types/flash.type.js';
+import type { Cookies } from '@sveltejs/kit';
 
 const FLASH_COOKIE_NAME = 'kentech-sc-flash';
 const FLASH_COOKIE_OPTIONS = {
