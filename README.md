@@ -52,7 +52,7 @@ KENTECH 학생회 웹사이트 저장소입니다. 내부 개발자 기준으로
 1. 의존성 설치
 
 ```powershell
-npm.cmd install
+npm install
 ```
 
 2. 루트 `.env` 파일 구성
@@ -62,13 +62,13 @@ npm.cmd install
 3. 개발 서버 실행
 
 ```powershell
-npm.cmd run dev
+npm run dev
 ```
 
 4. 타입 및 Svelte 검사
 
 ```powershell
-npm.cmd run check
+npm run check
 ```
 
 ## 환경 변수
@@ -92,12 +92,12 @@ npm.cmd run check
 
 | 스크립트                | 설명                                              |
 | ----------------------- | ------------------------------------------------- |
-| `npm.cmd run dev`       | Vite 개발 서버를 실행합니다.                      |
-| `npm.cmd run build`     | 프로덕션 빌드를 생성합니다.                       |
-| `npm.cmd run preview`   | 빌드 결과를 로컬에서 미리 확인합니다.             |
-| `npm.cmd run check`     | `svelte-kit sync` 후 `svelte-check`를 실행합니다. |
-| `npm.cmd run fix`       | Prettier와 ESLint 자동 수정을 한 번에 실행합니다. |
-| `npm.cmd run all-check` | `fix` 후 `check`까지 연속 실행합니다.             |
+| `npm run dev`       | Vite 개발 서버를 실행합니다.                      |
+| `npm run build`     | 프로덕션 빌드를 생성합니다.                       |
+| `npm run preview`   | 빌드 결과를 로컬에서 미리 확인합니다.             |
+| `npm run check`     | `svelte-kit sync` 후 `svelte-check`를 실행합니다. |
+| `npm run fix`       | Prettier와 ESLint 자동 수정을 한 번에 실행합니다. |
+| `npm run all-check` | `fix` 후 `check`까지 연속 실행합니다.             |
 
 ## 프로젝트 구조
 

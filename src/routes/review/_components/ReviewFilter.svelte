@@ -38,13 +38,5 @@
 		margin-bottom: 1rem;
 
 		width: 100%;
-
-		& > :global(div:first-child) {
-			width: 28rem;
-		}
-
-		& > :global(div:last-child) {
-			width: 16rem;
-		}
 	}
 </style>
