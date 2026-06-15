@@ -70,6 +70,7 @@
 
 		ul {
 			margin-bottom: 0.4rem;
+			margin-left: 1rem;
 			font-size: 0.7rem;
 		}
 

@@ -23,4 +23,9 @@
 	section {
 		padding: 0;
 	}
+
+	p {
+		padding: 0.8rem 1rem;
+		width: 100%;
+	}
 </style>
