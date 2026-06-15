@@ -16,6 +16,10 @@ export async function countReviews(
 	return await ReviewModel.countDocuments(filterQuery);
 }
 
+export async function countReviewsByQuery(query: string): Promise<number> {
+	return await ReviewModel.countDocuments({ $text: { $search: query } });
+}
+
 export async function createReview(review: ReviewCreate): Promise<ReviewEntity> {
 	return toPojo<ReviewEntity>((await ReviewModel.create(review)).toObject());
 }
@@ -56,18 +60,15 @@ export async function deleteReviewById(reviewId: ReviewId): Promise<boolean> {
 }
 
 export async function searchReviewsByQuery(
-	q: string,
-	page = 1,
-	limit = 10
-): Promise<{ items: ReviewEntity[]; more: boolean }> {
-	const results = await ReviewModel.find(
-		{ $text: { $search: q } },
-		{ searchScore: { $meta: 'textScore' } }
-	)
-		.sort({ searchScore: { $meta: 'textScore' }, createdAt: -1 })
-		.skip((page - 1) * limit)
-		.limit(limit + 1)
-		.lean();
-
-	return { items: toPojo<ReviewEntity[]>(results.slice(0, limit)), more: results.length > limit };
+	query: string,
+	limit = 10,
+	skip = 0
+): Promise<Array<ReviewEntity & { searchScore?: number }>> {
+	return toPojo<Array<ReviewEntity & { searchScore?: number }>>(
+		await ReviewModel.find({ $text: { $search: query } }, { searchScore: { $meta: 'textScore' } })
+			.sort({ searchScore: { $meta: 'textScore' }, createdAt: -1 })
+			.skip(skip)
+			.limit(limit)
+			.lean()
+	);
 }

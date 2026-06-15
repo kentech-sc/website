@@ -37,6 +37,7 @@
 	let fontSize = $state('16px');
 	let textColor = $state('#000000');
 	let textAlign = $state('left');
+	let uploading = $state(false);
 	let editorNotice = $state<string | null>(null);
 	let noticeTimer: ReturnType<typeof setTimeout> | undefined;
 	let fileUploadInput = $state<HTMLInputElement>();
@@ -46,8 +47,13 @@
 		attachments = $bindable<FileMeta[]>([]),
 		imageIds = $bindable<FileId[]>([]),
 		editorHtml = $bindable<string>(''),
-		initialHtml = ''
+		initialHtml = '',
+		disabled = false
 	} = $props();
+
+	$effect(() => {
+		real_editor?.setEditable(!disabled);
+	});
 
 	function showEditorNotice(message: string) {
 		editorNotice = message;
@@ -68,11 +74,18 @@
 	}
 
 	function handleUploadButtonMouseDown(event: MouseEvent) {
+		if (disabled || uploading) {
+			event.preventDefault();
+			return;
+		}
+
 		capturePendingImageInsertSelection();
 		event.preventDefault();
 	}
 
 	function prepareFileUpload() {
+		if (disabled || uploading) return;
+
 		capturePendingImageInsertSelection();
 
 		if (fileUploadInput) {
@@ -142,6 +155,11 @@
 	// 파일 업로드 함수
 	async function handleFileUpload(event: Event) {
 		const target = event.target as HTMLInputElement;
+		if (disabled || uploading) {
+			target.value = '';
+			return;
+		}
+
 		const files = Array.from(target.files ?? []);
 		if (!files.length) {
 			pendingImageInsertSelection = null;
@@ -156,6 +174,8 @@
 		pendingImageInsertSelection = null;
 
 		try {
+			uploading = true;
+
 			if (files.some((file) => file.size > 1 * 1024 * 1024)) {
 				alert('용량이 큰 파일은 오래 걸릴 수 있습니다.');
 			}
@@ -212,6 +232,7 @@
 			console.error('파일 업로드 오류:', error);
 			alert('파일 업로드에 실패했습니다.');
 		} finally {
+			uploading = false;
 			target.value = '';
 		}
 	}
@@ -320,6 +341,7 @@
 				}
 			}
 		});
+		instance.setEditable(!disabled);
 		real_editor = instance;
 	});
 
@@ -329,113 +351,114 @@
 	});
 </script>
 
-{#if real_editor}
-	{@const editor = real_editor}
-	<div class="control-group">
-		<div class="button-group">
-			<select
-				bind:value={headingLevel}
-				onchange={(e) => {
-					const target = e.target as HTMLSelectElement;
-					const level = parseInt(target.value) as 1 | 2 | 3 | 4 | 5 | 6;
-					editor.chain().focus().toggleHeading({ level }).run();
-				}}
-			>
-				<option value="">본문</option>
-				<option value="1">제목 1</option>
-				<option value="2">제목 2</option>
-				<option value="3">제목 3</option>
-				<option value="4">제목 4</option>
-				<option value="5">제목 5</option>
-				<option value="6">제목 6</option>
-			</select>
-			<button
-				type="button"
-				onclick={() => editor.chain().focus().toggleBold().run()}
-				class={editor.isActive('bold') ? 'is-active' : ''}
-			>
-				<Bold size="0.8rem" />
-			</button>
-			<button
-				type="button"
-				onclick={() => editor.chain().focus().toggleItalic().run()}
-				class={editor.isActive('italic') ? 'is-active' : ''}
-			>
-				<Italic size="0.8rem" />
-			</button>
-			<button
-				type="button"
-				onclick={() => editor.chain().focus().toggleStrike().run()}
-				class={editor.isActive('strike') ? 'is-active' : ''}
-			>
-				<Strikethrough size="0.8rem" />
-			</button>
-			<button
-				type="button"
-				onclick={() => editor.chain().focus().toggleUnderline().run()}
-				class={editor.isActive('underline') ? 'is-active' : ''}
-			>
-				<UnderlineIcon size="0.8rem" />
-			</button>
-			<select
-				bind:value={fontSize}
-				onchange={(e) =>
-					editor
-						.chain()
-						.focus()
-						.setFontSize((e.target as HTMLSelectElement)?.value || '16px')
-						.run()}
-			>
-				<option value="12px">12px</option>
-				<option value="14px">14px</option>
-				<option value="16px">16px</option>
-				<option value="18px">18px</option>
-				<option value="20px">20px</option>
-				<option value="24px">24px</option>
-				<option value="32px">32px</option>
-			</select>
-			<input
-				type="color"
-				bind:value={textColor}
-				onchange={(e) => {
-					const target = e.target as HTMLInputElement;
-					if (target?.value) {
-						editor.chain().focus().setColor(target.value).run();
-					}
-				}}
-				title="글자 색상 선택"
-			/>
-			<select
-				bind:value={textAlign}
-				onchange={(e) => {
-					const target = e.target as HTMLSelectElement;
-					editor
-						.chain()
-						.focus()
-						.setTextAlign(target.value as string)
-						.run();
-				}}
-			>
-				<option value="left">왼쪽 정렬</option>
-				<option value="center">가운데 정렬</option>
-				<option value="right">오른쪽 정렬</option>
-				<option value="justify">양쪽 정렬</option>
-			</select>
-			<button
-				type="button"
-				onclick={() => editor.chain().focus().toggleBulletList().run()}
-				class={editor.isActive('bulletList') ? 'is-active' : ''}
-			>
-				<List size="0.8rem" />
-			</button>
-			<button
-				type="button"
-				onclick={() => editor.chain().focus().toggleOrderedList().run()}
-				class={editor.isActive('orderedList') ? 'is-active' : ''}
-			>
-				<ListOrdered size="0.8rem" />
-			</button>
-			<!-- <button
+<section>
+	{#if real_editor}
+		{@const editor = real_editor}
+		<div class="control-group">
+			<div class="button-group">
+				<select
+					bind:value={headingLevel}
+					onchange={(e) => {
+						const target = e.target as HTMLSelectElement;
+						const level = parseInt(target.value) as 1 | 2 | 3 | 4 | 5 | 6;
+						editor.chain().focus().toggleHeading({ level }).run();
+					}}
+				>
+					<option value="">본문</option>
+					<option value="1">제목 1</option>
+					<option value="2">제목 2</option>
+					<option value="3">제목 3</option>
+					<option value="4">제목 4</option>
+					<option value="5">제목 5</option>
+					<option value="6">제목 6</option>
+				</select>
+				<button
+					type="button"
+					onclick={() => editor.chain().focus().toggleBold().run()}
+					class={editor.isActive('bold') ? 'is-active' : ''}
+				>
+					<Bold size="0.8rem" />
+				</button>
+				<button
+					type="button"
+					onclick={() => editor.chain().focus().toggleItalic().run()}
+					class={editor.isActive('italic') ? 'is-active' : ''}
+				>
+					<Italic size="0.8rem" />
+				</button>
+				<button
+					type="button"
+					onclick={() => editor.chain().focus().toggleStrike().run()}
+					class={editor.isActive('strike') ? 'is-active' : ''}
+				>
+					<Strikethrough size="0.8rem" />
+				</button>
+				<button
+					type="button"
+					onclick={() => editor.chain().focus().toggleUnderline().run()}
+					class={editor.isActive('underline') ? 'is-active' : ''}
+				>
+					<UnderlineIcon size="0.8rem" />
+				</button>
+				<select
+					bind:value={fontSize}
+					onchange={(e) =>
+						editor
+							.chain()
+							.focus()
+							.setFontSize((e.target as HTMLSelectElement)?.value || '16px')
+							.run()}
+				>
+					<option value="12px">12px</option>
+					<option value="14px">14px</option>
+					<option value="16px">16px</option>
+					<option value="18px">18px</option>
+					<option value="20px">20px</option>
+					<option value="24px">24px</option>
+					<option value="32px">32px</option>
+				</select>
+				<input
+					type="color"
+					bind:value={textColor}
+					onchange={(e) => {
+						const target = e.target as HTMLInputElement;
+						if (target?.value) {
+							editor.chain().focus().setColor(target.value).run();
+						}
+					}}
+					title="글자 색상 선택"
+				/>
+				<select
+					bind:value={textAlign}
+					onchange={(e) => {
+						const target = e.target as HTMLSelectElement;
+						editor
+							.chain()
+							.focus()
+							.setTextAlign(target.value as string)
+							.run();
+					}}
+				>
+					<option value="left">왼쪽 정렬</option>
+					<option value="center">가운데 정렬</option>
+					<option value="right">오른쪽 정렬</option>
+					<option value="justify">양쪽 정렬</option>
+				</select>
+				<button
+					type="button"
+					onclick={() => editor.chain().focus().toggleBulletList().run()}
+					class={editor.isActive('bulletList') ? 'is-active' : ''}
+				>
+					<List size="0.8rem" />
+				</button>
+				<button
+					type="button"
+					onclick={() => editor.chain().focus().toggleOrderedList().run()}
+					class={editor.isActive('orderedList') ? 'is-active' : ''}
+				>
+					<ListOrdered size="0.8rem" />
+				</button>
+				<!-- <button
 				type="button"
 				onclick={() => editor.chain().focus().setTextAlign('left').run()}
 				class={editor.isActive({ textAlign: 'left' }) ? 'is-active' : ''}
@@ -456,57 +479,74 @@
 			>
 				<AlignRight size="1rem" />
 			</button> -->
-			<button
-				type="button"
-				onclick={() => editor.chain().focus().toggleCode().run()}
-				disabled={!editor.can().chain().focus().toggleCode().run()}
-				class={editor.isActive('code') ? 'is-active' : ''}
-			>
-				<Code size="0.8rem" />
-			</button>
-			<button
-				type="button"
-				onclick={() => editor.chain().focus().toggleCodeBlock().run()}
-				class={editor.isActive('codeBlock') ? 'is-active' : ''}
-			>
-				<Code2 size="0.8rem" />
-			</button>
-			<button
-				type="button"
-				onclick={() => editor.chain().focus().toggleBlockquote().run()}
-				class={editor.isActive('blockquote') ? 'is-active' : ''}
-			>
-				<Quote size="0.8rem" />
-			</button>
-			<button type="button" onclick={() => editor.chain().focus().setHorizontalRule().run()}>
-				<Minus size="0.8rem" />
-			</button>
-			<input
-				type="file"
-				multiple
-				accept="image/*,.pdf,.docx,.xlsx"
-				bind:this={fileUploadInput}
-				onchange={handleFileUpload}
-				style="display: none"
-			/>
-			<button type="button" onmousedown={handleUploadButtonMouseDown} onclick={prepareFileUpload}>
-				<Upload size="0.8rem" />
-			</button>
+				<button
+					type="button"
+					onclick={() => editor.chain().focus().toggleCode().run()}
+					disabled={!editor.can().chain().focus().toggleCode().run()}
+					class={editor.isActive('code') ? 'is-active' : ''}
+				>
+					<Code size="0.8rem" />
+				</button>
+				<button
+					type="button"
+					onclick={() => editor.chain().focus().toggleCodeBlock().run()}
+					class={editor.isActive('codeBlock') ? 'is-active' : ''}
+				>
+					<Code2 size="0.8rem" />
+				</button>
+				<button
+					type="button"
+					onclick={() => editor.chain().focus().toggleBlockquote().run()}
+					class={editor.isActive('blockquote') ? 'is-active' : ''}
+				>
+					<Quote size="0.8rem" />
+				</button>
+				<button type="button" onclick={() => editor.chain().focus().setHorizontalRule().run()}>
+					<Minus size="0.8rem" />
+				</button>
+				<input
+					type="file"
+					multiple
+					accept="image/*,.pdf,.docx,.xlsx"
+					bind:this={fileUploadInput}
+					disabled={disabled || uploading}
+					onchange={handleFileUpload}
+					style="display: none"
+				/>
+				<button
+					type="button"
+					class="upload-button"
+					disabled={disabled || uploading}
+					onmousedown={handleUploadButtonMouseDown}
+					onclick={prepareFileUpload}
+				>
+					<Upload size="0.8rem" />
+				</button>
+			</div>
 		</div>
+	{/if}
+
+	{#if editorNotice}
+		<p class="editor-notice" role="alert">{editorNotice}</p>
+	{/if}
+
+	<div class="module">
+		<div class="nmu" data-disabled={disabled ? 'true' : 'false'} bind:this={element}></div>
 	</div>
-{/if}
-
-{#if editorNotice}
-	<p class="editor-notice" role="alert">{editorNotice}</p>
-{/if}
-
-<div class="nmu" bind:this={element}></div>
+</section>
 
 <style lang="scss">
+	section {
+		width: 100%;
+	}
+
 	.nmu {
-		padding: 0.6rem;
-		border: solid 0.1rem var(--gray-border);
-		position: relative;
+		margin-top: 2rem;
+	}
+
+	.nmu[data-disabled='true'] {
+		cursor: wait;
+		background: var(--gray-bg);
 	}
 
 	:global(.tiptap):focus {
@@ -514,11 +554,14 @@
 	}
 
 	.control-group {
-		border: 0.1rem solid var(--gray-border);
-		border-radius: 0.2rem;
+		position: absolute;
+		z-index: 90;
 		margin-bottom: 0.4rem;
-		padding: 0.25rem;
+		box-shadow: 0 0.2rem 0.4rem var(--shadow-color);
+		border: 0.1rem solid var(--gray-border);
+		border-radius: 0.4rem;
 		background: var(--gray-bg);
+		padding: 0.25rem;
 	}
 
 	.editor-notice {
@@ -530,67 +573,62 @@
 	.button-group {
 		display: flex;
 		flex-wrap: wrap;
-		height: auto;
-		gap: 0.25rem;
+		gap: 0.2rem;
 		max-width: 100%;
+		height: auto;
 	}
 
 	button {
 		display: flex;
-		align-items: center;
 		justify-content: center;
-		// padding: 0.5rem;
-		border: 1px solid var(--gray-border);
+		align-items: center;
+		transition: all 0.2s;
+		cursor: pointer;
+		border: 0.05rem solid var(--gray-border);
 		border-radius: 0.2rem;
 		background: var(--white);
 		color: var(--text);
-		cursor: pointer;
-		transition: all 0.2s;
 
 		&:hover {
-			background: var(--primary-bg);
-			color: var(--white);
-			border-color: var(--primary);
+			background: var(--gray-hover);
 		}
 
 		&:disabled {
 			opacity: 0.5;
-			cursor: not-allowed;
+			cursor: wait;
 		}
 
 		&.is-active {
-			background: var(--primary-bg);
-			color: var(--white);
-			border-color: var(--primary);
+			background: var(--gray-bg);
 		}
 	}
 
 	select {
-		height: auto;
-		padding: 0;
-		border: 1px solid var(--gray-border);
+		transition: all 0.2s;
+		cursor: pointer;
+		border: 0.05rem solid var(--gray-border);
 		border-radius: 0.2rem;
 		background: var(--white);
+		padding: 0;
+		height: auto;
 		color: var(--text);
 		font-size: 0.7rem;
-		cursor: pointer;
-		transition: all 0.2s;
 
 		&:hover {
-			border-color: var(--primary);
+			border-color: var(--gray-hover);
 		}
 	}
 
 	input[type='color'] {
-		height: auto;
-		width: 2rem;
-		border: 1px solid var(--gray-border);
-		border-radius: 0.2rem;
 		cursor: pointer;
+		border: 0.05rem solid var(--gray-border);
+		border-radius: 0.2rem;
 		padding: 0 0.25rem;
+		width: 2rem;
+		height: auto;
 
 		&:hover {
-			border-color: var(--primary);
+			border-color: var(--gray-hover);
 		}
 	}
 </style>

@@ -58,14 +58,14 @@
 		{/each}
 	</ul>
 
-	<button class="control container" id="left-btn" onclick={prev}
-		><img src={leftImg} alt="left" /></button
-	>
-	<button class="control container" id="right-btn" onclick={next}
-		><img src={rightImg} alt="right" /></button
-	>
+	<button class="control container left-btn" onclick={prev}>
+		<img src={leftImg} alt="left" />
+	</button>
+	<button class="control container right-btn" onclick={next}>
+		<img src={rightImg} alt="right" />
+	</button>
 
-	<ul id="slide-pagelist" class="container">
+	<ul class="container slide-pagelist">
 		{#each slides as _, idx (idx)}
 			<li>
 				<button class:selected={current === idx} onclick={() => goTo(idx)} aria-label="slide {idx}"
@@ -89,25 +89,25 @@
 			transform: translate(-50%, -50%);
 			z-index: 3;
 
-			width: 8rem;
-
 			filter: brightness(0) invert(1);
+
+			width: 8rem;
 		}
 
 		.slidelist {
 			display: flex;
-			height: 100%;
 			transition: transform 0.5s ease-in-out;
+			height: 100%;
 			list-style-type: none;
 
 			.slideitem {
-				flex: 0 0 100%;
 				position: relative;
+				flex: 0 0 100%;
 
 				img {
+					display: block;
 					width: 100%;
 					height: 100%;
-					display: block;
 					object-fit: cover;
 				}
 			}
@@ -117,12 +117,12 @@
 			position: absolute;
 			top: 50%;
 			transform: translateY(-50%);
-			width: 5rem;
-			height: 100%;
+			z-index: 2;
 			border: none;
 			background-color: transparent;
-			z-index: 2;
 			padding: 0 0.6rem;
+			width: 5rem;
+			height: 100%;
 
 			img {
 				width: 100%;
@@ -138,17 +138,17 @@
 			}
 		}
 
-		#left-btn {
+		.left-btn {
 			left: 0;
 			padding-right: 1rem;
 		}
 
-		#right-btn {
+		.right-btn {
 			right: 0;
 			padding-left: 1rem;
 		}
 
-		#slide-pagelist {
+		.slide-pagelist {
 			position: absolute;
 			bottom: 0%;
 			left: 50%;
@@ -162,12 +162,12 @@
 				list-style-type: none;
 
 				button {
-					width: 1.8rem;
-					height: 0.4rem;
+					border: none;
 
 					border-radius: 0.9rem;
-					border: none;
 					background: var(--gray-bg);
+					width: 1.8rem;
+					height: 0.4rem;
 
 					&:hover {
 						background: var(--gray-hover);

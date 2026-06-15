@@ -75,29 +75,29 @@ npm.cmd run check
 
 아래 키들은 현재 코드에서 사용하거나 빌드/배포 시 필요한 항목입니다.
 
-| 이름 | 용도 |
-| --- | --- |
-| `MONGO_URI` | MongoDB 연결 문자열. 서버 시작 시 `mongoose.connect()`에 사용됩니다. |
-| `GOOGLE_ID` | Google OAuth 클라이언트 ID입니다. |
-| `GOOGLE_SECRET` | Google OAuth 클라이언트 시크릿입니다. |
-| `AUTH_SECRET` | Auth.js 세션/토큰 서명에 사용하는 비밀값입니다. |
-| `SENTRY_AUTH_TOKEN` | Sentry 소스맵 업로드에 사용하는 토큰입니다. |
-| `AWS_BUCKET_NAME` | 업로드 대상 S3 버킷 이름입니다. |
-| `AWS_BUCKET_REGION` | S3 버킷 리전입니다. |
-| `AWS_ID` | S3 접근용 AWS access key ID입니다. |
-| `AWS_SECRET` | S3 접근용 AWS secret access key입니다. |
-| `MAX_FILE_SIZE` | 업로드 가능한 최대 파일 크기 바이트 값입니다. |
+| 이름                | 용도                                                                 |
+| ------------------- | -------------------------------------------------------------------- |
+| `MONGO_URI`         | MongoDB 연결 문자열. 서버 시작 시 `mongoose.connect()`에 사용됩니다. |
+| `GOOGLE_ID`         | Google OAuth 클라이언트 ID입니다.                                    |
+| `GOOGLE_SECRET`     | Google OAuth 클라이언트 시크릿입니다.                                |
+| `AUTH_SECRET`       | Auth.js 세션/토큰 서명에 사용하는 비밀값입니다.                      |
+| `SENTRY_AUTH_TOKEN` | Sentry 소스맵 업로드에 사용하는 토큰입니다.                          |
+| `AWS_BUCKET_NAME`   | 업로드 대상 S3 버킷 이름입니다.                                      |
+| `AWS_BUCKET_REGION` | S3 버킷 리전입니다.                                                  |
+| `AWS_ID`            | S3 접근용 AWS access key ID입니다.                                   |
+| `AWS_SECRET`        | S3 접근용 AWS secret access key입니다.                               |
+| `MAX_FILE_SIZE`     | 업로드 가능한 최대 파일 크기 바이트 값입니다.                        |
 
 ## 주요 스크립트
 
-| 스크립트 | 설명 |
-| --- | --- |
-| `npm.cmd run dev` | Vite 개발 서버를 실행합니다. |
-| `npm.cmd run build` | 프로덕션 빌드를 생성합니다. |
-| `npm.cmd run preview` | 빌드 결과를 로컬에서 미리 확인합니다. |
-| `npm.cmd run check` | `svelte-kit sync` 후 `svelte-check`를 실행합니다. |
-| `npm.cmd run fix` | Prettier와 ESLint 자동 수정을 한 번에 실행합니다. |
-| `npm.cmd run all-check` | `fix` 후 `check`까지 연속 실행합니다. |
+| 스크립트                | 설명                                              |
+| ----------------------- | ------------------------------------------------- |
+| `npm.cmd run dev`       | Vite 개발 서버를 실행합니다.                      |
+| `npm.cmd run build`     | 프로덕션 빌드를 생성합니다.                       |
+| `npm.cmd run preview`   | 빌드 결과를 로컬에서 미리 확인합니다.             |
+| `npm.cmd run check`     | `svelte-kit sync` 후 `svelte-check`를 실행합니다. |
+| `npm.cmd run fix`       | Prettier와 ESLint 자동 수정을 한 번에 실행합니다. |
+| `npm.cmd run all-check` | `fix` 후 `check`까지 연속 실행합니다.             |
 
 ## 프로젝트 구조
 

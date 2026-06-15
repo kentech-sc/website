@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 
 import type { FileId } from '$lib/types/file-meta.type.js';
 import type { FilePresence } from '$lib/types/general.type.js';
+import type { Page } from '$lib/types/general.type.js';
 import type { PetitionId } from '$lib/types/petition.type.js';
 import type { Petition, PetitionEntity } from '$lib/types/petition.type.js';
 
@@ -58,26 +59,20 @@ function getSignerNames(petition: PetitionEntity, userIdToUser: Map<string, User
 		.filter((name): name is string => name !== null);
 }
 
-export async function getPetitionPageView(page: number, user: User) {
+export async function getPetitionPage(page: number, user: User) {
 	const limit = 10;
 	const skip = (page - 1) * limit;
 
-	const petitionsResult = await PetitionService.getPetitionPage(limit, skip);
+	const petitionPage = await PetitionService.getPetitionPage(limit, skip);
 	const [userIdToUser, filePresence] = await Promise.all([
-		findPetitionUserMap(petitionsResult.items),
-		FileMetaService.getFilePresenceByArticleIds(
-			petitionsResult.items.map((petition) => petition._id)
-		)
+		findPetitionUserMap(petitionPage.items),
+		FileMetaService.getFilePresenceByArticleIds(petitionPage.items.map((petition) => petition._id))
 	]);
-	const petitions = attachPetitionNames(petitionsResult.items, userIdToUser);
+	petitionPage.items = attachPetitionNames(petitionPage.items, userIdToUser);
 
 	return {
-		petitions,
+		petitionPage: petitionPage as Page<Petition>,
 		filePresence: filePresence as FilePresence,
-		currentPage: petitionsResult.currentPage,
-		totalPages: petitionsResult.totalPages,
-		hasPrev: petitionsResult.hasPrev,
-		hasNext: petitionsResult.hasNext,
 		canCreatePetition: hasCapability(user, 'petition.write')
 	};
 }
@@ -96,11 +91,11 @@ export async function getPetitionDetail(
 		FileMetaService.getFileMetasByArticleId(petitionId)
 	]);
 	const [petition] = attachPetitionNames([petitionRaw], userIdToUser);
-	const signersNames = getSignerNames(petitionRaw, userIdToUser);
+	const signerNames = getSignerNames(petitionRaw, userIdToUser);
 
 	return {
 		petition,
-		signersNames,
+		signerNames,
 		files,
 		permissions: PetitionService.getPetitionPermissions(petition, user)
 	};

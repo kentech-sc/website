@@ -1,32 +1,39 @@
 <script lang="ts">
 	import Trash2 from '@lucide/svelte/icons/trash-2';
+	import UserRoundX from '@lucide/svelte/icons/user-round-x';
 
-	import type { ActionResult } from '@sveltejs/kit';
-
-	import { invalidateAll } from '$app/navigation';
 	import CommonForm from '$components/CommonForm.svelte';
 
 	let submitBtn: HTMLButtonElement;
-	let formResult = $state<ActionResult | null>(null);
+	let loading = $state(false);
 
 	function handleSubmit() {
+		if (loading) return;
+
 		const confirmed = confirm('정말로 탈퇴하시겠습니까?');
 		if (confirmed) {
 			submitBtn?.click();
 		}
 	}
 
-	$effect(() => {
-		if (formResult?.type === 'success') {
-			alert('탈퇴가 완료되었습니다.');
-			invalidateAll();
-		}
-	});
+	function handleSuccess() {
+		alert('탈퇴가 완료되었습니다.');
+	}
 </script>
 
-<CommonForm actionName="deleteUser" formName="deleteUser" bind:formResult>
-	<div class="form-card">
-		<div class="delete-warning">
+<CommonForm
+	actionName="deleteUser"
+	formName="deleteUser"
+	policy="reload"
+	afterSuccess={handleSuccess}
+	bind:loading
+>
+	<div class="container-col">
+		<p>
+			<UserRoundX size="0.8rem" />
+			<span>계정 탈퇴</span>
+		</p>
+		<div class="error container-col">
 			<h4>탈퇴 전 주의사항</h4>
 			<ul>
 				<li>계정 탈퇴는 되돌릴 수 없습니다.</li>
@@ -36,38 +43,43 @@
 			</ul>
 		</div>
 
-		<div class="form-actions-end">
-			<button type="button" class="error-btn delete-btn" onclick={handleSubmit}>
-				<Trash2 size="0.8rem" />
-				<span>탈퇴하기</span>
-			</button>
-		</div>
+		<button type="button" class="error-btn" onclick={handleSubmit} disabled={loading}>
+			<Trash2 size="0.8rem" />
+			<span>탈퇴하기</span>
+		</button>
 	</div>
-	<button hidden type="submit" bind:this={submitBtn}>submit</button>
+	<button hidden type="submit" bind:this={submitBtn} disabled={loading}>submit</button>
 </CommonForm>
 
 <style lang="scss">
-	.delete-warning {
-		padding: 0.6rem;
-		background: var(--error-bg);
-		border: 0.1rem solid var(--error);
-		border-radius: 0.4rem;
-		color: var(--error-text);
+	p {
+		width: 100%;
+		color: var(--error);
+		font-weight: 500;
+		text-align: left;
 	}
 
-	.delete-warning h4 {
-		margin-bottom: 0.8rem;
-		font-size: 0.8rem;
-		font-weight: 600;
-	}
-
-	.delete-warning ul {
-		padding-left: 1.2rem;
-		font-size: 0.7rem;
-		line-height: 1.5;
-	}
-
-	.delete-warning li + li {
+	.error {
 		margin-top: 0.6rem;
+
+		h4 {
+			margin: 0.4rem 0;
+			font-weight: 600;
+			font-size: 0.9rem;
+		}
+
+		ul {
+			margin-bottom: 0.4rem;
+			font-size: 0.7rem;
+		}
+
+		li + li {
+			margin-top: 0.4rem;
+		}
+	}
+
+	button {
+		margin-top: 0.6rem;
+		margin-left: auto;
 	}
 </style>

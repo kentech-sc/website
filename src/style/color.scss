@@ -1,5 +1,6 @@
 :root {
 	--white: oklch(1 0 0);
+	--white-hover: oklch(from var(--white) calc(l - 0.1) c h);
 	--text: oklch(0 0 0);
 
 	--gray: oklch(0.6 0 0);
@@ -27,10 +28,6 @@
 	--tertiary-hover: oklch(from var(--tertiary-bg) calc(l - 0.05) c h);
 	--tertiary-strong-hover: oklch(from var(--tertiary) calc(l - 0.08) c h);
 
-	--surface-base: var(--white);
-	--surface-elevated: var(--white);
-	--surface-hover: oklch(from var(--white) calc(l - 0.08) c h);
-	--white-hover: var(--surface-hover);
 	--shadow-color: rgba(0, 0, 0, 0.1);
 
 	--error: oklch(0.45 0.3 30);

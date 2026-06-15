@@ -9,6 +9,10 @@ export async function countPostsByBoardId(boardId: BoardId): Promise<number> {
 	return await PostModel.countDocuments({ boardId });
 }
 
+export async function countPostsByQuery(query: string): Promise<number> {
+	return await PostModel.countDocuments({ $text: { $search: query } });
+}
+
 export async function createPost(postCreate: PostCreate): Promise<PostEntity> {
 	return toPojo<PostEntity>((await PostModel.create(postCreate)).toObject());
 }
@@ -93,18 +97,15 @@ export async function unlikePostById(postId: PostId, userId: UserId): Promise<Po
 }
 
 export async function searchPostsByQuery(
-	q: string,
-	page = 1,
-	limit = 10
-): Promise<{ items: PostEntity[]; more: boolean }> {
-	const results = await PostModel.find(
-		{ $text: { $search: q } },
-		{ searchScore: { $meta: 'textScore' } }
-	)
-		.sort({ searchScore: { $meta: 'textScore' }, createdAt: -1 })
-		.skip((page - 1) * limit)
-		.limit(limit + 1)
-		.lean();
-
-	return { items: toPojo<PostEntity[]>(results.slice(0, limit)), more: results.length > limit };
+	query: string,
+	limit = 10,
+	skip = 0
+): Promise<Array<PostEntity & { searchScore?: number }>> {
+	return toPojo<Array<PostEntity & { searchScore?: number }>>(
+		await PostModel.find({ $text: { $search: query } }, { searchScore: { $meta: 'textScore' } })
+			.sort({ searchScore: { $meta: 'textScore' }, createdAt: -1 })
+			.skip(skip)
+			.limit(limit)
+			.lean()
+	);
 }

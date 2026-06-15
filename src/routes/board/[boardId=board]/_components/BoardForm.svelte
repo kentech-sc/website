@@ -1,13 +1,21 @@
 <script lang="ts">
+	import Pencil from '@lucide/svelte/icons/pencil';
+
 	import type { FileId, FileMeta } from '$lib/types/file-meta.type';
 	import type { Post } from '$lib/types/post.type.js';
+	import type { User } from '$lib/types/user.type.js';
 
 	import CommonForm from '$components/CommonForm.svelte';
+	import CommonLabel from '$components/CommonLabel.svelte';
+	import DisplayTypeSelector from '$components/DisplayTypeSelector.svelte';
 	import Editor from '$components/Editor.svelte';
 	import FileList from '$components/FileList.svelte';
-	import { DisplayType } from '$lib/types/user.type.js';
 
-	let { post, fileMetas = [] }: { post?: Post; fileMetas?: FileMeta[] } = $props();
+	let {
+		user,
+		post,
+		fileMetas = []
+	}: { user: User; post?: Post; fileMetas?: FileMeta[] } = $props();
 
 	let loading = $state<boolean>(false);
 	let editorHtml = $state('');
@@ -15,7 +23,7 @@
 	let imageIds = $state<FileId[]>([]);
 	let initializedFor = $state<string | null>(null);
 
-	const allFileIds = $derived([...attachments.map((fileMeta) => fileMeta._id), ...imageIds]);
+	const fileIds = $derived([...attachments.map((fileMeta) => fileMeta._id), ...imageIds]);
 
 	$effect(() => {
 		const formKey = post?._id ?? 'new';
@@ -31,115 +39,86 @@
 	});
 </script>
 
-{#snippet DisplayTypePicker()}
-	<div class="display-type-group">
-		<input
-			class="display-type-input"
-			type="radio"
-			id="anonymous"
-			name="displayType"
-			value={DisplayType.Anonymous}
-			{...{ checked: post?.displayType === DisplayType.Anonymous || !post }}
-		/>
-		<label class="display-type-label" for="anonymous">익명</label>
-		<input
-			class="display-type-input"
-			type="radio"
-			id="nickname"
-			name="displayType"
-			value={DisplayType.Nickname}
-			{...{ checked: post?.displayType === DisplayType.Nickname }}
-		/>
-		<label class="display-type-label" for="nickname">별명</label>
-		<input
-			class="display-type-input"
-			type="radio"
-			id="realName"
-			name="displayType"
-			value={DisplayType.RealName}
-			{...{ checked: post?.displayType === DisplayType.RealName }}
-		/>
-		<label class="display-type-label" for="realName">실명</label>
+{#snippet MetaModule()}
+	<div class="module container-col">
+		<DisplayTypeSelector {user} displayType={post?.displayType} />
+		<CommonLabel labelFor="title" labelString="글 제목">
+			<input type="text" name="title" value={post?.title} placeholder="제목을 입력하세요." />
+		</CommonLabel>
 	</div>
 {/snippet}
 
-<section class="module">
+{#snippet EditorModule()}
+	<input type="hidden" name="content" bind:value={editorHtml} readonly />
+	{#each fileIds as fileId (fileId)}
+		<input type="hidden" name="fileIds" value={fileId} readonly />
+	{/each}
+
+	<Editor
+		bind:editorHtml
+		bind:attachments
+		bind:imageIds
+		initialHtml={post?.content}
+		disabled={loading}
+	/>
+{/snippet}
+
+<section class="container-col" data-loading={loading ? 'true' : 'false'}>
 	<CommonForm
 		actionName={post ? 'editPost' : 'createPost'}
 		formName={post ? 'editPost' : 'createPost'}
 		bind:loading
 	>
-		<div class="post-form-fields">
-			{@render DisplayTypePicker()}
-
-			<input
-				class="post-form-title"
-				type="text"
-				name="title"
-				value={post?.title}
-				placeholder="제목을 입력하세요"
-			/>
-
-			<input type="hidden" name="content" bind:value={editorHtml} readonly />
-			{#each allFileIds as fileId (fileId)}
-				<input type="hidden" name="fileIds" value={fileId} readonly />
-			{/each}
-
-			<Editor bind:editorHtml bind:attachments bind:imageIds initialHtml={post?.content} />
+		<div class="container-col post-form">
+			{@render MetaModule()}
+			{@render EditorModule()}
 		</div>
 	</CommonForm>
 
-	<FileList bind:fileMetas={attachments} isEditing={true} />
+	<FileList bind:fileMetas={attachments} isEditing={true} disabled={loading} />
 
-	<p class="form-hint post-form-note">
+	<p class="file-hint">
 		업로드는 30MB 이하의 파일만 가능합니다.<br />
-		지원 확장자는 PNG, JPG(JPEG), WEBP, PDF, DOCX, XLSX 입니다.
+		지원 확장자는 PNG, JPG(JPEG), WEBP, PDF, DOCX, XLSX 등 입니다.
 	</p>
 
-	<div class="form-actions-end">
+	<div class="action-group container">
 		<button
 			type="submit"
-			class="btn-action"
+			class="action-btn"
 			form={post ? 'editPost' : 'createPost'}
 			disabled={loading}
 		>
+			<Pencil size="0.8rem" />
 			{post ? '수정' : '작성'}
 		</button>
 	</div>
 </section>
 
 <style lang="scss">
-	.display-type-group {
-		display: flex;
-		width: fit-content;
-		border: 0.1rem solid var(--gray-border);
-		background-color: var(--surface-base);
+	section {
+		gap: 1rem;
+		width: 100%;
 	}
 
-	.display-type-input {
-		display: none;
+	.post-form {
+		align-items: flex-start;
+		gap: 1rem;
+
+		& > div {
+			align-items: flex-start;
+			gap: 0.6rem;
+		}
 	}
 
-	.display-type-label {
-		word-break: keep-all;
-		padding: 0.4rem 0.6rem;
-		cursor: pointer;
-		text-align: center;
-		border-right: 0.1rem solid var(--gray-border);
-		transition: all 0.2s ease-in-out;
+	.file-hint {
+		width: 100%;
+		color: var(--gray);
+		font-size: 0.7rem;
 	}
 
-	.display-type-label:last-child {
-		border-right: none;
-	}
-
-	.display-type-label:hover {
-		background-color: var(--secondary-bg);
-	}
-
-	.display-type-input:checked + .display-type-label {
-		background-color: var(--secondary);
-		color: var(--tertiary-text);
-		font-weight: bold;
+	.action-group {
+		justify-content: right;
+		width: 100%;
 	}
 </style>

@@ -4,7 +4,11 @@ import editorActions, { normalizeEditorContent } from '$lib/server/editor.js';
 import { withActionErrorHandling } from '$lib/server/errors.js';
 import * as PetitionUsecase from '$lib/usecase/petition.usecase.js';
 
-export const load = () => {};
+export const load = ({ locals }) => {
+	return {
+		user: locals.user
+	};
+};
 
 export const actions = {
 	createPetition: withActionErrorHandling(async ({ request, locals }) => {

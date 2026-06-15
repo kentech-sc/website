@@ -6,11 +6,24 @@
 	import type { User } from '$lib/types/user.type.js';
 
 	let { user }: { user: User } = $props();
+	let logoutLoading = $state(false);
+
+	async function handleSignOut() {
+		if (logoutLoading) return;
+
+		logoutLoading = true;
+
+		try {
+			await signOut();
+		} finally {
+			logoutLoading = false;
+		}
+	}
 </script>
 
-<section class="profile-card">
+<section class="profile-card container-col">
 	<div class="profile-header">
-		<div class="avatar">
+		<div class="avatar container">
 			<UserIcon size="1.6rem" />
 		</div>
 		<div class="profile-info">
@@ -41,57 +54,51 @@
 		</div>
 	</div>
 
-	<div class="profile-actions">
-		<button class="error-btn logout-btn" onclick={() => signOut()}>
-			<LogOut size="0.8rem" />
-			<span>로그아웃</span>
-		</button>
-	</div>
+	<button
+		class="error-btn logout-btn"
+		disabled={logoutLoading}
+		aria-busy={logoutLoading ? 'true' : 'false'}
+		onclick={handleSignOut}
+	>
+		<LogOut size="0.8rem" />
+		<span>로그아웃</span>
+	</button>
 </section>
 
 <style lang="scss">
 	.profile-card {
-		background: var(--surface-elevated);
-		border: 0.1rem solid var(--gray-border);
-		border-radius: 0.4rem;
-		padding: 1.2rem;
-		box-shadow: 0 0.1rem 0.3rem var(--shadow-color);
+		gap: 1rem;
+
+		& > * {
+			width: stretch;
+		}
 	}
 
 	.profile-header {
 		display: flex;
 		align-items: center;
 		gap: 0.6rem;
-		margin-bottom: 1.2rem;
-		padding-bottom: 0.6rem;
 		border-bottom: 0.1rem solid var(--gray-border);
+		padding-bottom: 0.6rem;
 
 		.avatar {
-			display: flex;
-			align-items: center;
-			justify-content: center;
+			border-radius: 50%;
+			background: var(--secondary);
 			width: 2.4rem;
 			height: 2.4rem;
-			background: var(--secondary);
-			border-radius: 50%;
 			color: var(--tertiary-text);
 		}
 
 		.profile-info {
-			flex: 1;
-
 			h2 {
-				margin: 0 0 0.2rem;
-				font-size: 1rem;
-				font-weight: 600;
 				color: var(--text);
+				font-weight: 600;
+				font-size: 1rem;
 			}
 
 			.user-id {
-				margin: 0;
-				font-size: 0.7rem;
 				color: var(--gray-text);
-				font-family: monospace;
+				font-size: 0.7rem;
 			}
 		}
 	}
@@ -100,58 +107,33 @@
 		display: flex;
 		flex-direction: column;
 		gap: 0.6rem;
-		margin-bottom: 1.4rem;
 
 		.detail-item {
 			display: flex;
 			justify-content: space-between;
 			align-items: center;
-			padding: 0.4rem;
-			background: var(--gray-bg);
 			border-radius: 0.4rem;
+			background: var(--gray-bg);
+			padding: 0.4rem 0.6rem;
 
 			.label {
-				font-size: 0.7rem;
 				color: var(--gray-text);
-				font-weight: 500;
+				font-size: 0.7rem;
 			}
 
 			.value {
-				font-size: 0.8rem;
 				color: var(--text);
 				font-weight: 500;
+				font-size: 0.8rem;
 
 				&.badge {
+					border-radius: 0.4rem;
 					background: var(--secondary-bg);
-					color: var(--secondary);
 					padding: 0.2rem 0.4rem;
-					border-radius: 0.2rem;
+					color: var(--tertiary);
 					font-size: 0.7rem;
 					text-transform: uppercase;
 				}
-			}
-		}
-	}
-
-	.profile-actions {
-		.logout-btn {
-			width: 100%;
-		}
-	}
-
-	@media (max-width: 768px) {
-		.profile-card {
-			padding: 0.6rem;
-		}
-
-		.profile-header {
-			.avatar {
-				width: 2rem;
-				height: 2rem;
-			}
-
-			h2 {
-				font-size: 0.9rem;
 			}
 		}
 	}

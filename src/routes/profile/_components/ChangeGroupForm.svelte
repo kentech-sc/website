@@ -1,56 +1,64 @@
 <script lang="ts">
+	import Pencil from '@lucide/svelte/icons/pencil';
 	import Users from '@lucide/svelte/icons/users';
 
-	import type { ActionResult } from '@sveltejs/kit';
-
-	import { invalidateAll } from '$app/navigation';
 	import CommonForm from '$components/CommonForm.svelte';
+	import CommonLabel from '$components/CommonLabel.svelte';
 
-	let formResult = $state<ActionResult | null>(null);
-
-	$effect(() => {
-		if (formResult?.type === 'success') {
-			alert('권한이 변경되었습니다.');
-			invalidateAll();
-		}
-	});
+	function handleSuccess() {
+		alert('권한이 변경되었습니다.');
+	}
 </script>
 
-<CommonForm actionName="changeGroup" formName="changeGroup" bind:formResult>
-	<div class="form-card group-form-card">
-		<div class="form-card-header">
+<CommonForm
+	actionName="changeGroup"
+	formName="changeGroup"
+	policy="reload"
+	afterSuccess={handleSuccess}
+>
+	<div class="container-col">
+		<p>
 			<Users size="0.8rem" />
 			<span>권한 변경</span>
-		</div>
+		</p>
 
-		<div class="form-card-body">
-			<div class="field-group">
-				<label for="group-email">대상 사용자의 이메일</label>
-				<input type="text" name="email" id="group-email" placeholder="user@example.com" required />
-			</div>
+		<CommonLabel labelFor="group-email" labelString="대상 사용자의 이메일">
+			<input type="text" name="email" id="group-email" placeholder="abc1234" />
+			<span class="inline-container">@kentech.ac.kr</span>
+		</CommonLabel>
 
-			<div class="field-group">
-				<label for="group-role">새로운 권한</label>
-				<select name="group" id="group-role" required>
-					<option value="">권한 선택</option>
-					<option value="user">user</option>
-					<option value="moderator">moderator</option>
-					<option value="manager">manager</option>
-				</select>
-			</div>
+		<CommonLabel labelFor="group-role" labelString="새로운 권한">
+			<select name="group" id="group-role" required>
+				<option value="">권한 선택</option>
+				<option value="user">user</option>
+				<option value="moderator">moderator</option>
+				<option value="manager">manager</option>
+			</select>
+		</CommonLabel>
 
-			<div class="form-actions-end">
-				<button type="submit" class="warn-btn">
-					<Users size="0.8rem" />
-					<span>권한 변경하기</span>
-				</button>
-			</div>
-		</div>
+		<button type="submit" class="warn-btn">
+			<Pencil size="0.8rem" />
+			<span>변경하기</span>
+		</button>
 	</div>
 </CommonForm>
 
 <style lang="scss">
-	.group-form-card {
-		margin-top: 1.2rem;
+	p {
+		width: 100%;
+		font-weight: 500;
+		text-align: left;
+	}
+
+	#group-email + span {
+		flex: 0;
+		margin-left: 0.4rem;
+		color: var(--gray);
+		font-size: 0.9rem;
+	}
+
+	button {
+		margin-top: 0.6rem;
+		margin-left: auto;
 	}
 </style>

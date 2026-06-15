@@ -110,9 +110,13 @@ export async function unlikePostById(postId: PostId, user: User): Promise<PostEn
 }
 
 export async function searchPostsByQuery(
-	q: string,
-	page = 1,
-	limit = 10
-): Promise<{ items: PostEntity[]; more: boolean }> {
-	return await PostRepository.searchPostsByQuery(q, page, limit);
+	query: string,
+	limit = 10,
+	skip = 0
+): Promise<Array<PostEntity & { searchScore?: number }>> {
+	return await PostRepository.searchPostsByQuery(query, limit, skip);
+}
+
+export async function countPostsByQuery(query: string): Promise<number> {
+	return await PostRepository.countPostsByQuery(query);
 }

@@ -1,13 +1,13 @@
 <script lang="ts">
-	import type { DisplayType, User } from '$lib/types/user.type.js';
+	import Pencil from '@lucide/svelte/icons/pencil';
+
+	import type { User } from '$lib/types/user.type.js';
 
 	import CommonForm from '$components/CommonForm.svelte';
-	import { createDisplayName } from '$lib/shared/utils.js';
-	import { DisplayType as DisplayTypeValue } from '$lib/types/user.type.js';
+	import DisplayTypeSelector from '$components/DisplayTypeSelector.svelte';
 
 	let { user }: { user: User } = $props();
 
-	let displayType = $state<DisplayType>(DisplayTypeValue.Anonymous);
 	let commentTextarea = $state<HTMLTextAreaElement | null>(null);
 
 	function clearCommentTextarea() {
@@ -17,88 +17,37 @@
 	}
 </script>
 
-<CommonForm
-	actionName="createComment"
-	formName="createComment"
-	policy="reload"
-	afterSuccess={clearCommentTextarea}
->
-	<div class="comment-form container-col">
-		<div class="container">
-			<span><b>[{createDisplayName(user, displayType)}]</b></span>
-		</div>
-		<div class="display-type-row container">
-			<label for="anonymous">익명</label>
-			<input
-				type="radio"
-				id="anonymous"
-				name="displayType"
-				value={DisplayTypeValue.Anonymous}
-				checked
-				bind:group={displayType}
-			/>
-			<label for="nickname">별명</label>
-			<input
-				type="radio"
-				id="nickname"
-				name="displayType"
-				value={DisplayTypeValue.Nickname}
-				bind:group={displayType}
-			/>
-			<label for="realName">실명</label>
-			<input
-				type="radio"
-				id="realName"
-				name="displayType"
-				value={DisplayTypeValue.RealName}
-				bind:group={displayType}
-			/>
-		</div>
-		<div class="container">
+<section class="module">
+	<CommonForm
+		actionName="createComment"
+		formName="createComment"
+		policy="reload"
+		afterSuccess={clearCommentTextarea}
+	>
+		<div class="comment-form container-col">
+			<div class="container">
+				<DisplayTypeSelector {user} />
+				<button type="submit" class="action-btn"><Pencil size="0.8rem" />작성</button>
+			</div>
 			<textarea name="content" autocomplete="off" bind:this={commentTextarea}></textarea>
-			<button type="submit" class="btn-action">작성</button>
 		</div>
-	</div>
-</CommonForm>
+	</CommonForm>
+</section>
 
 <style lang="scss">
 	.comment-form {
-		justify-content: space-between;
-		width: 100%;
-		padding: 0.2rem;
-
-		label {
-			word-break: keep-all;
-		}
+		gap: 0.8rem;
 
 		& > div {
-			width: 100%;
-			justify-content: flex-start;
-			margin-bottom: 0.6rem;
-		}
-
-		input:not([type='radio']),
-		textarea {
-			padding: 0.6rem;
-			font-size: 0.8rem;
+			justify-content: space-between;
 			width: 100%;
 		}
 
 		textarea {
+			padding: 0.4rem 0.6rem;
+			width: 100%;
 			resize: vertical;
-		}
-
-		button {
-			margin-left: 0.6rem;
-		}
-	}
-
-	.display-type-row {
-		justify-content: flex-start;
-
-		input {
-			margin-left: 0.6rem;
-			margin-right: 1.2rem;
+			font-size: 0.9rem;
 		}
 	}
 </style>

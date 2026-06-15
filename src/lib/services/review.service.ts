@@ -76,8 +76,12 @@ export async function deleteReviewById(reviewId: ReviewId, user: User): Promise<
 
 export async function searchReviewsByQuery(
 	query: string,
-	page = 1,
-	limit = 10
-): Promise<{ items: ReviewEntity[]; more: boolean }> {
-	return await ReviewRepository.searchReviewsByQuery(query, page, limit);
+	limit = 10,
+	skip = 0
+): Promise<Array<ReviewEntity & { searchScore?: number }>> {
+	return await ReviewRepository.searchReviewsByQuery(query, limit, skip);
+}
+
+export async function countReviewsByQuery(query: string): Promise<number> {
+	return await ReviewRepository.countReviewsByQuery(query);
 }

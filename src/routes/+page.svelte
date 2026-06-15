@@ -22,10 +22,10 @@
 
 <style lang="scss">
 	#grid-container {
-		width: 100%;
 		display: grid;
 		grid-template-columns: repeat(2, minmax(0, 1fr));
 		margin-top: 0.6rem;
+		width: 100%;
 
 		@media (max-width: 768px) {
 			grid-template-columns: 1fr;

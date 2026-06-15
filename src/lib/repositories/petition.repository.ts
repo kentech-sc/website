@@ -13,6 +13,10 @@ export async function countPetitions(): Promise<number> {
 	return await PetitionModel.countDocuments();
 }
 
+export async function countPetitionsByQuery(query: string): Promise<number> {
+	return await PetitionModel.countDocuments({ $text: { $search: query } });
+}
+
 export async function createPetition(petition: PetitionCreate): Promise<PetitionEntity> {
 	return toPojo<PetitionEntity>((await PetitionModel.create(petition)).toObject());
 }
@@ -183,18 +187,15 @@ export async function refreshPetitionStatusById(
 }
 
 export async function searchPetitionsByQuery(
-	q: string,
-	page = 1,
-	limit = 10
-): Promise<{ items: PetitionEntity[]; more: boolean }> {
-	const results = await PetitionModel.find(
-		{ $text: { $search: q } },
-		{ searchScore: { $meta: 'textScore' } }
-	)
-		.sort({ searchScore: { $meta: 'textScore' }, createdAt: -1 })
-		.skip((page - 1) * limit)
-		.limit(limit + 1)
-		.lean();
-
-	return { items: toPojo<PetitionEntity[]>(results.slice(0, limit)), more: results.length > limit };
+	query: string,
+	limit = 10,
+	skip = 0
+): Promise<Array<PetitionEntity & { searchScore?: number }>> {
+	return toPojo<Array<PetitionEntity & { searchScore?: number }>>(
+		await PetitionModel.find({ $text: { $search: query } }, { searchScore: { $meta: 'textScore' } })
+			.sort({ searchScore: { $meta: 'textScore' }, createdAt: -1 })
+			.skip(skip)
+			.limit(limit)
+			.lean()
+	);
 }

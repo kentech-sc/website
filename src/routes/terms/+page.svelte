@@ -1,7 +1,5 @@
-<div class="module">
-	<div class="module_head">
-		<h1>&lt;서비스 이용약관&gt;</h1>
-	</div>
+<article class="module">
+	<h1>&lt;서비스 이용약관&gt;</h1>
 
 	<div class="content">
 		<p class="intro">
@@ -97,7 +95,7 @@
 
 		<p class="effective-date">시행일: 2026년 4월 2일</p>
 	</div>
-</div>
+</article>
 
 <style lang="scss">
 	@use '../../style/legal-page';

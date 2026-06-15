@@ -5,16 +5,12 @@
 
 	import type { Course } from '$lib/types/course.type.js';
 	import type { Professor } from '$lib/types/professor.type.js';
-	import type { Review } from '$lib/types/review.type.js';
 
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import CommonListBtnModule from '$components/CommonListBtnModule.svelte';
 
 	let { data } = $props();
-	const reviews = $derived<Review[]>(data.reviews);
-	const currentPage = $derived<number>(data.currentPage);
-	const totalPages = $derived<number>(data.totalPages);
+	const reviewPage = $derived(data.reviewPage);
 	const canCreateReview = $derived<boolean>(data.canCreateReview);
 	const canManageCatalog = $derived<boolean>(data.canManageCatalog);
 	let selectedCourse = $derived<string>(data.courseId ?? '');
@@ -45,8 +41,6 @@
 
 <ReviewHeader pageType="list" {canCreateReview} {canManageCatalog} />
 
-<section class="container-col module">
-	<ReviewFilter {courses} {professors} bind:selectedCourse bind:selectedProfessor />
-	<ReviewList {reviews} />
-	<CommonListBtnModule {currentPage} {totalPages} />
-</section>
+<ReviewFilter {courses} {professors} bind:selectedCourse bind:selectedProfessor />
+
+<ReviewList {reviewPage} />

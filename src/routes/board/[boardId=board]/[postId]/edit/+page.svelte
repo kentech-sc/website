@@ -5,6 +5,10 @@
 	import type { FileMeta } from '$lib/types/file-meta.type.js';
 	import type { Post } from '$lib/types/post.type.js';
 
+	import { page } from '$app/state';
+
+	const user = $derived(page.data.user);
+
 	let { data } = $props();
 	const post = $derived<Post>(data.post);
 	const fileMetas = $derived<Array<FileMeta>>(data.files);
@@ -12,5 +16,5 @@
 
 <BoardHeader pageType="edit" />
 {#key post._id}
-	<BoardForm {post} {fileMetas} />
+	<BoardForm {post} {user} {fileMetas} />
 {/key}

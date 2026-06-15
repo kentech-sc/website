@@ -48,13 +48,11 @@
 	{/if}
 {/snippet}
 
+<NavBar />
+{@render Flash()}
+
 {#if page.route.id === '/'}
-	<NavBar isMain={true} />
-	{@render Flash()}
 	<Slideshow />
-{:else}
-	<NavBar isMain={false} />
-	{@render Flash()}
 {/if}
 
 <div class="layout-shell container">
@@ -71,21 +69,21 @@
 
 		main {
 			flex: 1;
-			max-width: 82.5vw;
+			max-width: 80vw;
 		}
 	}
 
 	.flash-banner {
+		display: flex;
 		position: fixed;
 		top: 3.4rem;
-		z-index: 999;
-		min-width: 40vw;
-		width: fit-content;
-		transform: translate(-50%, 0);
 		left: 50%;
-		display: flex;
 		justify-content: space-between;
+		transform: translate(-50%, 0);
+		z-index: 999;
 		padding-right: 0.6rem;
+		width: fit-content;
+		min-width: 40vw;
 
 		p {
 			margin: 0;

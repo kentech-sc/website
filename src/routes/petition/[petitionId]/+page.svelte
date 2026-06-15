@@ -14,13 +14,22 @@
 
 	let { data } = $props();
 	const petition = $derived<Petition>(data.petition);
-	const signersNames = $derived<string[]>(data.signersNames);
+	const signerNames = $derived<string[]>(data.signerNames);
 	const fileMetas = $derived<FileMeta[]>(data.files);
 	const permissions = $derived(data.permissions);
 </script>
 
 <PetitionHeader pageType="detail" />
-<PetitionArticle {petition} {user} {permissions} />
-<FileList {fileMetas} isEditing={false} />
-<ResponseArticle {petition} {permissions} />
-<Signers {signersNames} />
+<div class="container-col">
+	<PetitionArticle {petition} {user} {permissions} />
+	<FileList {fileMetas} isEditing={false} />
+	<ResponseArticle {petition} {permissions} />
+	<Signers {signerNames} />
+</div>
+
+<style lang="scss">
+	div {
+		gap: 1rem;
+		width: 100%;
+	}
+</style>

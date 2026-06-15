@@ -27,15 +27,18 @@
 	} = $props();
 
 	let confirmSubmitButton = $state<HTMLButtonElement | null>(null);
+	let loading = $state(false);
 
 	function handleConfirmSubmit() {
+		if (loading) return;
+
 		if (!confirmMessage || confirm(confirmMessage)) {
 			confirmSubmitButton?.click();
 		}
 	}
 </script>
 
-<CommonForm {actionName} {formName} {policy} {afterSuccess} {afterConflict}>
+<CommonForm {actionName} {formName} {policy} {afterSuccess} {afterConflict} bind:loading>
 	{#each hiddenFields as hiddenField (`${hiddenField.name}-${hiddenField.value}`)}
 		<input type="hidden" name={hiddenField.name} value={String(hiddenField.value)} />
 	{/each}
@@ -43,12 +46,15 @@
 	<button
 		type={confirmMessage ? 'button' : 'submit'}
 		class={buttonClass}
+		disabled={loading}
+		data-busy={loading ? 'true' : 'false'}
+		aria-busy={loading ? 'true' : 'false'}
 		onclick={confirmMessage ? handleConfirmSubmit : undefined}
 	>
 		{@render children()}
 	</button>
 
 	{#if confirmMessage}
-		<button hidden type="submit" bind:this={confirmSubmitButton}>submit</button>
+		<button hidden type="submit" bind:this={confirmSubmitButton} disabled={loading}>submit</button>
 	{/if}
 </CommonForm>

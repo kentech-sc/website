@@ -8,9 +8,9 @@ export const load = withLoadErrorHandling(async ({ url }) => {
 	const page = Math.max(1, Number(url.searchParams.get('page') ?? 1) || 1);
 	const limit = 10;
 
-	const { results, more } = await SearchUsecase.search(query, page, limit);
+	const searchPage = await SearchUsecase.search(query, page, limit);
 
-	return { results, query, page, limit, more };
+	return { searchPage };
 });
 
 export const actions = {

@@ -5,15 +5,18 @@
 	let {
 		score = $bindable(0),
 		interactive = false,
+		disabled = false,
 		onchange
 	}: {
 		score?: number;
 		interactive?: boolean;
+		disabled?: boolean;
 		onchange?: (value: number) => void;
 	} = $props();
 
 	let hoveredRating = $state(0);
-	let displayRating = $derived(interactive && hoveredRating ? hoveredRating : score / 2);
+	let isInteractive = $derived(interactive && !disabled);
+	let displayRating = $derived(isInteractive && hoveredRating ? hoveredRating : score / 2);
 
 	function handleMouseMove(e: MouseEvent, starIndex: number) {
 		const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
@@ -29,17 +32,23 @@
 </script>
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
-<div class="star-rating" class:interactive onmouseleave={() => (hoveredRating = 0)}>
+<div
+	class="star-rating"
+	class:interactive={isInteractive}
+	data-disabled={disabled ? 'true' : 'false'}
+	onmouseleave={() => (hoveredRating = 0)}
+>
 	{#each [1, 2, 3, 4, 5] as i (i)}
 		<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
 		<div
 			class="star-wrapper"
-			role={interactive ? 'button' : undefined}
-			tabindex={interactive ? 0 : undefined}
-			aria-label={interactive ? `별점 ${i}점` : undefined}
-			onmousemove={interactive ? (e) => handleMouseMove(e, i) : undefined}
-			onclick={interactive ? (e) => handleClick(e, i) : undefined}
-			onkeydown={interactive
+			role={isInteractive ? 'button' : undefined}
+			tabindex={isInteractive ? 0 : undefined}
+			aria-label={isInteractive ? `별점 ${i}점` : undefined}
+			aria-disabled={disabled ? 'true' : undefined}
+			onmousemove={isInteractive ? (e) => handleMouseMove(e, i) : undefined}
+			onclick={isInteractive ? (e) => handleClick(e, i) : undefined}
+			onkeydown={isInteractive
 				? (e) => e.key === 'Enter' && handleClick(e as unknown as MouseEvent, i)
 				: undefined}
 		>
@@ -62,13 +71,18 @@
 	.star-rating {
 		display: inline-flex;
 		align-items: center;
-		gap: 0.125rem;
+		gap: 0.1rem;
+
+		&[data-disabled='true'] {
+			opacity: 0.7;
+			cursor: wait;
+		}
 
 		&.interactive .star-wrapper {
+			transition: transform 0.1s ease;
 			cursor: pointer;
 			width: 1.6rem;
 			height: 1.6rem;
-			transition: transform 0.1s ease;
 
 			&:hover {
 				transform: scale(1.15);
@@ -77,16 +91,16 @@
 	}
 
 	.star-wrapper {
+		display: flex;
 		position: relative;
+		justify-content: center;
+		align-items: center;
 		width: 1rem;
 		height: 1rem;
-		display: flex;
-		align-items: center;
-		justify-content: center;
 	}
 
 	:global(.star) {
-		stroke-width: 0.125rem;
+		stroke-width: 0.1rem;
 		width: 100%;
 		height: 100%;
 	}
@@ -111,7 +125,7 @@
 
 	.score-text {
 		margin-left: 0.4rem;
+		color: var(--gray);
 		font-size: 0.8rem;
-		color: var(--secondary-text);
 	}
 </style>

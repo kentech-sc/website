@@ -6,9 +6,9 @@
 }
 
 html {
-	font-size: 20px;
-	background-color: var(--surface-base);
+	background-color: var(--white);
 	min-height: 100%;
+	font-size: 20px;
 }
 
 @media (max-width: 75rem) {
@@ -30,12 +30,12 @@ html {
 }
 
 body {
-	margin: 0;
-	background-color: var(--surface-base);
-	color: var(--text);
 	display: flex;
 	flex-direction: column;
+	margin: 0;
+	background-color: var(---base);
 	min-height: 100vh;
+	color: var(--text);
 	line-height: 1.4;
 }
 
@@ -69,21 +69,21 @@ select {
 }
 
 fieldset {
-	min-width: 0;
-	padding: 0;
 	border: 0;
+	padding: 0;
+	min-width: 0;
 }
 
 a {
-	text-decoration: none;
 	color: var(--secondary);
+	text-decoration: none;
+	text-decoration-thickness: 0.05rem;
+	text-underline-offset: 0.1rem;
 }
 
 a:hover {
 	cursor: pointer;
 	text-decoration: underline;
-	text-underline-offset: 0.2rem;
-	text-decoration-thickness: 0.05rem;
 }
 
 a:focus {
@@ -100,8 +100,8 @@ s:hover {
 }
 
 u {
-	text-underline-offset: 0.2rem;
 	text-decoration-thickness: 0.05rem;
+	text-underline-offset: 0.2rem;
 }
 
 table {
@@ -116,18 +116,18 @@ td {
 }
 
 @mixin btn-style {
-	color: var(--text);
-	padding: 0.2rem 0.8rem;
 	border: solid 0.1rem var(--gray-border);
-	background-color: var(--surface-base);
-	font-size: 0.8rem;
-	font-weight: bold;
-	word-break: keep-all;
 	border-radius: 0.4rem;
+	background-color: var(--white);
+	padding: 0.2rem 0.8rem;
+	color: var(--text);
+	font-weight: bold;
+	font-size: 0.8rem;
+	word-break: keep-all;
 
 	&:hover {
 		cursor: pointer;
-		background-color: var(--surface-hover);
+		background-color: var(--white-hover);
 		text-decoration: none;
 	}
 }
@@ -137,26 +137,34 @@ label.button {
 	@include btn-style;
 }
 
+button:disabled,
+label.button[aria-disabled='true'] {
+	opacity: 0.6;
+	filter: saturate(0.65);
+	cursor: wait;
+}
+
+button:disabled:hover,
+label.button[aria-disabled='true']:hover {
+	text-decoration: none;
+}
+
 button,
 input,
 textarea,
 select {
-	font: inherit;
 	color: inherit;
+	font: inherit;
 }
 
 textarea,
 input,
 select {
-	font-size: 0.8rem;
-	background-color: var(--surface-base);
-	padding: 0.2rem 0.4rem;
 	border: 0.1rem solid var(--gray-border);
 	border-radius: 0.4rem;
-}
-
-select {
-	height: 1.6rem;
+	background-color: var(--white);
+	padding: 0.2rem 0.4rem;
+	font-size: 0.8rem;
 }
 
 pre {
@@ -166,7 +174,11 @@ pre {
 }
 
 hr {
-	width: 100%;
-	margin: 0.6rem 0;
+	margin: 0.4rem 0;
 	border: solid 0.1rem var(--gray-border);
+	width: 100%;
+}
+
+.nmu {
+	font-size: 0.9rem;
 }

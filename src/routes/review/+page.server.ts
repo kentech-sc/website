@@ -9,23 +9,16 @@ export const load = withLoadErrorHandling(async ({ url, locals }) => {
 	const professorId = professorIdRaw ?? undefined;
 
 	const page = Math.max(1, Number(url.searchParams.get('page') ?? '1') || 1);
-	const reviewsResult = await ReviewUsecase.getReviewPageView(
-		page,
-		locals.user,
-		courseId,
-		professorId
-	);
+	const reviewResult = await ReviewUsecase.getReviewPage(page, locals.user, courseId, professorId);
 	const { courses, professors } = await ReviewUsecase.getReviewFormOptions();
 
 	return {
-		reviews: reviewsResult.reviews,
-		currentPage: reviewsResult.currentPage,
-		totalPages: reviewsResult.totalPages,
+		reviewPage: reviewResult.reviewPage,
 		courses,
 		professors,
 		courseId,
 		professorId,
-		canCreateReview: reviewsResult.canCreateReview,
-		canManageCatalog: reviewsResult.canManageCatalog
+		canCreateReview: reviewResult.canCreateReview,
+		canManageCatalog: reviewResult.canManageCatalog
 	};
 });

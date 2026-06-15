@@ -19,21 +19,21 @@ export const actions = {
 	}),
 	changeGroup: withActionErrorHandling(async ({ request, locals }) => {
 		const formData = await request.formData();
-		const email = (formData.get('email') ?? '').toString();
+		const email = (formData.get('email') ?? '').toString() + '@kentech.ac.kr';
 		const group = (formData.get('group') ?? '').toString();
 		await ProfileUsecase.changeGroup(email, group as UserGroup, locals.user);
 		return { email, group };
 	}),
 	blockUser: withActionErrorHandling(async ({ request, locals }) => {
 		const formData = await request.formData();
-		const email = (formData.get('email') ?? '').toString();
+		const email = (formData.get('email') ?? '').toString() + '@kentech.ac.kr';
 		const duration = Number(formData.get('duration')) * 60 * 1000;
 		await ProfileUsecase.blockUser(email, locals.user, duration);
 		return { email };
 	}),
 	unblockUser: withActionErrorHandling(async ({ request, locals }) => {
 		const formData = await request.formData();
-		const email = (formData.get('email') ?? '').toString();
+		const email = (formData.get('email') ?? '').toString() + '@kentech.ac.kr';
 		await ProfileUsecase.unblockUser(email, locals.user);
 		return { email };
 	}),

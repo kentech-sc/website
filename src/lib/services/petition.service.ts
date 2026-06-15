@@ -202,8 +202,12 @@ async function refreshStatusByPetition(petition: PetitionEntity): Promise<Petiti
 
 export async function searchPetitionsByQuery(
 	query: string,
-	page = 1,
-	limit = 10
-): Promise<{ items: PetitionEntity[]; more: boolean }> {
-	return await PetitionRepository.searchPetitionsByQuery(query, page, limit);
+	limit = 10,
+	skip = 0
+): Promise<Array<PetitionEntity & { searchScore?: number }>> {
+	return await PetitionRepository.searchPetitionsByQuery(query, limit, skip);
+}
+
+export async function countPetitionsByQuery(query: string): Promise<number> {
+	return await PetitionRepository.countPetitionsByQuery(query);
 }

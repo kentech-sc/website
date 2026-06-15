@@ -1,4 +1,6 @@
 <script lang="ts">
+	import CommonLabel from '$components/CommonLabel.svelte';
+
 	let {
 		courses,
 		professors,
@@ -7,48 +9,42 @@
 	} = $props();
 </script>
 
-<div class="filter-row">
-	<div class="field-group filter-field">
-		<label for="course">강의</label>
+<div class="filter">
+	<CommonLabel labelFor="course" labelString="강의">
 		<select id="course" bind:value={selectedCourse}>
 			<option value="">전체</option>
 			{#each courses as course (course._id)}
 				<option value={course._id}>[{course._id}] {course.name}</option>
 			{/each}
 		</select>
-	</div>
+	</CommonLabel>
 
-	<div class="field-group filter-field">
-		<label for="professor">교수</label>
+	<CommonLabel labelFor="professor" labelString="교수">
 		<select id="professor" bind:value={selectedProfessor}>
 			<option value="">전체</option>
 			{#each professors as professor (professor._id)}
 				<option value={professor._id}>{professor.name} 교수님</option>
 			{/each}
 		</select>
-	</div>
+	</CommonLabel>
 </div>
 
 <style lang="scss">
-	.filter-row {
-		width: 100%;
+	.filter {
 		display: flex;
 		justify-content: flex-start;
-		gap: 0.6rem;
-		margin-bottom: 0.6rem;
-	}
 
-	.filter-field {
-		flex: 0 1 20rem;
-	}
+		gap: 1rem;
+		margin-bottom: 1rem;
 
-	@media (max-width: 768px) {
-		.filter-row {
-			flex-direction: column;
+		width: 100%;
+
+		& > :global(div:first-child) {
+			width: 28rem;
 		}
 
-		.filter-field {
-			width: 100%;
+		& > :global(div:last-child) {
+			width: 16rem;
 		}
 	}
 </style>

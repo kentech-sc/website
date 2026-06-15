@@ -8,9 +8,18 @@
 </script>
 
 <CourseHeader />
-{#if permissions.canManageProfessor}
-	<ProfessorForm />
-{/if}
-{#if permissions.canManageCourse}
-	<CourseForm />
-{/if}
+<section class="container-col">
+	{#if permissions.canManageProfessor}
+		<ProfessorForm />
+	{/if}
+	{#if permissions.canManageCourse}
+		<CourseForm />
+	{/if}
+</section>
+
+<style lang="scss">
+	section {
+		gap: 1rem;
+		width: 100%;
+	}
+</style>

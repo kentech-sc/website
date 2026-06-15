@@ -20,9 +20,7 @@
 	} = $props();
 </script>
 
-<section class="container-col module">
-	{#if canCreateComment}
-		<CommentForm {user} />
-	{/if}
-	<CommentList {authorId} {comments} {commentPermissions} />
-</section>
+{#if canCreateComment}
+	<CommentForm {user} />
+{/if}
+<CommentList {authorId} {comments} {commentPermissions} />

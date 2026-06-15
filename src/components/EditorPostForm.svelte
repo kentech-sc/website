@@ -51,7 +51,7 @@
 	});
 </script>
 
-<section class="module">
+<section class="module" data-loading={loading ? 'true' : 'false'}>
 	<CommonForm {actionName} {formName} bind:loading>
 		<div class="form-stack">
 			{#if beforeTitle}
@@ -67,11 +67,11 @@
 				<input type="hidden" name="fileIds" value={fileId} readonly />
 			{/each}
 
-			<Editor bind:editorHtml bind:attachments bind:imageIds {initialHtml} />
+			<Editor bind:editorHtml bind:attachments bind:imageIds {initialHtml} disabled={loading} />
 		</div>
 	</CommonForm>
 
-	<FileList bind:fileMetas={attachments} isEditing={true} />
+	<FileList bind:fileMetas={attachments} isEditing={true} disabled={loading} />
 
 	<p class="form-helper-text">
 		첨부는 30MB 이하의 파일만 업로드 가능합니다.<br />
@@ -79,7 +79,7 @@
 	</p>
 
 	<div class="form-actions-end">
-		<button type="submit" class="btn-action" form={formName} disabled={loading}>{submitText}</button
+		<button type="submit" class="action-btn" form={formName} disabled={loading}>{submitText}</button
 		>
 	</div>
 </section>

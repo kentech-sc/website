@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { ActionResult } from '@sveltejs/kit';
+	import type { ActionResult, SubmitFunction } from '@sveltejs/kit';
 	import type { Snippet } from 'svelte';
 
 	import { enhance } from '$app/forms';
@@ -52,64 +52,67 @@
 		return currentPolicy === 'reload' || isDetailPolicy(currentPolicy);
 	}
 
-	function formHandle() {
+	const formHandle: SubmitFunction = ({ cancel }) => {
+		if (loading) {
+			cancel();
+			return;
+		}
+
 		loading = true;
 
-		return async ({ result }: { result: ActionResult }) => {
-			if (result.type === 'redirect') {
-				try {
+		return async ({ result }) => {
+			try {
+				if (result.type === 'redirect') {
 					await goto(result.location);
-				} finally {
-					loading = false;
-				}
-				return;
-			}
-
-			formResult = result;
-
-			if (result.type === 'success') {
-				await afterSuccess?.();
-
-				if (shouldInvalidateOnSuccess(policy)) {
-					await invalidateAll();
+					return;
 				}
 
-				setTimeout(() => {
-					loading = false;
-				}, 200);
-				return;
-			}
+				formResult = result;
 
-			if (result.type === 'failure') {
-				const message = getActionResultMessage(result);
+				if (result.type === 'success') {
+					await afterSuccess?.();
 
-				if (result.status === 404) {
-					if (isDetailPolicy(policy)) {
-						setClientFlash({ kind: 'error', message });
-						await goto(policy.notFoundRedirectTo);
-						return;
-					}
-
-					if (shouldInvalidateOnNotFound(policy)) {
+					if (shouldInvalidateOnSuccess(policy)) {
 						await invalidateAll();
 					}
+					return;
 				}
 
-				if (result.status === 409) {
-					await afterConflict?.();
+				if (result.type === 'failure') {
+					const message = getActionResultMessage(result);
 
-					if (shouldInvalidateOnConflict(policy)) {
-						await invalidateAll();
+					if (result.status === 404) {
+						if (isDetailPolicy(policy)) {
+							setClientFlash({ kind: 'error', message });
+							await goto(policy.notFoundRedirectTo);
+							return;
+						}
+
+						if (shouldInvalidateOnNotFound(policy)) {
+							await invalidateAll();
+						}
+					}
+
+					if (result.status === 409) {
+						await afterConflict?.();
+
+						if (shouldInvalidateOnConflict(policy)) {
+							await invalidateAll();
+						}
 					}
 				}
+			} finally {
+				loading = false;
 			}
-
-			loading = false;
 		};
-	}
+	};
 </script>
 
-<div class="common-form">
+<div
+	class="common-form"
+	data-loading={loading ? 'true' : 'false'}
+	aria-busy={loading ? 'true' : 'false'}
+>
 	<form
 		method="POST"
 		{...formName ? { id: formName } : {}}
@@ -121,23 +124,35 @@
 			{@render children()}
 		</fieldset>
 	</form>
-
-	{#if errorMsg}
-		<p class="error error-message">
-			{errorMsg}
-		</p>
-	{/if}
 </div>
+
+{#if errorMsg}
+	<p class="error error-message">
+		{errorMsg}
+	</p>
+{/if}
 
 <style lang="scss">
 	.common-form {
 		width: 100%;
 	}
 
+	.common-form[data-loading='true'] {
+		cursor: wait;
+	}
+
 	.common-form-content {
 		display: flex;
 		flex-direction: column;
 		min-width: 0;
+	}
+
+	.common-form[data-loading='true'] .common-form-content {
+		opacity: 0.7;
+	}
+
+	.common-form[data-loading='true'] .common-form-content :global(*) {
+		cursor: wait;
 	}
 
 	.error-message {

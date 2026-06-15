@@ -1,9 +1,12 @@
 <script lang="ts">
+	import Pencil from '@lucide/svelte/icons/pencil';
+
 	import type { Course } from '$lib/types/course.type.js';
 	import type { Professor } from '$lib/types/professor.type.js';
 	import type { Review } from '$lib/types/review.type.js';
 
 	import CommonForm from '$components/CommonForm.svelte';
+	import CommonLabel from '$components/CommonLabel.svelte';
 	import StarRating from '$components/StarRating.svelte';
 	import { translatedTerm } from '$lib/shared/view.js';
 
@@ -14,10 +17,11 @@
 	}: { professors: Professor[]; courses: Course[]; review?: Review } = $props();
 
 	let initializedFor = $state<string | null>(null);
+	let loading = $state(false);
 	let scores = $state({
-		assignment: 5,
-		lecture: 5,
-		exam: 5,
+		assignment: 3,
+		lecture: 3,
+		exam: 3,
 		satisfaction: 10
 	});
 
@@ -28,9 +32,9 @@
 
 		initializedFor = formKey;
 		scores = {
-			assignment: review?.score.assignment ?? 5,
-			lecture: review?.score.lecture ?? 5,
-			exam: review?.score.exam ?? 5,
+			assignment: review?.score.assignment ?? 3,
+			lecture: review?.score.lecture ?? 3,
+			exam: review?.score.exam ?? 3,
 			satisfaction: review?.score.satisfaction ?? 10
 		};
 	});
@@ -52,73 +56,61 @@
 	}
 </script>
 
-<section class="module">
+<section class="module container-col">
 	<CommonForm
 		actionName={review ? 'editReview' : 'createReview'}
 		formName={review ? 'editReview' : 'createReview'}
+		bind:loading
 	>
-		<div class="review-form">
-			<div class="review-input-row">
-				<div class="review-input-pair">
-					<div class="field-group field-group-strong">
-						<label for="courseId">강의 코드</label>
-						<select id="courseId" name="courseId" required value={review?.courseId.toString()}>
+		<div class="review-form container-col">
+			<section class="input-section container-col">
+				<div>
+					<CommonLabel labelFor="courseId" labelString="강의">
+						<select id="courseId" name="courseId" value={review?.courseId.toString()}>
 							<option value="">선택</option>
 							{#each courses as course (course._id)}
 								<option value={course._id}>[{course._id}] {course.name}</option>
 							{/each}
 						</select>
-					</div>
+					</CommonLabel>
 
-					<div class="field-group field-group-strong">
-						<label for="professorId">담당 교수</label>
-						<select
-							id="professorId"
-							name="professorId"
-							required
-							value={review?.professorId.toString()}
-						>
+					<CommonLabel labelFor="professorId" labelString="담당 교수">
+						<select id="professorId" name="professorId" value={review?.professorId.toString()}>
 							<option value="">선택</option>
 							{#each professors as professor (professor._id)}
 								<option value={professor._id}>{professor.name} 교수님</option>
 							{/each}
 						</select>
-					</div>
-				</div>
+					</CommonLabel>
 
-				<div class="review-input-pair">
-					<div class="field-group field-group-strong">
-						<label for="year">수강 연도</label>
-						<select id="year" name="year" required value={review?.year}>
+					<CommonLabel labelFor="year" labelString="수강 연도">
+						<select id="year" name="year" value={review?.year}>
 							<option value="">선택</option>
 							{#each Array.from({ length: new Date().getFullYear() - 2021 }, (_, i) => 22 + i) as year (year)}
 								<option value={year}>{year}년</option>
 							{/each}
 						</select>
-					</div>
+					</CommonLabel>
 
-					<div class="field-group field-group-strong">
-						<label for="term">수강 학기</label>
-						<select id="term" name="term" required value={review?.term.toString()}>
+					<CommonLabel labelFor="term" labelString="수강 학기">
+						<select id="term" name="term" value={review?.term.toString()}>
 							<option value="">선택</option>
 							<option value="1">{translatedTerm[1]}학기</option>
 							<option value="2">{translatedTerm[2]}학기</option>
 							<option value="3">{translatedTerm[3]}학기</option>
 							<option value="4">{translatedTerm[4]}학기</option>
 						</select>
-					</div>
+					</CommonLabel>
 				</div>
-			</div>
 
-			<div class="field-group field-group-strong">
-				<label for="title">제목</label>
-				<input type="text" id="title" name="title" required value={review?.title} maxlength="100" />
-			</div>
+				<CommonLabel labelFor="title" labelString="한줄평">
+					<input type="text" id="title" name="title" value={review?.title} maxlength="100" />
+				</CommonLabel>
 
-			<div class="field-group field-group-strong">
-				<label for="comment">내용</label>
-				<textarea id="comment" name="comment" class="review-comment">{review?.comment}</textarea>
-			</div>
+				<CommonLabel labelFor="comment" labelString="내용">
+					<textarea id="comment" name="comment" class="review-comment">{review?.comment}</textarea>
+				</CommonLabel>
+			</section>
 
 			<div class="review-score-section">
 				<div class="review-slider-row">
@@ -188,7 +180,7 @@
 
 				<div class="review-satisfaction">
 					<label for="satisfactionScore">만족도</label>
-					<StarRating interactive bind:score={scores.satisfaction} />
+					<StarRating interactive disabled={loading} bind:score={scores.satisfaction} />
 					<input
 						type="hidden"
 						name="satisfactionScore"
@@ -199,32 +191,36 @@
 			</div>
 
 			<div class="form-actions-end">
-				<button type="submit" class="btn-action">{review ? '수정하기' : '평가하기'}</button>
+				<button type="submit" class="action-btn">
+					<Pencil size="0.8rem" />{review ? '수정하기' : '평가하기'}
+				</button>
 			</div>
 		</div>
 	</CommonForm>
 </section>
 
 <style lang="scss">
-	.review-form {
-		width: 100%;
-		display: flex;
-		flex-direction: column;
+	section {
 		gap: 0.8rem;
-		align-items: stretch;
 	}
 
-	.review-input-row {
-		display: flex;
-		gap: 1.6rem;
-		flex-wrap: wrap;
-	}
-
-	.review-input-pair {
-		flex: 1 1 24rem;
-		min-width: 20rem;
-		display: flex;
+	.review-form {
 		gap: 1.2rem;
+
+		& > * {
+			width: stretch;
+		}
+	}
+
+	.input-section {
+		gap: 0.6rem;
+
+		& > div:first-child {
+			display: grid;
+			grid-template-columns: 4fr 2fr 1fr 1fr;
+			gap: 1rem;
+			width: 100%;
+		}
 	}
 
 	.review-comment {
@@ -240,12 +236,11 @@
 	.review-slider-row {
 		display: flex;
 		gap: 1.6rem;
-		flex-wrap: wrap;
 	}
 
 	.review-score-item {
-		flex: 1 1 20rem;
 		display: flex;
+		flex: 1 1 20rem;
 		flex-direction: column;
 	}
 
@@ -254,69 +249,57 @@
 		justify-content: space-between;
 		align-items: center;
 		gap: 0.6rem;
-		margin-bottom: 0.6rem;
-	}
-
-	.review-label-row label {
-		font-weight: bold;
+		margin-bottom: 0.2rem;
+		font-weight: 600;
+		font-size: 0.9rem;
 	}
 
 	.review-current-label {
 		color: var(--secondary);
-		font-weight: bold;
 	}
 
 	.review-range {
 		-webkit-appearance: none;
 		appearance: none;
 		cursor: pointer;
-		width: 100%;
-		padding: 0.2rem;
-		margin: 0 0 0.4rem;
-		background: var(--gray-bg);
-		border-radius: 0.9rem;
 		border: solid 0.1rem var(--gray-border);
+		border-radius: 1rem;
+		background: var(--gray-bg);
+		padding: 0.1rem;
+		width: 100%;
 	}
 
 	.review-range::-webkit-slider-thumb {
 		-webkit-appearance: none;
 		appearance: none;
-		width: 1.3rem;
-		height: 0.8rem;
+		border-radius: 1rem;
 		background: var(--secondary);
-		border-radius: 0.9rem;
+		width: 1.4rem;
+		height: 0.8rem;
 	}
 
 	.review-range-guide {
 		display: flex;
 		justify-content: space-between;
+		margin-top: 0.2rem;
+		color: var(--gray);
 		font-size: 0.7rem;
-		color: var(--secondary-text);
 	}
 
 	.review-satisfaction {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		gap: 0.6rem;
+		gap: 0.2rem;
 	}
 
 	.review-satisfaction label {
-		font-size: 1.2rem;
 		font-weight: bold;
+		font-size: 1.2rem;
 	}
 
-	@media (max-width: 768px) {
-		.review-input-row,
-		.review-input-pair,
-		.review-slider-row {
-			flex-direction: column;
-			gap: 0.8rem;
-		}
-
-		.review-input-pair,
-		.review-score-item {
-			min-width: 0;
-		}
+	.form-actions-end {
+		display: flex;
+		justify-content: right;
 	}
 </style>

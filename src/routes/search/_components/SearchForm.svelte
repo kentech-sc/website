@@ -1,40 +1,26 @@
 <script lang="ts">
+	import Search from '@lucide/svelte/icons/search';
+
 	import CommonForm from '$components/CommonForm.svelte';
 </script>
 
-<section class="module">
-	<CommonForm actionName="search" formName="search">
-		<div class="search-form-row">
-			<label for="query">검색어</label>
-			<!-- svelte-ignore a11y_autofocus -->
-			<input class="search-input" type="text" id="query" name="query" autofocus />
-			<button type="submit">검색</button>
-		</div>
-	</CommonForm>
-</section>
+<CommonForm actionName="search" formName="search">
+	<div class="form-div">
+		<label for="query" class="input-label">검색어</label>
+		<!-- svelte-ignore a11y_autofocus -->
+		<input type="text" id="query" name="query" autofocus />
+		<button class="action-btn" type="submit"><Search size="0.8rem" />검색</button>
+	</div>
+</CommonForm>
 
 <style lang="scss">
-	.search-form-row {
-		width: 100%;
-		display: flex;
-		align-items: center;
-		gap: 0.6rem;
+	.form-div {
+		position: relative;
+		margin-top: 1rem;
 	}
 
-	.search-input {
-		width: min(100%, 30rem);
-		padding: 0.4rem 0.6rem;
-		font-size: 1rem;
-	}
-
-	@media (max-width: 768px) {
-		.search-form-row {
-			flex-direction: column;
-			align-items: flex-start;
-		}
-
-		.search-input {
-			width: 100%;
-		}
+	input {
+		width: 30rem;
+		font-size: 0.9rem;
 	}
 </style>

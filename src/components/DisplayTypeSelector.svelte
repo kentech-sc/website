@@ -1,78 +1,92 @@
 <script lang="ts">
-	import { DisplayType as DisplayTypeValue, type DisplayType } from '$lib/types/user.type.js';
+	import type { User } from '$lib/types/user.type.js';
+
+	import { createDisplayName } from '$lib/shared/utils.js';
+	import { DisplayType } from '$lib/types/user.type.js';
 
 	let {
-		value = $bindable<DisplayType>(DisplayTypeValue.Anonymous),
-		name = 'displayType',
-		idPrefix = 'display-type'
+		user,
+		displayType = $bindable<DisplayType>(DisplayType.Anonymous)
 	}: {
-		value?: DisplayType;
-		name?: string;
-		idPrefix?: string;
+		user: User;
+		displayType?: DisplayType;
 	} = $props();
 </script>
 
-<div class="display-type-selector">
-	<input
-		type="radio"
-		id={`${idPrefix}-anonymous`}
-		{name}
-		value={DisplayTypeValue.Anonymous}
-		bind:group={value}
-	/>
-	<label for={`${idPrefix}-anonymous`}>익명</label>
+<div class="display-type-selector container">
+	<div class="selector container">
+		<input
+			type="radio"
+			id="anonymous"
+			name="displayType"
+			value={DisplayType.Anonymous}
+			checked
+			bind:group={displayType}
+		/>
+		<label for="anonymous">익명</label>
 
-	<input
-		type="radio"
-		id={`${idPrefix}-nickname`}
-		{name}
-		value={DisplayTypeValue.Nickname}
-		bind:group={value}
-	/>
-	<label for={`${idPrefix}-nickname`}>별명</label>
+		<input
+			type="radio"
+			id="nickname"
+			name="displayType"
+			value={DisplayType.Nickname}
+			bind:group={displayType}
+		/>
+		<label for="nickname">별명</label>
 
-	<input
-		type="radio"
-		id={`${idPrefix}-real-name`}
-		{name}
-		value={DisplayTypeValue.RealName}
-		bind:group={value}
-	/>
-	<label for={`${idPrefix}-real-name`}>실명</label>
+		<input
+			type="radio"
+			id="realName"
+			name="displayType"
+			value={DisplayType.RealName}
+			bind:group={displayType}
+		/>
+		<label for="realName">실명</label>
+	</div>
+	<span class="display-name">{createDisplayName(user, displayType)}</span>
 </div>
 
 <style lang="scss">
 	.display-type-selector {
-		display: flex;
+		gap: 0.8rem;
+	}
+
+	.display-name {
+		font-weight: 600;
+		font-size: 0.9rem;
+	}
+
+	.selector {
+		border: 0.05rem solid var(--gray-border);
+		border-radius: 0.2rem;
+		background-color: var(--white);
 		width: fit-content;
-		border: 0.1rem solid var(--gray-border);
-		background-color: var(--surface-base);
-	}
+		overflow: hidden;
 
-	input {
-		display: none;
-	}
-
-	label {
-		word-break: keep-all;
-		padding: 0.4rem 0.6rem;
-		cursor: pointer;
-		text-align: center;
-		border-right: 0.1rem solid var(--gray-border);
-		transition: all 0.2s ease-in-out;
-
-		&:last-child {
-			border-right: none;
+		input {
+			display: none;
 		}
 
-		&:hover {
-			background-color: var(--secondary-bg);
-		}
-	}
+		label {
+			transition: all 0.2s ease-in-out;
+			cursor: pointer;
+			padding: 0.2rem 0.6rem;
+			font-size: 0.8rem;
+			text-align: center;
+			word-break: keep-all;
 
-	input:checked + label {
-		background-color: var(--secondary);
-		color: var(--tertiary-text);
-		font-weight: bold;
+			&:last-child {
+				border-right: none;
+			}
+
+			&:hover {
+				background-color: var(--gray-hover);
+			}
+		}
+
+		input:checked + label {
+			background-color: var(--gray-border);
+			font-weight: 600;
+		}
 	}
 </style>
