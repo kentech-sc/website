@@ -1,4 +1,4 @@
-import type { FlashMessage } from '$lib/types/flash.type.js';
+import type { FlashMessage } from '$lib/types/general.type.js';
 
 const FLASH_STORAGE_KEY = 'kentech-sc:flash';
 

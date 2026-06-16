@@ -1,15 +1,5 @@
+import type { CommonFormPolicy } from '$lib/types/general.type.js';
 import type { ActionResult } from '@sveltejs/kit';
-
-export type MaybePromise = void | Promise<void>;
-export type ActionSimpleCallback = () => MaybePromise;
-
-export type CommonFormPolicy =
-	| 'inline'
-	| 'reload'
-	| {
-			kind: 'detail';
-			notFoundRedirectTo: string;
-	  };
 
 export function isDetailPolicy(
 	policy: CommonFormPolicy
@@ -24,7 +14,7 @@ export function getActionResultMessage(
 	if (!result) return '';
 
 	if (result.type === 'failure') {
-		return result.data?.message ?? fallbackMessage;
+		return (result.data as { message?: string } | undefined)?.message ?? fallbackMessage;
 	}
 
 	if (result.type === 'error') {

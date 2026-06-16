@@ -1,14 +1,7 @@
 import { ResizableNodeView } from '@tiptap/core';
 import Image from '@tiptap/extension-image';
 
-type ImageAttrs = {
-	src?: string | null;
-	alt?: string | null;
-	title?: string | null;
-	width?: number | null;
-	height?: number | null;
-	fileId?: string | null;
-};
+import type { ImageAttrs } from '$lib/types/general.type.js';
 
 function syncImageElementAttributes(element: HTMLImageElement, attrs: ImageAttrs) {
 	if (attrs.src) {

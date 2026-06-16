@@ -23,11 +23,10 @@
 	import { CustomImage } from './CustomImage.js';
 
 	import type { FileMeta, FileId } from '$lib/types/file-meta.type';
+	import type { SelectionHint } from '$lib/types/general.type.js';
 	import type { ActionResult } from '@sveltejs/kit';
 
 	import { deserialize } from '$app/forms';
-
-	type SelectionHint = { from: number; to: number };
 	const IMAGE_INSERTION_FAILURE_MESSAGE = '이미지 업로드는 완료됐지만 본문 삽입에 실패했습니다.';
 	const PASTE_IMAGE_BLOCK_MESSAGE = '이미지는 업로드 버튼으로만 추가할 수 있습니다.';
 

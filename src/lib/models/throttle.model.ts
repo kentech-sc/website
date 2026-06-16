@@ -1,8 +1,8 @@
 import mongoose from 'mongoose';
 
-import type { Throttle } from '$lib/types/throttle.type.js';
+import type { ThrottleEntity } from '$lib/types/throttle.type.js';
 
-const ThrottleSchema = new mongoose.Schema<Throttle>(
+const ThrottleSchema = new mongoose.Schema<ThrottleEntity>(
 	{
 		userId: { type: String, required: true },
 		bucket: { type: String, required: true },

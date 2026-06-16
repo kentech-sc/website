@@ -1,3 +1,5 @@
+import type { AppErrorType, RuleResult } from '$lib/types/general.type.js';
+
 export const APP_ERROR = {
 	BAD_REQUEST: { code: 'BAD_REQUEST', status: 400 },
 	UNAUTHORIZED: { code: 'UNAUTHORIZED', status: 401 },
@@ -8,17 +10,6 @@ export const APP_ERROR = {
 	INVALID_STATE: { code: 'INVALID_STATE', status: 409 },
 	INTERNAL: { code: 'INTERNAL', status: 500 }
 } as const;
-
-export type AppErrorType = (typeof APP_ERROR)[keyof typeof APP_ERROR];
-export type AppErrorCode = AppErrorType['code'];
-
-export type RuleResult =
-	| { ok: true }
-	| {
-			ok: false;
-			type: AppErrorType;
-			message: string;
-	  };
 
 export function ok(): RuleResult {
 	return { ok: true };

@@ -1,9 +1,10 @@
 import type { BoardId } from '$lib/types/board.type.js';
+import type { RuleResult } from '$lib/types/general.type.js';
 import type { PostEntity } from '$lib/types/post.type.js';
 import type { User } from '$lib/types/user.type.js';
 
 import { hasCapability, isOwner } from '$lib/shared/permission.js';
-import { APP_ERROR, ok, ruleFail, type RuleResult } from '$lib/shared/rule.js';
+import { APP_ERROR, ok, ruleFail } from '$lib/shared/rule.js';
 
 export function canCreatePost(boardId: BoardId, user: User): RuleResult {
 	if (boardId === 'free' && hasCapability(user, 'board.free.write')) return ok();
@@ -23,9 +24,13 @@ function canUseLikeCapability(user: User): RuleResult {
 	return ruleFail(APP_ERROR.FORBIDDEN, '좋아요를 누를 권한이 없습니다.');
 }
 
-export function canLikePost(post: Pick<PostEntity, 'likedBy'>, user: User): RuleResult {
+export function canLikePost(post: Pick<PostEntity, 'likedBy' | 'userId'>, user: User): RuleResult {
 	const capabilityResult = canUseLikeCapability(user);
 	if (!capabilityResult.ok) return capabilityResult;
+
+	if (post.userId === user._id) {
+		return ruleFail(APP_ERROR.INVALID_STATE, '본인 게시글에는 좋아요를 누를 수 없습니다.');
+	}
 
 	if (post.likedBy.includes(user._id)) {
 		return ruleFail(APP_ERROR.INVALID_STATE, '이미 좋아요를 누른 게시글입니다.');

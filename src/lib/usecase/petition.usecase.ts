@@ -1,10 +1,6 @@
 import mongoose from 'mongoose';
 
-import type {
-	ActivityLogCreate,
-	PetitionLogSnapshot,
-	PetitionResponseSnapshot
-} from '$lib/types/activity-log.type.js';
+import type { ActivityLogCreate } from '$lib/types/activity-log.type.js';
 import type { FileId } from '$lib/types/file-meta.type.js';
 import type { FilePresence } from '$lib/types/general.type.js';
 import type { Page } from '$lib/types/general.type.js';
@@ -14,6 +10,7 @@ import type { Petition, PetitionEntity } from '$lib/types/petition.type.js';
 import * as ActivityLogService from '$lib/services/activity-log.service.js';
 import * as FileMetaService from '$lib/services/file-meta.service.js';
 import * as PetitionService from '$lib/services/petition.service.js';
+import * as PointService from '$lib/services/point.service.js';
 import * as ThrottleService from '$lib/services/throttle.service.js';
 import * as UserService from '$lib/services/user.service.js';
 import { hasCapability } from '$lib/shared/permission.js';
@@ -66,7 +63,7 @@ function getSignerNames(petition: PetitionEntity, userIdToUser: Map<string, User
 		.filter((name): name is string => name !== null);
 }
 
-async function getPetitionLogSnapshot(petition: PetitionEntity): Promise<PetitionLogSnapshot> {
+async function getPetitionLogSnapshot(petition: PetitionEntity) {
 	const files = await FileMetaService.getFileMetasByArticleId(petition._id);
 	return {
 		...petition,
@@ -74,7 +71,7 @@ async function getPetitionLogSnapshot(petition: PetitionEntity): Promise<Petitio
 	};
 }
 
-function toPetitionResponseSnapshot(petition: PetitionEntity): PetitionResponseSnapshot {
+function toPetitionResponseSnapshot(petition: PetitionEntity) {
 	return {
 		responderId: petition.responderId,
 		response: petition.response,
@@ -148,12 +145,12 @@ export async function createPetition(
 			action: 'create',
 			targetType: 'petition',
 			targetId: petition._id,
-			parentTargetId: null,
 			cause: 'direct',
 			beforeSnapshot: null,
 			afterSnapshot: petitionSnapshot
 		};
 		await ActivityLogService.create(activityLog);
+		await PointService.awardPetitionCreate(petitioner._id);
 		return petition;
 	});
 }
@@ -168,7 +165,7 @@ export async function deletePetitionById(petitionId: PetitionId, user: User) {
 			action: 'delete',
 			targetType: 'petition',
 			targetId: petition._id,
-			parentTargetId: null,
+
 			cause: 'direct',
 			beforeSnapshot: petitionSnapshot,
 			afterSnapshot: null
@@ -178,11 +175,19 @@ export async function deletePetitionById(petitionId: PetitionId, user: User) {
 }
 
 export async function signPetition(petitionId: PetitionId, user: User) {
-	return await PetitionService.signPetitionById(petitionId, user);
+	return await mongoose.connection.transaction(async () => {
+		const petition = await PetitionService.signPetitionById(petitionId, user);
+		await PointService.applyPetitionSignDelta(petition.petitionerId, 2);
+		return petition;
+	});
 }
 
 export async function unsignPetition(petitionId: PetitionId, user: User) {
-	return await PetitionService.unsignPetitionById(petitionId, user);
+	return await mongoose.connection.transaction(async () => {
+		const petition = await PetitionService.unsignPetitionById(petitionId, user);
+		await PointService.applyPetitionSignDelta(petition.petitionerId, -2);
+		return petition;
+	});
 }
 
 export async function reviewPetition(petitionId: PetitionId, user: User) {
@@ -201,7 +206,7 @@ export async function respondToPetition(petitionId: PetitionId, user: User, resp
 			action: 'create',
 			targetType: 'petition-response',
 			targetId: petition._id,
-			parentTargetId: null,
+
 			cause: 'direct',
 			beforeSnapshot: null,
 			afterSnapshot: toPetitionResponseSnapshot(petition)
@@ -220,7 +225,7 @@ export async function editPetitionResponse(petitionId: PetitionId, user: User, r
 			action: 'edit',
 			targetType: 'petition-response',
 			targetId: petition._id,
-			parentTargetId: null,
+
 			cause: 'direct',
 			beforeSnapshot: toPetitionResponseSnapshot(beforePetition),
 			afterSnapshot: toPetitionResponseSnapshot(petition)
@@ -239,7 +244,7 @@ export async function deletePetitionResponse(petitionId: PetitionId, user: User)
 			action: 'delete',
 			targetType: 'petition-response',
 			targetId: petitionId,
-			parentTargetId: null,
+
 			cause: 'direct',
 			beforeSnapshot: toPetitionResponseSnapshot(beforePetition),
 			afterSnapshot: null

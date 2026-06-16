@@ -1,8 +1,8 @@
 import mongoose from 'mongoose';
 
-import type { ActivityLog } from '$lib/types/activity-log.type.js';
+import type { ActivityLogEntity } from '$lib/types/activity-log.type.js';
 
-const ActivityLogSchema = new mongoose.Schema<ActivityLog>(
+const ActivityLogSchema = new mongoose.Schema<ActivityLogEntity>(
 	{
 		actorId: { type: String, required: true },
 		action: { type: String, required: true, enum: ['create', 'edit', 'delete'] },
@@ -12,7 +12,6 @@ const ActivityLogSchema = new mongoose.Schema<ActivityLog>(
 			enum: ['post', 'comment', 'review', 'petition', 'petition-response']
 		},
 		targetId: { type: String, required: true },
-		parentTargetId: { type: String, default: null },
 		cause: {
 			type: String,
 			required: true,

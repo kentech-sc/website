@@ -32,9 +32,27 @@ export async function findUsersByIds(userIds: UserId[]): Promise<Array<UserEntit
 	);
 }
 
+export async function findUserIds(): Promise<UserId[]> {
+	const users = await UserModel.find({}, { _id: 1 }).lean();
+	return toPojo<UserId[]>(users.map((user) => user._id.toString()));
+}
+
 export async function updateUserById(userId: UserId, user: UserUpdate): Promise<UserEntity | null> {
 	return toPojo<UserEntity | null>(
 		await UserModel.findOneAndUpdate({ _id: userId }, user, { new: true }).lean()
+	);
+}
+
+export async function incrementUserPointsById(
+	userId: UserId,
+	delta: number
+): Promise<UserEntity | null> {
+	return toPojo<UserEntity | null>(
+		await UserModel.findOneAndUpdate(
+			{ _id: userId },
+			{ $inc: { points: delta } },
+			{ returnDocument: 'after' }
+		).lean()
 	);
 }
 

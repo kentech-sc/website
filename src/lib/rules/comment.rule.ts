@@ -1,8 +1,9 @@
 import type { CommentEntity } from '$lib/types/comment.type.js';
+import type { RuleResult } from '$lib/types/general.type.js';
 import type { User } from '$lib/types/user.type.js';
 
 import { hasCapability, isOwner } from '$lib/shared/permission.js';
-import { APP_ERROR, ok, ruleFail, type RuleResult } from '$lib/shared/rule.js';
+import { APP_ERROR, ok, ruleFail } from '$lib/shared/rule.js';
 
 export function canCreateComment(content: string, user: User): RuleResult {
 	if (!hasCapability(user, 'comment.write')) {

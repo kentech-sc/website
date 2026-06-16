@@ -3,13 +3,17 @@
 ## 1. 레이어 역할
 
 - `src/lib/types`
-  - 공용 타입을 둔다.
+  - standalone `type`, `interface`, type alias를 둔다.
+  - 타입 소유권이 애매하면 `general.type.ts`에 둔다.
+  - `src/app.d.ts`만 SvelteKit 전역 타입 예외로 둔다.
 - `src/lib/shared`
   - client/server 공용 순수 코드를 둔다.
   - 예: `permission.ts`, `rule.ts`, `utils.ts`, `view.ts`, `paginate.ts`, `flash.ts`
 - `src/lib/server`
   - 서버 전용 인프라를 둔다.
   - 예: `errors.ts`, `db.ts`, `storage.ts`, `flash.ts`
+- `src/lib/models`
+  - Mongoose schema/model만 둔다.
 - `src/lib/repositories`
   - DB CRUD / query만 둔다.
 - `src/lib/rules`
@@ -25,8 +29,9 @@
 - server entry -> usecase, shared, types, server
 - usecase -> service, shared, types
 - service -> rules, repositories, shared, types, server
+- repositories -> models, shared, types
+- models -> types
 - rules -> shared, types
-- repositories -> shared, types
 
 ## 3. import 규칙
 
@@ -56,7 +61,17 @@
 - `rules`, `repositories`, `shared`, `types`를 import한다.
 - 서버 전용 인프라가 필요할 때만 `server`를 import한다.
 
-5. rules
+5. repositories
+
+- `models`, `shared`, `types`만 import한다.
+- 다른 layer를 import하지 않는다.
+
+6. models
+
+- `types`만 import한다.
+- model 전용 Mongoose schema/document 타입은 대응 type 파일에서 가져온다.
+
+7. rules
 
 - throw하지 않는다.
 - 아래 둘 중 하나만 반환한다.
@@ -70,6 +85,13 @@
 - 일반적인 module 파일의 top-level 함수는 `function` 선언을 사용한다.
 - class 메서드, module 객체 메서드, callback처럼 구조상 필요한 경우만 예외로 arrow function을 사용한다.
 - 상수 이름은 `SCREAMING_SNAKE_CASE`를 사용한다.
+
+### 타입 위치
+
+- standalone `type`, `interface`, type alias는 `src/lib/types`에만 둔다.
+- 특정 도메인에 속하는 타입은 해당 도메인 type 파일에 둔다.
+- 공용인데 소유권이 애매하면 `general.type.ts`에 둔다.
+- model은 대응 `...Entity` 타입을 generic으로 사용한다.
 
 ### collection 이름
 
@@ -95,6 +117,7 @@
 - `types`, `shared`, `repositories`, `services`, `usecase`, `server entry` 경계 밖으로 raw `Date` 인스턴스를 내보내지 않는다.
 - 예: `createdAt`, `updatedAt`, `deletedAt`, `answeredAt` 같은 값은 타입과 반환값에서 ISO string으로 둔다.
 - 실제 `Date` 객체는 DB query, 비교, 계산처럼 필요한 내부 구현에서만 잠깐 사용하고, 반환 직전에 다시 ISO string으로 변환한다.
+- 단, Mongoose schema / query 내부 구현에서는 raw `Date`를 잠깐 사용할 수 있다.
 
 ### ObjectId 값
 
@@ -102,11 +125,13 @@
 - POJO를 유지해야 하므로 `types`, `shared`, `repositories`, `services`, `usecase`, `server entry` 경계 밖으로 raw `ObjectId` 인스턴스를 내보내지 않는다.
 - 예: `_id`, `userId`, `postId`, `petitionId`, `courseId`, `professorId`, `fileId` 같은 값은 타입과 반환값에서 string으로 둔다.
 - 실제 `ObjectId` 객체는 DB query, populate, 비교처럼 필요한 내부 구현에서만 잠깐 사용하고, 반환 직전에는 다시 string으로 변환한다.
+- 단, Mongoose schema / query 내부 구현에서는 raw `ObjectId`를 잠깐 사용할 수 있다.
 
 ## 5. repository 메서드 규칙
 
 - repository는 DB CRUD / query만 다루고, 각 메서드의 반환 계약을 명확히 유지한다.
 - stateful mutation에서는 비즈니스 판단을 넣지 않고, 동시성 때문에 필요한 atomic precondition만 query 조건으로 둔다.
+- retry, fallback, reset 같은 오케스트레이션은 service에서 처리한다.
 
 ### create
 

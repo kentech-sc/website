@@ -4,6 +4,13 @@ import type { UserId } from './user.type.js';
 
 export type ReviewId = string;
 
+export interface ReviewScore {
+	assignment: number;
+	lecture: number;
+	exam: number;
+	satisfaction: number;
+}
+
 export interface ReviewCreate {
 	courseId: CourseId;
 	professorId: ProfessorId;
@@ -11,12 +18,7 @@ export interface ReviewCreate {
 	year: number;
 	term: number; // 1 ~ 4
 	title: string;
-	score: {
-		assignment: number;
-		lecture: number;
-		exam: number;
-		satisfaction: number;
-	};
+	score: ReviewScore;
 	comment: string;
 }
 

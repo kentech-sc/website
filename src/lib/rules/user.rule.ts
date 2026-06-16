@@ -1,7 +1,8 @@
+import type { RuleResult } from '$lib/types/general.type.js';
 import type { User } from '$lib/types/user.type.js';
 
 import { hasCapability, isOwner } from '$lib/shared/permission.js';
-import { APP_ERROR, ok, ruleFail, type RuleResult } from '$lib/shared/rule.js';
+import { APP_ERROR, ok, ruleFail } from '$lib/shared/rule.js';
 import { UserGroup, type UserGroup as UserGroupType } from '$lib/types/user.type.js';
 
 const validNicknameRegex = /^[가-힣a-zA-Z0-9 ]+$/;

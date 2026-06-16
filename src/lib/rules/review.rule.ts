@@ -1,15 +1,9 @@
-import type { ReviewEntity } from '$lib/types/review.type.js';
+import type { RuleResult } from '$lib/types/general.type.js';
+import type { ReviewEntity, ReviewScore } from '$lib/types/review.type.js';
 import type { User } from '$lib/types/user.type.js';
 
 import { hasCapability, isOwner } from '$lib/shared/permission.js';
-import { APP_ERROR, ok, ruleFail, type RuleResult } from '$lib/shared/rule.js';
-
-type ReviewScore = {
-	assignment: number;
-	lecture: number;
-	exam: number;
-	satisfaction: number;
-};
+import { APP_ERROR, ok, ruleFail } from '$lib/shared/rule.js';
 
 export function canCreateReview(user: User): RuleResult {
 	if (hasCapability(user, 'review.write')) return ok();

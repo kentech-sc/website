@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { ActionSimpleCallback, CommonFormPolicy } from '$lib/shared/action-result.js';
+	import type { ActionSimpleCallback, CommonFormPolicy } from '$lib/types/general.type.js';
 	import type { Snippet } from 'svelte';
 
 	import CommonForm from '$components/CommonForm.svelte';

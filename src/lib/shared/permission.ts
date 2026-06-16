@@ -1,26 +1,7 @@
+import type { Capability } from '$lib/types/general.type.js';
 import type { User } from '$lib/types/user.type.js';
 
 import { UserGroup, type UserGroup as UserGroupType } from '$lib/types/user.type.js';
-
-export type Capability =
-	| 'board.free.write'
-	| 'board.notice.write'
-	| 'board.bylaw.write'
-	| 'post.like'
-	| 'post.moderate'
-	| 'comment.write'
-	| 'comment.moderate'
-	| 'review.write'
-	| 'review.moderate'
-	| 'petition.write'
-	| 'petition.sign'
-	| 'petition.delete.any'
-	| 'petition.manage'
-	| 'petition.respond'
-	| 'course.manage'
-	| 'professor.manage'
-	| 'user.manage'
-	| 'system.cleanup';
 
 const ROLE_CAPABILITIES: Record<UserGroupType, Capability[]> = {
 	[UserGroup.Guest]: [],

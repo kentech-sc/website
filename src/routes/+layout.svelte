@@ -3,7 +3,7 @@
 	import NavBar from './_components/NavBar.svelte';
 	import Slideshow from './_components/Slideshow.svelte';
 
-	import type { FlashMessage } from '$lib/types/flash.type.js';
+	import type { FlashMessage } from '$lib/types/general.type.js';
 
 	import { browser } from '$app/environment';
 	import { page } from '$app/state';

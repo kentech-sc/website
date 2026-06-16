@@ -5,61 +5,66 @@ import type { PostEntity } from './post.type.js';
 import type { ReviewEntity } from './review.type.js';
 import type { UserId } from './user.type.js';
 
-export type ActivityAction = 'create' | 'edit' | 'delete';
-export type ActivityTarget = 'post' | 'comment' | 'review' | 'petition' | 'petition-response';
-export type ActivityCause = 'direct' | 'post-delete-cascade';
+type ActivityAction = 'create' | 'edit' | 'delete';
+type ActivityTarget = 'post' | 'comment' | 'review' | 'petition' | 'petition-response';
+type ActivityCause = 'direct' | 'post-delete-cascade';
 
-export interface PostLogSnapshot extends PostEntity {
+interface PostLogSnapshot extends PostEntity {
 	fileIds: FileId[];
 }
 
-export interface PetitionLogSnapshot extends PetitionEntity {
+interface PetitionLogSnapshot extends PetitionEntity {
 	fileIds: FileId[];
 }
 
-export type PetitionResponseSnapshot = Pick<
+type PetitionResponseSnapshot = Pick<
 	PetitionEntity,
 	'responderId' | 'response' | 'answeredAt' | 'status'
 >;
 
-interface ActivityLogBase {
-	_id: string;
+interface ActivityLogCommon<TTarget extends ActivityTarget> {
 	actorId: UserId;
-	action: ActivityAction;
-	targetType: ActivityTarget;
+	targetType: TTarget;
 	targetId: string;
-	parentTargetId: string | null;
 	cause: ActivityCause;
-	createdAt: string;
 }
 
-export type ActivityLog =
-	| (ActivityLogBase & {
-			targetType: 'post';
-			beforeSnapshot: PostLogSnapshot | null;
-			afterSnapshot: PostLogSnapshot | null;
-	  })
-	| (ActivityLogBase & {
-			targetType: 'comment';
-			beforeSnapshot: CommentEntity | null;
-			afterSnapshot: CommentEntity | null;
-	  })
-	| (ActivityLogBase & {
-			targetType: 'review';
-			beforeSnapshot: ReviewEntity | null;
-			afterSnapshot: ReviewEntity | null;
-	  })
-	| (ActivityLogBase & {
-			targetType: 'petition';
-			beforeSnapshot: PetitionLogSnapshot | null;
-			afterSnapshot: PetitionLogSnapshot | null;
-	  })
-	| (ActivityLogBase & {
-			targetType: 'petition-response';
-			beforeSnapshot: PetitionResponseSnapshot | null;
-			afterSnapshot: PetitionResponseSnapshot | null;
-	  });
+type CreateActivityLog<TTarget extends ActivityTarget, TSnapshot> = ActivityLogCommon<TTarget> & {
+	action: 'create';
+	beforeSnapshot: null;
+	afterSnapshot: TSnapshot;
+};
 
-type DistributiveOmit<T, K extends keyof any> = T extends unknown ? Omit<T, K> : never;
+type EditActivityLog<TTarget extends ActivityTarget, TSnapshot> = ActivityLogCommon<TTarget> & {
+	action: 'edit';
+	beforeSnapshot: TSnapshot;
+	afterSnapshot: TSnapshot;
+};
 
-export type ActivityLogCreate = DistributiveOmit<ActivityLog, '_id' | 'createdAt'>;
+type DeleteActivityLog<TTarget extends ActivityTarget, TSnapshot> = ActivityLogCommon<TTarget> & {
+	action: 'delete';
+	beforeSnapshot: TSnapshot;
+	afterSnapshot: null;
+};
+
+export type ActivityLogCreate =
+	| CreateActivityLog<'post', PostLogSnapshot>
+	| EditActivityLog<'post', PostLogSnapshot>
+	| DeleteActivityLog<'post', PostLogSnapshot>
+	| CreateActivityLog<'comment', CommentEntity>
+	| EditActivityLog<'comment', CommentEntity>
+	| DeleteActivityLog<'comment', CommentEntity>
+	| CreateActivityLog<'review', ReviewEntity>
+	| EditActivityLog<'review', ReviewEntity>
+	| DeleteActivityLog<'review', ReviewEntity>
+	| CreateActivityLog<'petition', PetitionLogSnapshot>
+	| EditActivityLog<'petition', PetitionLogSnapshot>
+	| DeleteActivityLog<'petition', PetitionLogSnapshot>
+	| CreateActivityLog<'petition-response', PetitionResponseSnapshot>
+	| EditActivityLog<'petition-response', PetitionResponseSnapshot>
+	| DeleteActivityLog<'petition-response', PetitionResponseSnapshot>;
+
+export type ActivityLogEntity = ActivityLogCreate & {
+	_id: string;
+	createdAt: string;
+};

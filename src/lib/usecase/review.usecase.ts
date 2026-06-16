@@ -15,6 +15,7 @@ import type { User } from '$lib/types/user.type.js';
 
 import * as ActivityLogService from '$lib/services/activity-log.service.js';
 import * as CourseService from '$lib/services/course.service.js';
+import * as PointService from '$lib/services/point.service.js';
 import * as ProfessorService from '$lib/services/professor.service.js';
 import * as ReviewService from '$lib/services/review.service.js';
 import * as ThrottleService from '$lib/services/throttle.service.js';
@@ -92,12 +93,13 @@ export async function createReview(reviewCreate: ReviewCreate, user: User) {
 			action: 'create',
 			targetType: 'review',
 			targetId: review._id,
-			parentTargetId: null,
+			 
 			cause: 'direct',
 			beforeSnapshot: null,
 			afterSnapshot: review
 		};
 		await ActivityLogService.create(activityLog);
+		await PointService.awardReviewCreate(user._id);
 		return review;
 	});
 }
@@ -111,7 +113,7 @@ export async function editReview(reviewId: ReviewId, reviewUpdate: ReviewUpdate,
 			action: 'edit',
 			targetType: 'review',
 			targetId: review._id,
-			parentTargetId: null,
+			 
 			cause: 'direct',
 			beforeSnapshot: beforeReview,
 			afterSnapshot: review
@@ -129,7 +131,7 @@ export async function deleteReview(reviewId: ReviewId, user: User) {
 			action: 'delete',
 			targetType: 'review',
 			targetId: review._id,
-			parentTargetId: null,
+			 
 			cause: 'direct',
 			beforeSnapshot: review,
 			afterSnapshot: null

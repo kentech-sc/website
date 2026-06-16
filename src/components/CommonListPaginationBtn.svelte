@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { SvelteURLSearchParams } from 'svelte/reactivity';
 
-	import { page } from '$app/state';
+	import type { PaginationItem } from '$lib/types/general.type.js';
 
-	type PaginationItem = number | 'ellipsis';
+	import { page } from '$app/state';
 
 	let { totalPages, currentPage }: { totalPages: number; currentPage: number } = $props();
 

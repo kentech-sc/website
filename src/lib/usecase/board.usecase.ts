@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-import type { ActivityLogCreate, PostLogSnapshot } from '$lib/types/activity-log.type.js';
+import type { ActivityLogCreate } from '$lib/types/activity-log.type.js';
 import type { BoardId } from '$lib/types/board.type.js';
 import type {
 	Comment,
@@ -22,12 +22,13 @@ import type { DisplayType, User } from '$lib/types/user.type.js';
 import * as ActivityLogService from '$lib/services/activity-log.service.js';
 import * as CommentService from '$lib/services/comment.service.js';
 import * as FileMetaService from '$lib/services/file-meta.service.js';
+import * as PointService from '$lib/services/point.service.js';
 import * as PostService from '$lib/services/post.service.js';
 import * as ThrottleService from '$lib/services/throttle.service.js';
 import * as UserService from '$lib/services/user.service.js';
 import { hasCapability } from '$lib/shared/permission.js';
 
-async function getPostLogSnapshot(post: PostEntity): Promise<PostLogSnapshot> {
+async function getPostLogSnapshot(post: PostEntity) {
 	const files = await FileMetaService.getFileMetasByArticleId(post._id);
 	return {
 		...post,
@@ -117,19 +118,21 @@ export async function createPost(
 			userId: user._id,
 			displayType
 		};
+
 		const post = await PostService.createPostByBoardId(postCreate, user);
 		await FileMetaService.linkArticleToFiles(fileIds, post._id);
+
 		const postSnapshot = await getPostLogSnapshot(post);
 		await ActivityLogService.create({
 			actorId: user._id,
 			action: 'create',
 			targetType: 'post',
 			targetId: post._id,
-			parentTargetId: null,
 			cause: 'direct',
 			beforeSnapshot: null,
 			afterSnapshot: postSnapshot
 		});
+		await PointService.awardPostCreate(user._id);
 		return post;
 	});
 }
@@ -162,7 +165,6 @@ export async function editPost(
 			action: 'edit',
 			targetType: 'post',
 			targetId: post._id,
-			parentTargetId: null,
 			cause: 'direct',
 			beforeSnapshot,
 			afterSnapshot
@@ -185,7 +187,6 @@ export async function deletePostById(postId: PostId, user: User) {
 				action: 'delete',
 				targetType: 'post',
 				targetId: deletedPost._id,
-				parentTargetId: null,
 				cause: 'direct',
 				beforeSnapshot: postSnapshot,
 				afterSnapshot: null
@@ -195,7 +196,6 @@ export async function deletePostById(postId: PostId, user: User) {
 				action: 'delete' as const,
 				targetType: 'comment' as const,
 				targetId: comment._id,
-				parentTargetId: comment.postId,
 				cause: 'post-delete-cascade' as const,
 				beforeSnapshot: comment,
 				afterSnapshot: null
@@ -206,11 +206,19 @@ export async function deletePostById(postId: PostId, user: User) {
 }
 
 export async function likePost(postId: PostId, user: User) {
-	return await PostService.likePostById(postId, user);
+	return await mongoose.connection.transaction(async () => {
+		const post = await PostService.likePostById(postId, user);
+		await PointService.applyPostLikeDelta(post.userId, 1);
+		return post;
+	});
 }
 
 export async function unlikePost(postId: PostId, user: User) {
-	return await PostService.unlikePostById(postId, user);
+	return await mongoose.connection.transaction(async () => {
+		const post = await PostService.unlikePostById(postId, user);
+		await PointService.applyPostLikeDelta(post.userId, -1);
+		return post;
+	});
 }
 
 export async function createCommentAndUpdatePost(
@@ -234,11 +242,11 @@ export async function createCommentAndUpdatePost(
 			action: 'create',
 			targetType: 'comment',
 			targetId: comment._id,
-			parentTargetId: comment.postId,
 			cause: 'direct',
 			beforeSnapshot: null,
 			afterSnapshot: comment
 		});
+		await PointService.awardCommentCreate(user._id);
 		return comment;
 	});
 }
@@ -252,7 +260,6 @@ export async function deleteCommentAndUpdatePost(commentId: CommentId, user: Use
 			action: 'delete',
 			targetType: 'comment',
 			targetId: deletedComment._id,
-			parentTargetId: deletedComment.postId,
 			cause: 'direct',
 			beforeSnapshot: deletedComment,
 			afterSnapshot: null

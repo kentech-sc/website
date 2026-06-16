@@ -1,15 +1,11 @@
 <script lang="ts">
+	import type { ActionSimpleCallback, CommonFormPolicy } from '$lib/types/general.type.js';
 	import type { ActionResult, SubmitFunction } from '@sveltejs/kit';
 	import type { Snippet } from 'svelte';
 
 	import { enhance } from '$app/forms';
 	import { goto, invalidateAll } from '$app/navigation';
-	import {
-		getActionResultMessage,
-		isDetailPolicy,
-		type ActionSimpleCallback,
-		type CommonFormPolicy
-	} from '$lib/shared/action-result.js';
+	import { getActionResultMessage, isDetailPolicy } from '$lib/shared/action-result.js';
 	import { setClientFlash } from '$lib/shared/flash.js';
 
 	let {

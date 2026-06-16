@@ -46,6 +46,10 @@ export async function findUserMapByIds(userIds: UserId[]): Promise<Map<string, U
 	return userIdToUser;
 }
 
+export async function findUserIds(): Promise<UserId[]> {
+	return await UserRepository.findUserIds();
+}
+
 export async function signupUser(profile: Profile): Promise<User> {
 	const existingUser = await findUserById(profile.id);
 	assertRule(UserRule.canSignup(existingUser));
