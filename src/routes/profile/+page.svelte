@@ -5,6 +5,7 @@
 	import CleanupForm from './_components/CleanupForm.svelte';
 	import DeleteUserForm from './_components/DeleteUserForm.svelte';
 	import Profile from './_components/Profile.svelte';
+	import PushNotificationForm from './_components/PushNotificationForm.svelte';
 
 	import { page } from '$app/state';
 
@@ -36,6 +37,7 @@
 			<div class="dev module container-col">
 				<h3>개발자 기능</h3>
 				<CleanupForm />
+				<PushNotificationForm />
 			</div>
 		{/if}
 	</div>
