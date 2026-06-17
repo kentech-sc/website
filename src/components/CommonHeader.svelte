@@ -22,7 +22,7 @@
 
 <style lang="scss">
 	header {
-		margin: 1.6rem 0 1rem 0;
+		margin: 0 0 1rem 0;
 		box-shadow: none;
 		border: none;
 		padding: 0;

@@ -1,6 +1,5 @@
 @mixin content-frame($with-table: false, $with-note: false) {
 	article {
-		margin-top: 2rem;
 		padding: 2rem 3rem;
 		word-break: keep-all;
 

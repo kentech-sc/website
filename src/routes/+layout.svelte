@@ -32,19 +32,6 @@
 	$effect(() => {
 		if (!browser || !flash) return;
 	});
-
-	let isPwa = $state(false);
-
-	$effect(() => {
-		if (!browser) return;
-
-		const iosStandalone = (navigator as Navigator & { standalone?: boolean }).standalone === true;
-
-		isPwa =
-			window.matchMedia('(display-mode: standalone)').matches ||
-			iosStandalone ||
-			document.referrer.startsWith('android-app://');
-	});
 </script>
 
 {#snippet Flash()}
@@ -61,36 +48,37 @@
 	{/if}
 {/snippet}
 
-{#if isPwa}
-	<div class="mode-pwa layout-shell container">
-		<main class="container-col">
-			{@render children?.()}
-		</main>
-	</div>
-{:else}
-	<NavBar />
-	{@render Flash()}
+<NavBar />
+{@render Flash()}
 
-	{#if page.route.id === '/'}
-		<Slideshow />
-	{/if}
-
-	<div class="mode-web layout-shell container">
-		<main class="container-col">
-			{@render children?.()}
-		</main>
-	</div>
-
-	<Footer />
+{#if page.route.id === '/'}
+	<Slideshow />
 {/if}
 
+<div class="layout-shell container">
+	<main class="container-col">
+		{@render children?.()}
+	</main>
+</div>
+
+<Footer />
+
 <style lang="scss">
+	@use 'media';
+
 	.layout-shell {
 		align-items: flex-start;
 
 		main {
+			padding: 1rem;
 			flex: 1;
 			max-width: 80vw;
+			margin-top: 1rem;
+
+			@include media.mobile {
+				margin-top: 0rem;
+				max-width: 100vw;
+			}
 		}
 	}
 

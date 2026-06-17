@@ -1,6 +1,6 @@
 {
-	"name": "KENTECH Student Council",
-	"short_name": "KENTECH",
+	"name": "KENTECH Student Council-name",
+	"short_name": "KENTECH-short_name",
 	"id": "/",
 	"start_url": "/",
 	"scope": "/",
@@ -8,7 +8,7 @@
 	"orientation": "portrait",
 	"background_color": "#ffffff",
 	"theme_color": "#4a8cff",
-	"description": "KENTECH 총학생회 웹앱",
+	"description": "KENTECH 총학생회 웹앱-description",
 	"lang": "ko-KR",
 	"icons": [
 		{

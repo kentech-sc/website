@@ -536,6 +536,7 @@
 
 <style lang="scss">
 	section {
+		position: relative;
 		width: 100%;
 	}
 
@@ -554,6 +555,8 @@
 
 	.control-group {
 		position: absolute;
+		left: 0;
+		right: 0;
 		z-index: 90;
 		margin-bottom: 0.4rem;
 		box-shadow: 0 0.2rem 0.4rem var(--shadow-color);

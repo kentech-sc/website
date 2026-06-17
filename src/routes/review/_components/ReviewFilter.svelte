@@ -37,6 +37,8 @@
 		gap: 1rem;
 		margin-bottom: 1rem;
 
-		width: 100%;
+		select {
+			width: 100%;
+		}
 	}
 </style>

@@ -28,7 +28,7 @@
 {/snippet}
 
 {#snippet Nav()}
-	<nav class="desktop-only">
+	<nav class="only-pc">
 		<a href="/board/notice">공지사항</a>
 		<a href="/board/free">자유게시판</a>
 		<a href="/board/bylaw">회칙·세칙</a>
@@ -41,8 +41,8 @@
 	<div class="inline-container profile-btn">
 		{#if user.group !== 'guest'}
 			<a href="/profile" class="inline-container">
-				<CircleUserRound size="1.6rem" strokeWidth={1.5} color="white" class="mobile-only" />
-				<span class="desktop-only">{user.nickname}</span>
+				<CircleUserRound size="1.6rem" strokeWidth={1.5} color="white" class="only-mobile" />
+				<span class="only-pc">{user.nickname}</span>
 			</a>
 		{:else}
 			<a href="/signin">
@@ -59,7 +59,7 @@
 {/snippet}
 
 {#snippet DrawerBtn()}
-	<button class="drawer-btn mobile-only inline-container" onclick={toggleDrawer}>
+	<button class="drawer-btn only-mobile inline-container" onclick={toggleDrawer}>
 		{#if isDrawerOpen}
 			<X_img size="1.3rem" color="white" />
 		{:else}
@@ -70,7 +70,7 @@
 
 {#snippet Drawer()}
 	<div
-		class="backdrop mobile-only"
+		class="backdrop only-mobile"
 		role="button"
 		tabindex="0"
 		onclick={closeDrawer}
@@ -78,7 +78,7 @@
 		transition:fade={{ duration: 200 }}
 	></div>
 	<nav
-		class="menu mobile-only"
+		class="menu only-mobile"
 		data-sveltekit-preload-data="hover"
 		transition:fly={{ x: 300, duration: 200, easing: cubicOut }}
 	>
@@ -96,7 +96,11 @@
 	</nav>
 {/snippet}
 
-<header class="container" class:isMain={page.route.id === '/'} data-sveltekit-preload-data="hover">
+<header
+	class="container"
+	class:isMain={page.route.id === '/'}
+	data-sveltekit-preload-data="hover"
+>
 	<div class="nav-left container">
 		{@render Logo()}
 		{@render Nav()}
@@ -114,6 +118,8 @@
 {/if}
 
 <style lang="scss">
+	@use 'media';
+
 	header {
 		top: 0;
 		justify-content: space-between;
@@ -126,11 +132,14 @@
 		border-bottom: solid white 0.2rem;
 
 		background-color: var(--tertiary);
-		padding: 0.6rem 6.4rem;
 		width: 100%;
+		padding: 0.6rem 1rem;
 
-		&.isMain {
-			position: fixed;
+		@include media.pc {
+			padding: 0.6rem 10vw;
+			&.isMain {
+				position: fixed;
+			}
 		}
 
 		&:not(.isMain) {

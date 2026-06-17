@@ -1,14 +1,13 @@
 import webpush from 'web-push';
 
-import { env as privateEnv } from '$env/dynamic/private';
-import { env as publicEnv } from '$env/dynamic/public';
-
 import type {
 	PushNotificationPayload,
 	PushSubscriptionEntity,
 	PushSubscriptionInput
 } from '$lib/types/push-subscription.type.js';
 
+import { env as privateEnv } from '$env/dynamic/private';
+import { env as publicEnv } from '$env/dynamic/public';
 import { PushSubscriptionModel } from '$lib/models/push-subscription.model.js';
 import { AppError } from '$lib/server/errors.js';
 import { APP_ERROR } from '$lib/shared/rule.js';

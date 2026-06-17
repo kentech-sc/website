@@ -200,23 +200,3 @@ label.input-label {
 		background-color: var(--info-strong-hover);
 	}
 }
-
-.mode-web .only-pwa {
-	display: none;
-}
-
-.mode-pwa .only-web {
-	display: none;
-}
-
-@media (min-width: 800px) {
-	.mobile-only {
-		display: none;
-	}
-}
-
-@media (max-width: 800px) {
-	.desktop-only {
-		display: none;
-	}
-}

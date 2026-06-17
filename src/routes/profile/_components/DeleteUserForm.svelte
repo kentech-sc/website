@@ -60,9 +60,12 @@
 	}
 
 	.error {
+		align-items: flex-start;
 		margin-top: 0.6rem;
 
 		h4 {
+			width: stretch;
+			text-align: center;
 			margin: 0.4rem 0;
 			font-weight: 600;
 			font-size: 0.9rem;

@@ -21,14 +21,16 @@
 </div>
 
 <style lang="scss">
-	#grid-container {
-		display: grid;
-		grid-template-columns: repeat(2, minmax(0, 1fr));
-		margin-top: 0.6rem;
-		width: 100%;
+	@use 'media';
 
-		@media (max-width: 768px) {
-			grid-template-columns: 1fr;
+	#grid-container {
+		gap: 1rem;
+		display: grid;
+		width: 100%;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+
+		@include media.mobile {
+			grid-template-columns: minmax(0, 1fr);
 		}
 	}
 </style>

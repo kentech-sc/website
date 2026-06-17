@@ -98,7 +98,7 @@
 </article>
 
 <style lang="scss">
-	@use '../../style/legal-page';
+	@use 'legal-page';
 
 	@include legal-page.content-frame;
 </style>

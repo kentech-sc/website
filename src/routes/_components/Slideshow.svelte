@@ -47,7 +47,7 @@
 	});
 </script>
 
-<div class="slideshow">
+<div class="only-web only-pc slideshow">
 	<img src={mainLogo} alt="Main Logo" class="center-logo" />
 
 	<ul class="slidelist" style="transform: translateX(-{current * 100}%);">

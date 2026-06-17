@@ -177,7 +177,7 @@
 <div class="push-settings container-col">
 	<p class="title">
 		<Smartphone size="0.8rem" />
-		<span>Push Notifications</span>
+		<span>푸시 알림 설정</span>
 	</p>
 
 	<p class="help">

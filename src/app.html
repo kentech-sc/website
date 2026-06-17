@@ -4,7 +4,7 @@
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="theme-color" content="#4a8cff" />
-		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="mobile-web-app-capable" content="yes" />
 		<meta name="apple-mobile-web-app-status-bar-style" content="default" />
 		<link rel="icon" href="/kentech.ico" />
 		<link rel="manifest" href="/manifest.webmanifest" />
@@ -14,5 +14,17 @@
 	</head>
 	<body data-sveltekit-preload-code="hover">
 		<div style="display: contents">%sveltekit.body%</div>
+		<script>
+			(() => {
+				const iosStandalone = window.navigator.standalone === true;
+				const isPwa =
+					window.matchMedia('(display-mode: standalone)').matches ||
+					iosStandalone ||
+					document.referrer.startsWith('android-app://');
+
+				const root = document.documentElement;
+				root.classList.add(isPwa ? 'mode-pwa' : 'mode-web');
+			})();
+		</script>
 	</body>
 </html>

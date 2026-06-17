@@ -22,7 +22,7 @@
 		display: flex;
 		position: relative;
 		margin-top: 1.4rem;
-		width: 100%;
+		width: stretch;
 
 		& > :global(*) {
 			flex: 1;

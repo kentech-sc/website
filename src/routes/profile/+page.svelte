@@ -47,13 +47,18 @@
 </section>
 
 <style lang="scss">
+	@use 'media';
+
 	.profile {
+		width: stretch;
 		display: grid;
-		grid-template-columns: 0.8fr 1fr;
+		grid-template-columns: minmax(0, 1fr);
 		align-items: flex-start;
 		gap: 1rem;
-		margin-top: 2rem;
-		width: 80%;
+
+		@include media.pc {
+			grid-template-columns: minmax(0, 0.8fr) minmax(0, 1fr);
+		}
 
 		& > div:last-child {
 			gap: 1rem;
