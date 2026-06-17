@@ -41,7 +41,9 @@ export function isPushSubscriptionInput(value: unknown): value is PushSubscripti
 			subscription.keys &&
 			typeof subscription.keys.p256dh === 'string' &&
 			typeof subscription.keys.auth === 'string' &&
-			(expirationTime === undefined || expirationTime === null || typeof expirationTime === 'number')
+			(expirationTime === undefined ||
+				expirationTime === null ||
+				typeof expirationTime === 'number')
 	);
 }
 
@@ -86,9 +88,7 @@ export async function deleteUserPushSubscription(
 	return result.deletedCount ?? 0;
 }
 
-export async function findUserPushSubscriptions(
-	userId: string
-): Promise<PushSubscriptionEntity[]> {
+export async function findUserPushSubscriptions(userId: string): Promise<PushSubscriptionEntity[]> {
 	return toPojo<PushSubscriptionEntity[]>(await PushSubscriptionModel.find({ userId }).lean());
 }
 

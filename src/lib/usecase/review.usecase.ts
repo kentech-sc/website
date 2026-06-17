@@ -93,7 +93,7 @@ export async function createReview(reviewCreate: ReviewCreate, user: User) {
 			action: 'create',
 			targetType: 'review',
 			targetId: review._id,
-			 
+
 			cause: 'direct',
 			beforeSnapshot: null,
 			afterSnapshot: review
@@ -113,7 +113,7 @@ export async function editReview(reviewId: ReviewId, reviewUpdate: ReviewUpdate,
 			action: 'edit',
 			targetType: 'review',
 			targetId: review._id,
-			 
+
 			cause: 'direct',
 			beforeSnapshot: beforeReview,
 			afterSnapshot: review
@@ -131,7 +131,7 @@ export async function deleteReview(reviewId: ReviewId, user: User) {
 			action: 'delete',
 			targetType: 'review',
 			targetId: review._id,
-			 
+
 			cause: 'direct',
 			beforeSnapshot: review,
 			afterSnapshot: null

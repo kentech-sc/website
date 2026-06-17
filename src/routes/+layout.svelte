@@ -70,10 +70,10 @@
 		align-items: flex-start;
 
 		main {
-			padding: 1rem;
 			flex: 1;
-			max-width: 80vw;
 			margin-top: 1rem;
+			padding: 1rem;
+			max-width: 80vw;
 
 			@include media.mobile {
 				margin-top: 0rem;

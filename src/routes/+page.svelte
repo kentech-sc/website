@@ -24,10 +24,10 @@
 	@use 'media';
 
 	#grid-container {
-		gap: 1rem;
 		display: grid;
-		width: 100%;
 		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 1rem;
+		width: 100%;
 
 		@include media.mobile {
 			grid-template-columns: minmax(0, 1fr);

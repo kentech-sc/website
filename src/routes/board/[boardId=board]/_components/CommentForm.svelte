@@ -29,15 +29,19 @@
 				<DisplayTypeSelector {user} />
 				<button type="submit" class="action-btn"><Pencil size="0.8rem" />작성</button>
 			</div>
-			<textarea name="content" placeholder="댓글을 입력하세요." autocomplete="off" bind:this={commentTextarea}></textarea>
+			<textarea
+				name="content"
+				placeholder="댓글을 입력하세요."
+				autocomplete="off"
+				bind:this={commentTextarea}
+			></textarea>
 		</div>
 	</CommonForm>
 </section>
 
 <style lang="scss">
-
 	section {
-		gap: .8rem;
+		gap: 0.8rem;
 	}
 
 	.comment-form {

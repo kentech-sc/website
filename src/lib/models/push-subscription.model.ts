@@ -20,7 +20,4 @@ const PushSubscriptionSchema = new mongoose.Schema<PushSubscriptionEntity>(
 
 PushSubscriptionSchema.index({ userId: 1, endpoint: 1 }, { unique: true });
 
-export const PushSubscriptionModel = mongoose.model(
-	'PushSubscription',
-	PushSubscriptionSchema
-);
+export const PushSubscriptionModel = mongoose.model('PushSubscription', PushSubscriptionSchema);

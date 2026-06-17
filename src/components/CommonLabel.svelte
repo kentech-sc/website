@@ -25,7 +25,7 @@
 		width: stretch;
 
 		& > :global(*) {
-			flex: 1;
+			width: 100%;
 		}
 
 		& > :global(input),

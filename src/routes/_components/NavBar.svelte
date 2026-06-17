@@ -96,11 +96,7 @@
 	</nav>
 {/snippet}
 
-<header
-	class="container"
-	class:isMain={page.route.id === '/'}
-	data-sveltekit-preload-data="hover"
->
+<header class="container" class:isMain={page.route.id === '/'} data-sveltekit-preload-data="hover">
 	<div class="nav-left container">
 		{@render Logo()}
 		{@render Nav()}
@@ -132,8 +128,8 @@
 		border-bottom: solid white 0.2rem;
 
 		background-color: var(--tertiary);
-		width: 100%;
 		padding: 0.6rem 1rem;
+		width: 100%;
 
 		@include media.pc {
 			padding: 0.6rem 10vw;

@@ -1,5 +1,4 @@
 <script lang="ts">
-
 	import BlockForm from './_components/BlockForm.svelte';
 	import ChangeGroupForm from './_components/ChangeGroupForm.svelte';
 	import ChangeNicknameForm from './_components/ChangeNicknameForm.svelte';
@@ -50,11 +49,11 @@
 	@use 'media';
 
 	.profile {
-		width: stretch;
 		display: grid;
 		grid-template-columns: minmax(0, 1fr);
 		align-items: flex-start;
 		gap: 1rem;
+		width: stretch;
 
 		@include media.pc {
 			grid-template-columns: minmax(0, 0.8fr) minmax(0, 1fr);

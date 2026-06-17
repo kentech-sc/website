@@ -24,7 +24,9 @@
 	}
 
 	function isSupported(): boolean {
-		return browser && 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+		return (
+			browser && 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window
+		);
 	}
 
 	async function refreshState() {
@@ -74,9 +76,7 @@
 				existingSubscription ??
 				(await registration.pushManager.subscribe({
 					userVisibleOnly: true,
-					applicationServerKey: base64UrlToUint8Array(
-						env.PUBLIC_VAPID_PUBLIC_KEY
-					) as BufferSource
+					applicationServerKey: base64UrlToUint8Array(env.PUBLIC_VAPID_PUBLIC_KEY) as BufferSource
 				}));
 
 			const response = await fetch('/api/push/subscription', {
@@ -181,7 +181,8 @@
 	</p>
 
 	<p class="help">
-		Install this site to your home screen, then enable notifications on the device you want to receive them on.
+		Install this site to your home screen, then enable notifications on the device you want to
+		receive them on.
 	</p>
 
 	<div class="status container-col">
@@ -244,10 +245,10 @@
 
 	.status {
 		gap: 0.2rem;
-		padding: 0.8rem;
 		border: 0.1rem solid var(--gray-border);
 		border-radius: 0.6rem;
 		background: var(--gray-bg);
+		padding: 0.8rem;
 	}
 
 	.actions {

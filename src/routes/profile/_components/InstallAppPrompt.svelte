@@ -94,7 +94,12 @@
 				<span class="label">앱 설치</span>
 			</button>
 		{:else if showIosGuide}
-			<button type="button" class="install-btn" onclick={toggleGuidePanel} aria-expanded={showGuidePanel}>
+			<button
+				type="button"
+				class="install-btn"
+				onclick={toggleGuidePanel}
+				aria-expanded={showGuidePanel}
+			>
 				<Share size="0.8rem" />
 				<span class="label">설치 안내</span>
 			</button>
@@ -116,8 +121,8 @@
 
 <style lang="scss">
 	.install-prompt {
-		position: relative;
 		display: inline-flex;
+		position: relative;
 		align-items: center;
 	}
 
@@ -140,10 +145,10 @@
 	}
 
 	.guide-panel {
+		display: flex;
 		position: absolute;
 		top: calc(100% + 0.4rem);
 		right: 0;
-		display: flex;
 		flex-direction: column;
 		gap: 0.4rem;
 

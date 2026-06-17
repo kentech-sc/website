@@ -529,19 +529,19 @@
 		<p class="editor-notice" role="alert">{editorNotice}</p>
 	{/if}
 
-	<div class="module">
+	<div class="module input-div">
 		<div class="nmu" data-disabled={disabled ? 'true' : 'false'} bind:this={element}></div>
 	</div>
 </section>
 
 <style lang="scss">
 	section {
-		position: relative;
 		width: 100%;
 	}
 
-	.nmu {
-		margin-top: 2rem;
+	.input-div {
+		border-top: none;
+		border-radius: 0 0 0.4rem 0.4rem;
 	}
 
 	.nmu[data-disabled='true'] {
@@ -554,14 +554,9 @@
 	}
 
 	.control-group {
-		position: absolute;
-		left: 0;
-		right: 0;
-		z-index: 90;
-		margin-bottom: 0.4rem;
 		box-shadow: 0 0.2rem 0.4rem var(--shadow-color);
 		border: 0.1rem solid var(--gray-border);
-		border-radius: 0.4rem;
+		border-radius: 0.4rem 0.4rem 0 0;
 		background: var(--gray-bg);
 		padding: 0.25rem;
 	}
