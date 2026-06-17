@@ -201,6 +201,14 @@ label.input-label {
 	}
 }
 
+.mode-web .only-pwa {
+	display: none;
+}
+
+.mode-pwa .only-web {
+	display: none;
+}
+
 @media (min-width: 800px) {
 	.mobile-only {
 		display: none;

@@ -1,4 +1,5 @@
 <script lang="ts">
+
 	import BlockForm from './_components/BlockForm.svelte';
 	import ChangeGroupForm from './_components/ChangeGroupForm.svelte';
 	import ChangeNicknameForm from './_components/ChangeNicknameForm.svelte';
@@ -6,6 +7,7 @@
 	import DeleteUserForm from './_components/DeleteUserForm.svelte';
 	import Profile from './_components/Profile.svelte';
 	import PushNotificationForm from './_components/PushNotificationForm.svelte';
+	import InstallAppPrompt from '../profile/_components/InstallAppPrompt.svelte';
 
 	import { page } from '$app/state';
 
@@ -21,6 +23,8 @@
 	<div class="container-col">
 		<div class="settings module container-col">
 			<h3>사용자 기능</h3>
+			<InstallAppPrompt />
+			<PushNotificationForm />
 			<ChangeNicknameForm />
 			<DeleteUserForm />
 		</div>
@@ -37,7 +41,6 @@
 			<div class="dev module container-col">
 				<h3>개발자 기능</h3>
 				<CleanupForm />
-				<PushNotificationForm />
 			</div>
 		{/if}
 	</div>
