@@ -8,7 +8,8 @@
 	import { env } from '$env/dynamic/public';
 
 	let loading = $state(false);
-	let supported = $state(true);
+	let checked = $state(false);
+	let supported = $state(false);
 	let subscribed = $state(false);
 	let message = $state('');
 
@@ -27,16 +28,20 @@
 	}
 
 	async function refreshState() {
-		supported = isSupported() && Boolean(env.PUBLIC_VAPID_PUBLIC_KEY);
+		const nextSupported = isSupported() && Boolean(env.PUBLIC_VAPID_PUBLIC_KEY);
 
-		if (!supported) {
+		if (!nextSupported) {
+			supported = false;
 			subscribed = false;
+			checked = true;
 			return;
 		}
 
 		const registration = await navigator.serviceWorker.ready;
 		const subscription = await registration.pushManager.getSubscription();
+		supported = true;
 		subscribed = Boolean(subscription);
+		checked = true;
 	}
 
 	function getErrorMessage(error: unknown, fallback: string): string {
@@ -147,25 +152,23 @@
 	</h4>
 
 	<p>
-		먼저 앱을 설치한 뒤 알림을 허용해 주세요.
-		<br />
-		알림을 허용하면 학생회의 소식이나 소통식 메뉴 알림을 빠르게 받을 수 있습니다.
+		알림을 허용하면 학생회의 소식이나 학식 메뉴 알림을 빠르게 받을 수 있습니다.
 	</p>
 
 	{#if message}
 		<div class="error">{message}</div>
 	{/if}
 
-	{#if supported}
+	{#if checked && supported}
 		{#if subscribed}
 			<button class="error-btn" type="button" onclick={disableNotifications} disabled={loading}>
 				<BellOff size="0.8rem" />
-				<span>{loading ? '차단 중...' : '차단'}</span>
+				<span>{loading ? '차단 중...' : '차단하기'}</span>
 			</button>
 		{:else}
 			<button class="success-btn" type="button" onclick={enableNotifications} disabled={loading}>
 				<Bell size="0.8rem" />
-				<span>{loading ? '허용 중...' : '허용'}</span>
+				<span>{loading ? '허용 중...' : '허용하기'}</span>
 			</button>
 		{/if}
 	{/if}

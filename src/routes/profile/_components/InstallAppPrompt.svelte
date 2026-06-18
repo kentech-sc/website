@@ -81,7 +81,6 @@
 	});
 </script>
 
-<!-- PC 안내 메시지는 푸시 완성하기 전까지 임시로 가려 둠. -->
 {#if shouldShowSection && !showPcGuide}
 	<section class="container-col">
 		<h4>
@@ -89,7 +88,10 @@
 			<span>앱 설치</span>
 		</h4>
 		{#if showAndroidGuide}
-			<p>버튼 클릭 한번으로 앱을 바로 설치할 수 있습니다.</p>
+			<p>버튼 클릭 한번으로 앱을 바로 설치할 수 있습니다.
+				<br/>
+				아무런 변화가 없으면 새로고침 후 다시 시도해 주세요.
+			</p>
 			<button
 				type="button"
 				class="action-btn"
@@ -100,8 +102,6 @@
 			</button>
 		{:else if showIosGuide}
 			<p>브라우저의 공유 버튼을 누른 뒤, 홈 화면에 추가를 선택해 주세요.</p>
-		{:else if showPcGuide}
-			<p>PC 환경에서는 별도 설치 없이 푸시 알림을 받을 수 있습니다.</p>
 		{/if}
 	</section>
 {/if}

@@ -46,7 +46,8 @@
 
 <style lang="scss">
 	h2 {
-		font-size: 1.4rem;
+		font-weight: 600;
+		font-size: 1.2rem;
 		margin-bottom: 0.6rem;
 	}
 

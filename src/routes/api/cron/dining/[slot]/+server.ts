@@ -9,9 +9,9 @@ function isAuthorizedCronRequest(request: Request): boolean {
 }
 
 export const GET = async ({ params, request }) => {
-	// if (!privateEnv.CRON_SECRET || !isAuthorizedCronRequest(request)) {
-	// 	return json({ message: '허용되지 않은 요청입니다.' }, { status: 401 });
-	// }
+	if (!privateEnv.CRON_SECRET || !isAuthorizedCronRequest(request)) {
+		return json({ message: '허용되지 않은 요청입니다.' }, { status: 401 });
+	}
 
 	if (!DiningUsecase.isDiningSlot(params.slot)) {
 		return json({ message: '잘못된 식사 구분입니다.' }, { status: 400 });

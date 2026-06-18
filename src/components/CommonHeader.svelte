@@ -10,7 +10,7 @@
 
 	<div>
 		<p class="description">{description}</p>
-		<div>
+		<div class="container-col">
 			{#if children}
 				{@render children()}
 			{/if}
@@ -31,11 +31,20 @@
 			display: flex;
 			justify-content: space-between;
 			align-items: center;
+
+			div {
+				gap: .4rem;
+				align-items: flex-end;
+			}
 		}
+	}
+
+	h1 {
+		font-size: 1.8rem;
 	}
 
 	.description {
 		font-weight: 600;
-		font-size: 0.9rem;
+		font-size: 0.8rem;
 	}
 </style>
