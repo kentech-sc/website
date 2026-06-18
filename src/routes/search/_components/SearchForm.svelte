@@ -20,7 +20,7 @@
 	}
 
 	input {
-		width: 30rem;
+		max-width: 30rem;
 		font-size: 0.9rem;
 	}
 </style>

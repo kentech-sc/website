@@ -1,4 +1,4 @@
-<footer>
+<footer class="">
 	<h1>4th KENTECH STUDENT COUNCIL | 4:EVER</h1>
 	<p>Mail: studentcouncil@kentech.ac.kr</p>
 	<p>Developed by nemovim</p>
@@ -17,7 +17,7 @@
 		justify-content: flex-start;
 		gap: 0.6rem;
 
-		margin-top: 1.6rem;
+		margin-top: 1rem;
 
 		border: none;
 		border-top: solid var(--white) 0.2rem;

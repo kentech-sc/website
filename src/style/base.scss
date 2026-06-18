@@ -1,8 +1,11 @@
+@use 'media';
+
 *,
 *::before,
 *::after {
 	box-sizing: border-box;
 	font-family: 'Pretendard', sans-serif;
+	word-break: keep-all;
 }
 
 html {
@@ -11,22 +14,36 @@ html {
 	font-size: 20px;
 }
 
-@media (max-width: 75rem) {
+@media (max-width: 1024px) {
 	html {
-		font-size: 15px;
+		font-size: 14px;
 	}
 }
 
-@media (max-width: 50rem) {
+@media (max-width: media.$mobile-max) {
 	html {
-		font-size: 12px;
+		font-size: 16px;
 	}
 }
 
-@media (max-width: 37.5rem) {
-	html {
-		font-size: 10px;
+@media (min-width: media.$mobile-max) {
+	.only-mobile {
+		display: none !important;
 	}
+}
+
+@media (max-width: media.$mobile-max) {
+	.only-pc {
+		display: none !important;
+	}
+}
+
+.mode-web .only-pwa {
+	display: none !important;
+}
+
+.mode-pwa .only-web {
+	display: none !important;
 }
 
 body {

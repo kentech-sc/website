@@ -30,7 +30,7 @@
 </script>
 
 <section class="container-col module">
-	<h1>켄텍 이메일로 로그인 후 이용 가능합니다.</h1>
+	<h2>켄텍 이메일로 로그인 후 이용 가능합니다.</h2>
 	<div
 		class="google-login-shell"
 		data-busy={googleBusy ? 'true' : 'false'}
@@ -45,7 +45,9 @@
 </section>
 
 <style lang="scss">
-	h1 {
+	h2 {
+		font-weight: 600;
+		font-size: 1.2rem;
 		margin-bottom: 0.6rem;
 	}
 

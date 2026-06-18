@@ -5,7 +5,6 @@ import type { PostEntity } from './post.type.js';
 import type { ReviewEntity } from './review.type.js';
 import type { UserId } from './user.type.js';
 
-type ActivityAction = 'create' | 'edit' | 'delete';
 type ActivityTarget = 'post' | 'comment' | 'review' | 'petition' | 'petition-response';
 type ActivityCause = 'direct' | 'post-delete-cascade';
 

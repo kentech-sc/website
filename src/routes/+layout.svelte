@@ -64,12 +64,21 @@
 <Footer />
 
 <style lang="scss">
+	@use 'media';
+
 	.layout-shell {
 		align-items: flex-start;
 
 		main {
 			flex: 1;
+			margin-top: 1rem;
+			padding: 1rem;
 			max-width: 80vw;
+
+			@include media.mobile {
+				margin-top: 0rem;
+				max-width: 100vw;
+			}
 		}
 	}
 

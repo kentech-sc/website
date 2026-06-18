@@ -22,10 +22,10 @@
 		display: flex;
 		position: relative;
 		margin-top: 1.4rem;
-		width: 100%;
+		width: stretch;
 
 		& > :global(*) {
-			flex: 1;
+			width: 100%;
 		}
 
 		& > :global(input),

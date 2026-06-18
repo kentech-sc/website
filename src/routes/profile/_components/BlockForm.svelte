@@ -17,10 +17,10 @@
 	afterSuccess={handleSuccess}
 >
 	<div class="container-col">
-		<p>
+		<h4>
 			<Ban size="0.8rem" />
 			<span>사용자 차단</span>
-		</p>
+		</h4>
 
 		<CommonLabel labelFor="block-email" labelString="차단할 사용자의 이메일">
 			<input type="text" name="email" id="block-email" placeholder="abc1234" />
@@ -45,10 +45,10 @@
 	afterSuccess={handleSuccess}
 >
 	<div class="container-col">
-		<p>
+		<h4>
 			<ShieldCheck size="0.8rem" />
 			<span>차단 해제</span>
-		</p>
+		</h4>
 
 		<CommonLabel labelFor="unblock-email" labelString="차단 해제할 사용자의 이메일">
 			<input type="text" name="email" id="unblock-email" placeholder="abc1234" />
@@ -63,10 +63,10 @@
 </CommonForm>
 
 <style lang="scss">
-	p {
+	h4 {
+		font-size: 1rem;
 		width: 100%;
 		font-weight: 500;
-		text-align: left;
 	}
 
 	input + span {

@@ -75,6 +75,8 @@
 </article>
 
 <style lang="scss">
+	@use 'media';
+
 	article {
 		width: 100%;
 	}
@@ -94,6 +96,11 @@
 	.score {
 		gap: 2rem;
 		margin-top: 0.8rem;
+
+		@include media.mobile {
+			gap: .4rem;
+			flex-direction: column;
+		}
 
 		p {
 			display: flex;

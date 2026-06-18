@@ -43,7 +43,6 @@
 
 <style lang="scss">
 	section {
-		margin: 0.4rem;
 		width: auto;
 	}
 

@@ -18,10 +18,10 @@
 </script>
 
 <CommonForm actionName="cleanup" formName="cleanup" policy="reload" bind:formResult>
-	<p>
+	<h4>
 		<Trash2 size="0.8rem" />
 		<span>미사용 파일 정리</span>
-	</p>
+	</h4>
 
 	<div class="error">
 		<div class="inline-container">
@@ -45,11 +45,11 @@
 </CommonForm>
 
 <style lang="scss">
-	p {
+	h4 {
+		font-size: 1rem;
 		width: 100%;
 		color: var(--error);
 		font-weight: 500;
-		text-align: left;
 	}
 
 	.error {

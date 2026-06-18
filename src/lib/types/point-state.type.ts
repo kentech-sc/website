@@ -6,7 +6,7 @@ export const PointCapKind = {
 	POST: 'post',
 	COMMENT: 'comment',
 	REVIEW: 'review',
-	PETITION: 'petition',
+	PETITION: 'petition'
 } as const;
 
 export type PointCapKind = (typeof PointCapKind)[keyof typeof PointCapKind];

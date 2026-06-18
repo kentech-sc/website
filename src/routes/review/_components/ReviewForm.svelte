@@ -200,8 +200,18 @@
 </section>
 
 <style lang="scss">
+	@use 'media';
+
 	section {
 		gap: 0.8rem;
+	}
+
+	select {
+		width: 100%;
+	}
+
+	textarea {
+		resize: vertical;
 	}
 
 	.review-form {
@@ -217,9 +227,13 @@
 
 		& > div:first-child {
 			display: grid;
-			grid-template-columns: 4fr 2fr 1fr 1fr;
+			grid-template-columns: minmax(0, 4fr) minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr);
 			gap: 1rem;
 			width: 100%;
+
+			@include media.mobile {
+				grid-template-columns: minmax(0, 1fr);
+			}
 		}
 	}
 
@@ -234,8 +248,13 @@
 	}
 
 	.review-slider-row {
-		display: flex;
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
 		gap: 1.6rem;
+
+		@include media.mobile {
+			grid-template-columns: minmax(0, 1fr);
+		}
 	}
 
 	.review-score-item {
