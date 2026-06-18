@@ -29,12 +29,12 @@
 	bind:loading
 >
 	<div class="container-col">
-		<p>
+		<h4>
 			<UserRoundX size="0.8rem" />
 			<span>계정 탈퇴</span>
-		</p>
+		</h4>
 		<div class="error container-col">
-			<h4>탈퇴 전 주의사항</h4>
+			<h5>탈퇴 전 주의사항</h5>
 			<ul>
 				<li>계정 탈퇴는 되돌릴 수 없습니다.</li>
 				<li>개인정보는 즉시 파기되지만, 일부 기록 정보는 6개월간 보관됩니다.</li>
@@ -52,18 +52,18 @@
 </CommonForm>
 
 <style lang="scss">
-	p {
+	h4 {
+		font-size: 1rem;
 		width: 100%;
 		color: var(--error);
 		font-weight: 500;
-		text-align: left;
 	}
 
 	.error {
 		align-items: flex-start;
 		margin-top: 0.6rem;
 
-		h4 {
+		h5 {
 			margin: 0.4rem 0;
 			width: stretch;
 			font-weight: 600;

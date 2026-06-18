@@ -17,10 +17,10 @@
 	afterSuccess={handleSuccess}
 >
 	<div class="container-col">
-		<p>
+		<h4>
 			<Users size="0.8rem" />
 			<span>권한 변경</span>
-		</p>
+		</h4>
 
 		<CommonLabel labelFor="group-email" labelString="대상 사용자의 이메일">
 			<input type="text" name="email" id="group-email" placeholder="abc1234" />
@@ -44,10 +44,10 @@
 </CommonForm>
 
 <style lang="scss">
-	p {
+	h4 {
+		font-size: 1rem;
 		width: 100%;
 		font-weight: 500;
-		text-align: left;
 	}
 
 	#group-email + span {

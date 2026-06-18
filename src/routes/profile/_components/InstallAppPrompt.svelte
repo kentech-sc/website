@@ -1,7 +1,5 @@
 <script lang="ts">
 	import Download from '@lucide/svelte/icons/download';
-	import Share from '@lucide/svelte/icons/share';
-	import X from '@lucide/svelte/icons/x';
 	import { onMount } from 'svelte';
 
 	type BeforeInstallPromptEvent = Event & {
@@ -9,12 +7,16 @@
 		userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }>;
 	};
 
-	let deferredPrompt = $state<BeforeInstallPromptEvent | null>(null);
-	let canPromptInstall = $state(false);
+	let showPcGuide = $state(false);
 	let showIosGuide = $state(false);
-	let showGuidePanel = $state(false);
-	let isInstalled = $state(false);
-	let isReady = $state(false);
+	let showAndroidGuide = $state(false);
+	let shouldShowSection = $state(false);
+
+	let androidInstallPrompt: BeforeInstallPromptEvent | null = null;
+
+	function isAndroidDevice(): boolean {
+		return /Android/i.test(navigator.userAgent);
+	}
 
 	function isIosDevice(): boolean {
 		const userAgent = navigator.userAgent;
@@ -24,181 +26,107 @@
 		return /iPhone|iPad|iPod/i.test(userAgent) || (platform === 'MacIntel' && hasTouchPoints);
 	}
 
-	function updateInstalledState(mediaQueryList: MediaQueryList) {
-		const navigatorWithStandalone = navigator as Navigator & { standalone?: boolean };
+	function isPcDevice(): boolean {
+		return !isIosDevice() && !isAndroidDevice();
+	}
 
-		isInstalled =
+	function updateGuideState(mediaQueryList: MediaQueryList) {
+		const navigatorWithStandalone = navigator as Navigator & { standalone?: boolean };
+		const isInstalled =
 			mediaQueryList.matches ||
 			navigatorWithStandalone.standalone === true ||
 			document.referrer.startsWith('android-app://');
 
+		showPcGuide = isPcDevice() && !isInstalled;
 		showIosGuide = isIosDevice() && !isInstalled;
+		showAndroidGuide = isAndroidDevice() && !isInstalled;
+		shouldShowSection = showPcGuide || showIosGuide || showAndroidGuide;
 
 		if (isInstalled) {
-			canPromptInstall = false;
-			deferredPrompt = null;
-			showGuidePanel = false;
+			androidInstallPrompt = null;
 		}
 	}
 
-	async function promptInstall() {
-		if (!deferredPrompt) return;
+	async function promptAndroidInstall() {
+		if (!androidInstallPrompt) return;
 
-		await deferredPrompt.prompt();
-		const choice = await deferredPrompt.userChoice;
-
-		deferredPrompt = null;
-		canPromptInstall = false;
-
-		if (choice.outcome === 'accepted') {
-			showGuidePanel = false;
-		}
-	}
-
-	function toggleGuidePanel() {
-		showGuidePanel = !showGuidePanel;
+		await androidInstallPrompt.prompt();
+		await androidInstallPrompt.userChoice;
+		androidInstallPrompt = null;
 	}
 
 	onMount(() => {
 		const mediaQueryList = window.matchMedia('(display-mode: standalone)');
-		const handleDisplayModeChange = () => updateInstalledState(mediaQueryList);
+		const handleDisplayModeChange = () => updateGuideState(mediaQueryList);
+		const handleAppInstalled = () => updateGuideState(mediaQueryList);
 		const handleBeforeInstallPrompt = (event: Event) => {
 			const promptEvent = event as BeforeInstallPromptEvent;
 
 			promptEvent.preventDefault();
-			deferredPrompt = promptEvent;
-			canPromptInstall = !isInstalled;
+			androidInstallPrompt = promptEvent;
+			updateGuideState(mediaQueryList);
 		};
-		const handleAppInstalled = () => updateInstalledState(mediaQueryList);
 
-		updateInstalledState(mediaQueryList);
-		isReady = true;
+		updateGuideState(mediaQueryList);
 
 		mediaQueryList.addEventListener('change', handleDisplayModeChange);
-		window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 		window.addEventListener('appinstalled', handleAppInstalled);
+		window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 
 		return () => {
 			mediaQueryList.removeEventListener('change', handleDisplayModeChange);
-			window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 			window.removeEventListener('appinstalled', handleAppInstalled);
+			window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 		};
 	});
 </script>
 
-{#if isReady && !isInstalled && (canPromptInstall || showIosGuide)}
-	<div class="install-prompt">
-		{#if canPromptInstall}
-			<button type="button" class="install-btn" onclick={promptInstall}>
-				<Download size="0.8rem" />
-				<span class="label">앱 설치</span>
-			</button>
-		{:else if showIosGuide}
+<!-- PC 안내 메시지는 푸시 완성하기 전까지 임시로 가려 둠. -->
+{#if shouldShowSection && !showPcGuide}
+	<section class="container-col">
+		<h4>
+			<Download size="0.8rem" />
+			<span>앱 설치</span>
+		</h4>
+		{#if showAndroidGuide}
+			<p>버튼 클릭 한번으로 앱을 바로 설치할 수 있습니다.</p>
 			<button
 				type="button"
-				class="install-btn"
-				onclick={toggleGuidePanel}
-				aria-expanded={showGuidePanel}
+				class="action-btn"
+				onclick={promptAndroidInstall}
 			>
-				<Share size="0.8rem" />
-				<span class="label">설치 안내</span>
+				<Download size="0.8rem" />
+				<span>설치하기</span>
 			</button>
+		{:else if showIosGuide}
+			<p>브라우저의 공유 버튼을 누른 뒤, 홈 화면에 추가를 선택해 주세요.</p>
+		{:else if showPcGuide}
+			<p>PC 환경에서는 별도 설치 없이 푸시 알림을 받을 수 있습니다.</p>
 		{/if}
-
-		{#if showGuidePanel}
-			<div class="guide-panel">
-				<div class="guide-header">
-					<strong>앱 설치</strong>
-					<button type="button" class="close-btn" onclick={() => (showGuidePanel = false)}>
-						<X size="0.8rem" />
-					</button>
-				</div>
-				<p>브라우저 메뉴의 공유 버튼을 누른 뒤 홈 화면에 추가를 선택해 주세요.</p>
-			</div>
-		{/if}
-	</div>
+	</section>
 {/if}
 
 <style lang="scss">
-	.install-prompt {
-		display: inline-flex;
-		position: relative;
-		align-items: center;
+	section {
+		width: 100%;
 	}
 
-	.install-btn {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.2rem;
-
-		border-color: oklch(from var(--white) calc(l - 0.12) c h);
-		background-color: var(--white);
-		padding: 0.2rem 0.5rem;
-		color: var(--tertiary);
-		font-weight: 700;
-		font-size: 0.7rem;
-		white-space: nowrap;
-
-		&:hover {
-			background-color: var(--white-hover);
-		}
+	h4 {
+		width: 100%;
+		color: var(--secondary);
+		font-weight: 500;
+		font-size: 1rem;
 	}
 
-	.guide-panel {
-		display: flex;
-		position: absolute;
-		top: calc(100% + 0.4rem);
-		right: 0;
-		flex-direction: column;
-		gap: 0.4rem;
-
-		box-shadow: 0 0.3rem 1rem oklch(0 0 0 / 18%);
-		border: 0.1rem solid var(--gray-border);
-		border-radius: 0.6rem;
-		background-color: var(--white);
-		padding: 0.6rem;
-		width: min(16rem, calc(100vw - 1.2rem));
-
-		color: var(--text);
-
-		p {
-			margin: 0;
-			font-size: 0.7rem;
-			line-height: 1.5;
-			text-align: left;
-		}
+	p {
+		margin-top: .2rem;
+		width: 100%;
+		color: var(--gray);
+		font-size: 0.8rem;
 	}
 
-	.guide-header {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		gap: 0.4rem;
-
-		strong {
-			font-size: 0.75rem;
-		}
-	}
-
-	.close-btn {
-		border: none;
-		background: transparent;
-		padding: 0.1rem;
-		color: var(--gray-text);
-
-		&:hover {
-			background: transparent;
-			color: var(--text);
-		}
-	}
-
-	@media (max-width: 800px) {
-		.install-btn {
-			padding: 0.2rem 0.4rem;
-		}
-
-		.label {
-			display: none;
-		}
+	button {
+		margin-top: .6rem;
+		margin-left: auto;
 	}
 </style>

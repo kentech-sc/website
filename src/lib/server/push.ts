@@ -19,7 +19,7 @@ function getPushConfig() {
 	const subject = privateEnv.VAPID_SUBJECT;
 
 	if (!publicKey || !privateKey || !subject) {
-		throw new AppError(APP_ERROR.INTERNAL, 'Push notifications are not configured.');
+		throw new AppError(APP_ERROR.INTERNAL, '푸시 알림 설정이 완료되지 않았습니다.');
 	}
 
 	return { publicKey, privateKey, subject };

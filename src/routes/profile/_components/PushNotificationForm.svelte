@@ -1,7 +1,6 @@
 <script lang="ts">
 	import Bell from '@lucide/svelte/icons/bell';
 	import BellOff from '@lucide/svelte/icons/bell-off';
-	import SendHorizontal from '@lucide/svelte/icons/send-horizontal';
 	import Smartphone from '@lucide/svelte/icons/smartphone';
 	import { onMount } from 'svelte';
 
@@ -9,10 +8,8 @@
 	import { env } from '$env/dynamic/public';
 
 	let loading = $state(false);
-	let testing = $state(false);
-	let supported = $state(false);
+	let supported = $state(true);
 	let subscribed = $state(false);
-	let permission = $state<NotificationPermission>('default');
 	let message = $state('');
 
 	function base64UrlToUint8Array(base64Url: string): Uint8Array {
@@ -30,7 +27,6 @@
 	}
 
 	async function refreshState() {
-		permission = browser && 'Notification' in window ? Notification.permission : 'default';
 		supported = isSupported() && Boolean(env.PUBLIC_VAPID_PUBLIC_KEY);
 
 		if (!supported) {
@@ -49,12 +45,12 @@
 
 	async function enableNotifications() {
 		if (!env.PUBLIC_VAPID_PUBLIC_KEY) {
-			message = 'PUBLIC_VAPID_PUBLIC_KEY is not configured.';
+			message = '푸시 알림 공개키가 설정되지 않았습니다.';
 			return;
 		}
 
 		if (!isSupported()) {
-			message = 'Push notifications are not supported on this device.';
+			message = '이 기기에서는 푸시 알림을 지원하지 않습니다.';
 			return;
 		}
 
@@ -63,10 +59,9 @@
 
 		try {
 			const permissionResult = await Notification.requestPermission();
-			permission = permissionResult;
 
 			if (permissionResult !== 'granted') {
-				message = 'Notification permission was not granted.';
+				message = '알림 권한이 허용되지 않았습니다.';
 				return;
 			}
 
@@ -89,12 +84,11 @@
 
 			const result = (await response.json()) as { message?: string };
 			if (!response.ok) {
-				throw new Error(result.message ?? 'Failed to save push subscription.');
+				throw new Error(result.message ?? '푸시 구독 저장에 실패했습니다.');
 			}
 
-			message = 'Notifications are enabled on this device.';
 		} catch (error) {
-			message = getErrorMessage(error, 'Failed to enable notifications.');
+			message = getErrorMessage(error, '알림 활성화 중 오류가 발생했습니다.');
 		} finally {
 			loading = false;
 			await refreshState();
@@ -103,7 +97,7 @@
 
 	async function disableNotifications() {
 		if (!isSupported()) {
-			message = 'Push notifications are not supported on this device.';
+			message = '이 기기에서는 푸시 알림을 지원하지 않습니다.';
 			return;
 		}
 
@@ -115,7 +109,7 @@
 			const subscription = await registration.pushManager.getSubscription();
 
 			if (!subscription) {
-				message = 'No active push subscription found on this device.';
+				message = '이 기기에 활성화된 푸시 구독이 없습니다.';
 				return;
 			}
 
@@ -129,43 +123,15 @@
 
 			const result = (await response.json()) as { message?: string };
 			if (!response.ok) {
-				throw new Error(result.message ?? 'Failed to remove push subscription.');
+				throw new Error(result.message ?? '푸시 구독 해제에 실패했습니다.');
 			}
 
 			await subscription.unsubscribe();
-			message = 'Notifications are disabled on this device.';
 		} catch (error) {
-			message = getErrorMessage(error, 'Failed to disable notifications.');
+			message = getErrorMessage(error, '알림 비활성화 중 오류가 발생했습니다.');
 		} finally {
 			loading = false;
 			await refreshState();
-		}
-	}
-
-	async function sendTestNotification() {
-		if (!subscribed) {
-			message = 'Enable notifications first on this device.';
-			return;
-		}
-
-		testing = true;
-		message = '';
-
-		try {
-			const response = await fetch('/api/push/test', {
-				method: 'POST'
-			});
-
-			const result = (await response.json()) as { message?: string };
-			if (!response.ok) {
-				throw new Error(result.message ?? 'Failed to send test notification.');
-			}
-
-			message = 'Test notification sent.';
-		} catch (error) {
-			message = getErrorMessage(error, 'Failed to send test notification.');
-		} finally {
-			testing = false;
 		}
 	}
 
@@ -174,90 +140,62 @@
 	});
 </script>
 
-<div class="push-settings container-col">
-	<p class="title">
+<section class="container-col">
+	<h4 class="title">
 		<Smartphone size="0.8rem" />
 		<span>푸시 알림 설정</span>
+	</h4>
+
+	<p>
+		먼저 앱을 설치한 뒤 알림을 허용해 주세요.
+		<br />
+		알림을 허용하면 학생회의 소식이나 소통식 메뉴 알림을 빠르게 받을 수 있습니다.
 	</p>
-
-	<p class="help">
-		Install this site to your home screen, then enable notifications on the device you want to
-		receive them on.
-	</p>
-
-	<div class="status container-col">
-		<p><strong>Support:</strong> {supported ? 'available' : 'unavailable'}</p>
-		<p><strong>Permission:</strong> {permission}</p>
-		<p><strong>Device subscription:</strong> {subscribed ? 'connected' : 'not connected'}</p>
-	</div>
-
-	<div class="actions">
-		<button class="secondary-btn" type="button" onclick={enableNotifications} disabled={loading}>
-			<Bell size="0.8rem" />
-			<span>{loading ? 'Working...' : 'Enable'}</span>
-		</button>
-
-		<button class="secondary-btn" type="button" onclick={disableNotifications} disabled={loading}>
-			<BellOff size="0.8rem" />
-			<span>{loading ? 'Working...' : 'Disable'}</span>
-		</button>
-
-		<button
-			class="primary-btn"
-			type="button"
-			onclick={sendTestNotification}
-			disabled={testing || !subscribed}
-		>
-			<SendHorizontal size="0.8rem" />
-			<span>{testing ? 'Sending...' : 'Send Test'}</span>
-		</button>
-	</div>
 
 	{#if message}
-		<p class="message">{message}</p>
+		<div class="error">{message}</div>
 	{/if}
-</div>
+
+	{#if supported}
+		{#if subscribed}
+			<button class="error-btn" type="button" onclick={disableNotifications} disabled={loading}>
+				<BellOff size="0.8rem" />
+				<span>{loading ? '차단 중...' : '차단'}</span>
+			</button>
+		{:else}
+			<button class="success-btn" type="button" onclick={enableNotifications} disabled={loading}>
+				<Bell size="0.8rem" />
+				<span>{loading ? '허용 중...' : '허용'}</span>
+			</button>
+		{/if}
+	{/if}
+</section>
 
 <style lang="scss">
-	.push-settings {
-		gap: 0.6rem;
+	section {
+		width: 100%;
 	}
 
-	.title {
+	h4 {
 		width: 100%;
 		color: var(--secondary);
 		font-weight: 500;
-		text-align: left;
+		font-size: 1rem;
 	}
 
-	.help,
-	.status p,
-	.message {
-		margin: 0;
-		font-size: 0.75rem;
-		text-align: left;
+	p {
+		margin-top: 0.2rem;
+		width: 100%;
+		color: var(--gray);
+		font-size: 0.8rem;
 	}
 
-	.help,
-	.status p {
-		color: var(--gray-text);
+	button {
+		margin-top: 0.6rem;
+		margin-left: auto;
 	}
 
-	.status {
-		gap: 0.2rem;
-		border: 0.1rem solid var(--gray-border);
-		border-radius: 0.6rem;
-		background: var(--gray-bg);
-		padding: 0.8rem;
-	}
-
-	.actions {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.4rem;
-	}
-
-	.message {
-		color: var(--secondary);
+	.error {
+		margin-top: 0.6rem;
 	}
 </style>

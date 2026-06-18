@@ -17,10 +17,10 @@
 	afterSuccess={handleSuccess}
 >
 	<div class="container-col">
-		<p>
+		<h4>
 			<UserRoundPen size="0.8rem" />
 			<span>별명 변경</span>
-		</p>
+		</h4>
 
 		<CommonLabel labelFor="nickname" labelString="새로운 별명">
 			<input
@@ -41,10 +41,10 @@
 </CommonForm>
 
 <style lang="scss">
-	p {
+	h4 {
+		font-size: 1rem;
 		width: 100%;
 		font-weight: 500;
-		text-align: left;
 	}
 
 	button {

@@ -210,6 +210,10 @@
 		width: 100%;
 	}
 
+	textarea {
+		resize: vertical;
+	}
+
 	.review-form {
 		gap: 1.2rem;
 

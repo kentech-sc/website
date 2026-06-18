@@ -8,16 +8,16 @@ function hasSameOriginRequest(request: Request, origin: string): boolean {
 
 export const POST = async ({ request, locals, url }) => {
 	if (locals.user.group === 'guest') {
-		return json({ message: 'Login is required.' }, { status: 401 });
+		return json({ message: '로그인이 필요합니다.' }, { status: 401 });
 	}
 
 	if (!hasSameOriginRequest(request, url.origin)) {
-		return json({ message: 'Forbidden request origin.' }, { status: 403 });
+		return json({ message: '허용되지 않은 요청 출처입니다.' }, { status: 403 });
 	}
 
 	const body: unknown = await request.json();
 	if (!Push.isPushSubscriptionInput(body)) {
-		return json({ message: 'Invalid push subscription.' }, { status: 400 });
+		return json({ message: '푸시 구독 정보가 올바르지 않습니다.' }, { status: 400 });
 	}
 
 	try {
@@ -36,22 +36,22 @@ export const POST = async ({ request, locals, url }) => {
 			return json({ message: error.message }, { status: 500 });
 		}
 
-		return json({ message: 'Failed to save push subscription.' }, { status: 500 });
+		return json({ message: '푸시 구독 저장에 실패했습니다.' }, { status: 500 });
 	}
 };
 
 export const DELETE = async ({ request, locals, url }) => {
 	if (locals.user.group === 'guest') {
-		return json({ message: 'Login is required.' }, { status: 401 });
+		return json({ message: '로그인이 필요합니다.' }, { status: 401 });
 	}
 
 	if (!hasSameOriginRequest(request, url.origin)) {
-		return json({ message: 'Forbidden request origin.' }, { status: 403 });
+		return json({ message: '허용되지 않은 요청 출처입니다.' }, { status: 403 });
 	}
 
 	const body = (await request.json()) as { endpoint?: unknown };
 	if (typeof body.endpoint !== 'string' || body.endpoint.length === 0) {
-		return json({ message: 'Endpoint is required.' }, { status: 400 });
+		return json({ message: 'endpoint 값이 필요합니다.' }, { status: 400 });
 	}
 
 	const deletedCount = await Push.deleteUserPushSubscription(locals.user._id, body.endpoint);
