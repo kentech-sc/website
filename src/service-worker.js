@@ -57,7 +57,7 @@ self.addEventListener('push', (event) => {
 	event.waitUntil(
 		self.registration.showNotification(title, {
 			body: data.body ?? '',
-			icon: '/icon-192.png',
+			// icon: '/icon-192.png',
 			data: {
 				url: data.url ?? '/'
 			}

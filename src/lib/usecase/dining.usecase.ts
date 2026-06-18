@@ -45,7 +45,7 @@ function getKstDateString(now: Date): string {
 		.replace(/-/g, '');
 }
 
-function getDiningItems(menus: DiningMenus, slot: DiningSlot): string[] {
+function getDiningItems(menus: DiningMenus, slot: DiningSlot): string {
 	if (slot === 'breakfast') return menus.breakfast;
 	if (slot === 'lunch') return menus.lunch;
 	return menus.dinner;
@@ -57,7 +57,7 @@ function getDiningTitle(slot: DiningSlot): string {
 	return '오늘의 석식';
 }
 
-function createDiningBody(items: string[]): string {
+function createDiningBody(items: string): string {
 	// const preview = items.slice(0, 3);
 	// const extraCount = items.length - preview.length;
 
@@ -67,5 +67,5 @@ function createDiningBody(items: string[]): string {
 
 	// return preview.join(', ');
 
-	return items.join(', ');
+	return items;
 }
