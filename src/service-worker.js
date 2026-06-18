@@ -57,7 +57,6 @@ self.addEventListener('push', (event) => {
 	event.waitUntil(
 		self.registration.showNotification(title, {
 			body: data.body ?? '',
-			icon: '/icons/android-icon-192x192.png',
 			data: {
 				url: data.url ?? '/'
 			}
