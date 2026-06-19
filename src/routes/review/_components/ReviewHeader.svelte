@@ -24,7 +24,7 @@
 		{#if canManageCatalog}
 			<a href="/course/new" class="link-btn">
 				<Plus size="0.8rem" />
-				<span>강의/교수 추가</span>
+				<span>추가하기</span>
 			</a>
 		{/if}
 		{#if canCreateReview}

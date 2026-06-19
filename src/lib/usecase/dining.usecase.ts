@@ -39,10 +39,7 @@ export async function getDiningPush(
 }
 
 function getKstDateString(now: Date): string {
-	return new Date(now.getTime() + 9 * 60 * 60 * 1000)
-		.toISOString()
-		.slice(0, 10)
-		.replace(/-/g, '');
+	return new Date(now.getTime() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10).replace(/-/g, '');
 }
 
 function getDiningItems(menus: DiningMenus, slot: DiningSlot): string {

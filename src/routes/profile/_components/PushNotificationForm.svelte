@@ -9,6 +9,7 @@
 
 	let loading = $state(false);
 	let checked = $state(false);
+	let visible = $state(false);
 	let supported = $state(false);
 	let subscribed = $state(false);
 	let message = $state('');
@@ -27,7 +28,30 @@
 		);
 	}
 
+	function isMobileDevice(): boolean {
+		return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+	}
+
+	function isInstalledApp(): boolean {
+		const navigatorWithStandalone = navigator as Navigator & { standalone?: boolean };
+
+		return (
+			window.matchMedia('(display-mode: standalone)').matches ||
+			navigatorWithStandalone.standalone === true ||
+			document.referrer.startsWith('android-app://')
+		);
+	}
+
 	async function refreshState() {
+		visible = !isMobileDevice() || isInstalledApp();
+
+		if (!visible) {
+			supported = false;
+			subscribed = false;
+			checked = true;
+			return;
+		}
+
 		const nextSupported = isSupported() && Boolean(env.PUBLIC_VAPID_PUBLIC_KEY);
 
 		if (!nextSupported) {
@@ -91,7 +115,6 @@
 			if (!response.ok) {
 				throw new Error(result.message ?? '푸시 구독 저장에 실패했습니다.');
 			}
-
 		} catch (error) {
 			message = getErrorMessage(error, '알림 활성화 중 오류가 발생했습니다.');
 		} finally {
@@ -114,7 +137,7 @@
 			const subscription = await registration.pushManager.getSubscription();
 
 			if (!subscription) {
-				message = '이 기기에 활성화된 푸시 구독이 없습니다.';
+				message = '이 기기에는 활성화된 푸시 구독이 없습니다.';
 				return;
 			}
 
@@ -145,34 +168,34 @@
 	});
 </script>
 
-<section class="container-col">
-	<h4 class="title">
-		<Smartphone size="0.8rem" />
-		<span>푸시 알림 설정</span>
-	</h4>
+{#if visible}
+	<section class="container-col">
+		<h4 class="title">
+			<Smartphone size="0.8rem" />
+			<span>푸시 알림 설정</span>
+		</h4>
 
-	<p>
-		알림을 허용하면 학생회의 소식이나 학식 메뉴 알림을 빠르게 받을 수 있습니다.
-	</p>
+		<p>알림을 허용하면 학생회의 소식이나 학식 메뉴 알림을 빠르게 받을 수 있습니다.</p>
 
-	{#if message}
-		<div class="error">{message}</div>
-	{/if}
-
-	{#if checked && supported}
-		{#if subscribed}
-			<button class="error-btn" type="button" onclick={disableNotifications} disabled={loading}>
-				<BellOff size="0.8rem" />
-				<span>{loading ? '차단 중...' : '차단하기'}</span>
-			</button>
-		{:else}
-			<button class="success-btn" type="button" onclick={enableNotifications} disabled={loading}>
-				<Bell size="0.8rem" />
-				<span>{loading ? '허용 중...' : '허용하기'}</span>
-			</button>
+		{#if message}
+			<div class="error">{message}</div>
 		{/if}
-	{/if}
-</section>
+
+		{#if checked && supported}
+			{#if subscribed}
+				<button class="error-btn" type="button" onclick={disableNotifications} disabled={loading}>
+					<BellOff size="0.8rem" />
+					<span>{loading ? '차단 중...' : '차단하기'}</span>
+				</button>
+			{:else}
+				<button class="success-btn" type="button" onclick={enableNotifications} disabled={loading}>
+					<Bell size="0.8rem" />
+					<span>{loading ? '허용 중...' : '허용하기'}</span>
+				</button>
+			{/if}
+		{/if}
+	</section>
+{/if}
 
 <style lang="scss">
 	section {

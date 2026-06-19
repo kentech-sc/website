@@ -64,9 +64,9 @@
 
 <style lang="scss">
 	h4 {
-		font-size: 1rem;
 		width: 100%;
 		font-weight: 500;
+		font-size: 1rem;
 	}
 
 	input + span {

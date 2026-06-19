@@ -51,7 +51,7 @@
 		{@render ActionGroup()}
 	</CommonArticleHeader>
 	<hr />
-	<h2 class="container title"><span>" {review.title} "</span></h2>
+	<h3 class="container title"><span>" {review.title} "</span></h3>
 	<pre>{review.comment}</pre>
 	<hr />
 	<div class="score container">
@@ -93,13 +93,17 @@
 		}
 	}
 
+	pre {
+		font-size: 0.9rem;
+	}
+
 	.score {
 		gap: 2rem;
 		margin-top: 0.8rem;
 
 		@include media.mobile {
-			gap: .4rem;
 			flex-direction: column;
+			gap: 0.4rem;
 		}
 
 		p {
