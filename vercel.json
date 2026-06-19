@@ -3,15 +3,15 @@
 	"crons": [
 		{
 			"path": "/api/cron/dining/breakfast",
-			"schedule": "45 21 * * *"
+			"schedule": "30 21 * * *"
 		},
 		{
 			"path": "/api/cron/dining/lunch",
-			"schedule": "0 2 * * *"
+			"schedule": "45 1 * * *"
 		},
 		{
 			"path": "/api/cron/dining/dinner",
-			"schedule": "15 8 * * *"
+			"schedule": "0 8 * * *"
 		}
 	]
 }

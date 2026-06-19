@@ -46,9 +46,9 @@
 
 <style lang="scss">
 	h2 {
+		margin-bottom: 0.6rem;
 		font-weight: 600;
 		font-size: 1.2rem;
-		margin-bottom: 0.6rem;
 	}
 
 	.google-login-shell {

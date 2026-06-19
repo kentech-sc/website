@@ -88,15 +88,12 @@
 			<span>앱 설치</span>
 		</h4>
 		{#if showAndroidGuide}
-			<p>버튼 클릭 한번으로 앱을 바로 설치할 수 있습니다.
-				<br/>
+			<p>
+				버튼 클릭 한번으로 앱을 바로 설치할 수 있습니다.
+				<br />
 				아무런 변화가 없으면 새로고침 후 다시 시도해 주세요.
 			</p>
-			<button
-				type="button"
-				class="action-btn"
-				onclick={promptAndroidInstall}
-			>
+			<button type="button" class="action-btn" onclick={promptAndroidInstall}>
 				<Download size="0.8rem" />
 				<span>설치하기</span>
 			</button>
@@ -119,14 +116,14 @@
 	}
 
 	p {
-		margin-top: .2rem;
+		margin-top: 0.2rem;
 		width: 100%;
 		color: var(--gray);
 		font-size: 0.8rem;
 	}
 
 	button {
-		margin-top: .6rem;
+		margin-top: 0.6rem;
 		margin-left: auto;
 	}
 </style>

@@ -33,8 +33,8 @@
 			align-items: center;
 
 			div {
-				gap: .4rem;
 				align-items: flex-end;
+				gap: 0.4rem;
 			}
 		}
 	}
