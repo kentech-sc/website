@@ -38,7 +38,7 @@
 			{/if}
 		</div>
 		<div class="row2">
-			<span class="meta">
+			<span>
 				{#if 'likedBy' in item}
 					{item.displayName} | 조회 {item.viewCnt} | 좋아요 {item.likedBy.length}
 				{:else if 'signedBy' in item}

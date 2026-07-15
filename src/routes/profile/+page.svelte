@@ -15,12 +15,12 @@
 </script>
 
 <section class="profile">
-	<div class="infos module">
+	<div class="module">
 		<Profile {user} />
 	</div>
 
 	<div class="container-col">
-		<div class="settings module container-col">
+		<div class="module container-col">
 			<h3>사용자 기능</h3>
 			<InstallAppPrompt />
 			<PushNotificationForm />
@@ -29,7 +29,7 @@
 		</div>
 
 		{#if permissions.canManageUsers}
-			<div class="admin module container-col">
+			<div class="module container-col">
 				<h3>관리자 기능</h3>
 				<BlockForm />
 				<ChangeGroupForm />
@@ -37,7 +37,7 @@
 		{/if}
 
 		{#if permissions.canCleanup}
-			<div class="dev module container-col">
+			<div class="module container-col">
 				<h3>개발자 기능</h3>
 				<CleanupForm />
 			</div>

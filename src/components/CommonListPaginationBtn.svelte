@@ -65,7 +65,7 @@
 		{:else if item === currentPage}
 			<span class="current" aria-current="page">{item}</span>
 		{:else}
-			<a href={getPageHref(item)} class="btn-anchor others">{item}</a>
+			<a href={getPageHref(item)} class="others">{item}</a>
 		{/if}
 	{/each}
 </div>

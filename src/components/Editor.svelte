@@ -514,7 +514,6 @@
 				/>
 				<button
 					type="button"
-					class="upload-button"
 					disabled={disabled || uploading}
 					onmousedown={handleUploadButtonMouseDown}
 					onclick={prepareFileUpload}

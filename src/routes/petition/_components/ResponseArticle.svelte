@@ -34,7 +34,7 @@
 	</CommonForm>
 {/snippet}
 
-<section class="container-col module" id="response-section">
+<section class="container-col module">
 	{#if petition.answeredAt}
 		{#if isEditing}
 			{@render ResponseForm(petition.response)}

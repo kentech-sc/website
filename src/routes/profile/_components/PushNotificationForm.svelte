@@ -170,7 +170,7 @@
 
 {#if visible}
 	<section class="container-col">
-		<h4 class="title">
+		<h4>
 			<Smartphone size="0.8rem" />
 			<span>푸시 알림 설정</span>
 		</h4>
