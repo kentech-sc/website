@@ -53,12 +53,12 @@
 
 <section class="module" data-loading={loading ? 'true' : 'false'}>
 	<CommonForm {actionName} {formName} bind:loading>
-		<div class="form-stack">
+		<div>
 			{#if beforeTitle}
 				{@render beforeTitle()}
 			{/if}
 
-			<div class="field-group">
+			<div>
 				<input type="text" name="title" value={initialTitle ?? ''} placeholder={titlePlaceholder} />
 			</div>
 
@@ -73,12 +73,12 @@
 
 	<FileList bind:fileMetas={attachments} isEditing={true} disabled={loading} />
 
-	<p class="form-helper-text">
+	<p>
 		첨부는 30MB 이하의 파일만 업로드 가능합니다.<br />
 		허용 확장자: PNG, JPG(JPEG), WEBP, PDF, DOCX, XLSX
 	</p>
 
-	<div class="form-actions-end">
+	<div>
 		<button type="submit" class="action-btn" form={formName} disabled={loading}>{submitText}</button
 		>
 	</div>

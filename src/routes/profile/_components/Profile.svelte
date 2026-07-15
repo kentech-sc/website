@@ -55,7 +55,7 @@
 	</div>
 
 	<button
-		class="error-btn logout-btn"
+		class="error-btn"
 		disabled={logoutLoading}
 		aria-busy={logoutLoading ? 'true' : 'false'}
 		onclick={handleSignOut}

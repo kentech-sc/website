@@ -53,10 +53,10 @@
 				: undefined}
 		>
 			{#if displayRating >= i}
-				<Star class="star full" fill="#FFC107" />
+				<Star class="star" fill="#FFC107" />
 			{:else if displayRating >= i - 0.5}
 				<Star class="star empty background" />
-				<StarHalf class="star half overlay" fill="#FFC107" />
+				<StarHalf class="star overlay" fill="#FFC107" />
 			{:else}
 				<Star class="star empty" />
 			{/if}

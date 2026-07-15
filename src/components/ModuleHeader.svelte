@@ -16,17 +16,17 @@
 	} = $props();
 </script>
 
-<header class="container-col module_head module-head-layout">
+<header class="container-col">
 	<h1>{title}</h1>
 
 	{#if description || actions}
-		<div class="container module-head-row">
+		<div class="container">
 			{#if description}
 				<p class={descriptionClass ?? ''}>{description}</p>
 			{/if}
 
 			{#if actions}
-				<div class="module-head-actions">
+				<div>
 					{@render actions()}
 				</div>
 			{/if}

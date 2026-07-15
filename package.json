@@ -3,15 +3,27 @@
 	"private": true,
 	"version": "1.0.0",
 	"type": "module",
+	"engines": {
+		"node": "24.18.0"
+	},
 	"scripts": {
 		"dev": "vite dev",
-		"build": "vite build",
+		"build": "svelte-kit sync && vite build",
 		"preview": "vite preview",
-		"prepare": "svelte-kit sync || echo ''",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-		"fix": "prettier --write . && eslint . --fix",
-		"all-check": "npm run fix && npm run check"
+		"fix": "prettier --write . && eslint src tests vite.config.ts eslint.config.js --fix",
+		"test": "vitest run",
+		"test:watch": "vitest",
+		"prepare": "husky"
+	},
+	"lint-staged": {
+		"*.{js,ts,svelte}": [
+			"prettier --write",
+			"eslint --fix"
+		],
+		"*.{json,md,css,scss}": [
+			"prettier --write"
+		]
 	},
 	"devDependencies": {
 		"@auth/sveltekit": "^1.10.0",
@@ -28,6 +40,8 @@
 		"eslint-plugin-import-x": "^4.16.2",
 		"eslint-plugin-svelte": "^3.0.0",
 		"globals": "^16.0.0",
+		"husky": "^9.1.7",
+		"lint-staged": "^17.0.8",
 		"prettier": "^3.4.2",
 		"prettier-plugin-css-order": "^2.2.0",
 		"prettier-plugin-svelte": "^3.3.3",

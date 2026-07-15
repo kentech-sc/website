@@ -10,7 +10,7 @@
 	{#if error}
 		<p><span style="color: red">[{error.status}]</span> {error.message}</p>
 	{/if}
-	<a href="/" class="btn-anchor">메인 페이지로 돌아가기</a>
+	<a href="/">메인 페이지로 돌아가기</a>
 </div>
 
 <style lang="scss">
