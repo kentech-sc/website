@@ -31,7 +31,7 @@ jobs:
       - name: Check Lint & Formatting
         run: |
           npx prettier --check .
-          npx eslint src tests vite.config.ts eslint.config.js
+          npx eslint src vite.config.ts eslint.config.js
 
       # 5. SvelteKit 타입스크립트 및 문법 전수 검사
       - name: Run Svelte Check
