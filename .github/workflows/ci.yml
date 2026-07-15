@@ -1,0 +1,48 @@
+name: SvelteKit CI/CD Check
+
+on:
+  pull_request:
+    branches: [main, dev]
+  push:
+    branches: [main, dev]
+
+jobs:
+  continuous-integration:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. 깃허브 소스코드 가져오기
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      # 2. Node.js 환경 세팅 (최신 LTS인 20버전 권장)
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      # 3. 의존성 패키지 깔끔하게 설치 (npm install 대신 npm ci 사용)
+      - name: Install Dependencies
+        run: npm ci
+
+      # 4. 코드 스타일 및 린트 전체 전수 검사
+      # (만약 Prettier/ESLint 경고를 무시하고 강제 푸시했다면 여기서 걸러집니다)
+      - name: Check Lint & Formatting
+        run: |
+          npx prettier --check .
+          npx eslint src tests vite.config.ts eslint.config.js
+
+      # 5. SvelteKit 타입스크립트 및 문법 전수 검사
+      - name: Run Svelte Check
+        run: npm run check
+
+      # 7. SvelteKit 실제 빌드 검사 (가장 중요)
+      # ( 환경 변수가 누락되었거나 배포 시 터질 코드라면 여기서 실패 처리됩니다 )
+      - name: Build Project
+        run: npm run build
+        env:
+          # Auth.js나 MongoDB 연결을 위한 더미 환경 변수 설정
+          # 빌드가 성공하는지 검사하는 단계이므로 가짜 값을 넣어두면 됩니다
+          MONGO_URI: 'mongodb://localhost:27017/dummy'
+          AUTH_SECRET: 'dummy_secret_key_for_testing_purposes_only'

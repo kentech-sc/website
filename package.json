@@ -12,8 +12,6 @@
 		"preview": "vite preview",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"fix": "prettier --write . && eslint src tests vite.config.ts eslint.config.js --fix",
-		"test": "vitest run",
-		"test:watch": "vitest",
 		"prepare": "husky"
 	},
 	"lint-staged": {
