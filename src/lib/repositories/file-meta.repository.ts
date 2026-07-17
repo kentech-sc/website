@@ -69,7 +69,7 @@ export async function removeArticleIdFromAllFiles(
 	return res.modifiedCount > 0;
 }
 
-export async function findOrphanedFiles(cutoffTime: Date): Promise<FileMetaEntity[]> {
+export async function findOrphanedFiles(cutoffTime: string): Promise<FileMetaEntity[]> {
 	const fileMetas = await FileMetaModel.find({
 		articleIds: { $size: 0 },
 		createdAt: { $lt: cutoffTime }

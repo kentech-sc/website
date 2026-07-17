@@ -1,7 +1,6 @@
 import type { CourseId } from '$lib/types/course.type.js';
 import type { ProfessorId } from '$lib/types/professor.type.js';
 import type { ReviewEntity, ReviewCreate, ReviewUpdate, ReviewId } from '$lib/types/review.type.js';
-import type { FilterQuery } from 'mongoose';
 
 import { ReviewModel } from '$lib/models/review.model.js';
 import { toPojo } from '$lib/shared/utils.js';
@@ -10,7 +9,7 @@ export async function countReviews(
 	professorId?: ProfessorId,
 	courseId?: CourseId
 ): Promise<number> {
-	const filterQuery: FilterQuery<ReviewEntity> = {};
+	const filterQuery: { professorId?: string; courseId?: string } = {};
 	if (professorId) filterQuery.professorId = professorId;
 	if (courseId) filterQuery.courseId = courseId;
 	return await ReviewModel.countDocuments(filterQuery);
@@ -34,7 +33,7 @@ export async function findRecentReviews(
 	professorId?: ProfessorId,
 	courseId?: CourseId
 ): Promise<Array<ReviewEntity>> {
-	const filterQuery: FilterQuery<ReviewEntity> = {};
+	const filterQuery: { professorId?: string; courseId?: string } = {};
 	if (professorId) filterQuery.professorId = professorId;
 	if (courseId) filterQuery.courseId = courseId;
 
