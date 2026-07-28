@@ -127,7 +127,7 @@
 						userVisibleOnly: true,
 						applicationServerKey: applicationServerKey as BufferSource
 					}),
-					'푸시 알림 구독 생성이 응답하지 않습니다. 브라우저의 알림 권한을 확인해 주세요.'
+					'브라우저의 푸시 서비스에 연결할 수 없습니다. Chrome, Edge 또는 Firefox에서 다시 시도해 주세요.'
 				));
 
 			message = '푸시 알림 구독을 저장하고 있습니다.';
