@@ -11,9 +11,11 @@
 	let checked = $state(false);
 	let supported = $state(false);
 	let subscribed = $state(false);
-	let message = $state('');
+	let errorMessage = $state('');
 
-	const PUSH_OPERATION_TIMEOUT_MS = 15_000;
+	const PUSH_OPERATION_TIMEOUT_MS = 5_000;
+	const ENABLE_FAILED_MESSAGE =
+		'푸시 알림 설정에 실패했습니다. 인터넷 연결 상태를 확인하거나 다른 웹 브라우저에서 다시 시도해 주세요.';
 
 	function withTimeout<T>(promise: Promise<T>, errorMessage: string): Promise<T> {
 		return new Promise<T>((resolve, reject) => {
@@ -74,23 +76,19 @@
 		checked = true;
 	}
 
-	function getErrorMessage(error: unknown, fallback: string): string {
-		return error instanceof Error && error.message ? error.message : fallback;
-	}
-
 	async function enableNotifications() {
 		if (!env.PUBLIC_VAPID_PUBLIC_KEY) {
-			message = '푸시 알림 공개키가 설정되지 않았습니다.';
+			errorMessage = ENABLE_FAILED_MESSAGE;
 			return;
 		}
 
 		if (!isSupported()) {
-			message = '이 기기에서는 푸시 알림을 지원하지 않습니다.';
+			errorMessage = ENABLE_FAILED_MESSAGE;
 			return;
 		}
 
 		loading = true;
-		message = '알림 권한을 확인하고 있습니다.';
+		errorMessage = '';
 
 		try {
 			const permissionResult = await withTimeout(
@@ -99,11 +97,10 @@
 			);
 
 			if (permissionResult !== 'granted') {
-				message = '알림 권한이 허용되지 않았습니다.';
+				errorMessage = ENABLE_FAILED_MESSAGE;
 				return;
 			}
 
-			message = '서비스 워커를 확인하고 있습니다.';
 			const registration = await withTimeout(
 				navigator.serviceWorker.ready,
 				'서비스 워커가 준비되지 않았습니다. 페이지를 새로고침한 뒤 다시 시도해 주세요.'
@@ -119,7 +116,6 @@
 				existingSubscription = null;
 			}
 
-			message = '푸시 알림 구독을 생성하고 있습니다.';
 			const subscription =
 				existingSubscription ??
 				(await withTimeout(
@@ -130,7 +126,6 @@
 					'브라우저의 푸시 서비스에 연결할 수 없습니다. Chrome, Edge 또는 Firefox에서 다시 시도해 주세요.'
 				));
 
-			message = '푸시 알림 구독을 저장하고 있습니다.';
 			const response = await withTimeout(
 				fetch('/api/push/subscription', {
 					method: 'POST',
@@ -146,11 +141,9 @@
 			if (!response.ok) {
 				throw new Error(result.message ?? '푸시 구독 저장에 실패했습니다.');
 			}
-
-			message = '푸시 알림이 활성화되었습니다.';
 		} catch (error) {
-			console.error('Failed to enable push notifications:', error);
-			message = getErrorMessage(error, '알림 활성화 중 오류가 발생했습니다.');
+			console.warn('Failed to enable push notifications:', error);
+			errorMessage = ENABLE_FAILED_MESSAGE;
 		} finally {
 			loading = false;
 			await refreshState();
@@ -159,19 +152,18 @@
 
 	async function disableNotifications() {
 		if (!isSupported()) {
-			message = '이 기기에서는 푸시 알림을 지원하지 않습니다.';
+			errorMessage = '푸시 알림 설정 해제에 실패했습니다.';
 			return;
 		}
 
 		loading = true;
-		message = '';
+		errorMessage = '';
 
 		try {
 			const registration = await navigator.serviceWorker.ready;
 			const subscription = await registration.pushManager.getSubscription();
 
 			if (!subscription) {
-				message = '이 기기에는 활성화된 푸시 구독이 없습니다.';
 				return;
 			}
 
@@ -190,7 +182,8 @@
 
 			await subscription.unsubscribe();
 		} catch (error) {
-			message = getErrorMessage(error, '알림 비활성화 중 오류가 발생했습니다.');
+			console.warn('Failed to disable push notifications:', error);
+			errorMessage = '푸시 알림 설정 해제에 실패했습니다.';
 		} finally {
 			loading = false;
 			await refreshState();
@@ -210,8 +203,8 @@
 
 	<p>알림을 허용하면 학생회의 소식이나 학식 메뉴 알림을 빠르게 받을 수 있습니다.</p>
 
-	{#if message}
-		<div class="error">{message}</div>
+	{#if errorMessage}
+		<div class="error">{errorMessage}</div>
 	{/if}
 
 	{#if checked && supported}
