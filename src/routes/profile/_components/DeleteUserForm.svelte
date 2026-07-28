@@ -61,7 +61,7 @@
 
 	.error {
 		align-items: flex-start;
-		margin-top: 0.6rem;
+		margin-top: 0.4rem;
 
 		h5 {
 			margin: 0.4rem 0;

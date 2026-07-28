@@ -7,12 +7,13 @@
 		userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }>;
 	};
 
-	let showPcGuide = $state(false);
-	let showIosGuide = $state(false);
-	let showAndroidGuide = $state(false);
-	let shouldShowSection = $state(false);
+	type WindowWithInstallPrompt = Window & {
+		__deferredInstallPrompt?: BeforeInstallPromptEvent | null;
+	};
 
-	let androidInstallPrompt: BeforeInstallPromptEvent | null = null;
+	let showIosGuide = $state(false);
+	let installPrompt = $state<BeforeInstallPromptEvent | null>(null);
+	let browserReady = $state(false);
 
 	function isAndroidDevice(): boolean {
 		return /Android/i.test(navigator.userAgent);
@@ -26,82 +27,73 @@
 		return /iPhone|iPad|iPod/i.test(userAgent) || (platform === 'MacIntel' && hasTouchPoints);
 	}
 
-	function isPcDevice(): boolean {
-		return !isIosDevice() && !isAndroidDevice();
+	function isManualInstallSupported(): boolean {
+		if (!window.isSecureContext) return false;
+		if (isIosDevice() || isAndroidDevice()) return true;
+
+		const userAgent = navigator.userAgent;
+		const isChromium = /(?:Edg|Chrome|Chromium)\//i.test(userAgent);
+		const isDesktopSafari =
+			/Safari\//i.test(userAgent) && !/(?:Chrome|Chromium|Edg)\//i.test(userAgent);
+
+		return isChromium || isDesktopSafari;
 	}
 
-	function updateGuideState(mediaQueryList: MediaQueryList) {
-		const navigatorWithStandalone = navigator as Navigator & { standalone?: boolean };
-		const isInstalled =
-			mediaQueryList.matches ||
-			navigatorWithStandalone.standalone === true ||
-			document.referrer.startsWith('android-app://');
+	async function promptInstall() {
+		if (!installPrompt) return;
 
-		showPcGuide = isPcDevice() && !isInstalled;
-		showIosGuide = isIosDevice() && !isInstalled;
-		showAndroidGuide = isAndroidDevice() && !isInstalled;
-		shouldShowSection = showPcGuide || showIosGuide || showAndroidGuide;
-
-		if (isInstalled) {
-			androidInstallPrompt = null;
-		}
-	}
-
-	async function promptAndroidInstall() {
-		if (!androidInstallPrompt) return;
-
-		await androidInstallPrompt.prompt();
-		await androidInstallPrompt.userChoice;
-		androidInstallPrompt = null;
+		await installPrompt.prompt();
+		await installPrompt.userChoice;
+		installPrompt = null;
+		(window as WindowWithInstallPrompt).__deferredInstallPrompt = null;
 	}
 
 	onMount(() => {
-		const mediaQueryList = window.matchMedia('(display-mode: standalone)');
-		const handleDisplayModeChange = () => updateGuideState(mediaQueryList);
-		const handleAppInstalled = () => updateGuideState(mediaQueryList);
-		const handleBeforeInstallPrompt = (event: Event) => {
-			const promptEvent = event as BeforeInstallPromptEvent;
+		browserReady = true;
+		showIosGuide = isIosDevice();
 
-			promptEvent.preventDefault();
-			androidInstallPrompt = promptEvent;
-			updateGuideState(mediaQueryList);
+		const handleAppInstalled = () => {
+			installPrompt = null;
+		};
+		const handleInstallPromptAvailable = () => {
+			installPrompt = (window as WindowWithInstallPrompt).__deferredInstallPrompt ?? installPrompt;
 		};
 
-		updateGuideState(mediaQueryList);
-
-		mediaQueryList.addEventListener('change', handleDisplayModeChange);
+		handleInstallPromptAvailable();
 		window.addEventListener('appinstalled', handleAppInstalled);
-		window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+		window.addEventListener('installpromptavailable', handleInstallPromptAvailable);
 
 		return () => {
-			mediaQueryList.removeEventListener('change', handleDisplayModeChange);
 			window.removeEventListener('appinstalled', handleAppInstalled);
-			window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+			window.removeEventListener('installpromptavailable', handleInstallPromptAvailable);
 		};
 	});
 </script>
 
-{#if shouldShowSection && !showPcGuide}
-	<section class="container-col">
-		<h4>
+<section class="container-col">
+	<h4>
+		<Download size="0.8rem" />
+		<span>앱 설치</span>
+	</h4>
+	{#if showIosGuide}
+		<p>브라우저의 공유 버튼을 누른 뒤 ‘홈 화면에 추가’를 선택해 주세요.</p>
+	{:else if installPrompt}
+		<p>이 사이트를 앱으로 설치하면 홈 화면에서 바로 실행할 수 있습니다.</p>
+		<button type="button" class="action-btn" onclick={promptInstall}>
 			<Download size="0.8rem" />
-			<span>앱 설치</span>
-		</h4>
-		{#if showAndroidGuide}
-			<p>
-				버튼 클릭 한번으로 앱을 바로 설치할 수 있습니다.
-				<br />
-				아무런 변화가 없으면 새로고침 후 다시 시도해 주세요.
-			</p>
-			<button type="button" class="action-btn" onclick={promptAndroidInstall}>
-				<Download size="0.8rem" />
-				<span>설치하기</span>
-			</button>
-		{:else if showIosGuide}
-			<p>브라우저의 공유 버튼을 누른 뒤, 홈 화면에 추가를 선택해 주세요.</p>
-		{/if}
-	</section>
-{/if}
+			<span>설치하기</span>
+		</button>
+	{:else if !browserReady}
+		<p>앱을 설치할 수 있는지 확인하고 있습니다...</p>
+	{:else if isManualInstallSupported()}
+		<p>
+			브라우저 주소창 또는 메뉴에서 ‘앱 설치’를 선택해 주세요. 이미 설치했다면 설치된 앱을 열어
+			주세요.
+		</p>
+	{:else}
+		<div class="error">현재 브라우저 또는 접속 환경에서는 앱을 설치할 수 없습니다.</div>
+	{/if}
+</section>
 
 <style lang="scss">
 	section {
@@ -116,7 +108,6 @@
 	}
 
 	p {
-		margin-top: 0.2rem;
 		width: 100%;
 		color: var(--gray);
 		font-size: 0.8rem;

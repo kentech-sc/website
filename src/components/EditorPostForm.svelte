@@ -67,7 +67,15 @@
 				<input type="hidden" name="fileIds" value={fileId} readonly />
 			{/each}
 
-			<Editor bind:editorHtml bind:attachments bind:imageIds {initialHtml} disabled={loading} />
+			{#key formKey ?? '__default__'}
+				<Editor
+					{initialHtml}
+					bind:attachments
+					onChangeHtml={(html: string) => (editorHtml = html)}
+					onChangeImageIds={(ids: FileId[]) => (imageIds = ids)}
+					disabled={loading}
+				/>
+			{/key}
 		</div>
 	</CommonForm>
 

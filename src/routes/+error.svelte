@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 
 	let error = $derived(page.error);
@@ -10,7 +11,7 @@
 	{#if error}
 		<p><span style="color: red">[{error.status}]</span> {error.message}</p>
 	{/if}
-	<a href="/">메인 페이지로 돌아가기</a>
+	<a href={resolve('/')}>메인 페이지로 돌아가기</a>
 </div>
 
 <style lang="scss">

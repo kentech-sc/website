@@ -38,7 +38,12 @@
 		<input type="hidden" name="fileIds" value={fileId} readonly />
 	{/each}
 
-	<Editor bind:editorHtml bind:attachments bind:imageIds disabled={loading} />
+	<Editor
+		bind:attachments
+		onChangeHtml={(html: string) => (editorHtml = html)}
+		onChangeImageIds={(ids: FileId[]) => (imageIds = ids)}
+		disabled={loading}
+	/>
 {/snippet}
 
 <section class="container-col" data-loading={loading ? 'true' : 'false'}>

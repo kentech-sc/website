@@ -4,6 +4,7 @@
 
 	import type { Review, ReviewPermissions } from '$lib/types/review.type.js';
 
+	import { resolve } from '$app/paths';
 	import CommonArticleHeader from '$components/CommonArticleHeader.svelte';
 	import InlineActionForm from '$components/InlineActionForm.svelte';
 	import StarRating from '$components/StarRating.svelte';
@@ -30,7 +31,11 @@
 {#snippet ActionGroup()}
 	<div class="container">
 		{#if permissions.canEdit}
-			<a class="edit-btn inline-container" href="{review._id}/edit"><Pencil size="1.2rem" /></a>
+			<a
+				class="edit-btn inline-container"
+				href={resolve('/review/[reviewId]/edit', { reviewId: review._id.toString() })}
+				><Pencil size="1.2rem" /></a
+			>
 		{/if}
 		{#if permissions.canDelete}
 			<div class="delete-form">

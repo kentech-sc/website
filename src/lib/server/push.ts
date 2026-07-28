@@ -35,9 +35,9 @@ function configureWebPush() {
 function isStalePushError(error: unknown): boolean {
 	return Boolean(
 		typeof error === 'object' &&
-			error !== null &&
-			'statusCode' in error &&
-			(error.statusCode === 404 || error.statusCode === 410)
+		error !== null &&
+		'statusCode' in error &&
+		(error.statusCode === 404 || error.statusCode === 410)
 	);
 }
 
@@ -71,12 +71,10 @@ export function isPushSubscriptionInput(value: unknown): value is PushSubscripti
 
 	return Boolean(
 		typeof subscription.endpoint === 'string' &&
-			subscription.keys &&
-			typeof subscription.keys.p256dh === 'string' &&
-			typeof subscription.keys.auth === 'string' &&
-			(expirationTime === undefined ||
-				expirationTime === null ||
-				typeof expirationTime === 'number')
+		subscription.keys &&
+		typeof subscription.keys.p256dh === 'string' &&
+		typeof subscription.keys.auth === 'string' &&
+		(expirationTime === undefined || expirationTime === null || typeof expirationTime === 'number')
 	);
 }
 

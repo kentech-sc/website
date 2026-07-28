@@ -9,6 +9,7 @@
 	import type { Post, PostPermissions } from '$lib/types/post.type.js';
 	import type { User } from '$lib/types/user.type.js';
 
+	import { resolve } from '$app/paths';
 	import CommonArticleHeader from '$components/CommonArticleHeader.svelte';
 	import InlineActionForm from '$components/InlineActionForm.svelte';
 
@@ -40,7 +41,13 @@
 {#snippet ActionGroup()}
 	<div class="container">
 		{#if permissions.canEdit}
-			<a class="edit-btn inline-container" href="{post._id}/edit"><Pencil size="1.2rem" /></a>
+			<a
+				class="edit-btn inline-container"
+				href={resolve('/board/[boardId=board]/[postId]/edit', {
+					boardId: post.boardId,
+					postId: post._id.toString()
+				})}><Pencil size="1.2rem" /></a
+			>
 		{/if}
 		{#if permissions.canDelete}
 			<div class="delete-form">

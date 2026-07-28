@@ -49,8 +49,7 @@
 					name="content"
 					class="course-description"
 					placeholder="강의에 대한 간단한 설명을 입력해 주세요"
-					bind:this={courseContentInput}
-				></textarea>
+					bind:this={courseContentInput}></textarea>
 			</CommonLabel>
 
 			<button type="submit" class="action-btn">

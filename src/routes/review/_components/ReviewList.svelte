@@ -11,7 +11,7 @@
 	{#if reviewPage.items.length === 0}
 		<p>작성된 강의평가가 없습니다.</p>
 	{:else}
-		<CommonList href="/review" page={reviewPage} filePresence={{}} />
+		<CommonList page={reviewPage} filePresence={{}} />
 	{/if}
 </section>
 

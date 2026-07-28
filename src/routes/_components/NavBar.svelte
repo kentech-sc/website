@@ -6,6 +6,7 @@
 	import { cubicOut } from 'svelte/easing';
 	import { fly, fade } from 'svelte/transition';
 
+	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import favicon from '$assets/top_logo_white.png';
 
@@ -22,30 +23,30 @@
 </script>
 
 {#snippet Logo()}
-	<a href="/" class="inline-container logo">
+	<a href={resolve('/')} class="inline-container logo">
 		<img src={favicon} alt="켄텍 로고 이미지" />
 	</a>
 {/snippet}
 
 {#snippet Nav()}
 	<nav class="only-pc">
-		<a href="/board/notice">공지사항</a>
-		<a href="/board/free">자유게시판</a>
-		<a href="/board/bylaw">회칙·세칙</a>
-		<a href="/review">강의평가</a>
-		<a href="/petition">청원</a>
+		<a href={resolve('/board/[boardId=board]', { boardId: 'notice' })}>공지사항</a>
+		<a href={resolve('/board/[boardId=board]', { boardId: 'free' })}>자유게시판</a>
+		<a href={resolve('/board/[boardId=board]', { boardId: 'bylaw' })}>회칙·세칙</a>
+		<a href={resolve('/review')}>강의평가</a>
+		<a href={resolve('/petition')}>청원</a>
 	</nav>
 {/snippet}
 
 {#snippet ProfileBtn()}
 	<div class="inline-container profile-btn">
 		{#if user.group !== 'guest'}
-			<a href="/profile" class="inline-container">
+			<a href={resolve('/profile')} class="inline-container">
 				<CircleUserRound size="1.6rem" strokeWidth={1.5} color="white" class="only-mobile" />
 				<span class="only-pc">{user.nickname}</span>
 			</a>
 		{:else}
-			<a href="/signin">
+			<a href={resolve('/signin')}>
 				<p>로그인</p>
 			</a>
 		{/if}
@@ -53,7 +54,7 @@
 {/snippet}
 
 {#snippet SearchBtn()}
-	<a href="/search" class="inline-container search-btn">
+	<a href={resolve('/search')} class="inline-container search-btn">
 		<Search size="0.8rem" color="white" />
 	</a>
 {/snippet}
@@ -82,16 +83,22 @@
 		data-sveltekit-preload-data="hover"
 		transition:fly={{ x: 300, duration: 200, easing: cubicOut }}
 	>
-		<a href="/board/notice" onclick={closeDrawer}>공지사항</a>
-		<a href="/board/free" onclick={closeDrawer}>자유게시판</a>
-		<a href="/board/bylaw" onclick={closeDrawer}>회칙·세칙</a>
-		<a href="/review" onclick={closeDrawer}>강의평가</a>
-		<a href="/petition" onclick={closeDrawer}>청원</a>
+		<a href={resolve('/board/[boardId=board]', { boardId: 'notice' })} onclick={closeDrawer}
+			>공지사항</a
+		>
+		<a href={resolve('/board/[boardId=board]', { boardId: 'free' })} onclick={closeDrawer}
+			>자유게시판</a
+		>
+		<a href={resolve('/board/[boardId=board]', { boardId: 'bylaw' })} onclick={closeDrawer}
+			>회칙·세칙</a
+		>
+		<a href={resolve('/review')} onclick={closeDrawer}>강의평가</a>
+		<a href={resolve('/petition')} onclick={closeDrawer}>청원</a>
 		<hr />
 		{#if user.group !== 'guest'}
-			<a href="/profile" onclick={closeDrawer}>{user.nickname}</a>
+			<a href={resolve('/profile')} onclick={closeDrawer}>{user.nickname}</a>
 		{:else}
-			<a href="/signin" onclick={closeDrawer}>로그인</a>
+			<a href={resolve('/signin')} onclick={closeDrawer}>로그인</a>
 		{/if}
 	</nav>
 {/snippet}

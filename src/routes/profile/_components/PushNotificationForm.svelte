@@ -9,10 +9,28 @@
 
 	let loading = $state(false);
 	let checked = $state(false);
-	let visible = $state(false);
 	let supported = $state(false);
 	let subscribed = $state(false);
 	let message = $state('');
+
+	const PUSH_OPERATION_TIMEOUT_MS = 15_000;
+
+	function withTimeout<T>(promise: Promise<T>, errorMessage: string): Promise<T> {
+		return new Promise<T>((resolve, reject) => {
+			const timer = setTimeout(() => reject(new Error(errorMessage)), PUSH_OPERATION_TIMEOUT_MS);
+
+			promise.then(
+				(value) => {
+					clearTimeout(timer);
+					resolve(value);
+				},
+				(error: unknown) => {
+					clearTimeout(timer);
+					reject(error);
+				}
+			);
+		});
+	}
 
 	function base64UrlToUint8Array(base64Url: string): Uint8Array {
 		const padding = '='.repeat((4 - (base64Url.length % 4)) % 4);
@@ -22,36 +40,24 @@
 		return Uint8Array.from([...raw].map((char) => char.charCodeAt(0)));
 	}
 
+	function hasSameApplicationServerKey(
+		subscription: PushSubscription,
+		expectedKey: Uint8Array
+	): boolean {
+		const currentKey = subscription.options.applicationServerKey;
+		if (!currentKey || currentKey.byteLength !== expectedKey.byteLength) return false;
+
+		const currentBytes = new Uint8Array(currentKey);
+		return expectedKey.every((byte, index) => currentBytes[index] === byte);
+	}
+
 	function isSupported(): boolean {
 		return (
 			browser && 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window
 		);
 	}
 
-	function isMobileDevice(): boolean {
-		return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-	}
-
-	function isInstalledApp(): boolean {
-		const navigatorWithStandalone = navigator as Navigator & { standalone?: boolean };
-
-		return (
-			window.matchMedia('(display-mode: standalone)').matches ||
-			navigatorWithStandalone.standalone === true ||
-			document.referrer.startsWith('android-app://')
-		);
-	}
-
 	async function refreshState() {
-		visible = !isMobileDevice() || isInstalledApp();
-
-		if (!visible) {
-			supported = false;
-			subscribed = false;
-			checked = true;
-			return;
-		}
-
 		const nextSupported = isSupported() && Boolean(env.PUBLIC_VAPID_PUBLIC_KEY);
 
 		if (!nextSupported) {
@@ -84,38 +90,66 @@
 		}
 
 		loading = true;
-		message = '';
+		message = '알림 권한을 확인하고 있습니다.';
 
 		try {
-			const permissionResult = await Notification.requestPermission();
+			const permissionResult = await withTimeout(
+				Notification.requestPermission(),
+				'알림 권한 요청이 응답하지 않습니다. 브라우저 또는 기기 설정에서 알림 권한을 확인해 주세요.'
+			);
 
 			if (permissionResult !== 'granted') {
 				message = '알림 권한이 허용되지 않았습니다.';
 				return;
 			}
 
-			const registration = await navigator.serviceWorker.ready;
-			const existingSubscription = await registration.pushManager.getSubscription();
+			message = '서비스 워커를 확인하고 있습니다.';
+			const registration = await withTimeout(
+				navigator.serviceWorker.ready,
+				'서비스 워커가 준비되지 않았습니다. 페이지를 새로고침한 뒤 다시 시도해 주세요.'
+			);
+			const applicationServerKey = base64UrlToUint8Array(env.PUBLIC_VAPID_PUBLIC_KEY);
+			let existingSubscription = await registration.pushManager.getSubscription();
+
+			if (
+				existingSubscription &&
+				!hasSameApplicationServerKey(existingSubscription, applicationServerKey)
+			) {
+				await existingSubscription.unsubscribe();
+				existingSubscription = null;
+			}
+
+			message = '푸시 알림 구독을 생성하고 있습니다.';
 			const subscription =
 				existingSubscription ??
-				(await registration.pushManager.subscribe({
-					userVisibleOnly: true,
-					applicationServerKey: base64UrlToUint8Array(env.PUBLIC_VAPID_PUBLIC_KEY) as BufferSource
-				}));
+				(await withTimeout(
+					registration.pushManager.subscribe({
+						userVisibleOnly: true,
+						applicationServerKey: applicationServerKey as BufferSource
+					}),
+					'푸시 알림 구독 생성이 응답하지 않습니다. 브라우저의 알림 권한을 확인해 주세요.'
+				));
 
-			const response = await fetch('/api/push/subscription', {
-				method: 'POST',
-				headers: {
-					'content-type': 'application/json'
-				},
-				body: JSON.stringify(subscription.toJSON())
-			});
+			message = '푸시 알림 구독을 저장하고 있습니다.';
+			const response = await withTimeout(
+				fetch('/api/push/subscription', {
+					method: 'POST',
+					headers: {
+						'content-type': 'application/json'
+					},
+					body: JSON.stringify(subscription.toJSON())
+				}),
+				'푸시 알림 구독 저장 요청이 응답하지 않습니다.'
+			);
 
 			const result = (await response.json()) as { message?: string };
 			if (!response.ok) {
 				throw new Error(result.message ?? '푸시 구독 저장에 실패했습니다.');
 			}
+
+			message = '푸시 알림이 활성화되었습니다.';
 		} catch (error) {
+			console.error('Failed to enable push notifications:', error);
 			message = getErrorMessage(error, '알림 활성화 중 오류가 발생했습니다.');
 		} finally {
 			loading = false;
@@ -168,34 +202,32 @@
 	});
 </script>
 
-{#if visible}
-	<section class="container-col">
-		<h4>
-			<Smartphone size="0.8rem" />
-			<span>푸시 알림 설정</span>
-		</h4>
+<section class="container-col">
+	<h4>
+		<Smartphone size="0.8rem" />
+		<span>푸시 알림 설정</span>
+	</h4>
 
-		<p>알림을 허용하면 학생회의 소식이나 학식 메뉴 알림을 빠르게 받을 수 있습니다.</p>
+	<p>알림을 허용하면 학생회의 소식이나 학식 메뉴 알림을 빠르게 받을 수 있습니다.</p>
 
-		{#if message}
-			<div class="error">{message}</div>
+	{#if message}
+		<div class="error">{message}</div>
+	{/if}
+
+	{#if checked && supported}
+		{#if subscribed}
+			<button class="error-btn" type="button" onclick={disableNotifications} disabled={loading}>
+				<BellOff size="0.8rem" />
+				<span>{loading ? '차단 중...' : '차단하기'}</span>
+			</button>
+		{:else}
+			<button class="success-btn" type="button" onclick={enableNotifications} disabled={loading}>
+				<Bell size="0.8rem" />
+				<span>{loading ? '허용 중...' : '허용하기'}</span>
+			</button>
 		{/if}
-
-		{#if checked && supported}
-			{#if subscribed}
-				<button class="error-btn" type="button" onclick={disableNotifications} disabled={loading}>
-					<BellOff size="0.8rem" />
-					<span>{loading ? '차단 중...' : '차단하기'}</span>
-				</button>
-			{:else}
-				<button class="success-btn" type="button" onclick={enableNotifications} disabled={loading}>
-					<Bell size="0.8rem" />
-					<span>{loading ? '허용 중...' : '허용하기'}</span>
-				</button>
-			{/if}
-		{/if}
-	</section>
-{/if}
+	{/if}
+</section>
 
 <style lang="scss">
 	section {

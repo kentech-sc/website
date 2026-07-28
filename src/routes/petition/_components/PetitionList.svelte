@@ -15,7 +15,7 @@
 	{#if petitionPage.items.length === 0}
 		<p>작성된 청원이 없습니다.</p>
 	{:else}
-		<CommonList href="/petition" page={petitionPage} {filePresence} />
+		<CommonList page={petitionPage} {filePresence} />
 	{/if}
 </section>
 

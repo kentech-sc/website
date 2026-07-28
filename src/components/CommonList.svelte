@@ -4,24 +4,32 @@
 	import type { Post } from '$lib/types/post.type.js';
 	import type { Review } from '$lib/types/review.type';
 
+	import { resolve } from '$app/paths';
 	import CommonListPaginationBtn from '$components/CommonListPaginationBtn.svelte';
 	import FileAttachmentIcons from '$components/FileAttachmentIcons.svelte';
 	import { parseRelativeDate } from '$lib/shared/utils.js';
 	import { translatedTerm, colorStatus, translatedStatus } from '$lib/shared/view';
 
 	let {
-		href,
 		page,
 		filePresence
 	}: {
-		href: string;
 		page: Page<Post | Petition | Review>;
 		filePresence: FilePresence;
 	} = $props();
 </script>
 
-{#snippet ListItem(item: Post | Petition | Review, href: string)}
-	<a href="{href}/{item._id}" class="list-item">
+{#snippet ListItem(item: Post | Petition | Review)}
+	{@const itemHref =
+		'boardId' in item
+			? resolve('/board/[boardId=board]/[postId]', {
+					boardId: item.boardId,
+					postId: item._id.toString()
+				})
+			: 'status' in item
+				? resolve('/petition/[petitionId]', { petitionId: item._id.toString() })
+				: resolve('/review/[reviewId]', { reviewId: item._id.toString() })}
+	<a href={itemHref} class="list-item">
 		<div class="row1">
 			{#if 'status' in item}
 				<span class="petition-status" style:color={colorStatus[item.status]}
@@ -55,7 +63,7 @@
 {/snippet}
 
 {#each page.items as item (item._id)}
-	{@render ListItem(item, href)}
+	{@render ListItem(item)}
 {/each}
 <CommonListPaginationBtn currentPage={page.currentPage} totalPages={page.totalPages} />
 
