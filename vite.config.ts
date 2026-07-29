@@ -25,10 +25,11 @@ export default defineConfig({
 			filename: 'service-worker.ts',
 			registerType: 'autoUpdate',
 			injectManifest: {
-				globPatterns: [
-					'client/**/*.{js,css,ico,png,svg,webp,webmanifest,html}',
-					'prerendered/**/*.{html,json}'
-				]
+				globPatterns: ['client/**/*.{js,css,ico,png,svg,webp,webmanifest,html}'],
+				modifyURLPrefix: {
+					'client/': '/'
+				},
+				manifestTransforms: [async (entries) => ({ manifest: entries })]
 			},
 			manifest: false
 		})

@@ -1,15 +1,18 @@
 import * as Sentry from '@sentry/sveltekit';
 
 import { dev } from '$app/environment';
-import { env } from '$env/dynamic/public';
+import * as publicEnv from '$env/static/public';
 
-const sentryEnabled =
-	!dev && Boolean(env.PUBLIC_SENTRY_DSN) && Boolean(env.PUBLIC_SENTRY_ENVIRONMENT);
+const staticPublicEnv = publicEnv as Record<string, string | undefined>;
+const sentryDsn = staticPublicEnv.PUBLIC_SENTRY_DSN;
+const sentryEnvironment = staticPublicEnv.PUBLIC_SENTRY_ENVIRONMENT;
+
+const sentryEnabled = !dev && Boolean(sentryDsn) && Boolean(sentryEnvironment);
 
 Sentry.init({
 	enabled: sentryEnabled,
-	dsn: sentryEnabled ? env.PUBLIC_SENTRY_DSN : undefined,
-	environment: sentryEnabled ? env.PUBLIC_SENTRY_ENVIRONMENT : undefined,
+	dsn: sentryEnabled ? sentryDsn : undefined,
+	environment: sentryEnabled ? sentryEnvironment : undefined,
 	tracesSampleRate: 1.0,
 
 	// Enable logs to be sent to Sentry
@@ -23,6 +26,6 @@ console.log('SENTRY_SERVER_INITIALIZED', {
 	dev,
 	enabled: sentryEnabled,
 	initialized: Sentry.isInitialized(),
-	environment: env.PUBLIC_SENTRY_ENVIRONMENT,
-	hasDsn: Boolean(env.PUBLIC_SENTRY_DSN)
+	environment: sentryEnvironment,
+	hasDsn: Boolean(sentryDsn)
 });
