@@ -3,10 +3,87 @@
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>오프라인</title>
+		<meta name="theme-color" content="#4a8cff" />
+		<title>오프라인 | 켄텍 총학생회</title>
+		<style>
+			:root {
+				--white: oklch(1 0 0);
+				--text: oklch(0 0 0);
+				--gray: oklch(0.6 0 0);
+				--gray-border: oklch(from var(--gray) 0.85 c h);
+				--gray-bg: oklch(from var(--gray) 0.98 c h);
+				--secondary: oklch(0.57 0.15 246.9);
+				--shadow-color: rgb(0 0 0 / 10%);
+			}
+
+			*,
+			*::before,
+			*::after {
+				box-sizing: border-box;
+				font-family:
+					Pretendard,
+					-apple-system,
+					BlinkMacSystemFont,
+					'Segoe UI',
+					sans-serif;
+				word-break: keep-all;
+			}
+
+			html {
+				background-color: var(--gray-bg);
+				min-height: 100%;
+				font-size: 20px;
+			}
+
+			body {
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				margin: 0;
+				background-color: var(--gray-bg);
+				padding: 1rem;
+				min-height: 100vh;
+				color: var(--text);
+				line-height: 1.4;
+			}
+
+			main {
+				box-shadow: 0 0.2rem 0.4rem var(--shadow-color);
+				border: 0.1rem solid var(--gray-border);
+				border-radius: 0.6rem;
+				background-color: var(--white);
+				padding: 1rem;
+				width: min(100%, 32rem);
+				text-align: center;
+			}
+
+			h1,
+			p {
+				margin: 0;
+			}
+
+			h1 {
+				font-weight: 600;
+				font-size: 1.2rem;
+			}
+
+			p {
+				margin-top: 0.6rem;
+				color: var(--gray);
+				font-size: 0.8rem;
+			}
+
+			@media (max-width: 1024px) {
+				html {
+					font-size: 14px;
+				}
+			}
+		</style>
 	</head>
 	<body>
-		<h1>인터넷 연결이 필요합니다.</h1>
-		<p>연결 후 다시 시도해 주세요.</p>
+		<main>
+			<h1>오프라인입니다.</h1>
+			<p>인터넷 연결을 확인한 뒤 다시 시도해 주세요.</p>
+		</main>
 	</body>
 </html>

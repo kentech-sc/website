@@ -4,6 +4,7 @@ import type { User } from '$lib/types/user.type.js';
 import * as PetitionRepository from '$lib/repositories/petition.repository.js';
 import * as PetitionRule from '$lib/rules/petition.rule.js';
 import { AppError, assertRule } from '$lib/server/errors.js';
+import { assertObjectId } from '$lib/server/object-id.js';
 import { createPage } from '$lib/shared/paginate.js';
 import { APP_ERROR } from '$lib/shared/rule.js';
 import {
@@ -34,6 +35,7 @@ export async function createPetition(
 }
 
 export async function getPetitionById(petitionId: PetitionId): Promise<PetitionEntity> {
+	assertObjectId(petitionId, '존재하지 않는 청원입니다.');
 	const petition = await PetitionRepository.findPetitionById(petitionId);
 	if (!petition) throw new AppError(APP_ERROR.NOT_FOUND, '존재하지 않는 청원입니다.');
 	return await refreshStatusByPetition(petition);
@@ -61,6 +63,7 @@ export async function deletePetitionById(
 }
 
 export async function viewPetitionById(petitionId: PetitionId): Promise<PetitionEntity> {
+	assertObjectId(petitionId, '존재하지 않는 청원입니다.');
 	const petition = await PetitionRepository.viewPetitionById(petitionId);
 	if (!petition) throw new AppError(APP_ERROR.NOT_FOUND, '존재하지 않는 청원입니다.');
 	return await refreshStatusByPetition(petition);

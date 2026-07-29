@@ -7,7 +7,7 @@ import * as ReviewUsecase from '$lib/usecase/review.usecase.js';
 
 export const load = withLoadErrorHandling(async ({ params, locals }) => {
 	const reviewIdRaw = params.reviewId;
-	if (!reviewIdRaw) throw new Error('리뷰 ID가 필요합니다.');
+	if (!reviewIdRaw) throw new Error('강의 평가 ID가 필요합니다.');
 	const reviewId: ReviewId = reviewIdRaw;
 
 	return await ReviewUsecase.getReviewDetail(reviewId, locals.user);
