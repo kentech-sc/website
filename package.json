@@ -16,12 +16,11 @@
 		"prepare": "husky"
 	},
 	"lint-staged": {
-		"*.{js,ts,svelte}": [
-			"prettier --write",
-			"eslint --fix"
+		"*": [
+			"prettier --write --ignore-unknown"
 		],
-		"*.{json,md,css,scss}": [
-			"prettier --write"
+		"*.{js,ts,svelte}": [
+			"eslint --fix"
 		]
 	},
 	"devDependencies": {
