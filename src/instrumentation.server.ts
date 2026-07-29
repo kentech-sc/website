@@ -18,3 +18,11 @@ Sentry.init({
 	// uncomment the line below to enable Spotlight (https://spotlightjs.com)
 	// spotlight: import.meta.env.DEV,
 });
+
+console.log('SENTRY_SERVER_INITIALIZED', {
+	dev,
+	enabled: sentryEnabled,
+	initialized: Sentry.isInitialized(),
+	environment: env.PUBLIC_SENTRY_ENVIRONMENT,
+	hasDsn: Boolean(env.PUBLIC_SENTRY_DSN)
+});

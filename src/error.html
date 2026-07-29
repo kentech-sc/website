@@ -1,5 +1,115 @@
-<h1>예상치 못한 아주아주 심각한 에러가 발생했습니다.</h1>
-<p>이 페이지를 만났다면 화면을 캡쳐해서 메일을 통해 꼭 알려주세요!</p>
-<p>Code %sveltekit.status%</p>
-<p>%sveltekit.error.message%</p>
-<a href="/">메인 페이지로 돌아가기</a>
+<!doctype html>
+<html lang="ko">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta name="theme-color" content="#4a8cff" />
+		<title>오류 | 켄텍 총학생회</title>
+		<style>
+			:root {
+				--white: oklch(1 0 0);
+				--text: oklch(0 0 0);
+				--gray: oklch(0.6 0 0);
+				--gray-border: oklch(from var(--gray) 0.85 c h);
+				--gray-bg: oklch(from var(--gray) 0.98 c h);
+				--secondary: oklch(0.57 0.15 246.9);
+				--secondary-strong-hover: oklch(from var(--secondary) calc(l - 0.08) c h);
+				--shadow-color: rgb(0 0 0 / 10%);
+			}
+
+			*,
+			*::before,
+			*::after {
+				box-sizing: border-box;
+				font-family:
+					Pretendard,
+					-apple-system,
+					BlinkMacSystemFont,
+					'Segoe UI',
+					sans-serif;
+				word-break: keep-all;
+			}
+
+			html {
+				background-color: var(--gray-bg);
+				min-height: 100%;
+				font-size: 20px;
+			}
+
+			body {
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				margin: 0;
+				background-color: var(--gray-bg);
+				padding: 1rem;
+				min-height: 100vh;
+				color: var(--text);
+				line-height: 1.4;
+			}
+
+			main {
+				box-shadow: 0 0.2rem 0.4rem var(--shadow-color);
+				border: 0.1rem solid var(--gray-border);
+				border-radius: 0.6rem;
+				background-color: var(--white);
+				padding: 1rem;
+				width: min(100%, 32rem);
+				text-align: center;
+			}
+
+			h1,
+			p {
+				margin: 0;
+			}
+
+			h1 {
+				font-weight: 600;
+				font-size: 1.2rem;
+			}
+
+			p {
+				margin-top: 0.6rem;
+				color: var(--gray);
+				font-size: 0.8rem;
+			}
+
+			.status-code {
+				color: var(--secondary);
+			}
+
+			a {
+				display: inline-flex;
+				justify-content: center;
+				align-items: center;
+				margin-top: 1.2rem;
+				transition: opacity 0.2s ease;
+				border-radius: 0.2rem;
+				background-color: var(--secondary);
+				padding: 0.2rem 0.6rem;
+				color: var(--white);
+				font-size: 0.9rem;
+				text-decoration: none;
+			}
+
+			a:hover {
+				opacity: 0.9;
+				background-color: var(--secondary-strong-hover);
+			}
+
+			@media (max-width: 1024px) {
+				html {
+					font-size: 14px;
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<main>
+			<h1>오류가 발생했습니다.</h1>
+			<p>잠시 후 다시 시도해 주세요. 문제가 계속되면 관리자에게 알려 주세요.</p>
+			<p class="status-code">오류 코드 %sveltekit.status%</p>
+			<a href="/">메인 페이지로 돌아가기</a>
+		</main>
+	</body>
+</html>
