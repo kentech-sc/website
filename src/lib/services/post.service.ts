@@ -6,6 +6,7 @@ import type { User } from '$lib/types/user.type.js';
 import * as PostRepository from '$lib/repositories/post.repository.js';
 import * as PostRule from '$lib/rules/post.rule.js';
 import { AppError, assertRule } from '$lib/server/errors.js';
+import { assertObjectId } from '$lib/server/object-id.js';
 import { createPage } from '$lib/shared/paginate.js';
 import { APP_ERROR } from '$lib/shared/rule.js';
 
@@ -21,6 +22,7 @@ export function getPostPermissions(post: PostEntity, user: User) {
 }
 
 export async function getPostById(postId: PostId): Promise<PostEntity> {
+	assertObjectId(postId, '존재하지 않는 게시글입니다.');
 	const post = await PostRepository.findPostById(postId);
 	if (!post) throw new AppError(APP_ERROR.NOT_FOUND, '존재하지 않는 게시글입니다.');
 	return post;
@@ -68,6 +70,7 @@ export async function deletePostById(postId: PostId, user: User): Promise<PostEn
 }
 
 export async function viewPostById(postId: PostId): Promise<PostEntity> {
+	assertObjectId(postId, '존재하지 않는 게시글입니다.');
 	const updatedPost = await PostRepository.incrementPostViewCntById(postId);
 	if (!updatedPost) throw new AppError(APP_ERROR.NOT_FOUND, '존재하지 않는 게시글입니다.');
 	return updatedPost;
@@ -77,6 +80,7 @@ export async function incrementCommentCountByPostId(
 	postId: PostId,
 	increment = 1
 ): Promise<PostEntity> {
+	assertObjectId(postId, '존재하지 않는 게시글입니다.');
 	const updatedPost = await PostRepository.incrementPostCommentCntById(postId, increment);
 	if (!updatedPost) throw new AppError(APP_ERROR.NOT_FOUND, '존재하지 않는 게시글입니다.');
 	return updatedPost;

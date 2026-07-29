@@ -161,25 +161,19 @@ export const blockHandle: Handle = async ({ event, resolve }) => {
 };
 
 export const handleError: HandleServerError = Sentry.handleErrorWithSentry(
-	async ({ error, status, message, event }) => {
-		const diagnosticEventId = Sentry.captureMessage(
-			'Sentry server handleError diagnostic',
-			'error'
-		);
-		const flushed = await Sentry.flush(2000);
-
-		console.log('SENTRY_SERVER_HANDLE_ERROR', {
+	({ error, status, message, event }) => {
+		console.error('SERVER_HANDLE_ERROR', {
 			status,
 			message,
 			path: event.url.pathname,
 			errorName: error instanceof Error ? error.name : typeof error,
-			errorMessage: error instanceof Error ? error.message : String(error),
-			initialized: Sentry.isInitialized(),
-			diagnosticEventId,
-			flushed
+			errorMessage: error instanceof Error ? error.message : String(error)
 		});
 
-		return { message, status };
+		return {
+			message,
+			status
+		};
 	}
 );
 

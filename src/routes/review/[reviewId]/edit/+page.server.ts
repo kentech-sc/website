@@ -9,7 +9,7 @@ import * as ReviewUsecase from '$lib/usecase/review.usecase.js';
 
 export const load = withLoadErrorHandling(async ({ params, locals }) => {
 	const reviewIdRaw = params.reviewId;
-	if (!reviewIdRaw) throw new Error('리뷰 ID가 필요합니다.');
+	if (!reviewIdRaw) throw new Error('강의 평가 ID가 필요합니다.');
 	const reviewId: ReviewId = reviewIdRaw;
 
 	return await ReviewUsecase.getReviewEditData(reviewId, locals.user);
@@ -18,7 +18,7 @@ export const load = withLoadErrorHandling(async ({ params, locals }) => {
 export const actions = {
 	editReview: withActionErrorHandling(async ({ request, locals, params }) => {
 		const reviewIdRaw = params.reviewId;
-		if (!reviewIdRaw) return fail(400, { message: '리뷰 ID가 필요합니다.' });
+		if (!reviewIdRaw) return fail(400, { message: '강의 평가 ID가 필요합니다.' });
 		const reviewId: ReviewId = reviewIdRaw;
 
 		const formData = await request.formData();
