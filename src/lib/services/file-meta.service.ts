@@ -98,7 +98,7 @@ export async function unlinkArticleFromAllFiles(articleId: PostId | PetitionId):
 export async function cleanupOrphanedFiles(olderThanHours = 24, user: User): Promise<number> {
 	assertRule(FileMetaRule.canCleanupOrphanedFiles(user));
 
-	const cutoffTime = new Date(Date.now() - olderThanHours * 60 * 60 * 1000);
+	const cutoffTime = new Date(Date.now() - olderThanHours * 60 * 60 * 1000).toString();
 	const orphanedFiles = await FileMetaRepository.findOrphanedFiles(cutoffTime);
 	if (orphanedFiles.length === 0) return 0;
 

@@ -1,8 +1,16 @@
 import { handleErrorWithSentry, replayIntegration } from '@sentry/sveltekit';
 import * as Sentry from '@sentry/sveltekit';
 
+import { dev } from '$app/environment';
+import { env } from '$env/dynamic/public';
+
+const sentryEnabled =
+	!dev && Boolean(env.PUBLIC_SENTRY_DSN) && Boolean(env.PUBLIC_SENTRY_ENVIRONMENT);
+
 Sentry.init({
-	dsn: 'https://0173444c8cf5871ec5ba8fa075cae2a5@o4509551707160576.ingest.us.sentry.io/4510423166287872',
+	enabled: sentryEnabled,
+	dsn: sentryEnabled ? env.PUBLIC_SENTRY_DSN : undefined,
+	environment: sentryEnabled ? env.PUBLIC_SENTRY_ENVIRONMENT : undefined,
 
 	tracesSampleRate: 1.0,
 

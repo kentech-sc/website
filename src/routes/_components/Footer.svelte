@@ -1,10 +1,14 @@
+<script lang="ts">
+	import { resolve } from '$app/paths';
+</script>
+
 <footer>
 	<h1>4th KENTECH STUDENT COUNCIL | 4:EVER</h1>
 	<p>Mail: studentcouncil@kentech.ac.kr</p>
 	<p>Developed by nemovim</p>
 	<div>
-		<a href="/privacy">개인정보처리방침</a>
-		<a href="/terms">서비스이용약관</a>
+		<a href={resolve('/privacy')}>개인정보처리방침</a>
+		<a href={resolve('/terms')}>서비스이용약관</a>
 	</div>
 </footer>
 

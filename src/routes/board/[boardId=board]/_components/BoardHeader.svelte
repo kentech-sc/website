@@ -2,12 +2,13 @@
 	import Pen from '@lucide/svelte/icons/pencil';
 	import List from '@lucide/svelte/icons/text';
 
+	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import CommonHeader from '$components/CommonHeader.svelte';
 
 	let { pageType, canCreatePost = false }: { pageType: string; canCreatePost?: boolean } = $props();
 
-	const boardId = $derived(page.params.boardId);
+	const boardId = $derived(page.params.boardId!);
 
 	const title = $derived.by(() => {
 		if (boardId === 'free') return '자유게시판';
@@ -26,12 +27,12 @@
 
 <CommonHeader {title} {description}>
 	{#if pageType === 'list' && canCreatePost}
-		<a href="/board/{boardId}/new" class="link-btn">
+		<a href={resolve('/board/[boardId=board]/new', { boardId })} class="link-btn">
 			<Pen size="0.8rem" />
 			<span>글쓰기</span>
 		</a>
 	{:else if pageType === 'new' || pageType === 'edit' || pageType === 'detail'}
-		<a href="/board/{boardId}" class="link-btn">
+		<a href={resolve('/board/[boardId=board]', { boardId })} class="link-btn">
 			<List size="0.8rem" />
 			<span>목록</span>
 		</a>

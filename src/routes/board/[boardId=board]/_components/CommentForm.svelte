@@ -33,8 +33,7 @@
 				name="content"
 				placeholder="댓글을 입력하세요."
 				autocomplete="off"
-				bind:this={commentTextarea}
-			></textarea>
+				bind:this={commentTextarea}></textarea>
 		</div>
 	</CommonForm>
 </section>

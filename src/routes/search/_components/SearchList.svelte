@@ -4,6 +4,7 @@
 	import type { PostEntity } from '$lib/types/post.type.js';
 	import type { ReviewEntity } from '$lib/types/review.type.js';
 
+	import { resolve } from '$app/paths';
 	import CommonListPaginationBtn from '$components/CommonListPaginationBtn.svelte';
 	import { getPlainTextFromHtml } from '$lib/shared/utils.js';
 
@@ -16,17 +17,26 @@
 
 {#snippet ListItem(item: PostEntity | PetitionEntity | ReviewEntity)}
 	{#if 'boardId' in item}
-		<a class="list-item" href="/board/{item.boardId}/{item._id}">
+		<a
+			class="list-item"
+			href={resolve('/board/[boardId=board]/[postId]', {
+				boardId: item.boardId,
+				postId: item._id.toString()
+			})}
+		>
 			<h3 class="ellipsis"><span class="board-tag">게시글</span>{item.title}</h3>
 			<p class="ellipsis">{getPlainTextFromHtml(item.content)}</p>
 		</a>
 	{:else if 'courseId' in item}
-		<a class="list-item" href="/review/{item._id}">
+		<a class="list-item" href={resolve('/review/[reviewId]', { reviewId: item._id.toString() })}>
 			<h3 class="ellipsis"><span class="review-tag">강의평가</span> {item.title}</h3>
 			<p class="ellipsis">{getPlainTextFromHtml(item.comment)}</p>
 		</a>
 	{:else}
-		<a class="list-item" href="/petition/{item._id}">
+		<a
+			class="list-item"
+			href={resolve('/petition/[petitionId]', { petitionId: item._id.toString() })}
+		>
 			<h3 class="ellipsis"><span class="petition-tag">청원</span> {item.title}</h3>
 			<p class="ellipsis">{getPlainTextFromHtml(item.content)}</p>
 		</a>

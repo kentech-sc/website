@@ -3,6 +3,7 @@
 	import Plus from '@lucide/svelte/icons/plus';
 	import List from '@lucide/svelte/icons/text';
 
+	import { resolve } from '$app/paths';
 	import CommonHeader from '$components/CommonHeader.svelte';
 
 	let {
@@ -22,19 +23,19 @@
 <CommonHeader {title} {description}>
 	{#if pageType === 'list'}
 		{#if canManageCatalog}
-			<a href="/course/new" class="link-btn">
+			<a href={resolve('/course/new')} class="link-btn">
 				<Plus size="0.8rem" />
 				<span>추가하기</span>
 			</a>
 		{/if}
 		{#if canCreateReview}
-			<a href="/review/new" class="link-btn">
+			<a href={resolve('/review/new')} class="link-btn">
 				<Pen size="0.8rem" />
 				<span>평가하기</span>
 			</a>
 		{/if}
 	{:else if pageType === 'new' || pageType === 'edit' || pageType === 'detail'}
-		<a href="/review" class="link-btn">
+		<a href={resolve('/review')} class="link-btn">
 			<List size="0.8rem" />
 			<span>목록</span>
 		</a>

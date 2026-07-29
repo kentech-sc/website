@@ -43,11 +43,17 @@
 	let pendingImageInsertSelection = $state<SelectionHint | null>(null);
 
 	let {
-		attachments = $bindable<FileMeta[]>([]),
-		imageIds = $bindable<FileId[]>([]),
-		editorHtml = $bindable<string>(''),
 		initialHtml = '',
+		attachments = $bindable<FileMeta[]>([]),
+		onChangeHtml,
+		onChangeImageIds,
 		disabled = false
+	}: {
+		initialHtml?: string;
+		attachments?: FileMeta[];
+		onChangeHtml: (html: string) => void;
+		onChangeImageIds: (ids: FileId[]) => void;
+		disabled?: boolean;
 	} = $props();
 
 	$effect(() => {
@@ -289,7 +295,7 @@
 
 				// Update HTML content
 				if (instance) {
-					editorHtml = instance.getHTML();
+					onChangeHtml(instance.getHTML());
 
 					// 현재 에디터에 있는 이미지 ID들 추출
 					const currentUsedIds = new SvelteSet<string>();
@@ -305,7 +311,7 @@
 					});
 
 					// imageIds 업데이트: 현재 사용된 이미지 ID들
-					imageIds = Array.from(currentUsedIds);
+					onChangeImageIds(Array.from(currentUsedIds));
 				}
 
 				// Update select values based on current cursor position

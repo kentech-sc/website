@@ -7,6 +7,7 @@
 	import { goto, invalidateAll } from '$app/navigation';
 	import { getActionResultMessage, isDetailPolicy } from '$lib/shared/action-result.js';
 	import { setClientFlash } from '$lib/shared/flash.js';
+	import { resolveInternalPath } from '$lib/shared/paths.js';
 
 	let {
 		children,
@@ -59,7 +60,7 @@
 		return async ({ result }) => {
 			try {
 				if (result.type === 'redirect') {
-					await goto(result.location);
+					await goto(resolveInternalPath(result.location));
 					return;
 				}
 
@@ -80,7 +81,7 @@
 					if (result.status === 404) {
 						if (isDetailPolicy(policy)) {
 							setClientFlash({ kind: 'error', message });
-							await goto(policy.notFoundRedirectTo);
+							await goto(resolveInternalPath(policy.notFoundRedirectTo));
 							return;
 						}
 

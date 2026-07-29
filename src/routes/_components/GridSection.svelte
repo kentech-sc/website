@@ -3,22 +3,42 @@
 	import type { Post } from '$lib/types/post.type.js';
 	import type { Review } from '$lib/types/review.type.js';
 
+	import { resolve } from '$app/paths';
 	import { parseDate } from '$lib/shared/utils.js';
 	import { translatedStatus, colorStatus } from '$lib/shared/view.js';
+
+	type GridLink = 'board/free' | 'board/notice' | 'petition' | 'review';
 
 	let {
 		title,
 		items,
 		link
-	}: { title: string; items: Review[] | Post[] | Petition[]; link: string } = $props();
+	}: { title: string; items: Review[] | Post[] | Petition[]; link: GridLink } = $props();
 </script>
 
 {#snippet Header()}
-	<h2>{title}<a href="/{link}">더보기</a></h2>
+	{@const sectionHref =
+		link === 'petition'
+			? resolve('/petition')
+			: link === 'review'
+				? resolve('/review')
+				: resolve('/board/[boardId=board]', {
+						boardId: link === 'board/notice' ? 'notice' : 'free'
+					})}
+	<h2>{title}<a href={sectionHref}>더보기</a></h2>
 {/snippet}
 
 {#snippet Item(item: Review | Post | Petition)}
-	<a href="/{link}/{item._id}" class="container grid-item">
+	{@const itemHref =
+		'boardId' in item
+			? resolve('/board/[boardId=board]/[postId]', {
+					boardId: item.boardId,
+					postId: item._id.toString()
+				})
+			: 'status' in item
+				? resolve('/petition/[petitionId]', { petitionId: item._id.toString() })
+				: resolve('/review/[reviewId]', { reviewId: item._id.toString() })}
+	<a href={itemHref} class="container grid-item">
 		<span>
 			{#if title === '청원'}
 				<span class={(item as Petition).status} style:color={colorStatus[(item as Petition).status]}

@@ -9,6 +9,7 @@
 	import type { Professor } from '$lib/types/professor.type.js';
 
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 
 	let { data } = $props();
@@ -25,7 +26,7 @@
 		params.set('professor', selectedProfessor);
 
 		const currentPath = `${page.url.pathname}${page.url.search}`;
-		const nextPath = params.toString() ? `/review?${params}` : '/review';
+		const nextPath = params.toString() ? resolve(`/review?${params}`) : resolve('/review');
 
 		if (nextPath !== currentPath) {
 			goto(nextPath);

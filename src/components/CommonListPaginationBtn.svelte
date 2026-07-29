@@ -4,6 +4,7 @@
 	import type { PaginationItem } from '$lib/types/general.type.js';
 
 	import { page } from '$app/state';
+	import { resolveInternalPath } from '$lib/shared/paths.js';
 
 	let { totalPages, currentPage }: { totalPages: number; currentPage: number } = $props();
 
@@ -65,7 +66,7 @@
 		{:else if item === currentPage}
 			<span class="current" aria-current="page">{item}</span>
 		{:else}
-			<a href={getPageHref(item)} class="others">{item}</a>
+			<a href={resolveInternalPath(getPageHref(item))} class="others">{item}</a>
 		{/if}
 	{/each}
 </div>

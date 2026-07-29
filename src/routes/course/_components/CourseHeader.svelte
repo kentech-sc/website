@@ -1,6 +1,7 @@
 <script>
 	import List from '@lucide/svelte/icons/list';
 
+	import { resolve } from '$app/paths';
 	import CommonHeader from '$components/CommonHeader.svelte';
 
 	const title = '강의/교수 추가';
@@ -8,7 +9,7 @@
 </script>
 
 <CommonHeader {title} {description}>
-	<a href="/review" class="link-btn">
+	<a href={resolve('/review')} class="link-btn">
 		<List size="0.8rem" />
 		<span>목록</span>
 	</a>

@@ -30,7 +30,7 @@
 
 {#snippet FileItem(file: FileMeta, idx: number)}
 	<div class="container file-item">
-		<p>[{idx + 1}] <a href={file.path}>{file.name}</a></p>
+		<p>[{idx + 1}] <a href={file.path} rel="external">{file.name}</a></p>
 		{#if isEditing}
 			<button onclick={() => deleteFile(file._id)} {disabled}><Trash_2 size="0.8rem" /></button>
 		{/if}

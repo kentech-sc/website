@@ -32,7 +32,23 @@ self.addEventListener('fetch', (event) => {
 	if (url.origin !== self.location.origin) return;
 
 	if (request.mode === 'navigate') {
-		event.respondWith(fetch(request).catch(() => caches.match('/offline.html')));
+		event.respondWith(
+			(async () => {
+				try {
+					return await fetch(request);
+				} catch {
+					return (
+						(await caches.match('/offline.html')) ??
+						new Response('오프라인 상태입니다.', {
+							status: 503,
+							headers: {
+								'content-type': 'text/plain; charset=utf-8'
+							}
+						})
+					);
+				}
+			})()
+		);
 		return;
 	}
 
@@ -40,12 +56,19 @@ self.addEventListener('fetch', (event) => {
 		caches.match(request).then(async (cached) => {
 			if (cached) return cached;
 
-			const response = await fetch(request);
-			if (response.ok) {
-				const cache = await caches.open(CACHE);
-				void cache.put(request, response.clone());
+			try {
+				const response = await fetch(request);
+				if (response.ok) {
+					const cache = await caches.open(CACHE);
+					await cache.put(request, response.clone());
+				}
+				return response;
+			} catch {
+				return new Response(null, {
+					status: 503,
+					statusText: 'Service Unavailable'
+				});
 			}
-			return response;
 		})
 	);
 });

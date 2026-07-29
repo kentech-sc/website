@@ -14,10 +14,8 @@ export default defineConfig({
 	},
 	plugins: [
 		sentrySvelteKit({
-			sourceMapsUploadOptions: {
-				org: 'nemovim',
-				project: 'kentech-sc'
-			}
+			autoUploadSourceMaps:
+				process.env.VERCEL_ENV === 'production' || process.env.VERCEL_ENV === 'preview'
 		}),
 		sveltekit()
 	]

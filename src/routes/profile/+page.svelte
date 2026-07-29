@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
+
 	import BlockForm from './_components/BlockForm.svelte';
 	import ChangeGroupForm from './_components/ChangeGroupForm.svelte';
 	import ChangeNicknameForm from './_components/ChangeNicknameForm.svelte';
@@ -10,8 +12,33 @@
 
 	import { page } from '$app/state';
 
+	type NavigatorWithStandalone = Navigator & {
+		standalone?: boolean;
+	};
+
 	const user = $derived(page.data.user);
 	const permissions = $derived(page.data.permissions);
+	let runningAsInstalledApp = $state(false);
+
+	function updateDisplayMode() {
+		const navigatorWithStandalone = navigator as NavigatorWithStandalone;
+
+		runningAsInstalledApp =
+			window.matchMedia('(display-mode: standalone)').matches ||
+			navigatorWithStandalone.standalone === true ||
+			document.referrer.startsWith('android-app://');
+	}
+
+	onMount(() => {
+		const displayMode = window.matchMedia('(display-mode: standalone)');
+
+		updateDisplayMode();
+		displayMode.addEventListener('change', updateDisplayMode);
+
+		return () => {
+			displayMode.removeEventListener('change', updateDisplayMode);
+		};
+	});
 </script>
 
 <section class="profile">
@@ -22,8 +49,11 @@
 	<div class="container-col">
 		<div class="module container-col">
 			<h3>사용자 기능</h3>
-			<InstallAppPrompt />
-			<PushNotificationForm />
+			{#if runningAsInstalledApp}
+				<PushNotificationForm />
+			{:else}
+				<InstallAppPrompt />
+			{/if}
 			<ChangeNicknameForm />
 			<DeleteUserForm />
 		</div>

@@ -2,6 +2,7 @@
 	import Pen from '@lucide/svelte/icons/pencil';
 	import List from '@lucide/svelte/icons/text';
 
+	import { resolve } from '$app/paths';
 	import CommonHeader from '$components/CommonHeader.svelte';
 
 	let { pageType, canCreatePetition = false }: { pageType: string; canCreatePetition?: boolean } =
@@ -13,12 +14,12 @@
 
 <CommonHeader {title} {description}>
 	{#if pageType === 'list' && canCreatePetition}
-		<a href="/petition/new" class="link-btn">
+		<a href={resolve('/petition/new')} class="link-btn">
 			<Pen size="0.8rem" />
 			<span>청원하기</span>
 		</a>
 	{:else if pageType === 'new' || pageType === 'detail'}
-		<a href="/petition" class="link-btn">
+		<a href={resolve('/petition')} class="link-btn">
 			<List size="0.8rem" />
 			<span>목록</span>
 		</a>
