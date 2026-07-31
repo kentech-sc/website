@@ -31,7 +31,7 @@ export async function findProfessorMapByIds(
 
 	for (const professor of professors) {
 		if (!professor) continue;
-		professorIdToProfessor.set(professor._id.toString(), professor);
+		professorIdToProfessor.set(professor.id.toString(), professor);
 	}
 
 	return professorIdToProfessor;

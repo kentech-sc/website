@@ -19,7 +19,7 @@ export interface PetitionCreate {
 }
 
 export interface PetitionEntity extends PetitionCreate {
-	_id: PetitionId;
+	id: PetitionId;
 	createdAt: string;
 	updatedAt: string;
 

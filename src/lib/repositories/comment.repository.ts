@@ -1,29 +1,48 @@
-import type { CommentId, CommentEntity, CommentCreate } from '$lib/types/comment.type.js';
+import { desc, eq } from 'drizzle-orm';
+
+import { asEntity, firstOrNull } from './repository.utils.js';
+
+import type { CommentCreate, CommentEntity, CommentId } from '$lib/types/comment.type.js';
 import type { PostId } from '$lib/types/post.type.js';
 
-import { CommentModel } from '$lib/models/comment.model.js';
-import { toPojo } from '$lib/shared/utils.js';
+import { comments } from '$lib/server/database/schema.js';
+import { getDatabase } from '$lib/server/db.js';
 
 export async function createComment(commentCreate: CommentCreate): Promise<CommentEntity> {
-	return toPojo<CommentEntity>((await CommentModel.create(commentCreate)).toObject());
+	const [comment] = await getDatabase().insert(comments).values(commentCreate).returning();
+	return asEntity<CommentEntity>(comment);
 }
 
 export async function findCommentById(commentId: CommentId): Promise<CommentEntity | null> {
-	return toPojo<CommentEntity | null>(await CommentModel.findOne({ _id: commentId }).lean());
+	const rows = await getDatabase()
+		.select()
+		.from(comments)
+		.where(eq(comments.id, commentId))
+		.limit(1);
+	return asEntity<CommentEntity | null>(firstOrNull(rows));
 }
 
 export async function findCommentsByPostId(postId: PostId): Promise<CommentEntity[]> {
-	return toPojo<CommentEntity[]>(
-		await CommentModel.find({ postId }).sort({ createdAt: -1 }).lean()
-	);
+	const rows = await getDatabase()
+		.select()
+		.from(comments)
+		.where(eq(comments.postId, postId))
+		.orderBy(desc(comments.createdAt));
+	return asEntity<CommentEntity[]>(rows);
 }
 
 export async function deleteCommentById(commentId: CommentId): Promise<boolean> {
-	const res = await CommentModel.deleteOne({ _id: commentId });
-	return res.deletedCount > 0;
+	const rows = await getDatabase()
+		.delete(comments)
+		.where(eq(comments.id, commentId))
+		.returning({ id: comments.id });
+	return rows.length > 0;
 }
 
 export async function deleteCommentsByPostId(postId: PostId): Promise<boolean> {
-	const res = await CommentModel.deleteMany({ postId });
-	return res.deletedCount > 0;
+	const rows = await getDatabase()
+		.delete(comments)
+		.where(eq(comments.postId, postId))
+		.returning({ id: comments.id });
+	return rows.length > 0;
 }

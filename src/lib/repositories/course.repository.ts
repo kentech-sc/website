@@ -1,25 +1,33 @@
-import type { CourseId, CourseCreate, CourseEntity } from '$lib/types/course.type.js';
+import { asc, eq, inArray } from 'drizzle-orm';
 
-import { CourseModel } from '$lib/models/course.model.js';
-import { toPojo } from '$lib/shared/utils.js';
+import { asEntity, firstOrNull } from './repository.utils.js';
+
+import type { CourseCreate, CourseEntity, CourseId } from '$lib/types/course.type.js';
+
+import { courses } from '$lib/server/database/schema.js';
+import { getDatabase } from '$lib/server/db.js';
 
 export async function createCourse(course: CourseCreate): Promise<CourseEntity> {
-	return toPojo<CourseEntity>((await CourseModel.create(course)).toObject());
+	const [created] = await getDatabase().insert(courses).values(course).returning();
+	return asEntity<CourseEntity>(created);
 }
 
 export async function findCourseById(courseId: CourseId): Promise<CourseEntity | null> {
-	return toPojo<CourseEntity | null>(await CourseModel.findOne({ _id: courseId }).lean());
+	const rows = await getDatabase().select().from(courses).where(eq(courses.id, courseId)).limit(1);
+	return asEntity<CourseEntity | null>(firstOrNull(rows));
 }
 
 export async function findCourses(): Promise<CourseEntity[]> {
-	return toPojo<CourseEntity[]>(await CourseModel.find().sort({ _id: 1 }).lean());
+	return asEntity<CourseEntity[]>(
+		await getDatabase().select().from(courses).orderBy(asc(courses.id))
+	);
 }
 
 export async function findCoursesByIds(courseIds: CourseId[]): Promise<Array<CourseEntity | null>> {
-	const courses = await CourseModel.find({ _id: { $in: courseIds } }).lean();
-	const courseIdToCourse = new Map(courses.map((course) => [course._id.toString(), course]));
-
-	return toPojo<Array<CourseEntity | null>>(
-		courseIds.map((courseId) => courseIdToCourse.get(courseId.toString()) ?? null)
+	if (courseIds.length === 0) return [];
+	const rows = await getDatabase().select().from(courses).where(inArray(courses.id, courseIds));
+	const courseIdToCourse = new Map(rows.map((course) => [course.id, course]));
+	return asEntity<Array<CourseEntity | null>>(
+		courseIds.map((courseId) => courseIdToCourse.get(courseId) ?? null)
 	);
 }

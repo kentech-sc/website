@@ -1,0 +1,27 @@
+{
+	"version": "7",
+	"dialect": "postgresql",
+	"entries": [
+		{
+			"idx": 0,
+			"version": "7",
+			"when": 1785389025384,
+			"tag": "0000_postgresql_initial",
+			"breakpoints": true
+		},
+		{
+			"idx": 1,
+			"version": "7",
+			"when": 1785389085682,
+			"tag": "0001_enable_rls",
+			"breakpoints": true
+		},
+		{
+			"idx": 2,
+			"version": "7",
+			"when": 1785401437485,
+			"tag": "0002_fix_review_score_constraints",
+			"breakpoints": true
+		}
+	]
+}

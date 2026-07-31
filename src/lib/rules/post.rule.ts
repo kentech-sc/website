@@ -28,11 +28,11 @@ export function canLikePost(post: Pick<PostEntity, 'likedBy' | 'userId'>, user: 
 	const capabilityResult = canUseLikeCapability(user);
 	if (!capabilityResult.ok) return capabilityResult;
 
-	if (post.userId === user._id) {
+	if (post.userId === user.id) {
 		return ruleFail(APP_ERROR.INVALID_STATE, '본인 게시글에는 좋아요를 누를 수 없습니다.');
 	}
 
-	if (post.likedBy.includes(user._id)) {
+	if (post.likedBy.includes(user.id)) {
 		return ruleFail(APP_ERROR.INVALID_STATE, '이미 좋아요를 누른 게시글입니다.');
 	}
 
@@ -43,7 +43,7 @@ export function canUnlikePost(post: Pick<PostEntity, 'likedBy'>, user: User): Ru
 	const capabilityResult = canUseLikeCapability(user);
 	if (!capabilityResult.ok) return capabilityResult;
 
-	if (!post.likedBy.includes(user._id)) {
+	if (!post.likedBy.includes(user.id)) {
 		return ruleFail(APP_ERROR.INVALID_STATE, '좋아요를 누르지 않은 게시글입니다.');
 	}
 

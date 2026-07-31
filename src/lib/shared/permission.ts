@@ -73,5 +73,5 @@ export function hasAnyCapability(user: User, capabilities: Capability[]): boolea
 }
 
 export function isOwner(user: User, ownerId: unknown): boolean {
-	return String(user._id) === String(ownerId);
+	return String(user.id) === String(ownerId);
 }

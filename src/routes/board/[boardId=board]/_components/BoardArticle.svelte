@@ -16,7 +16,7 @@
 	let { post, user, permissions }: { post: Post; user: User; permissions: PostPermissions } =
 		$props();
 
-	let liked = $derived<boolean>(post.likedBy.includes(user._id));
+	let liked = $derived<boolean>(post.likedBy.includes(user.id));
 </script>
 
 {#snippet LikeButton()}
@@ -24,7 +24,7 @@
 		<InlineActionForm
 			actionName={liked ? 'unlikePost' : 'likePost'}
 			buttonClass="container like-btn"
-			hiddenFields={[{ name: 'post-id', value: post._id }]}
+			hiddenFields={[{ name: 'post-id', value: post.id }]}
 			policy={{ kind: 'detail', notFoundRedirectTo: `/board/${post.boardId}` }}
 		>
 			<Heart size="1rem" color="red" fill={liked ? 'red' : 'transparent'} />
@@ -45,7 +45,7 @@
 				class="edit-btn inline-container"
 				href={resolve('/board/[boardId=board]/[postId]/edit', {
 					boardId: post.boardId,
-					postId: post._id.toString()
+					postId: post.id.toString()
 				})}><Pencil size="1.2rem" /></a
 			>
 		{/if}
@@ -54,7 +54,7 @@
 				<InlineActionForm
 					actionName="deletePost"
 					buttonClass="inline-container delete-btn"
-					hiddenFields={[{ name: 'post-id', value: post._id }]}
+					hiddenFields={[{ name: 'post-id', value: post.id }]}
 					policy={{ kind: 'detail', notFoundRedirectTo: `/board/${post.boardId}` }}
 				>
 					<Trash size="1.2rem" />

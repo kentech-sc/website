@@ -1,5 +1,3 @@
-import mongoose from 'mongoose';
-
 import type { ActivityLogCreate } from '$lib/types/activity-log.type.js';
 import type { BoardId } from '$lib/types/board.type.js';
 import type {
@@ -19,6 +17,7 @@ import type {
 } from '$lib/types/post.type.js';
 import type { DisplayType, User } from '$lib/types/user.type.js';
 
+import { transaction } from '$lib/server/db.js';
 import * as ActivityLogService from '$lib/services/activity-log.service.js';
 import * as CommentService from '$lib/services/comment.service.js';
 import * as FileMetaService from '$lib/services/file-meta.service.js';
@@ -29,10 +28,10 @@ import * as UserService from '$lib/services/user.service.js';
 import { hasCapability } from '$lib/shared/permission.js';
 
 async function getPostLogSnapshot(post: PostEntity) {
-	const files = await FileMetaService.getFileMetasByArticleId(post._id);
+	const files = await FileMetaService.getFileMetasByArticleId(post.id);
 	return {
 		...post,
-		fileIds: files.map((file) => file._id)
+		fileIds: files.map((file) => file.id)
 	};
 }
 
@@ -43,7 +42,7 @@ export async function getBoardPage(boardId: BoardId, page: number, user: User) {
 	const postResult = await PostService.getPostPageByBoardId(boardId, limit, skip);
 	const [userIdToUser, filePresence] = await Promise.all([
 		UserService.findUserMapByIds(postResult.items.map((post) => post.userId)),
-		FileMetaService.getFilePresenceByArticleIds(postResult.items.map((post) => post._id))
+		FileMetaService.getFilePresenceByArticleIds(postResult.items.map((post) => post.id))
 	]);
 	const posts = UserService.attachDisplayNames(postResult.items, userIdToUser, {
 		noIdxForAnon: true
@@ -94,7 +93,7 @@ export async function getPostDetailByPostId(
 		files,
 		postPermissions: PostService.getPostPermissions(post, user),
 		commentPermissions: Object.fromEntries(
-			comments.map((comment) => [comment._id, CommentService.getCommentPermissions(comment, user)])
+			comments.map((comment) => [comment.id, CommentService.getCommentPermissions(comment, user)])
 		),
 		canCreateComment: hasCapability(user, 'comment.write')
 	};
@@ -108,31 +107,31 @@ export async function createPost(
 	displayType: DisplayType,
 	fileIds: FileId[]
 ): Promise<PostEntity> {
-	return await mongoose.connection.transaction(async () => {
-		await ThrottleService.reserve(user._id, 'article');
+	return await transaction(async () => {
+		await ThrottleService.reserve(user.id, 'article');
 
 		const postCreate: PostCreate = {
 			boardId,
 			title,
 			content,
-			userId: user._id,
+			userId: user.id,
 			displayType
 		};
 
 		const post = await PostService.createPostByBoardId(postCreate, user);
-		await FileMetaService.linkArticleToFiles(fileIds, post._id);
+		await FileMetaService.linkArticleToFiles(fileIds, post.id);
 
 		const postSnapshot = await getPostLogSnapshot(post);
 		await ActivityLogService.create({
-			actorId: user._id,
+			actorId: user.id,
 			action: 'create',
 			targetType: 'post',
-			targetId: post._id,
+			targetId: post.id,
 			cause: 'direct',
 			beforeSnapshot: null,
 			afterSnapshot: postSnapshot
 		});
-		await PointService.awardPostCreate(user._id);
+		await PointService.awardPostCreate(user.id);
 		return post;
 	});
 }
@@ -145,7 +144,7 @@ export async function editPost(
 	displayType: DisplayType,
 	fileIds: FileId[]
 ): Promise<PostEntity> {
-	return await mongoose.connection.transaction(async () => {
+	return await transaction(async () => {
 		const beforePost = await PostService.getPostById(postId);
 		const beforeSnapshot = await getPostLogSnapshot(beforePost);
 
@@ -161,10 +160,10 @@ export async function editPost(
 		await FileMetaService.linkArticleToFiles(fileIds, postId);
 		const afterSnapshot = await getPostLogSnapshot(post);
 		await ActivityLogService.create({
-			actorId: user._id,
+			actorId: user.id,
 			action: 'edit',
 			targetType: 'post',
-			targetId: post._id,
+			targetId: post.id,
 			cause: 'direct',
 			beforeSnapshot,
 			afterSnapshot
@@ -174,28 +173,29 @@ export async function editPost(
 }
 
 export async function deletePostById(postId: PostId, user: User) {
-	return await mongoose.connection.transaction(async () => {
+	return await transaction(async () => {
 		const comments = await CommentService.getCommentsByPostId(postId);
+		const beforePost = await PostService.getPostById(postId);
+		const postSnapshot = await getPostLogSnapshot(beforePost);
 		const deletedPost = await PostService.deletePostById(postId, user);
-		const postSnapshot = await getPostLogSnapshot(deletedPost);
 		await FileMetaService.unlinkArticleFromAllFiles(postId);
 		await CommentService.deleteCommentsByPostId(postId);
 
 		const activityLogs: ActivityLogCreate[] = [
 			{
-				actorId: user._id,
+				actorId: user.id,
 				action: 'delete',
 				targetType: 'post',
-				targetId: deletedPost._id,
+				targetId: deletedPost.id,
 				cause: 'direct',
 				beforeSnapshot: postSnapshot,
 				afterSnapshot: null
 			},
 			...comments.map((comment) => ({
-				actorId: user._id,
+				actorId: user.id,
 				action: 'delete' as const,
 				targetType: 'comment' as const,
-				targetId: comment._id,
+				targetId: comment.id,
 				cause: 'post-delete-cascade' as const,
 				beforeSnapshot: comment,
 				afterSnapshot: null
@@ -206,7 +206,7 @@ export async function deletePostById(postId: PostId, user: User) {
 }
 
 export async function likePost(postId: PostId, user: User) {
-	return await mongoose.connection.transaction(async () => {
+	return await transaction(async () => {
 		const post = await PostService.likePostById(postId, user);
 		await PointService.applyPostLikeDelta(post.userId, 1);
 		return post;
@@ -214,7 +214,7 @@ export async function likePost(postId: PostId, user: User) {
 }
 
 export async function unlikePost(postId: PostId, user: User) {
-	return await mongoose.connection.transaction(async () => {
+	return await transaction(async () => {
 		const post = await PostService.unlikePostById(postId, user);
 		await PointService.applyPostLikeDelta(post.userId, -1);
 		return post;
@@ -227,39 +227,39 @@ export async function createCommentAndUpdatePost(
 	user: User,
 	displayType: DisplayType
 ) {
-	return await mongoose.connection.transaction(async () => {
-		await ThrottleService.reserve(user._id, 'comment');
+	return await transaction(async () => {
+		await ThrottleService.reserve(user.id, 'comment');
 		await PostService.incrementCommentCountByPostId(postId, 1);
 		const commentCreate: CommentCreate = {
 			postId,
 			content,
-			userId: user._id,
+			userId: user.id,
 			displayType
 		};
 		const comment = await CommentService.createCommentByPostId(commentCreate, user);
 		await ActivityLogService.create({
-			actorId: user._id,
+			actorId: user.id,
 			action: 'create',
 			targetType: 'comment',
-			targetId: comment._id,
+			targetId: comment.id,
 			cause: 'direct',
 			beforeSnapshot: null,
 			afterSnapshot: comment
 		});
-		await PointService.awardCommentCreate(user._id);
+		await PointService.awardCommentCreate(user.id);
 		return comment;
 	});
 }
 
 export async function deleteCommentAndUpdatePost(commentId: CommentId, user: User) {
-	return await mongoose.connection.transaction(async () => {
+	return await transaction(async () => {
 		const deletedComment = await CommentService.deleteCommentById(commentId, user);
 		await PostService.incrementCommentCountByPostId(deletedComment.postId, -1);
 		await ActivityLogService.create({
-			actorId: user._id,
+			actorId: user.id,
 			action: 'delete',
 			targetType: 'comment',
-			targetId: deletedComment._id,
+			targetId: deletedComment.id,
 			cause: 'direct',
 			beforeSnapshot: deletedComment,
 			afterSnapshot: null

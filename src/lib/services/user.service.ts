@@ -1,4 +1,4 @@
-import type { Profile, User, UserId, UserUpdate } from '$lib/types/user.type.js';
+import type { Profile, User, UserAdminOption, UserId, UserUpdate } from '$lib/types/user.type.js';
 
 import * as UserRepository from '$lib/repositories/user.repository.js';
 import * as UserRule from '$lib/rules/user.rule.js';
@@ -11,14 +11,8 @@ export async function findUserById(userId: UserId): Promise<User | null> {
 	return await UserRepository.findUserById(userId);
 }
 
-export async function findUserByEmail(email: string): Promise<User | null> {
-	return await UserRepository.findUserByEmail(email);
-}
-
-async function getUserByEmail(email: string): Promise<User> {
-	const user = await UserRepository.findUserByEmail(email);
-	if (!user) throw new AppError(APP_ERROR.NOT_FOUND, '존재하지 않는 사용자입니다.');
-	return user;
+export async function findUserByIdentity(issuer: string, subject: string): Promise<User | null> {
+	return await UserRepository.findUserByIdentity(issuer, subject);
 }
 
 export async function findUserByNickname(nickname: string): Promise<User | null> {
@@ -40,7 +34,7 @@ export async function findUserMapByIds(userIds: UserId[]): Promise<Map<string, U
 
 	for (const user of users) {
 		if (!user) continue;
-		userIdToUser.set(user._id, user);
+		userIdToUser.set(user.id, user);
 	}
 
 	return userIdToUser;
@@ -50,20 +44,54 @@ export async function findUserIds(): Promise<UserId[]> {
 	return await UserRepository.findUserIds();
 }
 
+export async function findUserAdminOptions(): Promise<UserAdminOption[]> {
+	const users = await UserRepository.findActiveUsers();
+	return users.map(({ id, email, realName, nickname, group, blockedUntil }) => ({
+		id,
+		email,
+		realName,
+		nickname,
+		group,
+		blockedUntil
+	}));
+}
+
 export async function signupUser(profile: Profile): Promise<User> {
-	const existingUser = await findUserById(profile.id);
+	const existingUser = await findUserByIdentity(profile.issuer, profile.subject);
 	assertRule(UserRule.canSignup(existingUser));
 
-	const nickname = profile.email.split('@')[0];
+	const nicknameBase = profile.email.split('@')[0];
+	const nickname =
+		(await findUserByNickname(nicknameBase)) === null
+			? nicknameBase
+			: `${nicknameBase.slice(0, 13)}-${profile.subject.slice(-6)}`;
 
-	return await UserRepository.createUser({
-		_id: profile.id,
-		email: profile.email,
-		realName: profile.name,
-		nickname,
-		group: UserGroup.User,
-		points: 50
-	});
+	return await UserRepository.createUser(
+		{
+			email: profile.email,
+			realName: profile.name,
+			nickname,
+			group: UserGroup.User,
+			points: 50
+		},
+		{
+			issuer: profile.issuer,
+			subject: profile.subject,
+			emailAtLogin: profile.email
+		}
+	);
+}
+
+export async function syncUserProfile(user: User, profile: Profile): Promise<User> {
+	if (user.deletedAt || (user.email === profile.email && user.realName === profile.name)) {
+		return user;
+	}
+
+	const [updatedUser] = await Promise.all([
+		updateUserById(user.id, { email: profile.email, realName: profile.name }),
+		UserRepository.updateIdentityEmail(profile.issuer, profile.subject, profile.email)
+	]);
+	return updatedUser;
 }
 
 export async function updateUserById(userId: UserId, userUpdate: UserUpdate): Promise<User> {
@@ -83,44 +111,42 @@ export async function changeNicknameById(
 
 	assertRule(UserRule.canChangeNickname(target, normalizedNickname, operator, isDuplicateNickname));
 
-	return await updateUserById(target._id, { nickname: normalizedNickname });
+	return await updateUserById(target.id, { nickname: normalizedNickname });
 }
 
-export async function changeGroupByEmail(
-	email: string,
+export async function changeGroupById(
+	userId: UserId,
 	group: UserGroupType,
 	operator: User
 ): Promise<User> {
-	const target = await getUserByEmail(email);
+	const target = await getUserById(userId);
 	assertRule(UserRule.canChangeGroup(target, group, operator));
-	return await updateUserById(target._id, { group });
+	return await updateUserById(target.id, { group });
 }
 
-export async function blockUserByEmail(
-	email: string,
+export async function blockUserById(
+	userId: UserId,
 	operator: User,
 	duration = 7 * 24 * 60 * 60 * 1000
 ): Promise<User> {
-	const target = await getUserByEmail(email);
+	const target = await getUserById(userId);
 	assertRule(UserRule.canBlockOrUnblockUser(target, operator));
-
-	return await updateUserById(target._id, {
+	return await updateUserById(target.id, {
 		blockedUntil: new Date(Date.now() + duration).toISOString()
 	});
 }
 
-export async function unblockUserByEmail(email: string, operator: User): Promise<User> {
-	const target = await getUserByEmail(email);
+export async function unblockUserById(userId: UserId, operator: User): Promise<User> {
+	const target = await getUserById(userId);
 	assertRule(UserRule.canBlockOrUnblockUser(target, operator));
-
-	return await updateUserById(target._id, { blockedUntil: null });
+	return await updateUserById(target.id, { blockedUntil: null });
 }
 
 export async function deleteUser(operator: User): Promise<void> {
-	const target = await getUserById(operator._id);
+	const target = await getUserById(operator.id);
 	assertRule(UserRule.canDeleteUser(target, operator));
 
-	const isDeleted = await UserRepository.deleteUserById(target._id);
+	const isDeleted = await UserRepository.deleteUserById(target.id);
 	if (!isDeleted) throw new AppError(APP_ERROR.NOT_FOUND, '존재하지 않는 사용자입니다.');
 }
 

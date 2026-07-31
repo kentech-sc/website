@@ -12,6 +12,9 @@
 		"preview": "vite preview",
 		"generate:pwa-assets": "pwa-assets-generator",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+		"db:generate": "drizzle-kit generate",
+		"db:migrate": "drizzle-kit migrate",
+		"db:studio": "drizzle-kit studio",
 		"fix": "prettier --write . && eslint src vite.config.ts eslint.config.js --fix",
 		"prepare": "husky"
 	},
@@ -32,9 +35,11 @@
 		"@sveltejs/kit": "^2.70.1",
 		"@sveltejs/vite-plugin-svelte": "^7.2.0",
 		"@types/node": "^26.1.2",
+		"@types/pg": "^8.20.0",
 		"@typescript-eslint/parser": "^8.65.0",
 		"@vite-pwa/assets-generator": "^1.0.2",
 		"@vite-pwa/sveltekit": "^1.1.0",
+		"drizzle-kit": "^0.31.10",
 		"eslint": "^10.8.0",
 		"eslint-config-prettier": "^10.1.8",
 		"eslint-plugin-import-x": "^4.17.1",
@@ -65,10 +70,13 @@
 		"@tiptap/extension-text-style": "^3.29.2",
 		"@tiptap/starter-kit": "^3.29.2",
 		"@vercel/analytics": "^2.0.1",
+		"@vercel/functions": "^3.7.6",
 		"@vercel/speed-insights": "^2.0.0",
+		"drizzle-orm": "^0.45.2",
+		"file-type": "^22.0.1",
 		"isomorphic-dompurify": "^3.19.0",
-		"mongoose": "^9.8.1",
-		"secure-s3-storage": "^2.0.0",
+		"pg": "^8.22.0",
+		"secure-s3-storage": "^3.0.1",
 		"web-push": "^3.6.7"
 	}
 }

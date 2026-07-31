@@ -14,6 +14,6 @@
 
 <ReviewHeader pageType="edit" />
 
-{#key review._id}
+{#key review.id}
 	<ReviewForm {professors} {courses} {review} />
 {/key}

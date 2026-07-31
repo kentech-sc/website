@@ -8,7 +8,7 @@ import { assertRule } from '$lib/server/errors.js';
 export async function createCourse(course: CourseCreate, user: User): Promise<Course> {
 	assertRule(CourseRule.canManageCourse(user));
 
-	const duplicate = await CourseRepository.findCourseById(course._id);
+	const duplicate = await CourseRepository.findCourseById(course.id);
 	assertRule(CourseRule.validateCourseCreate(duplicate !== null));
 
 	return await CourseRepository.createCourse(course);
@@ -27,7 +27,7 @@ export async function findCourseMapByIds(courseIds: CourseId[]): Promise<Map<str
 
 	for (const course of courses) {
 		if (!course) continue;
-		courseIdToCourse.set(course._id.toString(), course);
+		courseIdToCourse.set(course.id.toString(), course);
 	}
 
 	return courseIdToCourse;

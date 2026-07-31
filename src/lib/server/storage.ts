@@ -8,24 +8,36 @@ const categories = {
 	'files/documents': ['pdf', 'txt', 'md', 'json', 'csv', 'yml', 'yaml', 'docx', 'xlsx', 'pptx']
 };
 
+export interface FileStorageConfig {
+	bucket: string;
+	endpoint: string;
+	publicBaseUrl: string;
+	region: string;
+	accessKeyId: string;
+	secretAccessKey: string;
+	sessionToken?: string;
+	maxFileSize: number;
+}
+
 export class FileStorage {
 	static storage: Storage;
 	static maxFileSize: number;
 
-	static async init(
-		bucket: string,
-		region: string,
-		accessKeyId: string,
-		secretAccessKey: string,
-		maxFileSize: number
-	) {
-		this.maxFileSize = maxFileSize;
+	static async init(config: FileStorageConfig) {
+		if (!Number.isSafeInteger(config.maxFileSize) || config.maxFileSize <= 0) {
+			throw new Error('MAX_FILE_SIZE must be a positive integer.');
+		}
+
+		this.maxFileSize = config.maxFileSize;
 		this.storage = initStorage({
-			bucket,
-			region,
-			accessKeyId,
-			secretAccessKey,
-			categories: categories
+			bucket: config.bucket,
+			endpoint: config.endpoint,
+			publicBaseUrl: config.publicBaseUrl,
+			region: config.region,
+			accessKeyId: config.accessKeyId,
+			secretAccessKey: config.secretAccessKey,
+			sessionToken: config.sessionToken,
+			categories
 		});
 	}
 

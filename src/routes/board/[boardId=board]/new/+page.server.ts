@@ -40,7 +40,7 @@ export const actions = {
 			normalizedEditor.fileIds
 		);
 
-		throw redirect(302, '/board/' + params.boardId + '/' + post._id);
+		throw redirect(302, '/board/' + params.boardId + '/' + post.id);
 	}),
 	...editorActions
 };

@@ -22,7 +22,7 @@ export const POST = async ({ request, locals, url }) => {
 
 	try {
 		const subscription = await Push.saveUserPushSubscription(
-			locals.user._id,
+			locals.user.id,
 			body,
 			request.headers.get('user-agent') ?? ''
 		);
@@ -54,7 +54,7 @@ export const DELETE = async ({ request, locals, url }) => {
 		return json({ message: 'endpoint 값이 필요합니다.' }, { status: 400 });
 	}
 
-	const deletedCount = await Push.deleteUserPushSubscription(locals.user._id, body.endpoint);
+	const deletedCount = await Push.deleteUserPushSubscription(locals.user.id, body.endpoint);
 
 	return json({
 		ok: true,

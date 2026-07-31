@@ -1,3 +1,4 @@
+import { and, eq } from 'drizzle-orm';
 import webpush from 'web-push';
 
 import type {
@@ -8,12 +9,27 @@ import type {
 
 import { env as privateEnv } from '$env/dynamic/private';
 import { env as publicEnv } from '$env/dynamic/public';
-import { PushSubscriptionModel } from '$lib/models/push-subscription.model.js';
+import { pushSubscriptions } from '$lib/server/database/schema.js';
+import { getDatabase } from '$lib/server/db.js';
 import { AppError } from '$lib/server/errors.js';
 import { APP_ERROR } from '$lib/shared/rule.js';
-import { toPojo } from '$lib/shared/utils.js';
 
 const PUSH_CHUNK_SIZE = 100;
+
+function toPushSubscription(row: typeof pushSubscriptions.$inferSelect): PushSubscriptionEntity {
+	return {
+		userId: row.userId,
+		endpoint: row.endpoint,
+		expirationTime: row.expirationTime,
+		keys: {
+			p256dh: row.p256dh,
+			auth: row.auth
+		},
+		userAgent: row.userAgent,
+		createdAt: row.createdAt,
+		updatedAt: row.updatedAt
+	};
+}
 
 function getPushConfig() {
 	const publicKey = publicEnv.PUBLIC_VAPID_PUBLIC_KEY;
@@ -42,8 +58,11 @@ function isStalePushError(error: unknown): boolean {
 }
 
 async function deletePushSubscriptionByEndpoint(endpoint: string): Promise<number> {
-	const result = await PushSubscriptionModel.deleteOne({ endpoint });
-	return result.deletedCount ?? 0;
+	const rows = await getDatabase()
+		.delete(pushSubscriptions)
+		.where(eq(pushSubscriptions.endpoint, endpoint))
+		.returning({ id: pushSubscriptions.id });
+	return rows.length;
 }
 
 async function sendPushNotification(
@@ -83,48 +102,52 @@ export async function saveUserPushSubscription(
 	subscription: PushSubscriptionInput,
 	userAgent: string
 ): Promise<PushSubscriptionEntity> {
-	return toPojo<PushSubscriptionEntity>(
-		await PushSubscriptionModel.findOneAndUpdate(
-			{
-				userId,
-				endpoint: subscription.endpoint
-			},
-			{
-				$set: {
-					expirationTime: subscription.expirationTime ?? null,
-					keys: {
-						p256dh: subscription.keys.p256dh,
-						auth: subscription.keys.auth
-					},
-					userAgent
-				},
-				$setOnInsert: {
-					userId,
-					endpoint: subscription.endpoint
-				}
-			},
-			{
-				upsert: true,
-				returnDocument: 'after'
+	const [row] = await getDatabase()
+		.insert(pushSubscriptions)
+		.values({
+			userId,
+			endpoint: subscription.endpoint,
+			expirationTime: subscription.expirationTime ?? null,
+			p256dh: subscription.keys.p256dh,
+			auth: subscription.keys.auth,
+			userAgent
+		})
+		.onConflictDoUpdate({
+			target: [pushSubscriptions.userId, pushSubscriptions.endpoint],
+			set: {
+				expirationTime: subscription.expirationTime ?? null,
+				p256dh: subscription.keys.p256dh,
+				auth: subscription.keys.auth,
+				userAgent,
+				updatedAt: new Date().toISOString()
 			}
-		).lean()
-	);
+		})
+		.returning();
+	return toPushSubscription(row);
 }
 
 export async function deleteUserPushSubscription(
 	userId: string,
 	endpoint: string
 ): Promise<number> {
-	const result = await PushSubscriptionModel.deleteOne({ userId, endpoint });
-	return result.deletedCount ?? 0;
+	const rows = await getDatabase()
+		.delete(pushSubscriptions)
+		.where(and(eq(pushSubscriptions.userId, userId), eq(pushSubscriptions.endpoint, endpoint)))
+		.returning({ id: pushSubscriptions.id });
+	return rows.length;
 }
 
 export async function findUserPushSubscriptions(userId: string): Promise<PushSubscriptionEntity[]> {
-	return toPojo<PushSubscriptionEntity[]>(await PushSubscriptionModel.find({ userId }).lean());
+	const rows = await getDatabase()
+		.select()
+		.from(pushSubscriptions)
+		.where(eq(pushSubscriptions.userId, userId));
+	return rows.map(toPushSubscription);
 }
 
 export async function findAllPushSubscriptions(): Promise<PushSubscriptionEntity[]> {
-	return toPojo<PushSubscriptionEntity[]>(await PushSubscriptionModel.find().lean());
+	const rows = await getDatabase().select().from(pushSubscriptions);
+	return rows.map(toPushSubscription);
 }
 
 export async function sendPushToUser(

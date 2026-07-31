@@ -103,7 +103,7 @@
 		return {
 			src: fileMeta.path,
 			alt: fileMeta.name,
-			fileId: fileMeta._id.toString()
+			fileId: fileMeta.id.toString()
 		};
 	}
 

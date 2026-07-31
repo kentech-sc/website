@@ -1,30 +1,91 @@
+import { and, desc, eq, ilike, or, sql } from 'drizzle-orm';
+
+import { asEntity, firstOrNull } from './repository.utils.js';
+
 import type { CourseId } from '$lib/types/course.type.js';
 import type { ProfessorId } from '$lib/types/professor.type.js';
-import type { ReviewEntity, ReviewCreate, ReviewUpdate, ReviewId } from '$lib/types/review.type.js';
+import type { ReviewCreate, ReviewEntity, ReviewId, ReviewUpdate } from '$lib/types/review.type.js';
 
-import { ReviewModel } from '$lib/models/review.model.js';
-import { toPojo } from '$lib/shared/utils.js';
+import { reviews } from '$lib/server/database/schema.js';
+import { getDatabase } from '$lib/server/db.js';
+
+type ReviewRow = typeof reviews.$inferSelect;
+
+function toReview(row: ReviewRow): ReviewEntity {
+	return asEntity<ReviewEntity>({
+		id: row.id,
+		courseId: row.courseId,
+		professorId: row.professorId,
+		userId: row.userId,
+		year: row.year,
+		term: row.term,
+		title: row.title,
+		score: {
+			assignment: row.assignmentScore,
+			lecture: row.lectureScore,
+			exam: row.examScore,
+			satisfaction: row.satisfactionScore
+		},
+		comment: row.comment,
+		createdAt: row.createdAt,
+		updatedAt: row.updatedAt
+	});
+}
+
+function toReviewValues(review: ReviewCreate | ReviewUpdate) {
+	const { score, ...values } = review;
+	return {
+		...values,
+		assignmentScore: score?.assignment,
+		lectureScore: score?.lecture,
+		examScore: score?.exam,
+		satisfactionScore: score?.satisfaction
+	};
+}
+
+function filter(professorId?: ProfessorId, courseId?: CourseId) {
+	const conditions = [];
+	if (professorId) conditions.push(eq(reviews.professorId, professorId));
+	if (courseId) conditions.push(eq(reviews.courseId, courseId));
+	return conditions.length > 0 ? and(...conditions) : undefined;
+}
+
+function searchFilter(query: string) {
+	const pattern = `%${query}%`;
+	return or(ilike(reviews.title, pattern), ilike(reviews.comment, pattern))!;
+}
 
 export async function countReviews(
 	professorId?: ProfessorId,
 	courseId?: CourseId
 ): Promise<number> {
-	const filterQuery: { professorId?: string; courseId?: string } = {};
-	if (professorId) filterQuery.professorId = professorId;
-	if (courseId) filterQuery.courseId = courseId;
-	return await ReviewModel.countDocuments(filterQuery);
+	const [result] = await getDatabase()
+		.select({ count: sql<number>`count(*)::int` })
+		.from(reviews)
+		.where(filter(professorId, courseId));
+	return result.count;
 }
 
 export async function countReviewsByQuery(query: string): Promise<number> {
-	return await ReviewModel.countDocuments({ $text: { $search: query } });
+	const [result] = await getDatabase()
+		.select({ count: sql<number>`count(*)::int` })
+		.from(reviews)
+		.where(searchFilter(query));
+	return result.count;
 }
 
 export async function createReview(review: ReviewCreate): Promise<ReviewEntity> {
-	return toPojo<ReviewEntity>((await ReviewModel.create(review)).toObject());
+	const [created] = await getDatabase()
+		.insert(reviews)
+		.values(toReviewValues(review) as typeof reviews.$inferInsert)
+		.returning();
+	return toReview(created);
 }
 
 export async function findReviewById(reviewId: ReviewId): Promise<ReviewEntity | null> {
-	return toPojo<ReviewEntity | null>(await ReviewModel.findOne({ _id: reviewId }).lean());
+	const rows = await getDatabase().select().from(reviews).where(eq(reviews.id, reviewId)).limit(1);
+	const row = firstOrNull(rows);
+	return row ? toReview(row) : null;
 }
 
 export async function findRecentReviews(
@@ -32,30 +93,36 @@ export async function findRecentReviews(
 	skip = 0,
 	professorId?: ProfessorId,
 	courseId?: CourseId
-): Promise<Array<ReviewEntity>> {
-	const filterQuery: { professorId?: string; courseId?: string } = {};
-	if (professorId) filterQuery.professorId = professorId;
-	if (courseId) filterQuery.courseId = courseId;
-
-	return toPojo<ReviewEntity[]>(
-		await ReviewModel.find(filterQuery).sort({ createdAt: -1 }).skip(skip).limit(limit).lean()
-	);
+): Promise<ReviewEntity[]> {
+	const rows = await getDatabase()
+		.select()
+		.from(reviews)
+		.where(filter(professorId, courseId))
+		.orderBy(desc(reviews.createdAt))
+		.offset(skip)
+		.limit(limit);
+	return rows.map(toReview);
 }
 
 export async function updateReviewById(
 	reviewId: ReviewId,
 	reviewUpdate: ReviewUpdate
 ): Promise<ReviewEntity | null> {
-	return toPojo<ReviewEntity | null>(
-		await ReviewModel.findOneAndUpdate({ _id: reviewId }, reviewUpdate, {
-			returnDocument: 'after'
-		}).lean()
-	);
+	const rows = await getDatabase()
+		.update(reviews)
+		.set({ ...toReviewValues(reviewUpdate), updatedAt: sql`now()` })
+		.where(eq(reviews.id, reviewId))
+		.returning();
+	const row = firstOrNull(rows);
+	return row ? toReview(row) : null;
 }
 
 export async function deleteReviewById(reviewId: ReviewId): Promise<boolean> {
-	const res = await ReviewModel.deleteOne({ _id: reviewId });
-	return res.deletedCount > 0;
+	const rows = await getDatabase()
+		.delete(reviews)
+		.where(eq(reviews.id, reviewId))
+		.returning({ id: reviews.id });
+	return rows.length > 0;
 }
 
 export async function searchReviewsByQuery(
@@ -63,11 +130,12 @@ export async function searchReviewsByQuery(
 	limit = 10,
 	skip = 0
 ): Promise<Array<ReviewEntity & { searchScore?: number }>> {
-	return toPojo<Array<ReviewEntity & { searchScore?: number }>>(
-		await ReviewModel.find({ $text: { $search: query } }, { searchScore: { $meta: 'textScore' } })
-			.sort({ searchScore: { $meta: 'textScore' }, createdAt: -1 })
-			.skip(skip)
-			.limit(limit)
-			.lean()
-	);
+	const rows = await getDatabase()
+		.select()
+		.from(reviews)
+		.where(searchFilter(query))
+		.orderBy(desc(reviews.createdAt))
+		.offset(skip)
+		.limit(limit);
+	return rows.map((row) => ({ ...toReview(row), searchScore: 1 }));
 }

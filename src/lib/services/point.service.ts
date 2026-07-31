@@ -55,8 +55,8 @@ function isDuplicateKeyError(error: unknown): boolean {
 		typeof error === 'object' &&
 		error !== null &&
 		'code' in error &&
-		typeof error.code === 'number' &&
-		error.code === 11000
+		typeof error.code === 'string' &&
+		error.code === '23505'
 	);
 }
 

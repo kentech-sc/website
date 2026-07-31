@@ -35,7 +35,7 @@
 	let imageIds = $state<FileId[]>([]);
 	let initializedFor = $state<string | null>(null);
 
-	const allFileIds = $derived([...attachments.map((fileMeta) => fileMeta._id), ...imageIds]);
+	const allFileIds = $derived([...attachments.map((fileMeta) => fileMeta.id), ...imageIds]);
 
 	$effect(() => {
 		const currentFormKey = formKey ?? '__default__';
@@ -47,7 +47,7 @@
 		attachments = fileMetas.filter((fileMeta) => !fileMeta.mime.startsWith('image/'));
 		imageIds = fileMetas
 			.filter((fileMeta) => fileMeta.mime.startsWith('image/'))
-			.map((fileMeta) => fileMeta._id);
+			.map((fileMeta) => fileMeta.id);
 	});
 </script>
 

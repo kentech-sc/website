@@ -24,11 +24,11 @@
 		'boardId' in item
 			? resolve('/board/[boardId=board]/[postId]', {
 					boardId: item.boardId,
-					postId: item._id.toString()
+					postId: item.id.toString()
 				})
 			: 'status' in item
-				? resolve('/petition/[petitionId]', { petitionId: item._id.toString() })
-				: resolve('/review/[reviewId]', { reviewId: item._id.toString() })}
+				? resolve('/petition/[petitionId]', { petitionId: item.id.toString() })
+				: resolve('/review/[reviewId]', { reviewId: item.id.toString() })}
 	<a href={itemHref} class="list-item">
 		<div class="row1">
 			{#if 'status' in item}
@@ -38,8 +38,8 @@
 			{/if}
 			<span class="title">{item.title}</span>
 			<FileAttachmentIcons
-				hasImage={filePresence[item._id.toString()]?.hasImage}
-				hasFile={filePresence[item._id.toString()]?.hasFile}
+				hasImage={filePresence[item.id.toString()]?.hasImage}
+				hasFile={filePresence[item.id.toString()]?.hasFile}
 			/>
 			{#if 'commentCnt' in item}
 				<span class="comment-cnt">[{item.commentCnt}]</span>
@@ -62,7 +62,7 @@
 	</a>
 {/snippet}
 
-{#each page.items as item (item._id)}
+{#each page.items as item (item.id)}
 	{@render ListItem(item)}
 {/each}
 <CommonListPaginationBtn currentPage={page.currentPage} totalPages={page.totalPages} />

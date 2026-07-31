@@ -21,21 +21,21 @@
 			class="list-item"
 			href={resolve('/board/[boardId=board]/[postId]', {
 				boardId: item.boardId,
-				postId: item._id.toString()
+				postId: item.id.toString()
 			})}
 		>
 			<h3 class="ellipsis"><span class="board-tag">게시글</span>{item.title}</h3>
 			<p class="ellipsis">{getPlainTextFromHtml(item.content)}</p>
 		</a>
 	{:else if 'courseId' in item}
-		<a class="list-item" href={resolve('/review/[reviewId]', { reviewId: item._id.toString() })}>
+		<a class="list-item" href={resolve('/review/[reviewId]', { reviewId: item.id.toString() })}>
 			<h3 class="ellipsis"><span class="review-tag">강의평가</span> {item.title}</h3>
 			<p class="ellipsis">{getPlainTextFromHtml(item.comment)}</p>
 		</a>
 	{:else}
 		<a
 			class="list-item"
-			href={resolve('/petition/[petitionId]', { petitionId: item._id.toString() })}
+			href={resolve('/petition/[petitionId]', { petitionId: item.id.toString() })}
 		>
 			<h3 class="ellipsis"><span class="petition-tag">청원</span> {item.title}</h3>
 			<p class="ellipsis">{getPlainTextFromHtml(item.content)}</p>
@@ -47,7 +47,7 @@
 	{#if searchPage.items.length === 0}
 		<p>검색 결과가 없습니다.</p>
 	{:else}
-		{#each searchPage.items as item (item._id)}
+		{#each searchPage.items as item (item.id)}
 			{@render ListItem(item)}
 		{/each}
 

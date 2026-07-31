@@ -2,8 +2,12 @@
 	import Ban from '@lucide/svelte/icons/ban';
 	import ShieldCheck from '@lucide/svelte/icons/shield-check';
 
+	import type { UserAdminOption } from '$lib/types/user.type.js';
+
 	import CommonForm from '$components/CommonForm.svelte';
 	import CommonLabel from '$components/CommonLabel.svelte';
+
+	let { users }: { users: UserAdminOption[] } = $props();
 
 	function handleSuccess() {
 		alert('처리가 완료되었습니다.');
@@ -22,9 +26,15 @@
 			<span>사용자 차단</span>
 		</h4>
 
-		<CommonLabel labelFor="block-email" labelString="차단할 사용자의 이메일">
-			<input type="text" name="email" id="block-email" placeholder="abc1234" />
-			<span class="inline-container">@kentech.ac.kr</span>
+		<CommonLabel labelFor="block-user-id" labelString="차단할 사용자">
+			<select name="user-id" id="block-user-id" required>
+				<option value="">사용자 선택</option>
+				{#each users as user (user.id)}
+					<option value={user.id}>
+						{user.realName} · {user.email} · @{user.nickname} ({user.group})
+					</option>
+				{/each}
+			</select>
 		</CommonLabel>
 
 		<CommonLabel labelFor="block-duration" labelString="차단 기간 (분)">
@@ -50,9 +60,15 @@
 			<span>차단 해제</span>
 		</h4>
 
-		<CommonLabel labelFor="unblock-email" labelString="차단 해제할 사용자의 이메일">
-			<input type="text" name="email" id="unblock-email" placeholder="abc1234" />
-			<span class="inline-container">@kentech.ac.kr</span>
+		<CommonLabel labelFor="unblock-user-id" labelString="차단 해제할 사용자">
+			<select name="user-id" id="unblock-user-id" required>
+				<option value="">사용자 선택</option>
+				{#each users.filter((user) => user.blockedUntil !== null) as user (user.id)}
+					<option value={user.id}>
+						{user.realName} · {user.email} · @{user.nickname}
+					</option>
+				{/each}
+			</select>
 		</CommonLabel>
 
 		<button type="submit" class="success-btn">
@@ -67,13 +83,6 @@
 		width: 100%;
 		font-weight: 500;
 		font-size: 1rem;
-	}
-
-	input + span {
-		flex: 0;
-		margin-left: 0.4rem;
-		color: var(--gray);
-		font-size: 0.9rem;
 	}
 
 	button {

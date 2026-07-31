@@ -4,7 +4,7 @@ import type { User } from '$lib/types/user.type.js';
 import * as PetitionRepository from '$lib/repositories/petition.repository.js';
 import * as PetitionRule from '$lib/rules/petition.rule.js';
 import { AppError, assertRule } from '$lib/server/errors.js';
-import { assertObjectId } from '$lib/server/object-id.js';
+import { assertUuid } from '$lib/server/id.js';
 import { createPage } from '$lib/shared/paginate.js';
 import { APP_ERROR } from '$lib/shared/rule.js';
 import {
@@ -35,7 +35,7 @@ export async function createPetition(
 }
 
 export async function getPetitionById(petitionId: PetitionId): Promise<PetitionEntity> {
-	assertObjectId(petitionId, '존재하지 않는 청원입니다.');
+	assertUuid(petitionId, '존재하지 않는 청원입니다.');
 	const petition = await PetitionRepository.findPetitionById(petitionId);
 	if (!petition) throw new AppError(APP_ERROR.NOT_FOUND, '존재하지 않는 청원입니다.');
 	return await refreshStatusByPetition(petition);
@@ -63,7 +63,7 @@ export async function deletePetitionById(
 }
 
 export async function viewPetitionById(petitionId: PetitionId): Promise<PetitionEntity> {
-	assertObjectId(petitionId, '존재하지 않는 청원입니다.');
+	assertUuid(petitionId, '존재하지 않는 청원입니다.');
 	const petition = await PetitionRepository.viewPetitionById(petitionId);
 	if (!petition) throw new AppError(APP_ERROR.NOT_FOUND, '존재하지 않는 청원입니다.');
 	return await refreshStatusByPetition(petition);
@@ -76,7 +76,7 @@ export async function signPetitionById(
 	const petition = await getPetitionById(petitionId);
 	assertRule(PetitionRule.canSignPetition(petition, user));
 
-	const updatedPetition = await PetitionRepository.signPetitionById(petitionId, user._id);
+	const updatedPetition = await PetitionRepository.signPetitionById(petitionId, user.id);
 	if (!updatedPetition) {
 		throw new AppError(APP_ERROR.INVALID_STATE, '청원 상태가 변경되어 서명할 수 없습니다.');
 	}
@@ -91,7 +91,7 @@ export async function unsignPetitionById(
 	const petition = await getPetitionById(petitionId);
 	assertRule(PetitionRule.canUnsignPetition(petition, user));
 
-	const updatedPetition = await PetitionRepository.unsignPetitionById(petitionId, user._id);
+	const updatedPetition = await PetitionRepository.unsignPetitionById(petitionId, user.id);
 	if (!updatedPetition) {
 		throw new AppError(APP_ERROR.INVALID_STATE, '청원 상태가 변경되어 서명을 취소할 수 없습니다.');
 	}
@@ -139,7 +139,7 @@ export async function responseToPetitionById(
 
 	const updatedPetition = await PetitionRepository.respondToPetitionById(
 		petitionId,
-		responder._id,
+		responder.id,
 		response,
 		new Date().toISOString()
 	);
@@ -160,7 +160,7 @@ export async function reviseResponseById(
 
 	const updatedPetition = await PetitionRepository.revisePetitionResponseById(
 		petitionId,
-		responder._id,
+		responder.id,
 		response,
 		new Date().toISOString()
 	);
@@ -191,14 +191,14 @@ async function refreshStatusByPetition(petition: PetitionEntity): Promise<Petiti
 	if (nextStatus === petition.status) return petition;
 
 	const refreshedPetition = await PetitionRepository.refreshPetitionStatusById(
-		petition._id,
+		petition.id,
 		petition.status,
 		petition.signedBy,
 		nextStatus
 	);
 	if (refreshedPetition) return refreshedPetition;
 
-	const latestPetition = await PetitionRepository.findPetitionById(petition._id);
+	const latestPetition = await PetitionRepository.findPetitionById(petition.id);
 	if (!latestPetition) throw new AppError(APP_ERROR.NOT_FOUND, '존재하지 않는 청원입니다.');
 	return latestPetition;
 }

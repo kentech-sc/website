@@ -23,7 +23,7 @@ export interface ReviewCreate {
 }
 
 export interface ReviewEntity extends ReviewCreate {
-	_id: ReviewId;
+	id: ReviewId;
 	createdAt: string;
 	updatedAt: string;
 }

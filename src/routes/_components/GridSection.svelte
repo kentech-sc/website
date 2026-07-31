@@ -33,11 +33,11 @@
 		'boardId' in item
 			? resolve('/board/[boardId=board]/[postId]', {
 					boardId: item.boardId,
-					postId: item._id.toString()
+					postId: item.id.toString()
 				})
 			: 'status' in item
-				? resolve('/petition/[petitionId]', { petitionId: item._id.toString() })
-				: resolve('/review/[reviewId]', { reviewId: item._id.toString() })}
+				? resolve('/petition/[petitionId]', { petitionId: item.id.toString() })
+				: resolve('/review/[reviewId]', { reviewId: item.id.toString() })}
 	<a href={itemHref} class="container grid-item">
 		<span>
 			{#if title === '청원'}
@@ -57,7 +57,7 @@
 	{#if items.length === 0}
 		<p>작성된 글이 없습니다.</p>
 	{:else}
-		{#each items as item (item._id)}{@render Item(item)}{/each}
+		{#each items as item (item.id)}{@render Item(item)}{/each}
 	{/if}
 </section>
 

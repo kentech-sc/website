@@ -5,7 +5,7 @@ export interface ProfessorCreate {
 }
 
 export interface ProfessorEntity extends ProfessorCreate {
-	_id: ProfessorId;
+	id: ProfessorId;
 }
 
 export type Professor = ProfessorEntity;

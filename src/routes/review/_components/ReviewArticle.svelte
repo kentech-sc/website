@@ -33,7 +33,7 @@
 		{#if permissions.canEdit}
 			<a
 				class="edit-btn inline-container"
-				href={resolve('/review/[reviewId]/edit', { reviewId: review._id.toString() })}
+				href={resolve('/review/[reviewId]/edit', { reviewId: review.id.toString() })}
 				><Pencil size="1.2rem" /></a
 			>
 		{/if}
@@ -42,7 +42,7 @@
 				<InlineActionForm
 					actionName="deleteReview"
 					buttonClass="inline-container"
-					hiddenFields={[{ name: 'review-id', value: review._id }]}
+					hiddenFields={[{ name: 'review-id', value: review.id }]}
 				>
 					<Trash size="1.2rem" />
 				</InlineActionForm>

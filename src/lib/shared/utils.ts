@@ -72,7 +72,7 @@ export function createDisplayName(
 	switch (displayType) {
 		case 'anonymous': {
 			if (!userIdToIdx) return ANONYMOUS_NAME;
-			const anonIdx = userIdToIdx.get(user._id);
+			const anonIdx = userIdToIdx.get(user.id);
 			return anonIdx ? `${ANONYMOUS_NAME} ${anonIdx}` : ANONYMOUS_NAME;
 		}
 		case 'realName': {

@@ -1,6 +1,6 @@
-import mongoose from 'mongoose';
-
-export async function init(MONGO_URI: string) {
-	await mongoose.connect(MONGO_URI);
-	mongoose.set('transactionAsyncLocalStorage', true);
-}
+export {
+	closeDatabase,
+	getDatabase,
+	initDatabase as init,
+	transaction
+} from './database/client.js';

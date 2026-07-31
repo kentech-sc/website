@@ -1,4 +1,4 @@
-﻿<script lang="ts">
+<script lang="ts">
 	import Trash_2 from '@lucide/svelte/icons/trash-2';
 
 	import type { FileId, FileMeta } from '$lib/types/file-meta.type.js';
@@ -24,7 +24,7 @@
 	const deleteFile = (fileId: FileId) => {
 		if (disabled) return;
 
-		fileMetas = fileMetas.filter((fileMeta: FileMeta) => fileMeta._id !== fileId);
+		fileMetas = fileMetas.filter((fileMeta: FileMeta) => fileMeta.id !== fileId);
 	};
 </script>
 
@@ -32,7 +32,7 @@
 	<div class="container file-item">
 		<p>[{idx + 1}] <a href={file.path} rel="external">{file.name}</a></p>
 		{#if isEditing}
-			<button onclick={() => deleteFile(file._id)} {disabled}><Trash_2 size="0.8rem" /></button>
+			<button onclick={() => deleteFile(file.id)} {disabled}><Trash_2 size="0.8rem" /></button>
 		{/if}
 	</div>
 {/snippet}

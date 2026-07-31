@@ -21,7 +21,7 @@ export function canChangeNickname(
 	operatorUser: User,
 	isDuplicate: boolean
 ): RuleResult {
-	if (!(isOwner(operatorUser, targetUser._id) || hasCapability(operatorUser, 'user.manage'))) {
+	if (!(isOwner(operatorUser, targetUser.id) || hasCapability(operatorUser, 'user.manage'))) {
 		return ruleFail(APP_ERROR.FORBIDDEN, '별명을 변경할 권한이 없습니다.');
 	}
 
@@ -88,6 +88,6 @@ export function canBlockOrUnblockUser(targetUser: User, operatorUser: User): Rul
 }
 
 export function canDeleteUser(targetUser: User, operatorUser: User): RuleResult {
-	if (isOwner(operatorUser, targetUser._id)) return ok();
+	if (isOwner(operatorUser, targetUser.id)) return ok();
 	return ruleFail(APP_ERROR.FORBIDDEN, '사용자 탈퇴는 본인만 할 수 있습니다.');
 }

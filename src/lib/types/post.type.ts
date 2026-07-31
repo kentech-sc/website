@@ -12,7 +12,7 @@ export interface PostCreate {
 }
 
 export interface PostEntity extends PostCreate {
-	_id: PostId;
+	id: PostId;
 	createdAt: string;
 
 	viewCnt: number;

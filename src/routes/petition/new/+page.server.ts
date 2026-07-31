@@ -27,7 +27,7 @@ export const actions = {
 			normalizedEditor.fileIds
 		);
 
-		throw redirect(302, '/petition/' + petition._id);
+		throw redirect(302, '/petition/' + petition.id);
 	}),
 	...editorActions
 };

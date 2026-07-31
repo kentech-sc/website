@@ -35,7 +35,7 @@ export async function normalizeEditorContent(
 
 	const resolvedFileMetas = fileMetas as FileMeta[];
 	const imageFileMetas = resolvedFileMetas.filter(isImageFile);
-	const imageById = new Map(imageFileMetas.map((fileMeta) => [fileMeta._id, fileMeta]));
+	const imageById = new Map(imageFileMetas.map((fileMeta) => [fileMeta.id, fileMeta]));
 	const imageByPath = new Map(imageFileMetas.map((fileMeta) => [fileMeta.path, fileMeta]));
 	const attachmentIds = uniqueSubmittedFileIds.filter((fileId) => !imageById.has(fileId));
 	const usedImageIds = new Set<FileId>();
@@ -55,9 +55,9 @@ export async function normalizeEditorContent(
 			);
 		}
 
-		usedImageIds.add(fileMeta._id);
+		usedImageIds.add(fileMeta.id);
 		imageElement.setAttribute('src', fileMeta.path);
-		imageElement.setAttribute('data-file-id', fileMeta._id);
+		imageElement.setAttribute('data-file-id', fileMeta.id);
 
 		if (!imageElement.getAttribute('alt')) {
 			imageElement.setAttribute('alt', fileMeta.name);

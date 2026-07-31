@@ -7,7 +7,7 @@ import type { User } from '$lib/types/user.type.js';
 import * as ReviewRepository from '$lib/repositories/review.repository.js';
 import * as ReviewRule from '$lib/rules/review.rule.js';
 import { AppError, assertRule } from '$lib/server/errors.js';
-import { assertObjectId } from '$lib/server/object-id.js';
+import { assertUuid } from '$lib/server/id.js';
 import { createPage } from '$lib/shared/paginate.js';
 import { APP_ERROR } from '$lib/shared/rule.js';
 
@@ -26,7 +26,7 @@ export async function createReview(reviewCreate: ReviewCreate, user: User): Prom
 }
 
 export async function getReviewById(reviewId: ReviewId): Promise<ReviewEntity> {
-	assertObjectId(reviewId, '존재하지 않는 강의 평가입니다.');
+	assertUuid(reviewId, '존재하지 않는 강의 평가입니다.');
 	const review = await ReviewRepository.findReviewById(reviewId);
 	if (!review) throw new AppError(APP_ERROR.NOT_FOUND, '존재하지 않는 강의 평가입니다.');
 	return review;

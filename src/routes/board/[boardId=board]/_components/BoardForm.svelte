@@ -23,10 +23,10 @@
 	let imageIds = $state<FileId[]>([]);
 	let initializedFor = $state<string | null>(null);
 
-	const fileIds = $derived([...attachments.map((fileMeta) => fileMeta._id), ...imageIds]);
+	const fileIds = $derived([...attachments.map((fileMeta) => fileMeta.id), ...imageIds]);
 
 	$effect(() => {
-		const formKey = post?._id ?? 'new';
+		const formKey = post?.id ?? 'new';
 
 		if (initializedFor === formKey) return;
 
@@ -35,7 +35,7 @@
 		attachments = fileMetas.filter((fileMeta) => !fileMeta.mime.startsWith('image/'));
 		imageIds = fileMetas
 			.filter((fileMeta) => fileMeta.mime.startsWith('image/'))
-			.map((fileMeta) => fileMeta._id);
+			.map((fileMeta) => fileMeta.id);
 	});
 </script>
 
@@ -54,7 +54,7 @@
 		<input type="hidden" name="fileIds" value={fileId} readonly />
 	{/each}
 
-	{#key post?._id ?? 'new'}
+	{#key post?.id ?? 'new'}
 		<Editor
 			initialHtml={post?.content ?? ''}
 			bind:attachments

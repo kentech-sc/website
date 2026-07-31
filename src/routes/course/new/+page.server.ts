@@ -20,7 +20,7 @@ export const actions = {
 			return fail(400, { message: '강의 코드, 이름, 설명은 필수입니다.' });
 		}
 
-		await CourseUsecase.createCourse({ _id: courseId, name, content }, locals.user);
+		await CourseUsecase.createCourse({ id: courseId, name, content }, locals.user);
 		return { success: true };
 	}),
 	addProfessor: withActionErrorHandling(async ({ request, locals }) => {

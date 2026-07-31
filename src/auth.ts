@@ -23,6 +23,13 @@ export const { handle, signIn, signOut } = SvelteKitAuth({
 	//     signIn: '/u/',
 	// },
 	callbacks: {
+		async signIn({ profile }) {
+			return (
+				profile?.email_verified === true &&
+				profile.hd === 'kentech.ac.kr' &&
+				profile.email?.endsWith('@kentech.ac.kr') === true
+			);
+		},
 		async jwt({ token, user, profile }) {
 			if (user && profile) {
 				token.googleSub = profile.sub ?? undefined;
