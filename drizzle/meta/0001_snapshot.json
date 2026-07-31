@@ -1,0 +1,1432 @@
+{
+	"id": "ce964721-ecc2-48a5-b671-a594d61a6a56",
+	"prevId": "52784a5d-a12e-4fd5-a0c3-184f295ad528",
+	"version": "7",
+	"dialect": "postgresql",
+	"tables": {
+		"app.activity_logs": {
+			"name": "activity_logs",
+			"schema": "app",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "bigserial",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"actor_id": {
+					"name": "actor_id",
+					"type": "uuid",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"action": {
+					"name": "action",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"target_type": {
+					"name": "target_type",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"target_id": {
+					"name": "target_id",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"cause": {
+					"name": "cause",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"before_snapshot": {
+					"name": "before_snapshot",
+					"type": "jsonb",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"after_snapshot": {
+					"name": "after_snapshot",
+					"type": "jsonb",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": true
+		},
+		"app.comments": {
+			"name": "comments",
+			"schema": "app",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "uuid",
+					"primaryKey": true,
+					"notNull": true,
+					"default": "gen_random_uuid()"
+				},
+				"post_id": {
+					"name": "post_id",
+					"type": "uuid",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"user_id": {
+					"name": "user_id",
+					"type": "uuid",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"display_type": {
+					"name": "display_type",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"content": {
+					"name": "content",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				},
+				"updated_at": {
+					"name": "updated_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				}
+			},
+			"indexes": {
+				"comments_post_created_idx": {
+					"name": "comments_post_created_idx",
+					"columns": [
+						{
+							"expression": "post_id",
+							"isExpression": false,
+							"asc": true,
+							"nulls": "last"
+						},
+						{
+							"expression": "created_at",
+							"isExpression": false,
+							"asc": true,
+							"nulls": "last"
+						}
+					],
+					"isUnique": false,
+					"concurrently": false,
+					"method": "btree",
+					"with": {}
+				}
+			},
+			"foreignKeys": {
+				"comments_post_id_posts_id_fk": {
+					"name": "comments_post_id_posts_id_fk",
+					"tableFrom": "comments",
+					"tableTo": "posts",
+					"schemaTo": "app",
+					"columnsFrom": ["post_id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				},
+				"comments_user_id_users_id_fk": {
+					"name": "comments_user_id_users_id_fk",
+					"tableFrom": "comments",
+					"tableTo": "users",
+					"schemaTo": "app",
+					"columnsFrom": ["user_id"],
+					"columnsTo": ["id"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {
+				"comments_display_type_check": {
+					"name": "comments_display_type_check",
+					"value": "\"app\".\"comments\".\"display_type\" in ('email', 'realName', 'nickname', 'anonymous')"
+				}
+			},
+			"isRLSEnabled": true
+		},
+		"app.courses": {
+			"name": "courses",
+			"schema": "app",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "text",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"name": {
+					"name": "name",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"content": {
+					"name": "content",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": true
+		},
+		"app.file_metas": {
+			"name": "file_metas",
+			"schema": "app",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "uuid",
+					"primaryKey": true,
+					"notNull": true,
+					"default": "gen_random_uuid()"
+				},
+				"key": {
+					"name": "key",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"name": {
+					"name": "name",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"size": {
+					"name": "size",
+					"type": "bigint",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"mime": {
+					"name": "mime",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"ext": {
+					"name": "ext",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				},
+				"updated_at": {
+					"name": "updated_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {
+				"file_metas_key_unique": {
+					"name": "file_metas_key_unique",
+					"nullsNotDistinct": false,
+					"columns": ["key"]
+				}
+			},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": true
+		},
+		"app.petition_files": {
+			"name": "petition_files",
+			"schema": "app",
+			"columns": {
+				"petition_id": {
+					"name": "petition_id",
+					"type": "uuid",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"file_id": {
+					"name": "file_id",
+					"type": "uuid",
+					"primaryKey": false,
+					"notNull": true
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"petition_files_petition_id_petitions_id_fk": {
+					"name": "petition_files_petition_id_petitions_id_fk",
+					"tableFrom": "petition_files",
+					"tableTo": "petitions",
+					"schemaTo": "app",
+					"columnsFrom": ["petition_id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				},
+				"petition_files_file_id_file_metas_id_fk": {
+					"name": "petition_files_file_id_file_metas_id_fk",
+					"tableFrom": "petition_files",
+					"tableTo": "file_metas",
+					"schemaTo": "app",
+					"columnsFrom": ["file_id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {
+				"petition_files_petition_id_file_id_pk": {
+					"name": "petition_files_petition_id_file_id_pk",
+					"columns": ["petition_id", "file_id"]
+				}
+			},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": true
+		},
+		"app.petition_signatures": {
+			"name": "petition_signatures",
+			"schema": "app",
+			"columns": {
+				"petition_id": {
+					"name": "petition_id",
+					"type": "uuid",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"user_id": {
+					"name": "user_id",
+					"type": "uuid",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"petition_signatures_petition_id_petitions_id_fk": {
+					"name": "petition_signatures_petition_id_petitions_id_fk",
+					"tableFrom": "petition_signatures",
+					"tableTo": "petitions",
+					"schemaTo": "app",
+					"columnsFrom": ["petition_id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				},
+				"petition_signatures_user_id_users_id_fk": {
+					"name": "petition_signatures_user_id_users_id_fk",
+					"tableFrom": "petition_signatures",
+					"tableTo": "users",
+					"schemaTo": "app",
+					"columnsFrom": ["user_id"],
+					"columnsTo": ["id"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {
+				"petition_signatures_petition_id_user_id_pk": {
+					"name": "petition_signatures_petition_id_user_id_pk",
+					"columns": ["petition_id", "user_id"]
+				}
+			},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": true
+		},
+		"app.petitions": {
+			"name": "petitions",
+			"schema": "app",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "uuid",
+					"primaryKey": true,
+					"notNull": true,
+					"default": "gen_random_uuid()"
+				},
+				"title": {
+					"name": "title",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"content": {
+					"name": "content",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"status": {
+					"name": "status",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "'ongoing'"
+				},
+				"view_count": {
+					"name": "view_count",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true,
+					"default": 0
+				},
+				"petitioner_id": {
+					"name": "petitioner_id",
+					"type": "uuid",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"responder_id": {
+					"name": "responder_id",
+					"type": "uuid",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"response": {
+					"name": "response",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"answered_at": {
+					"name": "answered_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				},
+				"updated_at": {
+					"name": "updated_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				}
+			},
+			"indexes": {
+				"petitions_created_idx": {
+					"name": "petitions_created_idx",
+					"columns": [
+						{
+							"expression": "created_at",
+							"isExpression": false,
+							"asc": true,
+							"nulls": "last"
+						}
+					],
+					"isUnique": false,
+					"concurrently": false,
+					"method": "btree",
+					"with": {}
+				}
+			},
+			"foreignKeys": {
+				"petitions_petitioner_id_users_id_fk": {
+					"name": "petitions_petitioner_id_users_id_fk",
+					"tableFrom": "petitions",
+					"tableTo": "users",
+					"schemaTo": "app",
+					"columnsFrom": ["petitioner_id"],
+					"columnsTo": ["id"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				},
+				"petitions_responder_id_users_id_fk": {
+					"name": "petitions_responder_id_users_id_fk",
+					"tableFrom": "petitions",
+					"tableTo": "users",
+					"schemaTo": "app",
+					"columnsFrom": ["responder_id"],
+					"columnsTo": ["id"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {
+				"petitions_status_check": {
+					"name": "petitions_status_check",
+					"value": "\"app\".\"petitions\".\"status\" in ('ongoing', 'pending', 'reviewing', 'answered', 'expired')"
+				},
+				"petitions_view_count_check": {
+					"name": "petitions_view_count_check",
+					"value": "\"app\".\"petitions\".\"view_count\" >= 0"
+				}
+			},
+			"isRLSEnabled": true
+		},
+		"app.point_states": {
+			"name": "point_states",
+			"schema": "app",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "uuid",
+					"primaryKey": true,
+					"notNull": true,
+					"default": "gen_random_uuid()"
+				},
+				"user_id": {
+					"name": "user_id",
+					"type": "uuid",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"date_key": {
+					"name": "date_key",
+					"type": "date",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"post_count": {
+					"name": "post_count",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true,
+					"default": 0
+				},
+				"comment_count": {
+					"name": "comment_count",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true,
+					"default": 0
+				},
+				"review_count": {
+					"name": "review_count",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true,
+					"default": 0
+				},
+				"petition_count": {
+					"name": "petition_count",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true,
+					"default": 0
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				},
+				"updated_at": {
+					"name": "updated_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"point_states_user_id_users_id_fk": {
+					"name": "point_states_user_id_users_id_fk",
+					"tableFrom": "point_states",
+					"tableTo": "users",
+					"schemaTo": "app",
+					"columnsFrom": ["user_id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {
+				"point_states_user_id_unique": {
+					"name": "point_states_user_id_unique",
+					"nullsNotDistinct": false,
+					"columns": ["user_id"]
+				}
+			},
+			"policies": {},
+			"checkConstraints": {
+				"point_states_counts_check": {
+					"name": "point_states_counts_check",
+					"value": "\"app\".\"point_states\".\"post_count\" >= 0 and \"app\".\"point_states\".\"comment_count\" >= 0\n\t\t\t\tand \"app\".\"point_states\".\"review_count\" >= 0 and \"app\".\"point_states\".\"petition_count\" >= 0"
+				}
+			},
+			"isRLSEnabled": true
+		},
+		"app.post_files": {
+			"name": "post_files",
+			"schema": "app",
+			"columns": {
+				"post_id": {
+					"name": "post_id",
+					"type": "uuid",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"file_id": {
+					"name": "file_id",
+					"type": "uuid",
+					"primaryKey": false,
+					"notNull": true
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"post_files_post_id_posts_id_fk": {
+					"name": "post_files_post_id_posts_id_fk",
+					"tableFrom": "post_files",
+					"tableTo": "posts",
+					"schemaTo": "app",
+					"columnsFrom": ["post_id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				},
+				"post_files_file_id_file_metas_id_fk": {
+					"name": "post_files_file_id_file_metas_id_fk",
+					"tableFrom": "post_files",
+					"tableTo": "file_metas",
+					"schemaTo": "app",
+					"columnsFrom": ["file_id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {
+				"post_files_post_id_file_id_pk": {
+					"name": "post_files_post_id_file_id_pk",
+					"columns": ["post_id", "file_id"]
+				}
+			},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": true
+		},
+		"app.post_likes": {
+			"name": "post_likes",
+			"schema": "app",
+			"columns": {
+				"post_id": {
+					"name": "post_id",
+					"type": "uuid",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"user_id": {
+					"name": "user_id",
+					"type": "uuid",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"post_likes_post_id_posts_id_fk": {
+					"name": "post_likes_post_id_posts_id_fk",
+					"tableFrom": "post_likes",
+					"tableTo": "posts",
+					"schemaTo": "app",
+					"columnsFrom": ["post_id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				},
+				"post_likes_user_id_users_id_fk": {
+					"name": "post_likes_user_id_users_id_fk",
+					"tableFrom": "post_likes",
+					"tableTo": "users",
+					"schemaTo": "app",
+					"columnsFrom": ["user_id"],
+					"columnsTo": ["id"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {
+				"post_likes_post_id_user_id_pk": {
+					"name": "post_likes_post_id_user_id_pk",
+					"columns": ["post_id", "user_id"]
+				}
+			},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": true
+		},
+		"app.posts": {
+			"name": "posts",
+			"schema": "app",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "uuid",
+					"primaryKey": true,
+					"notNull": true,
+					"default": "gen_random_uuid()"
+				},
+				"board_id": {
+					"name": "board_id",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"user_id": {
+					"name": "user_id",
+					"type": "uuid",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"display_type": {
+					"name": "display_type",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"title": {
+					"name": "title",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"content": {
+					"name": "content",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"view_count": {
+					"name": "view_count",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true,
+					"default": 0
+				},
+				"comment_count": {
+					"name": "comment_count",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true,
+					"default": 0
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				},
+				"updated_at": {
+					"name": "updated_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				}
+			},
+			"indexes": {
+				"posts_board_created_idx": {
+					"name": "posts_board_created_idx",
+					"columns": [
+						{
+							"expression": "board_id",
+							"isExpression": false,
+							"asc": true,
+							"nulls": "last"
+						},
+						{
+							"expression": "created_at",
+							"isExpression": false,
+							"asc": true,
+							"nulls": "last"
+						}
+					],
+					"isUnique": false,
+					"concurrently": false,
+					"method": "btree",
+					"with": {}
+				}
+			},
+			"foreignKeys": {
+				"posts_user_id_users_id_fk": {
+					"name": "posts_user_id_users_id_fk",
+					"tableFrom": "posts",
+					"tableTo": "users",
+					"schemaTo": "app",
+					"columnsFrom": ["user_id"],
+					"columnsTo": ["id"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {
+				"posts_board_check": {
+					"name": "posts_board_check",
+					"value": "\"app\".\"posts\".\"board_id\" in ('notice', 'free', 'bylaw')"
+				},
+				"posts_display_type_check": {
+					"name": "posts_display_type_check",
+					"value": "\"app\".\"posts\".\"display_type\" in ('email', 'realName', 'nickname', 'anonymous')"
+				},
+				"posts_view_count_check": {
+					"name": "posts_view_count_check",
+					"value": "\"app\".\"posts\".\"view_count\" >= 0"
+				},
+				"posts_comment_count_check": {
+					"name": "posts_comment_count_check",
+					"value": "\"app\".\"posts\".\"comment_count\" >= 0"
+				}
+			},
+			"isRLSEnabled": true
+		},
+		"app.professors": {
+			"name": "professors",
+			"schema": "app",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "uuid",
+					"primaryKey": true,
+					"notNull": true,
+					"default": "gen_random_uuid()"
+				},
+				"name": {
+					"name": "name",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {
+				"professors_name_unique": {
+					"name": "professors_name_unique",
+					"nullsNotDistinct": false,
+					"columns": ["name"]
+				}
+			},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": true
+		},
+		"app.push_subscriptions": {
+			"name": "push_subscriptions",
+			"schema": "app",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "uuid",
+					"primaryKey": true,
+					"notNull": true,
+					"default": "gen_random_uuid()"
+				},
+				"user_id": {
+					"name": "user_id",
+					"type": "uuid",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"endpoint": {
+					"name": "endpoint",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"expiration_time": {
+					"name": "expiration_time",
+					"type": "bigint",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"p256dh": {
+					"name": "p256dh",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"auth": {
+					"name": "auth",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"user_agent": {
+					"name": "user_agent",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "''"
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				},
+				"updated_at": {
+					"name": "updated_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				}
+			},
+			"indexes": {
+				"push_subscriptions_endpoint_idx": {
+					"name": "push_subscriptions_endpoint_idx",
+					"columns": [
+						{
+							"expression": "endpoint",
+							"isExpression": false,
+							"asc": true,
+							"nulls": "last"
+						}
+					],
+					"isUnique": false,
+					"concurrently": false,
+					"method": "btree",
+					"with": {}
+				}
+			},
+			"foreignKeys": {
+				"push_subscriptions_user_id_users_id_fk": {
+					"name": "push_subscriptions_user_id_users_id_fk",
+					"tableFrom": "push_subscriptions",
+					"tableTo": "users",
+					"schemaTo": "app",
+					"columnsFrom": ["user_id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {
+				"push_subscriptions_user_endpoint_unique": {
+					"name": "push_subscriptions_user_endpoint_unique",
+					"nullsNotDistinct": false,
+					"columns": ["user_id", "endpoint"]
+				}
+			},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": true
+		},
+		"app.reviews": {
+			"name": "reviews",
+			"schema": "app",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "uuid",
+					"primaryKey": true,
+					"notNull": true,
+					"default": "gen_random_uuid()"
+				},
+				"course_id": {
+					"name": "course_id",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"professor_id": {
+					"name": "professor_id",
+					"type": "uuid",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"user_id": {
+					"name": "user_id",
+					"type": "uuid",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"year": {
+					"name": "year",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"term": {
+					"name": "term",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"title": {
+					"name": "title",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"assignment_score": {
+					"name": "assignment_score",
+					"type": "double precision",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"lecture_score": {
+					"name": "lecture_score",
+					"type": "double precision",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"exam_score": {
+					"name": "exam_score",
+					"type": "double precision",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"satisfaction_score": {
+					"name": "satisfaction_score",
+					"type": "double precision",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"comment": {
+					"name": "comment",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "''"
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				},
+				"updated_at": {
+					"name": "updated_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				}
+			},
+			"indexes": {
+				"reviews_created_idx": {
+					"name": "reviews_created_idx",
+					"columns": [
+						{
+							"expression": "created_at",
+							"isExpression": false,
+							"asc": true,
+							"nulls": "last"
+						}
+					],
+					"isUnique": false,
+					"concurrently": false,
+					"method": "btree",
+					"with": {}
+				}
+			},
+			"foreignKeys": {
+				"reviews_course_id_courses_id_fk": {
+					"name": "reviews_course_id_courses_id_fk",
+					"tableFrom": "reviews",
+					"tableTo": "courses",
+					"schemaTo": "app",
+					"columnsFrom": ["course_id"],
+					"columnsTo": ["id"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				},
+				"reviews_professor_id_professors_id_fk": {
+					"name": "reviews_professor_id_professors_id_fk",
+					"tableFrom": "reviews",
+					"tableTo": "professors",
+					"schemaTo": "app",
+					"columnsFrom": ["professor_id"],
+					"columnsTo": ["id"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				},
+				"reviews_user_id_users_id_fk": {
+					"name": "reviews_user_id_users_id_fk",
+					"tableFrom": "reviews",
+					"tableTo": "users",
+					"schemaTo": "app",
+					"columnsFrom": ["user_id"],
+					"columnsTo": ["id"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {
+				"reviews_term_check": {
+					"name": "reviews_term_check",
+					"value": "\"app\".\"reviews\".\"term\" between 1 and 4"
+				},
+				"reviews_scores_check": {
+					"name": "reviews_scores_check",
+					"value": "\"app\".\"reviews\".\"assignment_score\" between 0 and 5\n\t\t\t\tand \"app\".\"reviews\".\"lecture_score\" between 0 and 5\n\t\t\t\tand \"app\".\"reviews\".\"exam_score\" between 0 and 5\n\t\t\t\tand \"app\".\"reviews\".\"satisfaction_score\" between 0 and 5"
+				}
+			},
+			"isRLSEnabled": true
+		},
+		"app.throttles": {
+			"name": "throttles",
+			"schema": "app",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "uuid",
+					"primaryKey": true,
+					"notNull": true,
+					"default": "gen_random_uuid()"
+				},
+				"user_id": {
+					"name": "user_id",
+					"type": "uuid",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"bucket": {
+					"name": "bucket",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"available_at": {
+					"name": "available_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				},
+				"updated_at": {
+					"name": "updated_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"throttles_user_id_users_id_fk": {
+					"name": "throttles_user_id_users_id_fk",
+					"tableFrom": "throttles",
+					"tableTo": "users",
+					"schemaTo": "app",
+					"columnsFrom": ["user_id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {
+				"throttles_user_bucket_unique": {
+					"name": "throttles_user_bucket_unique",
+					"nullsNotDistinct": false,
+					"columns": ["user_id", "bucket"]
+				}
+			},
+			"policies": {},
+			"checkConstraints": {
+				"throttles_bucket_check": {
+					"name": "throttles_bucket_check",
+					"value": "\"app\".\"throttles\".\"bucket\" in ('article', 'comment')"
+				}
+			},
+			"isRLSEnabled": true
+		},
+		"private.user_identities": {
+			"name": "user_identities",
+			"schema": "private",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "uuid",
+					"primaryKey": true,
+					"notNull": true,
+					"default": "gen_random_uuid()"
+				},
+				"user_id": {
+					"name": "user_id",
+					"type": "uuid",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"issuer": {
+					"name": "issuer",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"subject": {
+					"name": "subject",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"email_at_login": {
+					"name": "email_at_login",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				},
+				"updated_at": {
+					"name": "updated_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				}
+			},
+			"indexes": {
+				"user_identities_user_id_idx": {
+					"name": "user_identities_user_id_idx",
+					"columns": [
+						{
+							"expression": "user_id",
+							"isExpression": false,
+							"asc": true,
+							"nulls": "last"
+						}
+					],
+					"isUnique": false,
+					"concurrently": false,
+					"method": "btree",
+					"with": {}
+				}
+			},
+			"foreignKeys": {
+				"user_identities_user_id_users_id_fk": {
+					"name": "user_identities_user_id_users_id_fk",
+					"tableFrom": "user_identities",
+					"tableTo": "users",
+					"schemaTo": "app",
+					"columnsFrom": ["user_id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {
+				"user_identities_issuer_subject_unique": {
+					"name": "user_identities_issuer_subject_unique",
+					"nullsNotDistinct": false,
+					"columns": ["issuer", "subject"]
+				}
+			},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": true
+		},
+		"app.users": {
+			"name": "users",
+			"schema": "app",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "uuid",
+					"primaryKey": true,
+					"notNull": true,
+					"default": "gen_random_uuid()"
+				},
+				"email": {
+					"name": "email",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"real_name": {
+					"name": "real_name",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"nickname": {
+					"name": "nickname",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"group": {
+					"name": "group",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "'user'"
+				},
+				"blocked_until": {
+					"name": "blocked_until",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"deleted_at": {
+					"name": "deleted_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"points": {
+					"name": "points",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true,
+					"default": 0
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				},
+				"updated_at": {
+					"name": "updated_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				}
+			},
+			"indexes": {
+				"users_email_idx": {
+					"name": "users_email_idx",
+					"columns": [
+						{
+							"expression": "email",
+							"isExpression": false,
+							"asc": true,
+							"nulls": "last"
+						}
+					],
+					"isUnique": false,
+					"concurrently": false,
+					"method": "btree",
+					"with": {}
+				}
+			},
+			"foreignKeys": {},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {
+				"users_nickname_unique": {
+					"name": "users_nickname_unique",
+					"nullsNotDistinct": false,
+					"columns": ["nickname"]
+				}
+			},
+			"policies": {},
+			"checkConstraints": {
+				"users_group_check": {
+					"name": "users_group_check",
+					"value": "\"app\".\"users\".\"group\" in ('guest', 'user', 'moderator', 'manager', 'dev')"
+				}
+			},
+			"isRLSEnabled": true
+		}
+	},
+	"enums": {},
+	"schemas": {
+		"app": "app",
+		"private": "private"
+	},
+	"sequences": {},
+	"roles": {},
+	"policies": {},
+	"views": {},
+	"_meta": {
+		"columns": {},
+		"schemas": {},
+		"tables": {}
+	}
+}

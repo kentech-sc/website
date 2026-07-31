@@ -1,33 +1,42 @@
-import type { ProfessorId, ProfessorCreate, ProfessorEntity } from '$lib/types/professor.type.js';
+import { asc, eq, inArray } from 'drizzle-orm';
 
-import { ProfessorModel } from '$lib/models/professor.model.js';
-import { toPojo } from '$lib/shared/utils.js';
+import { asEntity, firstOrNull } from './repository.utils.js';
+
+import type { ProfessorCreate, ProfessorEntity, ProfessorId } from '$lib/types/professor.type.js';
+
+import { professors } from '$lib/server/database/schema.js';
+import { getDatabase } from '$lib/server/db.js';
 
 export async function createProfessor(professor: ProfessorCreate): Promise<ProfessorEntity> {
-	return toPojo<ProfessorEntity>((await ProfessorModel.create(professor)).toObject());
+	const [created] = await getDatabase().insert(professors).values(professor).returning();
+	return asEntity<ProfessorEntity>(created);
 }
 
-export async function findProfessorByName(professorName: string): Promise<ProfessorEntity | null> {
-	return toPojo<ProfessorEntity | null>(
-		await ProfessorModel.findOne({ name: professorName }).lean()
-	);
+export async function findProfessorByName(name: string): Promise<ProfessorEntity | null> {
+	const rows = await getDatabase()
+		.select()
+		.from(professors)
+		.where(eq(professors.name, name))
+		.limit(1);
+	return asEntity<ProfessorEntity | null>(firstOrNull(rows));
 }
 
 export async function findProfessors(): Promise<ProfessorEntity[]> {
-	return toPojo<ProfessorEntity[]>(await ProfessorModel.find().sort({ name: 1 }).lean());
+	return asEntity<ProfessorEntity[]>(
+		await getDatabase().select().from(professors).orderBy(asc(professors.name))
+	);
 }
 
 export async function findProfessorsByIds(
 	professorIds: ProfessorId[]
 ): Promise<Array<ProfessorEntity | null>> {
-	const professors = await ProfessorModel.find({ _id: { $in: professorIds } }).lean();
-
-	const professorIdToProfessor = new Map<string, ProfessorEntity>();
-	for (const professor of professors) {
-		professorIdToProfessor.set(professor._id.toString(), professor);
-	}
-
-	return toPojo<Array<ProfessorEntity | null>>(
-		professorIds.map((professorId) => professorIdToProfessor.get(professorId.toString()) ?? null)
+	if (professorIds.length === 0) return [];
+	const rows = await getDatabase()
+		.select()
+		.from(professors)
+		.where(inArray(professors.id, professorIds));
+	const professorIdToProfessor = new Map(rows.map((professor) => [professor.id, professor]));
+	return asEntity<Array<ProfessorEntity | null>>(
+		professorIds.map((professorId) => professorIdToProfessor.get(professorId) ?? null)
 	);
 }

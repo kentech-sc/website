@@ -18,6 +18,7 @@
 
 	const user = $derived(page.data.user);
 	const permissions = $derived(page.data.permissions);
+	const userAdminOptions = $derived(page.data.userAdminOptions);
 	let runningAsInstalledApp = $state(false);
 
 	function updateDisplayMode() {
@@ -61,8 +62,8 @@
 		{#if permissions.canManageUsers}
 			<div class="module container-col">
 				<h3>관리자 기능</h3>
-				<BlockForm />
-				<ChangeGroupForm />
+				<BlockForm users={userAdminOptions} />
+				<ChangeGroupForm users={userAdminOptions} />
 			</div>
 		{/if}
 

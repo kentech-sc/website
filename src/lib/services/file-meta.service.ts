@@ -98,7 +98,7 @@ export async function unlinkArticleFromAllFiles(articleId: PostId | PetitionId):
 export async function cleanupOrphanedFiles(olderThanHours = 24, user: User): Promise<number> {
 	assertRule(FileMetaRule.canCleanupOrphanedFiles(user));
 
-	const cutoffTime = new Date(Date.now() - olderThanHours * 60 * 60 * 1000).toString();
+	const cutoffTime = new Date(Date.now() - olderThanHours * 60 * 60 * 1000).toISOString();
 	const orphanedFiles = await FileMetaRepository.findOrphanedFiles(cutoffTime);
 	if (orphanedFiles.length === 0) return 0;
 
@@ -106,7 +106,7 @@ export async function cleanupOrphanedFiles(olderThanHours = 24, user: User): Pro
 		orphanedFiles.map(async (file) => {
 			try {
 				await FileStorage.remove(file.key);
-				return file._id;
+				return file.id;
 			} catch (err) {
 				console.error(`S3 delete failed: ${file.key}`, err);
 				return null;

@@ -20,13 +20,13 @@ export type DisplayType = (typeof DisplayType)[keyof typeof DisplayType];
 export type UserId = string;
 
 export interface Profile {
-	id: string;
+	issuer: string;
+	subject: string;
 	email: string;
 	name: string;
 }
 
 export interface UserCreate {
-	_id: string;
 	email: string;
 	realName: string;
 	nickname: string;
@@ -35,6 +35,7 @@ export interface UserCreate {
 }
 
 export interface UserEntity extends UserCreate {
+	id: UserId;
 	createdAt: string;
 	updatedAt: string;
 
@@ -44,6 +45,20 @@ export interface UserEntity extends UserCreate {
 
 export type User = UserEntity;
 
+export type UserAdminOption = Pick<
+	UserEntity,
+	'id' | 'email' | 'realName' | 'nickname' | 'group' | 'blockedUntil'
+>;
+
+export interface IdentityCreate {
+	issuer: string;
+	subject: string;
+	emailAtLogin: string;
+}
+
 export type UserUpdate = Partial<
-	Pick<UserEntity, 'email' | 'nickname' | 'group' | 'deletedAt' | 'points' | 'blockedUntil'>
+	Pick<
+		UserEntity,
+		'email' | 'realName' | 'nickname' | 'group' | 'deletedAt' | 'points' | 'blockedUntil'
+	>
 >;

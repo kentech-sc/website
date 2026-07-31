@@ -64,6 +64,6 @@ export type ActivityLogCreate =
 	| DeleteActivityLog<'petition-response', PetitionResponseSnapshot>;
 
 export type ActivityLogEntity = ActivityLogCreate & {
-	_id: string;
+	id: number;
 	createdAt: string;
 };

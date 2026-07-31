@@ -27,12 +27,12 @@
 {#snippet Meta(comment: Comment)}
 	<div class="container">
 		<p class="date">{parseDate(comment.createdAt)}</p>
-		{#if commentPermissions[comment._id]?.canDelete}
+		{#if commentPermissions[comment.id]?.canDelete}
 			<div class="delete-form">
 				<InlineActionForm
 					actionName="deleteComment"
 					buttonClass="inline-container"
-					hiddenFields={[{ name: 'comment-id', value: comment._id }]}
+					hiddenFields={[{ name: 'comment-id', value: comment.id }]}
 					policy="reload"
 				>
 					<Trash2 size="0.8rem" />
@@ -43,7 +43,7 @@
 {/snippet}
 
 {#if comments.length !== 0}
-	{#each comments as comment (comment._id)}
+	{#each comments as comment (comment.id)}
 		<div class="container-col comment-div module">
 			<div class="container">
 				{@render DisplayName(comment)}

@@ -1,7 +1,7 @@
 export type CourseId = string;
 
 export interface CourseCreate {
-	_id: CourseId;
+	id: CourseId;
 	name: string;
 	content: string;
 }

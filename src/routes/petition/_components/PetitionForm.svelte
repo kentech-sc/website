@@ -17,7 +17,7 @@
 	let attachments = $state<FileMeta[]>([]);
 	let imageIds = $state<FileId[]>([]);
 
-	const fileIds = $derived([...attachments.map((fileMeta) => fileMeta._id), ...imageIds]);
+	const fileIds = $derived([...attachments.map((fileMeta) => fileMeta.id), ...imageIds]);
 </script>
 
 {#snippet MetaModule()}

@@ -11,9 +11,7 @@
   - 예: `permission.ts`, `rule.ts`, `utils.ts`, `view.ts`, `paginate.ts`, `flash.ts`
 - `src/lib/server`
   - 서버 전용 인프라를 둔다.
-  - 예: `errors.ts`, `db.ts`, `storage.ts`, `flash.ts`
-- `src/lib/models`
-  - Mongoose schema/model만 둔다.
+  - 예: `errors.ts`, `db.ts`, `database/schema.ts`, `storage.ts`, `flash.ts`
 - `src/lib/repositories`
   - DB CRUD / query만 둔다.
 - `src/lib/rules`
@@ -29,8 +27,7 @@
 - server entry -> usecase, shared, types, server
 - usecase -> service, shared, types
 - service -> rules, repositories, shared, types, server
-- repositories -> models, shared, types
-- models -> types
+- repositories -> server/database, shared, types
 - rules -> shared, types
 
 ## 3. import 규칙
@@ -63,15 +60,10 @@
 
 5. repositories
 
-- `models`, `shared`, `types`만 import한다.
+- `server/database`, `shared`, `types`만 import한다.
 - 다른 layer를 import하지 않는다.
 
-6. models
-
-- `types`만 import한다.
-- model 전용 Mongoose schema/document 타입은 대응 type 파일에서 가져온다.
-
-7. rules
+6. rules
 
 - throw하지 않는다.
 - 아래 둘 중 하나만 반환한다.
@@ -117,15 +109,15 @@
 - `types`, `shared`, `repositories`, `services`, `usecase`, `server entry` 경계 밖으로 raw `Date` 인스턴스를 내보내지 않는다.
 - 예: `createdAt`, `updatedAt`, `deletedAt`, `answeredAt` 같은 값은 타입과 반환값에서 ISO string으로 둔다.
 - 실제 `Date` 객체는 DB query, 비교, 계산처럼 필요한 내부 구현에서만 잠깐 사용하고, 반환 직전에 다시 ISO string으로 변환한다.
-- 단, Mongoose schema / query 내부 구현에서는 raw `Date`를 잠깐 사용할 수 있다.
+- Drizzle timestamp column은 `mode: 'string'`을 사용해 경계에서 ISO string 계약을 유지한다.
 
-### ObjectId 값
+### ID 값
 
-- `ObjectId` 값은 앱 전역에서 기본적으로 string으로 다룬다.
-- POJO를 유지해야 하므로 `types`, `shared`, `repositories`, `services`, `usecase`, `server entry` 경계 밖으로 raw `ObjectId` 인스턴스를 내보내지 않는다.
-- 예: `_id`, `userId`, `postId`, `petitionId`, `courseId`, `professorId`, `fileId` 같은 값은 타입과 반환값에서 string으로 둔다.
-- 실제 `ObjectId` 객체는 DB query, populate, 비교처럼 필요한 내부 구현에서만 잠깐 사용하고, 반환 직전에는 다시 string으로 변환한다.
-- 단, Mongoose schema / query 내부 구현에서는 raw `ObjectId`를 잠깐 사용할 수 있다.
+- 도메인 엔티티의 기본 키는 `id`로 통일한다.
+- 사용자와 콘텐츠 엔티티는 PostgreSQL UUID를 string으로 다룬다.
+- 강의 코드는 사람이 입력하고 의미가 있는 자연 키이므로 `courses.id`만 text를 사용한다.
+- 외부 인증 식별자는 사용자 PK로 쓰지 않고 `private.user_identities(issuer, subject)`에서 내부 사용자 UUID에 연결한다.
+- 이메일은 표시·연락용 속성일 뿐 식별 키가 아니다. 사용자 관리 작업은 내부 UUID를 대상으로 한다.
 
 ## 5. repository 메서드 규칙
 
@@ -276,7 +268,7 @@
 1. client는 `shared`, `types`만 본다.
 2. server entry는 `usecase`, `shared`, `types`, `server`만 본다.
 3. 일반 코드에서는 `this`를 자제하고, `.svelte` 로컬 함수는 arrow, module top-level 함수는 `function` 선언을 사용한다.
-4. collection은 복수형, map은 `[key]To[value]`, 상수는 `SCREAMING_SNAKE_CASE`, 날짜 값은 ISO string, `ObjectId` 값은 string을 사용한다.
+4. collection은 복수형, map은 `[key]To[value]`, 상수는 `SCREAMING_SNAKE_CASE`, 날짜 값은 ISO string, UUID 값은 string을 사용한다.
 5. repository 메서드는 `create/find/get/update/delete` 반환 계약을 유지한다.
 6. usecase는 service를 조합하고 transaction을 연다.
 7. service는 단일 도메인 작업과 `AppError`를 책임진다.

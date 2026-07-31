@@ -13,7 +13,7 @@ export interface FileMetaCreate {
 }
 
 export interface FileMetaEntity extends FileMetaCreate {
-	_id: FileId;
+	id: FileId;
 	articleIds: Array<PostId | PetitionId>;
 	createdAt: string;
 }

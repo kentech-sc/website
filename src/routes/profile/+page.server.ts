@@ -4,9 +4,10 @@ import type { PageServerLoad } from './$types.js';
 import { withActionErrorHandling } from '$lib/server/errors.js';
 import * as ProfileUsecase from '$lib/usecase/profile.usecase.js';
 
-export const load: PageServerLoad = ({ locals }) => {
+export const load: PageServerLoad = async ({ locals }) => {
 	return {
-		permissions: ProfileUsecase.getProfilePermissions(locals.user)
+		permissions: ProfileUsecase.getProfilePermissions(locals.user),
+		userAdminOptions: await ProfileUsecase.getUserAdminOptions(locals.user)
 	};
 };
 
@@ -14,32 +15,32 @@ export const actions = {
 	changeNickname: withActionErrorHandling(async ({ request, locals }) => {
 		const formData = await request.formData();
 		const nickname = (formData.get('nickname') ?? '').toString();
-		await ProfileUsecase.changeNickname(locals.user._id, nickname, locals.user);
+		await ProfileUsecase.changeNickname(locals.user.id, nickname, locals.user);
 		return { nickname };
 	}),
 	changeGroup: withActionErrorHandling(async ({ request, locals }) => {
 		const formData = await request.formData();
-		const email = (formData.get('email') ?? '').toString() + '@kentech.ac.kr';
+		const userId = (formData.get('user-id') ?? '').toString();
 		const group = (formData.get('group') ?? '').toString();
-		await ProfileUsecase.changeGroup(email, group as UserGroup, locals.user);
-		return { email, group };
+		await ProfileUsecase.changeGroupById(userId, group as UserGroup, locals.user);
+		return { userId, group };
 	}),
 	blockUser: withActionErrorHandling(async ({ request, locals }) => {
 		const formData = await request.formData();
-		const email = (formData.get('email') ?? '').toString() + '@kentech.ac.kr';
+		const userId = (formData.get('user-id') ?? '').toString();
 		const duration = Number(formData.get('duration')) * 60 * 1000;
-		await ProfileUsecase.blockUser(email, locals.user, duration);
-		return { email };
+		await ProfileUsecase.blockUserById(userId, locals.user, duration);
+		return { userId };
 	}),
 	unblockUser: withActionErrorHandling(async ({ request, locals }) => {
 		const formData = await request.formData();
-		const email = (formData.get('email') ?? '').toString() + '@kentech.ac.kr';
-		await ProfileUsecase.unblockUser(email, locals.user);
-		return { email };
+		const userId = (formData.get('user-id') ?? '').toString();
+		await ProfileUsecase.unblockUserById(userId, locals.user);
+		return { userId };
 	}),
 	deleteUser: withActionErrorHandling(async ({ locals }) => {
 		await ProfileUsecase.deleteUser(locals.user);
-		return { userId: locals.user._id };
+		return { userId: locals.user.id };
 	}),
 	cleanup: withActionErrorHandling(async ({ request, locals }) => {
 		const formData = await request.formData();

@@ -1,5 +1,3 @@
-import mongoose from 'mongoose';
-
 import type { ActivityLogCreate } from '$lib/types/activity-log.type.js';
 import type { FileId } from '$lib/types/file-meta.type.js';
 import type { FilePresence } from '$lib/types/general.type.js';
@@ -7,6 +5,7 @@ import type { Page } from '$lib/types/general.type.js';
 import type { PetitionId } from '$lib/types/petition.type.js';
 import type { Petition, PetitionEntity } from '$lib/types/petition.type.js';
 
+import { transaction } from '$lib/server/db.js';
 import * as ActivityLogService from '$lib/services/activity-log.service.js';
 import * as FileMetaService from '$lib/services/file-meta.service.js';
 import * as PetitionService from '$lib/services/petition.service.js';
@@ -64,10 +63,10 @@ function getSignerNames(petition: PetitionEntity, userIdToUser: Map<string, User
 }
 
 async function getPetitionLogSnapshot(petition: PetitionEntity) {
-	const files = await FileMetaService.getFileMetasByArticleId(petition._id);
+	const files = await FileMetaService.getFileMetasByArticleId(petition.id);
 	return {
 		...petition,
-		fileIds: files.map((file) => file._id)
+		fileIds: files.map((file) => file.id)
 	};
 }
 
@@ -87,7 +86,7 @@ export async function getPetitionPage(page: number, user: User) {
 	const petitionPage = await PetitionService.getPetitionPage(limit, skip);
 	const [userIdToUser, filePresence] = await Promise.all([
 		findPetitionUserMap(petitionPage.items),
-		FileMetaService.getFilePresenceByArticleIds(petitionPage.items.map((petition) => petition._id))
+		FileMetaService.getFilePresenceByArticleIds(petitionPage.items.map((petition) => petition.id))
 	]);
 	petitionPage.items = attachPetitionNames(petitionPage.items, userIdToUser);
 
@@ -128,43 +127,44 @@ export async function createPetition(
 	petitioner: User,
 	fileIds: FileId[]
 ) {
-	return await mongoose.connection.transaction(async () => {
-		await ThrottleService.reserve(petitioner._id, 'article');
+	return await transaction(async () => {
+		await ThrottleService.reserve(petitioner.id, 'article');
 		const petition = await PetitionService.createPetition(
 			{
 				title,
 				content,
-				petitionerId: petitioner._id
+				petitionerId: petitioner.id
 			},
 			petitioner
 		);
-		await FileMetaService.linkArticleToFiles(fileIds, petition._id);
+		await FileMetaService.linkArticleToFiles(fileIds, petition.id);
 		const petitionSnapshot = await getPetitionLogSnapshot(petition);
 		const activityLog: ActivityLogCreate = {
-			actorId: petitioner._id,
+			actorId: petitioner.id,
 			action: 'create',
 			targetType: 'petition',
-			targetId: petition._id,
+			targetId: petition.id,
 			cause: 'direct',
 			beforeSnapshot: null,
 			afterSnapshot: petitionSnapshot
 		};
 		await ActivityLogService.create(activityLog);
-		await PointService.awardPetitionCreate(petitioner._id);
+		await PointService.awardPetitionCreate(petitioner.id);
 		return petition;
 	});
 }
 
 export async function deletePetitionById(petitionId: PetitionId, user: User) {
-	return await mongoose.connection.transaction(async () => {
+	return await transaction(async () => {
+		const beforePetition = await PetitionService.getPetitionById(petitionId);
+		const petitionSnapshot = await getPetitionLogSnapshot(beforePetition);
 		const petition = await PetitionService.deletePetitionById(petitionId, user);
-		const petitionSnapshot = await getPetitionLogSnapshot(petition);
 		await FileMetaService.unlinkArticleFromAllFiles(petitionId);
 		const activityLog: ActivityLogCreate = {
-			actorId: user._id,
+			actorId: user.id,
 			action: 'delete',
 			targetType: 'petition',
-			targetId: petition._id,
+			targetId: petition.id,
 
 			cause: 'direct',
 			beforeSnapshot: petitionSnapshot,
@@ -175,7 +175,7 @@ export async function deletePetitionById(petitionId: PetitionId, user: User) {
 }
 
 export async function signPetition(petitionId: PetitionId, user: User) {
-	return await mongoose.connection.transaction(async () => {
+	return await transaction(async () => {
 		const petition = await PetitionService.signPetitionById(petitionId, user);
 		await PointService.applyPetitionSignDelta(petition.petitionerId, 2);
 		return petition;
@@ -183,7 +183,7 @@ export async function signPetition(petitionId: PetitionId, user: User) {
 }
 
 export async function unsignPetition(petitionId: PetitionId, user: User) {
-	return await mongoose.connection.transaction(async () => {
+	return await transaction(async () => {
 		const petition = await PetitionService.unsignPetitionById(petitionId, user);
 		await PointService.applyPetitionSignDelta(petition.petitionerId, -2);
 		return petition;
@@ -199,13 +199,13 @@ export async function unreviewPetition(petitionId: PetitionId, user: User) {
 }
 
 export async function respondToPetition(petitionId: PetitionId, user: User, response: string) {
-	return await mongoose.connection.transaction(async () => {
+	return await transaction(async () => {
 		const petition = await PetitionService.responseToPetitionById(petitionId, user, response);
 		const activityLog: ActivityLogCreate = {
-			actorId: user._id,
+			actorId: user.id,
 			action: 'create',
 			targetType: 'petition-response',
-			targetId: petition._id,
+			targetId: petition.id,
 
 			cause: 'direct',
 			beforeSnapshot: null,
@@ -217,14 +217,14 @@ export async function respondToPetition(petitionId: PetitionId, user: User, resp
 }
 
 export async function editPetitionResponse(petitionId: PetitionId, user: User, response: string) {
-	return await mongoose.connection.transaction(async () => {
+	return await transaction(async () => {
 		const beforePetition = await PetitionService.getPetitionById(petitionId);
 		const petition = await PetitionService.reviseResponseById(petitionId, user, response);
 		const activityLog: ActivityLogCreate = {
-			actorId: user._id,
+			actorId: user.id,
 			action: 'edit',
 			targetType: 'petition-response',
-			targetId: petition._id,
+			targetId: petition.id,
 
 			cause: 'direct',
 			beforeSnapshot: toPetitionResponseSnapshot(beforePetition),
@@ -236,11 +236,11 @@ export async function editPetitionResponse(petitionId: PetitionId, user: User, r
 }
 
 export async function deletePetitionResponse(petitionId: PetitionId, user: User) {
-	return await mongoose.connection.transaction(async () => {
+	return await transaction(async () => {
 		const beforePetition = await PetitionService.getPetitionById(petitionId);
 		const petition = await PetitionService.deleteResponseById(petitionId, user);
 		const activityLog: ActivityLogCreate = {
-			actorId: user._id,
+			actorId: user.id,
 			action: 'delete',
 			targetType: 'petition-response',
 			targetId: petitionId,

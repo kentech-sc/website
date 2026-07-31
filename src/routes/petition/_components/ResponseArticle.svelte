@@ -26,7 +26,7 @@
 		afterSuccess={endEditing}
 		afterConflict={endEditing}
 	>
-		<input type="hidden" name="petition-id" value={petition._id} />
+		<input type="hidden" name="petition-id" value={petition.id} />
 		<label for="response">답변</label>
 		<textarea id="response" name="response">{response ?? ''}</textarea>
 		<br />
@@ -54,7 +54,7 @@
 						<div class="delete-form">
 							<InlineActionForm
 								actionName="deleteResponse"
-								hiddenFields={[{ name: 'petition-id', value: petition._id }]}
+								hiddenFields={[{ name: 'petition-id', value: petition.id }]}
 								policy={{ kind: 'detail', notFoundRedirectTo: '/petition' }}
 							>
 								삭제
@@ -69,7 +69,7 @@
 	{:else if petition.status === PetitionStatus.Pending && permissions.canReview}
 		<InlineActionForm
 			actionName="reviewPetition"
-			hiddenFields={[{ name: 'petition-id', value: petition._id }]}
+			hiddenFields={[{ name: 'petition-id', value: petition.id }]}
 			policy={{ kind: 'detail', notFoundRedirectTo: '/petition' }}
 			afterConflict={endEditing}
 		>
@@ -79,7 +79,7 @@
 		{#if permissions.canUnreview}
 			<InlineActionForm
 				actionName="unreviewPetition"
-				hiddenFields={[{ name: 'petition-id', value: petition._id }]}
+				hiddenFields={[{ name: 'petition-id', value: petition.id }]}
 				policy={{ kind: 'detail', notFoundRedirectTo: '/petition' }}
 				afterConflict={endEditing}
 			>

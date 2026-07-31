@@ -15,6 +15,6 @@
 </script>
 
 <BoardHeader pageType="edit" />
-{#key post._id}
+{#key post.id}
 	<BoardForm {post} {user} {fileMetas} />
 {/key}

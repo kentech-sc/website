@@ -31,7 +31,7 @@ export function canSignPetition(petition: PetitionEntity, user: User): RuleResul
 		return ruleFail(APP_ERROR.INVALID_STATE, '응답되었거나 만료된 청원에는 서명할 수 없습니다.');
 	}
 
-	if (petition.signedBy.includes(user._id)) {
+	if (petition.signedBy.includes(user.id)) {
 		return ruleFail(APP_ERROR.INVALID_STATE, '이미 서명한 청원입니다.');
 	}
 
@@ -50,7 +50,7 @@ export function canUnsignPetition(petition: PetitionEntity, user: User): RuleRes
 		);
 	}
 
-	if (!petition.signedBy.includes(user._id)) {
+	if (!petition.signedBy.includes(user.id)) {
 		return ruleFail(APP_ERROR.INVALID_STATE, '서명하지 않은 청원입니다.');
 	}
 

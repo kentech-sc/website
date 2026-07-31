@@ -52,6 +52,6 @@ export const actions = {
 			},
 			locals.user
 		);
-		throw redirect(302, '/review/' + review._id);
+		throw redirect(302, '/review/' + review.id);
 	})
 };

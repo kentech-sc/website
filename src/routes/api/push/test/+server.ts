@@ -16,12 +16,12 @@ export const POST = async ({ request, locals, url }) => {
 	}
 
 	try {
-		const subscriptions = await Push.findUserPushSubscriptions(locals.user._id);
+		const subscriptions = await Push.findUserPushSubscriptions(locals.user.id);
 		if (subscriptions.length === 0) {
 			return json({ message: '이 계정에 등록된 푸시 구독이 없습니다.' }, { status: 400 });
 		}
 
-		const result = await Push.sendPushToUser(locals.user._id, {
+		const result = await Push.sendPushToUser(locals.user.id, {
 			title: 'KENTECH',
 			body: '테스트 알림입니다.',
 			url: '/profile'

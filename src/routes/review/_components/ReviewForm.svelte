@@ -26,7 +26,7 @@
 	});
 
 	$effect(() => {
-		const formKey = review?._id ?? 'new';
+		const formKey = review?.id ?? 'new';
 
 		if (initializedFor === formKey) return;
 
@@ -68,8 +68,8 @@
 					<CommonLabel labelFor="courseId" labelString="강의">
 						<select id="courseId" name="courseId" value={review?.courseId.toString()}>
 							<option value="">선택</option>
-							{#each courses as course (course._id)}
-								<option value={course._id}>[{course._id}] {course.name}</option>
+							{#each courses as course (course.id)}
+								<option value={course.id}>[{course.id}] {course.name}</option>
 							{/each}
 						</select>
 					</CommonLabel>
@@ -77,8 +77,8 @@
 					<CommonLabel labelFor="professorId" labelString="담당 교수">
 						<select id="professorId" name="professorId" value={review?.professorId.toString()}>
 							<option value="">선택</option>
-							{#each professors as professor (professor._id)}
-								<option value={professor._id}>{professor.name} 교수님</option>
+							{#each professors as professor (professor.id)}
+								<option value={professor.id}>{professor.name} 교수님</option>
 							{/each}
 						</select>
 					</CommonLabel>

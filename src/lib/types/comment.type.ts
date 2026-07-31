@@ -11,7 +11,7 @@ export interface CommentCreate {
 }
 
 export interface CommentEntity extends CommentCreate {
-	_id: CommentId;
+	id: CommentId;
 	createdAt: string;
 }
 

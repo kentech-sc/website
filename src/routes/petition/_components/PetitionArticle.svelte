@@ -17,7 +17,7 @@
 		permissions
 	}: { petition: Petition; user: User; permissions: PetitionPermissions } = $props();
 
-	let signed = $derived<boolean>(petition.signedBy.includes(user._id));
+	let signed = $derived<boolean>(petition.signedBy.includes(user.id));
 </script>
 
 {#snippet SignButton()}
@@ -25,7 +25,7 @@
 		<InlineActionForm
 			actionName={signed ? 'unsignPetition' : 'signPetition'}
 			buttonClass="container sign-btn"
-			hiddenFields={[{ name: 'petition-id', value: petition._id }]}
+			hiddenFields={[{ name: 'petition-id', value: petition.id }]}
 			policy={{ kind: 'detail', notFoundRedirectTo: '/petition' }}
 		>
 			<PenTool size="1rem" color="var(--secondary)" fill={signed ? 'skyblue' : 'transparent'} />
@@ -45,7 +45,7 @@
 			<InlineActionForm
 				actionName="deletePetition"
 				buttonClass="inline-container"
-				hiddenFields={[{ name: 'petition-id', value: petition._id }]}
+				hiddenFields={[{ name: 'petition-id', value: petition.id }]}
 				policy={{ kind: 'detail', notFoundRedirectTo: '/petition' }}
 			>
 				<Trash size="1.2rem" />

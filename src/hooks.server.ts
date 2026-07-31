@@ -7,32 +7,16 @@ import { handle as authenticationHandle } from './auth.js';
 import type { Profile } from '$lib/types/user.type.js';
 import type { ActionResult, Cookies, Handle, HandleServerError, ServerInit } from '@sveltejs/kit';
 
-import {
-	AWS_BUCKET_NAME,
-	AWS_ID,
-	AWS_SECRET,
-	MONGO_URI,
-	AWS_BUCKET_REGION,
-	MAX_FILE_SIZE
-} from '$env/static/private';
+import { env } from '$env/dynamic/private';
 import * as DB from '$lib/server/db.js';
 import { setServerFlash } from '$lib/server/flash.js';
 import { FileStorage } from '$lib/server/storage.js';
 import * as AuthUsecase from '$lib/usecase/auth.usecase.js';
 
-function checkEnv() {
-	if (MONGO_URI === undefined) {
-		throw new Error('.env 파일에 "MONGO_URI"를 설정해 주세요.');
-	}
-	if (AWS_BUCKET_NAME === undefined) {
-		throw new Error('.env 파일에 "AWS_BUCKET_NAME"을(를) 설정해 주세요.');
-	}
-	if (AWS_ID === undefined) {
-		throw new Error('.env 파일에 "AWS_ID"를 설정해 주세요.');
-	}
-	if (AWS_SECRET === undefined) {
-		throw new Error('.env 파일에 "AWS_SECRET"을(를) 설정해 주세요.');
-	}
+function requiredEnvironmentVariable(name: string): string {
+	const value = env[name]?.trim();
+	if (!value) throw new Error(`${name} 환경 변수를 설정해 주세요.`);
+	return value;
 }
 
 function clearAuthSessionCookies(cookies: Cookies): void {
@@ -59,16 +43,17 @@ function clearAuthSessionCookies(cookies: Cookies): void {
 }
 
 export const init: ServerInit = async () => {
-	checkEnv();
-
-	await FileStorage.init(
-		AWS_BUCKET_NAME,
-		AWS_BUCKET_REGION,
-		AWS_ID,
-		AWS_SECRET,
-		Number(MAX_FILE_SIZE)
-	);
-	await DB.init(MONGO_URI);
+	await FileStorage.init({
+		bucket: requiredEnvironmentVariable('STORAGE_BUCKET'),
+		endpoint: requiredEnvironmentVariable('STORAGE_ENDPOINT'),
+		publicBaseUrl: requiredEnvironmentVariable('STORAGE_PUBLIC_BASE_URL'),
+		region: requiredEnvironmentVariable('STORAGE_REGION'),
+		accessKeyId: requiredEnvironmentVariable('STORAGE_ACCESS_KEY_ID'),
+		secretAccessKey: requiredEnvironmentVariable('STORAGE_SECRET_ACCESS_KEY'),
+		sessionToken: env.STORAGE_SESSION_TOKEN?.trim() || undefined,
+		maxFileSize: Number(requiredEnvironmentVariable('MAX_FILE_SIZE'))
+	});
+	await DB.init(requiredEnvironmentVariable('DATABASE_URL'));
 
 	console.log('[Server Is Ready]');
 };
@@ -82,7 +67,8 @@ const authorizationHandle: Handle = async ({ event, resolve }) => {
 		}
 
 		const profile: Profile = {
-			id: session.user.id,
+			issuer: 'https://accounts.google.com',
+			subject: session.user.id,
 			email: session.user.email,
 			name: session.user.name.split('/')[0]
 		};
@@ -119,7 +105,7 @@ const authorizationHandle: Handle = async ({ event, resolve }) => {
 		blockedUntil: null,
 		deletedAt: null,
 		group: 'guest' as const,
-		_id: 'temp-guest-id',
+		id: '00000000-0000-0000-0000-000000000000',
 		createdAt: new Date().toISOString(),
 		updatedAt: new Date().toISOString(),
 		points: 0

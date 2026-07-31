@@ -1,19 +1,20 @@
+import { asEntity } from './repository.utils.js';
+
 import type { ActivityLogCreate, ActivityLogEntity } from '$lib/types/activity-log.type.js';
 
-import { ActivityLogModel } from '$lib/models/activity-log.model.js';
-import { toPojo } from '$lib/shared/utils.js';
+import { activityLogs } from '$lib/server/database/schema.js';
+import { getDatabase } from '$lib/server/db.js';
 
 export async function createActivityLog(
 	activityLog: ActivityLogCreate
 ): Promise<ActivityLogEntity> {
-	return toPojo<ActivityLogEntity>((await ActivityLogModel.create(activityLog)).toObject());
+	const [created] = await getDatabase().insert(activityLogs).values(activityLog).returning();
+	return asEntity<ActivityLogEntity>(created);
 }
 
-export async function createActivityLogs(
-	activityLogs: ActivityLogCreate[]
-): Promise<ActivityLogEntity[]> {
-	if (activityLogs.length === 0) return [];
-
-	const createdLogs = await ActivityLogModel.create(activityLogs);
-	return toPojo<ActivityLogEntity[]>(createdLogs.map((activityLog) => activityLog.toObject()));
+export async function createActivityLogs(logs: ActivityLogCreate[]): Promise<ActivityLogEntity[]> {
+	if (logs.length === 0) return [];
+	return asEntity<ActivityLogEntity[]>(
+		await getDatabase().insert(activityLogs).values(logs).returning()
+	);
 }

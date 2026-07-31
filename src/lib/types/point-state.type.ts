@@ -24,7 +24,7 @@ export interface PointStateCreate {
 }
 
 export interface PointStateEntity extends PointStateCreate {
-	_id: PointStateId;
+	id: PointStateId;
 	createdAt: string;
 	updatedAt: string;
 }

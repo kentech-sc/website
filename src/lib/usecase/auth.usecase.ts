@@ -1,7 +1,6 @@
-import mongoose from 'mongoose';
-
 import type { Profile, User } from '$lib/types/user.type.js';
 
+import { transaction } from '$lib/server/db.js';
 import * as ThrottleService from '$lib/services/throttle.service.js';
 import * as UserService from '$lib/services/user.service.js';
 
@@ -10,25 +9,30 @@ function isDuplicateKeyError(error: unknown): boolean {
 		typeof error === 'object' &&
 		error !== null &&
 		'code' in error &&
-		typeof error.code === 'number' &&
-		error.code === 11000
+		typeof error.code === 'string' &&
+		error.code === '23505'
 	);
 }
 
 export async function getOrCreateUser(profile: Profile): Promise<User> {
-	const user = await UserService.findUserById(profile.id);
-	if (user) return user;
+	const user = await UserService.findUserByIdentity(profile.issuer, profile.subject);
+	if (user) {
+		if (user.deletedAt || (user.email === profile.email && user.realName === profile.name)) {
+			return user;
+		}
+		return await transaction(async () => await UserService.syncUserProfile(user, profile));
+	}
 
 	try {
-		return await mongoose.connection.transaction(async () => {
+		return await transaction(async () => {
 			const createdUser = await UserService.signupUser(profile);
-			await ThrottleService.createUserThrottles(createdUser._id);
+			await ThrottleService.createUserThrottles(createdUser.id);
 			return createdUser;
 		});
 	} catch (error) {
 		if (!isDuplicateKeyError(error)) throw error;
 
-		const existingUser = await UserService.findUserById(profile.id);
+		const existingUser = await UserService.findUserByIdentity(profile.issuer, profile.subject);
 		if (existingUser) return existingUser;
 		throw error;
 	}

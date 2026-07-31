@@ -22,10 +22,12 @@ export function validateReviewYearAndTerm(year: number, term: number): RuleResul
 }
 
 export function validateReviewScore(score: ReviewScore): RuleResult {
-	for (const value of Object.values(score)) {
-		if (value < 1 || value > 10) {
-			return ruleFail(APP_ERROR.BAD_REQUEST, '점수는 1에서 10 사이의 값이어야 합니다.');
-		}
+	const fivePointScores = [score.assignment, score.lecture, score.exam];
+	if (fivePointScores.some((value) => value < 1 || value > 5)) {
+		return ruleFail(APP_ERROR.BAD_REQUEST, '과제, 난이도, 시험 점수는 1에서 5 사이여야 합니다.');
+	}
+	if (score.satisfaction < 1 || score.satisfaction > 10) {
+		return ruleFail(APP_ERROR.BAD_REQUEST, '만족도는 1에서 10 사이여야 합니다.');
 	}
 
 	return ok();

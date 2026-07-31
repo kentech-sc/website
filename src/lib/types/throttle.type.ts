@@ -10,7 +10,7 @@ export interface ThrottleCreate {
 }
 
 export interface ThrottleEntity extends ThrottleCreate {
-	_id: ThrottleId;
+	id: ThrottleId;
 	createdAt: string;
 	updatedAt: string;
 }

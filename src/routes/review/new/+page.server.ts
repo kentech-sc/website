@@ -35,7 +35,7 @@ export const actions = {
 			{
 				courseId: courseIdRaw as CourseId,
 				professorId: professorIdRaw as ProfessorId,
-				userId: locals.user._id,
+				userId: locals.user.id,
 				year,
 				term,
 				title,
@@ -45,6 +45,6 @@ export const actions = {
 			locals.user
 		);
 
-		throw redirect(302, '/review/' + review._id);
+		throw redirect(302, '/review/' + review.id);
 	})
 };
