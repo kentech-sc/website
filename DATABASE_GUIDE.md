@@ -20,7 +20,7 @@
 `private.user_identities`는 `(issuer, subject)`를 내부 사용자 UUID에 연결한다. 이메일은
 학교에서 재사용될 수 있으므로 unique identity나 관계 키로 사용하지 않는다.
 
-MongoDB 배열이었던 좋아요, 청원 서명, 파일 연결은 다음 관계 테이블로 정규화했다.
+좋아요, 청원 서명, 파일 연결 같은 다대다 관계는 다음 연결 테이블로 정규화한다.
 
 - `app.post_likes`
 - `app.petition_signatures`
@@ -37,9 +37,7 @@ MongoDB 배열이었던 좋아요, 청원 서명, 파일 연결은 다음 관계
 2. `npm run db:generate -- --name=<변경_이름>`으로 SQL을 생성한다.
 3. 생성된 SQL과 `drizzle/meta` 변경을 함께 검토한다.
 4. preview DB의 `DIRECT_DATABASE_URL`을 설정하고 `npm run db:migrate`를 실행한다.
-5. `npm run db:health`로 테이블 수와 RLS 적용 상태를 확인한다.
-6. `npm run db:smoke`로 UUID 관계와 transaction rollback을 확인한다.
-7. preview 환경에서 관련 기능과 트랜잭션을 확인한 뒤 production에 같은 마이그레이션을
+5. preview 환경에서 관련 기능과 트랜잭션을 확인한 뒤 production에 같은 마이그레이션을
    적용한다.
 
 운영 DB에 `drizzle-kit push`를 직접 사용하지 않는다. 저장소에 포함된 SQL

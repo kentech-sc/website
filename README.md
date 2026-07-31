@@ -34,7 +34,7 @@ KENTECH 학생회 웹사이트 저장소입니다. 내부 개발자 기준으로
   - 댓글 작성은 `comment` 버킷으로 3초 쿨다운을 사용합니다.
 - 콘텐츠 활동 로그
   - `post`, `comment`, `review`, `petition`, `petition-response`의 성공한 `create/edit/delete`만 기록합니다.
-  - 로그는 append-only 컬렉션인 `activitylogs`에 저장합니다.
+  - 로그는 append-only 테이블인 `activity_logs`에 저장합니다.
 - 사용자 포인트
   - 게시글 작성 `+5` 하루 1회
   - 댓글 작성 `+1` 하루 5회
@@ -42,16 +42,16 @@ KENTECH 학생회 웹사이트 저장소입니다. 내부 개발자 기준으로
   - 강의평가 작성 `+20` 하루 1회
   - 청원 작성 `+5` 하루 1회
   - 청원 동의 획득 `+2`
-  - 일일 한도는 KST 날짜 기준으로 계산하고, 상태는 사용자당 1문서의 `pointstates`에 저장합니다.
+  - 일일 한도는 KST 날짜 기준으로 계산하고, 상태는 사용자당 한 행의 `point_states`에 저장합니다.
 
 ## 기술 스택
 
-- 프레임워크: SvelteKit 2, Svelte 5, Vite 7
+- 프레임워크: SvelteKit 2, Svelte 5, Vite 8
 - 언어: TypeScript
 - 스타일: SCSS, Prettier
 - 데이터베이스: Supabase PostgreSQL, Drizzle ORM, `pg`
 - 인증: Auth.js for SvelteKit, Google OAuth
-- 파일 저장: `secure-s3-storage@3` 기반 S3-compatible storage
+- 파일 저장: Cloudflare R2, `secure-s3-storage@3`
 - 에러 추적: Sentry for SvelteKit
 - 배포 타깃: Vercel 어댑터
 
@@ -59,10 +59,10 @@ KENTECH 학생회 웹사이트 저장소입니다. 내부 개발자 기준으로
 
 ### 선행 조건
 
-- Node.js 20 이상 권장
+- Node.js 24
 - PostgreSQL 접근 가능 환경
 - Google OAuth 클라이언트
-- AWS S3, Cloudflare R2 등 S3-compatible storage의 endpoint와 접근 키
+- Cloudflare R2 endpoint와 접근 키
 
 ### 실행 순서
 
@@ -117,18 +117,16 @@ npm run check
 
 ## 주요 스크립트
 
-| 스크립트                  | 설명                                                              |
-| ------------------------- | ----------------------------------------------------------------- |
-| `npm run dev`             | Vite 개발 서버를 실행합니다.                                      |
-| `npm run build`           | 프로덕션 빌드를 생성합니다.                                       |
-| `npm run preview`         | 빌드 결과를 로컬에서 미리 확인합니다.                             |
-| `npm run check`           | `svelte-kit sync` 후 `svelte-check`를 실행합니다.                 |
-| `npm run db:generate`     | Drizzle 스키마 변경으로부터 SQL 마이그레이션을 생성합니다.        |
-| `npm run db:migrate`      | `DIRECT_DATABASE_URL` 대상에 대기 중인 마이그레이션을 적용합니다. |
-| `npm run db:studio`       | Drizzle Studio를 실행합니다.                                      |
-| `npm run storage:migrate` | AWS S3 → R2 이전을 검사하며 `--execute`로 복사·검증합니다.        |
-| `npm run fix`             | Prettier와 ESLint 자동 수정을 한 번에 실행합니다.                 |
-| `npm run all-check`       | `fix` 후 `check`까지 연속 실행합니다.                             |
+| 스크립트              | 설명                                                              |
+| --------------------- | ----------------------------------------------------------------- |
+| `npm run dev`         | Vite 개발 서버를 실행합니다.                                      |
+| `npm run build`       | 프로덕션 빌드를 생성합니다.                                       |
+| `npm run preview`     | 빌드 결과를 로컬에서 미리 확인합니다.                             |
+| `npm run check`       | `svelte-kit sync` 후 `svelte-check`를 실행합니다.                 |
+| `npm run db:generate` | Drizzle 스키마 변경으로부터 SQL 마이그레이션을 생성합니다.        |
+| `npm run db:migrate`  | `DIRECT_DATABASE_URL` 대상에 대기 중인 마이그레이션을 적용합니다. |
+| `npm run db:studio`   | Drizzle Studio를 실행합니다.                                      |
+| `npm run fix`         | Prettier와 ESLint 자동 수정을 한 번에 실행합니다.                 |
 
 ## 프로젝트 구조
 
@@ -192,7 +190,7 @@ Google 로그인을 사용하되 `@kentech.ac.kr` Workspace 계정만 허용합�
 - 업로드 가능 최대 크기는 `MAX_FILE_SIZE`로 제한됩니다.
 - 현재 스토리지 카테고리는 이미지와 문서 파일 업로드를 기준으로 구성되어 있습니다.
 
-## 내부 상태 컬렉션
+## 내부 상태 테이블
 
 - `throttles`
   - 사용자별 작성 쿨다운 상태를 저장합니다.
@@ -216,7 +214,5 @@ Google 로그인을 사용하되 `@kentech.ac.kr` Workspace 계정만 허용합�
   - 레이어 책임, import 방향, repository/service/usecase 경계를 확인할 때 봅니다.
 - [DATABASE_GUIDE.md](./DATABASE_GUIDE.md)
   - DB 연결, 사용자 identity, RLS, 마이그레이션과 트랜잭션 규칙을 확인할 때 봅니다.
-- [STORAGE_MIGRATION_GUIDE.md](./STORAGE_MIGRATION_GUIDE.md)
-  - AWS S3에서 Cloudflare R2로 객체와 본문 이미지 URL을 이전할 때 봅니다.
 - [STYLE_GUIDE.md](./STYLE_GUIDE.md)
   - SCSS 배치, rem 단위 규칙, selector 정책, shared style 기준을 확인할 때 봅니다.

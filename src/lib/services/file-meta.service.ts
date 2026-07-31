@@ -108,7 +108,7 @@ export async function cleanupOrphanedFiles(olderThanHours = 24, user: User): Pro
 				await FileStorage.remove(file.key);
 				return file.id;
 			} catch (err) {
-				console.error(`S3 delete failed: ${file.key}`, err);
+				console.error(`Object storage delete failed: ${file.key}`, err);
 				return null;
 			}
 		})

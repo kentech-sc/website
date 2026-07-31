@@ -121,12 +121,12 @@
 						<td>OAuth 인증</td>
 					</tr>
 					<tr>
-						<td>MongoDB Atlas</td>
+						<td>Supabase, Inc. (Supabase Database)</td>
 						<td>회원 및 콘텐츠 데이터 저장</td>
 					</tr>
 					<tr>
-						<td>Amazon Web Services (AWS S3)</td>
-						<td>파일 저장</td>
+						<td>Cloudflare, Inc. (Cloudflare R2)</td>
+						<td>파일 저장 및 전송</td>
 					</tr>
 					<tr>
 						<td>Vercel Inc.</td>
@@ -155,14 +155,17 @@
 				<li>Google 계정 설정에서 앱 연결 해제</li>
 			</ul>
 			<p>
-				요청은 아래 문의처(<a href="mailto:studentcouncil@kentech.ac.kr"
-					>studentcouncil@kentech.ac.kr</a
-				>)로 연락해 주시면 처리해 드립니다.
+				위 권리는 아래 개인정보 보호업무 및 고충처리 담당부서를 통해 행사할 수 있습니다. 본인 확인이
+				필요한 경우 최소한의 확인 절차를 요청할 수 있습니다.
 			</p>
 		</section>
 
 		<section>
-			<h3>8. 개인정보 보호책임자</h3>
+			<h3>8. 개인정보 보호업무 및 고충처리 담당부서</h3>
+			<p>
+				개인정보 열람, 정정·삭제, 처리정지, 고충 처리 및 침해 신고에 관한 문의는 아래 담당부서에서
+				접수합니다.
+			</p>
 			<table>
 				<thead>
 					<tr>
@@ -172,13 +175,13 @@
 				</thead>
 				<tbody>
 					<tr>
-						<td>성명</td>
-						<td>권우성</td>
+						<td>담당부서</td>
+						<td>KENTECH 총학생회 정보국</td>
 					</tr>
 					<tr>
-						<td>이메일</td>
+						<td>문의 이메일</td>
 						<td>
-							<a href="mailto:miniipad03@kentech.ac.kr">miiniipad03@kentech.ac.kr</a>
+							<a href="mailto:studentcouncil@kentech.ac.kr">studentcouncil@kentech.ac.kr</a>
 						</td>
 					</tr>
 				</tbody>
@@ -190,7 +193,7 @@
 			<p>본 방침이 변경될 경우 변경 사항을 시행 7일 전 사이트 공지를 통해 안내합니다.</p>
 		</section>
 
-		<p class="effective-date">시행일: 2026년 4월 2일</p>
+		<p class="effective-date">시행일: 2026년 8월 8일</p>
 	</div>
 </article>
 
