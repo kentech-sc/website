@@ -93,27 +93,41 @@ export async function unlinkArticleFromAllFiles(articleId: PostId | PetitionId):
 
 export async function cleanupOrphanedFiles(olderThanHours = 24, user: User): Promise<number> {
 	assertRule(FileMetaRule.canCleanupOrphanedFiles(user));
+	return await cleanupOrphanedFilesAsSystem(olderThanHours);
+}
 
+export async function cleanupOrphanedFilesAsSystem(olderThanHours = 24): Promise<number> {
 	const cutoffTime = new Date(Date.now() - olderThanHours * 60 * 60 * 1000).toISOString();
 	const orphanedFiles = await FileMetaRepository.findOrphanedFiles(cutoffTime);
 	if (orphanedFiles.length === 0) return 0;
 
-	const deleteResults = await Promise.all(
-		orphanedFiles.map(async (file) => {
-			try {
-				await FileStorage.remove(file.key);
-				return file.id;
-			} catch (err) {
-				console.error(`Object storage delete failed: ${file.key}`, err);
-				return null;
-			}
-		})
-	);
+	let deletedCount = 0;
+	const batchSize = 5;
 
-	const deletedIds = deleteResults.filter((id): id is FileId => id !== null);
-	if (deletedIds.length > 0) {
-		await FileMetaRepository.deleteFileMetasByFileIds(deletedIds);
+	for (let offset = 0; offset < orphanedFiles.length; offset += batchSize) {
+		const batch = orphanedFiles.slice(offset, offset + batchSize);
+		const deleteResults = await Promise.all(
+			batch.map(async (file) => {
+				try {
+					await FileStorage.remove(file.key);
+					return file.id;
+				} catch (err) {
+					console.error(`Object storage delete failed: ${file.key}`, err);
+					return null;
+				}
+			})
+		);
+
+		const deletedIds = deleteResults.filter((id): id is FileId => id !== null);
+		if (deletedIds.length > 0) {
+			try {
+				await FileMetaRepository.deleteFileMetasByFileIds(deletedIds);
+				deletedCount += deletedIds.length;
+			} catch (err) {
+				console.error('File metadata cleanup failed.', err);
+			}
+		}
 	}
 
-	return deletedIds.length;
+	return deletedCount;
 }
