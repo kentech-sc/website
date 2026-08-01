@@ -51,7 +51,8 @@ export const init: ServerInit = async () => {
 		accessKeyId: requiredEnvironmentVariable('STORAGE_ACCESS_KEY_ID'),
 		secretAccessKey: requiredEnvironmentVariable('STORAGE_SECRET_ACCESS_KEY'),
 		sessionToken: env.STORAGE_SESSION_TOKEN?.trim() || undefined,
-		maxFileSize: Number(requiredEnvironmentVariable('MAX_FILE_SIZE'))
+		signingSecret: requiredEnvironmentVariable('STORAGE_SIGNING_SECRET'),
+		forcePathStyle: env.STORAGE_FORCE_PATH_STYLE?.trim().toLowerCase() === 'true'
 	});
 	await DB.init(requiredEnvironmentVariable('DATABASE_URL'));
 

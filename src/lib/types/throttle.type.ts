@@ -1,7 +1,7 @@
 import type { UserId } from './user.type.js';
 
 export type ThrottleId = string;
-export type ThrottleBucket = 'article' | 'comment';
+export type ThrottleBucket = 'article' | 'comment' | 'upload';
 
 export interface ThrottleCreate {
 	userId: UserId;

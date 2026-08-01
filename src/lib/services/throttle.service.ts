@@ -7,9 +7,10 @@ import { APP_ERROR } from '$lib/shared/rule.js';
 
 const THROTTLE_MS: Record<ThrottleBucket, number> = {
 	article: 15_000,
-	comment: 5_000
+	comment: 5_000,
+	upload: 5_000
 };
-const THROTTLE_BUCKETS: ThrottleBucket[] = ['article', 'comment'];
+const THROTTLE_BUCKETS: ThrottleBucket[] = ['article', 'comment', 'upload'];
 
 function throwThrottleError(
 	bucket: ThrottleBucket,
@@ -24,7 +25,7 @@ function throwThrottleError(
 
 	throw new AppError(
 		APP_ERROR.TOO_MANY_REQUESTS,
-		`잠시 후 다시 시도해 주세요. ${remainingSeconds}초 후에 작성할 수 있습니다.`
+		`잠시 후 다시 시도해 주세요. ${remainingSeconds}초 후에 요청할 수 있습니다.`
 	);
 }
 

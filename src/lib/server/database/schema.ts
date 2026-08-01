@@ -303,7 +303,7 @@ export const throttles = appSchema.table(
 	},
 	(table) => [
 		unique('throttles_user_bucket_unique').on(table.userId, table.bucket),
-		check('throttles_bucket_check', sql`${table.bucket} in ('article', 'comment')`)
+		check('throttles_bucket_check', sql`${table.bucket} in ('article', 'comment', 'upload')`)
 	]
 );
 
