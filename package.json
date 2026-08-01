@@ -27,16 +27,13 @@
 		]
 	},
 	"devDependencies": {
-		"@auth/sveltekit": "^1.11.3",
 		"@eslint/compat": "^2.1.0",
 		"@eslint/js": "^10.0.1",
-		"@sveltejs/adapter-auto": "^7.0.1",
 		"@sveltejs/adapter-vercel": "^6.3.4",
 		"@sveltejs/kit": "^2.70.1",
 		"@sveltejs/vite-plugin-svelte": "^7.2.0",
 		"@types/node": "^26.1.2",
 		"@types/pg": "^8.20.0",
-		"@typescript-eslint/parser": "^8.65.0",
 		"@vite-pwa/assets-generator": "^1.0.2",
 		"@vite-pwa/sveltekit": "^1.1.0",
 		"drizzle-kit": "^0.31.10",
@@ -61,6 +58,7 @@
 		"workbox-strategies": "^7.4.1"
 	},
 	"dependencies": {
+		"@auth/sveltekit": "^1.11.3",
 		"@lucide/svelte": "^1.27.0",
 		"@sentry/sveltekit": "^10.69.0",
 		"@tiptap/core": "^3.29.2",
