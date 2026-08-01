@@ -24,9 +24,8 @@
 
 	import type { FileMeta, FileId } from '$lib/types/file-meta.type';
 	import type { SelectionHint } from '$lib/types/general.type.js';
-	import type { ActionResult } from '@sveltejs/kit';
 
-	import { deserialize } from '$app/forms';
+	import { uploadFiles } from '$lib/client/file-upload.js';
 	const IMAGE_INSERTION_FAILURE_MESSAGE = '이미지 업로드는 완료됐지만 본문 삽입에 실패했습니다.';
 	const PASTE_IMAGE_BLOCK_MESSAGE = '이미지는 업로드 버튼으로만 추가할 수 있습니다.';
 
@@ -171,9 +170,6 @@
 			return;
 		}
 
-		const formData = new FormData();
-		files.forEach((file) => formData.append('files', file));
-
 		const selectionHint = pendingImageInsertSelection;
 		const preferEndInsertion = selectionHint === null;
 		pendingImageInsertSelection = null;
@@ -181,29 +177,10 @@
 		try {
 			uploading = true;
 
-			if (files.some((file) => file.size > 1 * 1024 * 1024)) {
-				alert('용량이 큰 파일은 오래 걸릴 수 있습니다.');
+			const { uploaded: uploadedFileMetas, failedCount } = await uploadFiles(files);
+			if (failedCount > 0) {
+				showEditorNotice(`${failedCount}개 파일을 업로드하지 못했습니다.`);
 			}
-
-			const res: ActionResult = deserialize(
-				await (await fetch('?/uploadFile', { method: 'POST', body: formData })).text()
-			);
-
-			if (res.type === 'failure') {
-				alert(`파일 업로드 실패: ${res.data!.message}`);
-				return;
-			}
-
-			if (res.type === 'error') {
-				alert(`파일 업로드 실패: ${res.error!.message}`);
-				return;
-			}
-
-			if (res.type === 'redirect') {
-				return;
-			}
-
-			const uploadedFileMetas = res.data!.fileMetas as FileMeta[];
 			const uploadedImageMetas = uploadedFileMetas.filter((fileMeta) =>
 				fileMeta.mime.startsWith('image/')
 			);
@@ -235,7 +212,7 @@
 			}
 		} catch (error) {
 			console.error('파일 업로드 오류:', error);
-			alert('파일 업로드에 실패했습니다.');
+			alert(error instanceof Error ? error.message : '파일 업로드에 실패했습니다.');
 		} finally {
 			uploading = false;
 			target.value = '';
@@ -512,7 +489,7 @@
 				<input
 					type="file"
 					multiple
-					accept="image/*,.pdf,.docx,.xlsx"
+					accept=".jpg,.jpeg,.png,.apng,.webp,.pdf,.docx,.xlsx"
 					bind:this={fileUploadInput}
 					disabled={disabled || uploading}
 					onchange={handleFileUpload}

@@ -73,10 +73,9 @@
 		"@vercel/functions": "^3.7.6",
 		"@vercel/speed-insights": "^2.0.0",
 		"drizzle-orm": "^0.45.2",
-		"file-type": "^22.0.1",
 		"isomorphic-dompurify": "^3.19.0",
 		"pg": "^8.22.0",
-		"secure-s3-storage": "^3.0.1",
+		"secure-s3-storage": "^4.0.0",
 		"web-push": "^3.6.7"
 	}
 }

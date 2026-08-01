@@ -60,12 +60,12 @@ export async function getFilePresenceByArticleIds(
 	return filePresence;
 }
 
-export async function uploadFile(file: File): Promise<FileMeta> {
-	const uploadResult = await FileStorage.upload(file);
+export async function completeUpload(token: string): Promise<FileMeta> {
+	const uploadResult = await FileStorage.complete(token);
 	const fileMetaCreate: FileMetaCreate = {
 		key: uploadResult.key,
 		name: uploadResult.filename,
-		size: file.size,
+		size: uploadResult.size,
 		mime: uploadResult.contentType,
 		ext: uploadResult.extension
 	};
@@ -77,10 +77,6 @@ export async function uploadFile(file: File): Promise<FileMeta> {
 		await FileStorage.remove(fileMetaCreate.key);
 		throw error;
 	}
-}
-
-export async function uploadFiles(files: File[]): Promise<FileMeta[]> {
-	return await Promise.all(files.map(uploadFile));
 }
 
 export async function linkArticleToFiles(

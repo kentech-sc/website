@@ -107,13 +107,14 @@ npm run check
 | `AUTH_SECRET`               | Auth.js 세션/토큰 서명에 사용하는 비밀값입니다.                                     |
 | `SENTRY_AUTH_TOKEN`         | Sentry 소스맵 업로드에 사용하는 토큰입니다.                                         |
 | `STORAGE_BUCKET`            | 런타임 object storage의 bucket 이름입니다.                                          |
-| `STORAGE_ENDPOINT`          | bucket까지 포함한 정확한 S3-compatible API endpoint입니다.                          |
+| `STORAGE_ENDPOINT`          | bucket을 제외한 S3-compatible API endpoint입니다.                                   |
 | `STORAGE_PUBLIC_BASE_URL`   | 브라우저가 파일을 조회하는 공개 base URL입니다.                                     |
 | `STORAGE_REGION`            | provider의 S3 region입니다. R2는 `auto`를 사용합니다.                               |
 | `STORAGE_ACCESS_KEY_ID`     | 런타임 storage access key ID입니다.                                                 |
 | `STORAGE_SECRET_ACCESS_KEY` | 런타임 storage secret access key입니다.                                             |
+| `STORAGE_SIGNING_SECRET`    | presigned 업로드 완료 token에 사용하는 별도 서명 비밀값입니다.                      |
+| `STORAGE_FORCE_PATH_STYLE`  | path-style S3 주소가 필요한 provider에서만 `true`로 설정합니다.                     |
 | `STORAGE_SESSION_TOKEN`     | 임시 credential을 사용할 때만 설정합니다.                                           |
-| `MAX_FILE_SIZE`             | 업로드 가능한 최대 파일 크기 바이트 값입니다.                                       |
 
 ## 주요 스크립트
 
@@ -182,18 +183,20 @@ Google 로그인을 사용하되 `@kentech.ac.kr` Workspace 계정만 허용합�
 ## 콘텐츠 및 파일 처리
 
 - 게시글과 청원 작성 폼은 공용 에디터를 사용합니다.
-- 에디터 업로드는 서버 액션을 통해 설정된 S3-compatible storage에 저장됩니다.
+- 에디터 파일은 presigned URL을 이용해 브라우저에서 S3-compatible storage로 직접 전송됩니다.
+- 파일 하나는 최대 20MB, 한 번의 선택은 최적화 후 합계 50MB까지 허용합니다.
+- 큰 본문 이미지는 브라우저에서 최대 2560px WebP로 조건부 최적화합니다.
+- 업로드는 최대 두 개씩 처리하며, 서버의 완료 검증을 통과한 파일만 최종 경로와 DB에 저장합니다.
 - 업로드된 파일은 `file meta`로 관리되며, 본문 이미지와 첨부 파일이 최종 저장 전에 정규화됩니다.
 - 본문 이미지에는 `data-file-id`가 연결되고, 저장 시 실제 접근 가능한 경로로 치환됩니다.
 - 이미지 외 첨부 파일과 본문 이미지 사용 파일을 합쳐 article과 연결합니다.
 - 파일 연결은 `post_files`, `petition_files` 관계 테이블에 저장합니다.
-- 업로드 가능 최대 크기는 `MAX_FILE_SIZE`로 제한됩니다.
 - 현재 스토리지 카테고리는 이미지와 문서 파일 업로드를 기준으로 구성되어 있습니다.
 
 ## 내부 상태 테이블
 
 - `throttles`
-  - 사용자별 작성 쿨다운 상태를 저장합니다.
+  - 사용자별 글·댓글 작성 및 업로드 준비 요청의 쿨다운 상태를 저장합니다.
 - `activity_logs`
   - 콘텐츠 생성/수정/삭제 감사 로그를 저장합니다.
 - `point_states`

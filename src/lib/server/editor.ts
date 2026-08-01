@@ -1,10 +1,13 @@
 import { fail } from '@sveltejs/kit';
 import DOMPurify from 'isomorphic-dompurify';
 
+import type { UploadFileMetadata } from '$lib/shared/file-policy.js';
 import type { FileId, FileMeta } from '$lib/types/file-meta.type.js';
 
 import { AppError, withActionErrorHandling } from '$lib/server/errors.js';
 import * as FileMetaService from '$lib/services/file-meta.service.js';
+import * as ThrottleService from '$lib/services/throttle.service.js';
+import { FILE_POLICY } from '$lib/shared/file-policy.js';
 import { APP_ERROR } from '$lib/shared/rule.js';
 import * as FileUsecase from '$lib/usecase/file.usecase.js';
 
@@ -71,17 +74,80 @@ export async function normalizeEditorContent(
 }
 
 export const editorActions = {
-	uploadFile: withActionErrorHandling(async ({ request, locals }) => {
+	presignFiles: withActionErrorHandling(async ({ request, locals }) => {
 		if (locals.user.group === 'guest') {
 			return fail(403, { message: '로그인이 필요합니다.' });
 		}
 
 		const formData = await request.formData();
-		const files = formData.getAll('files') as File[];
-		const fileMetas = await FileUsecase.uploadFiles(files);
+		const files = parseUploadMetadata(formData.get('files'));
+		const totalSize = files.reduce((sum, file) => sum + file.size, 0);
+		if (totalSize > FILE_POLICY.maxBatchSize) {
+			throw new AppError(APP_ERROR.BAD_REQUEST, '한 번에 최대 50MB까지 업로드할 수 있습니다.');
+		}
 
-		return { fileMetas };
+		await ThrottleService.reserve(locals.user.id, 'upload');
+		const uploads = await FileUsecase.presignFiles(files);
+		return { uploads };
+	}),
+
+	completeFile: withActionErrorHandling(async ({ request, locals }) => {
+		if (locals.user.group === 'guest') {
+			return fail(403, { message: '로그인이 필요합니다.' });
+		}
+
+		const formData = await request.formData();
+		const token = formData.get('token');
+		if (typeof token !== 'string' || !token.trim()) {
+			throw new AppError(APP_ERROR.BAD_REQUEST, '업로드 token이 필요합니다.');
+		}
+
+		const fileMeta = await FileUsecase.completeUpload(token);
+		return { fileMeta };
 	})
 };
+
+function parseUploadMetadata(value: FormDataEntryValue | null): UploadFileMetadata[] {
+	if (typeof value !== 'string') {
+		throw new AppError(APP_ERROR.BAD_REQUEST, '파일 정보가 필요합니다.');
+	}
+
+	let parsed: unknown;
+	try {
+		parsed = JSON.parse(value);
+	} catch {
+		throw new AppError(APP_ERROR.BAD_REQUEST, '파일 정보가 올바르지 않습니다.');
+	}
+
+	if (
+		!Array.isArray(parsed) ||
+		parsed.length === 0 ||
+		parsed.length > FILE_POLICY.maxMetadataItems
+	) {
+		throw new AppError(APP_ERROR.BAD_REQUEST, '한 번에 처리할 파일 정보가 너무 많습니다.');
+	}
+
+	return parsed.map((item) => {
+		if (!item || typeof item !== 'object') {
+			throw new AppError(APP_ERROR.BAD_REQUEST, '파일 정보가 올바르지 않습니다.');
+		}
+		const { filename, contentType, size } = item as Record<string, unknown>;
+		if (
+			typeof filename !== 'string' ||
+			(contentType !== undefined && typeof contentType !== 'string') ||
+			!Number.isSafeInteger(size) ||
+			(size as number) < 0 ||
+			(size as number) > FILE_POLICY.maxFileSize
+		) {
+			throw new AppError(APP_ERROR.BAD_REQUEST, '파일 정보가 올바르지 않습니다.');
+		}
+
+		return {
+			filename,
+			contentType: contentType as string | undefined,
+			size: size as number
+		};
+	});
+}
 
 export default editorActions;
