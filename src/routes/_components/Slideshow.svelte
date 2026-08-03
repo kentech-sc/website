@@ -1,16 +1,16 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 
-	import mainLogo from '$assets/slideshow/4th_sc_logo.webp';
 	import leftImg from '$assets/slideshow/left.webp';
+	import mainLogo from '$assets/slideshow/logo_transparent.png';
 	import rightImg from '$assets/slideshow/right.webp';
 	import slide01 from '$assets/slideshow/slide01.webp';
-	import slide02 from '$assets/slideshow/slide02.webp';
+	// import slide02 from '$assets/slideshow/slide02.webp';
 	import slide03 from '$assets/slideshow/slide03.webp';
 
 	const slides = [
 		{ title: '~조감도 사진~', image: slide01 },
-		{ title: '~학생회 사진~', image: slide02 },
+		// { title: '~학생회 사진~', image: slide02 },
 		{ title: '~야경 사진~', image: slide03 }
 	];
 
@@ -91,7 +91,7 @@
 
 			filter: brightness(0) invert(1);
 
-			width: 8rem;
+			width: 10rem;
 		}
 
 		.slidelist {

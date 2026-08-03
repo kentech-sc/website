@@ -3,7 +3,7 @@
 </script>
 
 <footer>
-	<h1>4th KENTECH STUDENT COUNCIL | 4:EVER</h1>
+	<h1>5th KENTECH STUDENT COUNCIL | 이음</h1>
 	<p>Mail: studentcouncil@kentech.ac.kr</p>
 	<p>Developed by nemovim</p>
 	<div>
