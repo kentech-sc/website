@@ -1,11 +1,8 @@
 export type ProfessorId = string;
 
-export interface ProfessorCreate {
-	name: string;
-}
-
-export interface ProfessorEntity extends ProfessorCreate {
+export interface ProfessorEntity {
 	id: ProfessorId;
+	name: string;
 }
 
 export type Professor = ProfessorEntity;

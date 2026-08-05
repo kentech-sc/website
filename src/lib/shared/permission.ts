@@ -68,10 +68,6 @@ export function hasCapability(user: User, capability: Capability): boolean {
 	return ROLE_CAPABILITIES[user.group].includes(capability);
 }
 
-export function hasAnyCapability(user: User, capabilities: Capability[]): boolean {
-	return capabilities.some((capability) => hasCapability(user, capability));
-}
-
 export function isOwner(user: User, ownerId: unknown): boolean {
 	return String(user.id) === String(ownerId);
 }

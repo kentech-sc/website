@@ -57,8 +57,5 @@ export interface IdentityCreate {
 }
 
 export type UserUpdate = Partial<
-	Pick<
-		UserEntity,
-		'email' | 'realName' | 'nickname' | 'group' | 'deletedAt' | 'points' | 'blockedUntil'
-	>
+	Pick<UserEntity, 'email' | 'realName' | 'nickname' | 'group' | 'deletedAt' | 'blockedUntil'>
 >;

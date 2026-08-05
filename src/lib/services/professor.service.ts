@@ -1,18 +1,6 @@
-import type { Professor, ProfessorCreate, ProfessorId } from '$lib/types/professor.type.js';
-import type { User } from '$lib/types/user.type.js';
+import type { Professor, ProfessorId } from '$lib/types/professor.type.js';
 
 import * as ProfessorRepository from '$lib/repositories/professor.repository.js';
-import * as ProfessorRule from '$lib/rules/professor.rule.js';
-import { assertRule } from '$lib/server/errors.js';
-
-export async function createProfessor(professor: ProfessorCreate, user: User): Promise<Professor> {
-	assertRule(ProfessorRule.canManageProfessor(user));
-
-	const duplicate = await ProfessorRepository.findProfessorByName(professor.name);
-	assertRule(ProfessorRule.validateProfessorCreate(duplicate !== null));
-
-	return await ProfessorRepository.createProfessor(professor);
-}
 
 export async function findProfessors(): Promise<Professor[]> {
 	return await ProfessorRepository.findProfessors();

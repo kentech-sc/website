@@ -15,7 +15,6 @@
 	let { data } = $props();
 	const reviewPage = $derived(data.reviewPage);
 	const canCreateReview = $derived<boolean>(data.canCreateReview);
-	const canManageCatalog = $derived<boolean>(data.canManageCatalog);
 	let selectedCourse = $derived<string>(data.courseId ?? '');
 	let selectedProfessor = $derived<string>(data.professorId ?? '');
 
@@ -37,7 +36,7 @@
 	const professors = $derived<Professor[]>(data.professors);
 </script>
 
-<ReviewHeader pageType="list" {canCreateReview} {canManageCatalog} />
+<ReviewHeader pageType="list" {canCreateReview} />
 
 <ReviewFilter {courses} {professors} bind:selectedCourse bind:selectedProfessor />
 

@@ -131,7 +131,7 @@ export async function createPost(
 			beforeSnapshot: null,
 			afterSnapshot: postSnapshot
 		});
-		await PointService.awardPostCreate(user.id);
+		await PointService.awardPostCreate(user.id, post.id);
 		return post;
 	});
 }
@@ -208,7 +208,7 @@ export async function deletePostById(postId: PostId, user: User) {
 export async function likePost(postId: PostId, user: User) {
 	return await transaction(async () => {
 		const post = await PostService.likePostById(postId, user);
-		await PointService.applyPostLikeDelta(post.userId, 1);
+		await PointService.applyPostLikeDelta(post.userId, postId, user.id, 1);
 		return post;
 	});
 }
@@ -216,7 +216,7 @@ export async function likePost(postId: PostId, user: User) {
 export async function unlikePost(postId: PostId, user: User) {
 	return await transaction(async () => {
 		const post = await PostService.unlikePostById(postId, user);
-		await PointService.applyPostLikeDelta(post.userId, -1);
+		await PointService.applyPostLikeDelta(post.userId, postId, user.id, -1);
 		return post;
 	});
 }
@@ -246,7 +246,7 @@ export async function createCommentAndUpdatePost(
 			beforeSnapshot: null,
 			afterSnapshot: comment
 		});
-		await PointService.awardCommentCreate(user.id);
+		await PointService.awardCommentCreate(user.id, comment.id);
 		return comment;
 	});
 }

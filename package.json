@@ -12,6 +12,7 @@
 		"preview": "vite preview",
 		"generate:pwa-assets": "pwa-assets-generator",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+		"test": "node --test src/lib/shared/degree.test.mjs src/lib/shared/course-offering-import.test.mjs src/lib/shared/portal-completion-import.test.mjs",
 		"db:generate": "drizzle-kit generate",
 		"db:migrate": "drizzle-kit migrate",
 		"db:studio": "drizzle-kit studio",
@@ -48,6 +49,7 @@
 		"prettier-plugin-css-order": "^2.2.0",
 		"prettier-plugin-svelte": "^4.1.1",
 		"sass": "^1.102.0",
+		"supabase": "^2.111.0",
 		"svelte": "^5.56.8",
 		"svelte-check": "^4.7.4",
 		"typescript": "^6.0.3",
@@ -59,6 +61,7 @@
 	},
 	"dependencies": {
 		"@auth/sveltekit": "^1.11.3",
+		"@excel.js/exceljs": "^0.12.0",
 		"@lucide/svelte": "^1.27.0",
 		"@sentry/sveltekit": "^10.69.0",
 		"@tiptap/core": "^3.29.2",

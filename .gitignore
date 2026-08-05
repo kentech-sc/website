@@ -31,3 +31,6 @@ vite.config.ts.timestamp-*
 Dockerfile
 docker-compose.yml
 keygen.ts
+
+# Local research and generated scratch files
+.tmp/

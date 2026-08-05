@@ -1,7 +1,5 @@
 import { fail, redirect } from '@sveltejs/kit';
 
-import type { CourseId } from '$lib/types/course.type.js';
-import type { ProfessorId } from '$lib/types/professor.type.js';
 import type { ReviewId } from '$lib/types/review.type.js';
 
 import { withActionErrorHandling, withLoadErrorHandling } from '$lib/server/errors.js';
@@ -22,10 +20,7 @@ export const actions = {
 		const reviewId: ReviewId = reviewIdRaw;
 
 		const formData = await request.formData();
-		const courseIdRaw = (formData.get('courseId') ?? '').toString();
-		const professorIdRaw = (formData.get('professorId') ?? '').toString();
-		const year = Number(formData.get('year'));
-		const term = Number(formData.get('term'));
+		const offeringId = (formData.get('offeringId') ?? '').toString() || undefined;
 		const title = (formData.get('title') ?? '').toString();
 		const score = {
 			assignment: Number(formData.get('assignmentScore')),
@@ -35,17 +30,14 @@ export const actions = {
 		};
 		const comment = (formData.get('comment') ?? '').toString();
 
-		if (!courseIdRaw || !professorIdRaw || !year || !term || !title || !score || !comment) {
-			return fail(400, { message: '강의, 교수, 연도, 학기, 제목, 점수, 내용은 필수입니다.' });
+		if (!title || !comment) {
+			return fail(400, { message: '제목, 점수, 내용은 필수입니다.' });
 		}
 
 		const review = await ReviewUsecase.editReview(
 			reviewId,
 			{
-				courseId: courseIdRaw as CourseId,
-				professorId: professorIdRaw as ProfessorId,
-				year,
-				term,
+				offeringId,
 				title,
 				score,
 				comment

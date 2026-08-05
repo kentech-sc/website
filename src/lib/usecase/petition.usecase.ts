@@ -149,7 +149,7 @@ export async function createPetition(
 			afterSnapshot: petitionSnapshot
 		};
 		await ActivityLogService.create(activityLog);
-		await PointService.awardPetitionCreate(petitioner.id);
+		await PointService.awardPetitionCreate(petitioner.id, petition.id);
 		return petition;
 	});
 }
@@ -177,7 +177,7 @@ export async function deletePetitionById(petitionId: PetitionId, user: User) {
 export async function signPetition(petitionId: PetitionId, user: User) {
 	return await transaction(async () => {
 		const petition = await PetitionService.signPetitionById(petitionId, user);
-		await PointService.applyPetitionSignDelta(petition.petitionerId, 2);
+		await PointService.applyPetitionSignDelta(petition.petitionerId, petitionId, user.id, 2);
 		return petition;
 	});
 }
@@ -185,7 +185,7 @@ export async function signPetition(petitionId: PetitionId, user: User) {
 export async function unsignPetition(petitionId: PetitionId, user: User) {
 	return await transaction(async () => {
 		const petition = await PetitionService.unsignPetitionById(petitionId, user);
-		await PointService.applyPetitionSignDelta(petition.petitionerId, -2);
+		await PointService.applyPetitionSignDelta(petition.petitionerId, petitionId, user.id, -2);
 		return petition;
 	});
 }

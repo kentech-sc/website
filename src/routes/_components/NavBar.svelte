@@ -34,6 +34,7 @@
 		<a href={resolve('/board/[boardId=board]', { boardId: 'free' })}>자유게시판</a>
 		<a href={resolve('/board/[boardId=board]', { boardId: 'bylaw' })}>회칙·세칙</a>
 		<a href={resolve('/review')}>강의평가</a>
+		<a href={resolve('/academic')}>학업</a>
 		<a href={resolve('/petition')}>청원</a>
 	</nav>
 {/snippet}
@@ -93,6 +94,7 @@
 			>회칙·세칙</a
 		>
 		<a href={resolve('/review')} onclick={closeDrawer}>강의평가</a>
+		<a href={resolve('/academic')} onclick={closeDrawer}>학업</a>
 		<a href={resolve('/petition')} onclick={closeDrawer}>청원</a>
 		<hr />
 		{#if user.group !== 'guest'}

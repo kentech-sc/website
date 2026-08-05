@@ -1,4 +1,7 @@
 :root {
+	--control-border-width: 0.1rem;
+	--divider-border-width: 0.05rem;
+
 	--white: oklch(1 0 0);
 	--white-hover: oklch(from var(--white) calc(l - 0.1) c h);
 	--text: oklch(0 0 0);

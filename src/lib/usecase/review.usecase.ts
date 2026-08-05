@@ -11,6 +11,8 @@ import type {
 } from '$lib/types/review.type.js';
 import type { User } from '$lib/types/user.type.js';
 
+import * as AcademicRepository from '$lib/repositories/academic.repository.js';
+import * as ReviewRepository from '$lib/repositories/review.repository.js';
 import { transaction } from '$lib/server/db.js';
 import * as ActivityLogService from '$lib/services/activity-log.service.js';
 import * as CourseService from '$lib/services/course.service.js';
@@ -18,28 +20,72 @@ import * as PointService from '$lib/services/point.service.js';
 import * as ProfessorService from '$lib/services/professor.service.js';
 import * as ReviewService from '$lib/services/review.service.js';
 import * as ThrottleService from '$lib/services/throttle.service.js';
-import { hasAnyCapability, hasCapability } from '$lib/shared/permission.js';
+import { hasCapability } from '$lib/shared/permission.js';
 
 export async function fillReviews(reviews: ReviewEntity[]): Promise<Review[]> {
+	const offeringMap = await AcademicRepository.findOfferingMapByIds(
+		reviews.flatMap((review) => (review.offeringId ? [review.offeringId] : []))
+	);
+	const resolved = reviews.map((review) => ({
+		review,
+		offering: review.offeringId ? offeringMap.get(review.offeringId) : undefined
+	}));
 	const [courseIdToCourse, professorIdToProfessor] = await Promise.all([
-		CourseService.findCourseMapByIds(reviews.map((review) => review.courseId)),
-		ProfessorService.findProfessorMapByIds(reviews.map((review) => review.professorId))
+		CourseService.findCourseMapByIds(
+			resolved.flatMap(({ review, offering }) => {
+				const id = offering?.courseId ?? review.courseId;
+				return id ? [id] : [];
+			})
+		),
+		ProfessorService.findProfessorMapByIds(
+			resolved.flatMap(({ review }) => (review.professorId ? [review.professorId] : []))
+		)
 	]);
 
-	return reviews.map((review) => ({
-		...review,
-		courseName: courseIdToCourse.get(review.courseId.toString())?.name ?? null,
-		professorName: professorIdToProfessor.get(review.professorId.toString())?.name ?? null
-	}));
+	return resolved.map(({ review, offering }) => {
+		const courseId = offering?.courseId ?? review.courseId;
+		const year = offering?.year ?? review.year;
+		const term = offering?.term ?? review.term;
+		if (!courseId || year === null || term === null)
+			throw new Error(`강의평 ${review.id}의 강좌 정보를 확인할 수 없습니다.`);
+		return {
+			...review,
+			courseId,
+			year,
+			term,
+			section: offering?.section ?? null,
+			courseName: offering?.courseName ?? courseIdToCourse.get(courseId)?.name ?? courseId,
+			subtitle: offering?.subtitle ?? null,
+			professors:
+				offering?.professors ??
+				(review.professorId
+					? [professorIdToProfessor.get(review.professorId)].filter(
+							(professor) => professor !== undefined
+						)
+					: [])
+		};
+	});
 }
 
-export async function getReviewFormOptions() {
+export async function getReviewFilterOptions() {
 	const [courses, professors] = await Promise.all([
-		CourseService.findCourses(),
+		CourseService.findInstructionalCourses(),
 		ProfessorService.findProfessors()
 	]);
-
 	return { courses, professors };
+}
+
+export async function getReviewFormOptions(user: User) {
+	const [reviewableOfferings, reviewedOfferingIds] = await Promise.all([
+		AcademicRepository.findAllOfferings(),
+		ReviewRepository.findReviewedOfferingIds(user.id)
+	]);
+
+	return {
+		reviewableOfferings: reviewableOfferings.filter(
+			(offering) => !reviewedOfferingIds.has(offering.id)
+		)
+	};
 }
 
 export async function getReviewPage(
@@ -55,8 +101,7 @@ export async function getReviewPage(
 
 	return {
 		reviewPage: reviewPage as Page<Review>,
-		canCreateReview: hasCapability(user, 'review.write'),
-		canManageCatalog: hasAnyCapability(user, ['course.manage', 'professor.manage'])
+		canCreateReview: hasCapability(user, 'review.write')
 	};
 }
 
@@ -72,14 +117,21 @@ export async function getReviewDetail(reviewId: ReviewId, user: User) {
 
 export async function getReviewEditData(reviewId: ReviewId, user: User) {
 	const [formOptions, detail] = await Promise.all([
-		getReviewFormOptions(),
+		getReviewFormOptions(user),
 		getReviewDetail(reviewId, user)
 	]);
+	const linkableOfferings = detail.permissions.canLinkOffering
+		? await AcademicRepository.findOfferings(
+				detail.review.year < 100 ? 2000 + detail.review.year : detail.review.year,
+				detail.review.term
+			)
+		: [];
 
 	return {
 		...formOptions,
 		review: detail.review,
-		permissions: detail.permissions
+		permissions: detail.permissions,
+		linkableOfferings
 	};
 }
 
@@ -98,7 +150,7 @@ export async function createReview(reviewCreate: ReviewCreate, user: User) {
 			afterSnapshot: review
 		};
 		await ActivityLogService.create(activityLog);
-		await PointService.awardReviewCreate(user.id);
+		await PointService.awardReviewCreate(user.id, review.id);
 		return review;
 	});
 }

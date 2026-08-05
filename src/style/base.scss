@@ -128,12 +128,12 @@ table {
 
 th,
 td {
-	border: solid 0.05rem var(--gray-border);
+	border: solid var(--divider-border-width) var(--gray-border);
 	background-color: var(--gray-bg);
 }
 
 @mixin btn-style {
-	border: solid 0.1rem var(--gray-border);
+	border: solid var(--control-border-width) var(--gray-border);
 	border-radius: 0.4rem;
 	background-color: var(--white);
 	padding: 0.2rem 0.8rem;
@@ -177,7 +177,7 @@ select {
 textarea,
 input,
 select {
-	border: 0.1rem solid var(--gray-border);
+	border: var(--control-border-width) solid var(--gray-border);
 	border-radius: 0.4rem;
 	background-color: var(--white);
 	padding: 0.2rem 0.4rem;
@@ -192,7 +192,7 @@ pre {
 
 hr {
 	margin: 0.4rem 0;
-	border: solid 0.1rem var(--gray-border);
+	border: solid var(--control-border-width) var(--gray-border);
 	width: 100%;
 }
 

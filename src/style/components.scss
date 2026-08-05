@@ -27,7 +27,7 @@
 }
 
 @mixin module-frame {
-	border-width: 0.1rem;
+	border-width: var(--control-border-width);
 	border-style: solid;
 	width: 100%;
 }

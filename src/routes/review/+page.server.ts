@@ -10,7 +10,7 @@ export const load = withLoadErrorHandling(async ({ url, locals }) => {
 
 	const page = Math.max(1, Number(url.searchParams.get('page') ?? '1') || 1);
 	const reviewResult = await ReviewUsecase.getReviewPage(page, locals.user, courseId, professorId);
-	const { courses, professors } = await ReviewUsecase.getReviewFormOptions();
+	const { courses, professors } = await ReviewUsecase.getReviewFilterOptions();
 
 	return {
 		reviewPage: reviewResult.reviewPage,
@@ -18,7 +18,6 @@ export const load = withLoadErrorHandling(async ({ url, locals }) => {
 		professors,
 		courseId,
 		professorId,
-		canCreateReview: reviewResult.canCreateReview,
-		canManageCatalog: reviewResult.canManageCatalog
+		canCreateReview: reviewResult.canCreateReview
 	};
 });

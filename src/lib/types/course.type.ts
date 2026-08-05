@@ -1,11 +1,17 @@
 export type CourseId = string;
 
-export interface CourseCreate {
+export interface CourseEntity {
 	id: CourseId;
 	name: string;
-	content: string;
+	credits: number;
+	creditType: 'numeric' | 'pass';
 }
 
-export type CourseEntity = CourseCreate;
-
 export type Course = CourseEntity;
+
+export interface CatalogCourseCreate extends CourseEntity {
+	category: string;
+	subcategory: string | null;
+	level: number | null;
+	gradExcluded: boolean;
+}
