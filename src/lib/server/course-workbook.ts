@@ -1,4 +1,5 @@
 import ExcelJS from '@excel.js/exceljs';
+import 'fast-csv';
 
 import type { OfferingWorkbookParseResult } from '$lib/types/academic.type.js';
 
