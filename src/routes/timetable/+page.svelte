@@ -881,6 +881,10 @@
 		width: 1.9rem;
 		height: 1.9rem;
 		color: white;
+
+		&:hover:not(:disabled) {
+			background: var(--secondary-strong-hover);
+		}
 	}
 	.confirm-button {
 		gap: 0.25rem;
@@ -890,6 +894,10 @@
 		color: white;
 		font-weight: 650;
 		font-size: 0.68rem;
+
+		&:hover:not(:disabled) {
+			background: var(--secondary-strong-hover);
+		}
 	}
 	.schedule-toolbar {
 		display: flex;
@@ -921,6 +929,10 @@
 		padding: 0.32rem 0.55rem;
 		color: var(--white);
 		font-size: 0.68rem;
+
+		&:hover:not(:disabled) {
+			background: var(--error-strong-hover);
+		}
 	}
 	.slot-tabs {
 		display: flex;
@@ -1055,6 +1067,10 @@
 		border-color: var(--error-text);
 		background: var(--error-text);
 		color: var(--white);
+
+		&:hover:not(:disabled) {
+			background: var(--error-strong-hover);
+		}
 	}
 	.planner-workspace {
 		display: grid;

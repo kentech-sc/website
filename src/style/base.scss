@@ -142,7 +142,7 @@ td {
 	font-size: 0.8rem;
 	word-break: keep-all;
 
-	&:hover {
+	&:hover:not(:disabled) {
 		cursor: pointer;
 		background-color: var(--white-hover);
 		text-decoration: none;
@@ -158,7 +158,7 @@ button:disabled,
 label.button[aria-disabled='true'] {
 	opacity: 0.6;
 	filter: saturate(0.65);
-	cursor: wait;
+	cursor: not-allowed;
 }
 
 button:disabled:hover,

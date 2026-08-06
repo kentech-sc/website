@@ -1,4 +1,5 @@
 <script lang="ts">
+	import Bookmark from '@lucide/svelte/icons/bookmark';
 	import Check from '@lucide/svelte/icons/check';
 	import Clipboard from '@lucide/svelte/icons/clipboard';
 	import Upload from '@lucide/svelte/icons/upload';
@@ -90,7 +91,7 @@
 								draggable="true"
 								onclick={(event) => event.preventDefault()}
 							>
-								📎 이 버튼을 북마크 바로 드래그
+								<Bookmark size="0.95rem" />KIS 이수내역 추출
 							</a>
 							<!-- eslint-enable svelte/no-navigation-without-resolve -->
 						</div>
