@@ -10,7 +10,7 @@ export interface CourseEntity {
 export type Course = CourseEntity;
 
 export interface CatalogCourseCreate extends CourseEntity {
-	category: string;
+	category: string | null;
 	subcategory: string | null;
 	level: number | null;
 	gradExcluded: boolean;

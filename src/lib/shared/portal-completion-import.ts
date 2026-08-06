@@ -3,6 +3,8 @@ import { resolveCompletionStatus } from './completion-status.js';
 import type { CompletionStatus } from '$lib/types/academic.type.js';
 
 export interface PortalCompletionImportRow {
+	/** KIS가 알려주는 이수구분. 졸업요건 영역인지는 사용하는 쪽에서 판단한다. */
+	category: string;
 	courseId: string;
 	courseName: string;
 	credits: number;
@@ -17,7 +19,18 @@ export interface PortalCompletionParseResult {
 	skippedCount: number;
 }
 
-const COURSE_CODE_RE = /^[A-Z][A-Z0-9_.-]{2,19}$/;
+// 학교마다 코드 체계가 달라 형태를 제한하지 않는다. 이 값이 곧 강의 PK라 공백과 길이만 막는다.
+const COURSE_CODE_RE = /^\S{1,20}$/;
+
+/**
+ * KIS 과목명은 학기마다 공백·번호 등 잡음이 붙어 정확히 일치하지 않을 수 있다.
+ * 개별 잡음을 하나씩 다듬는 대신, 한쪽이 다른 쪽을 포함하면 같은 과목으로 본다.
+ */
+export function isSameCourseName(left: string, right: string): boolean {
+	const a = left.replace(/\s+/g, '').toLowerCase();
+	const b = right.replace(/\s+/g, '').toLowerCase();
+	return a.length > 0 && b.length > 0 && (a.includes(b) || b.includes(a));
+}
 
 function parsePeriod(value: string): { year: number; term: number } | null {
 	const normalized = value.replace(/\s+/g, ' ').trim();
@@ -73,6 +86,7 @@ export function parsePortalCompletionText(text: string): PortalCompletionParseRe
 		if (seen.has(key)) continue;
 		seen.add(key);
 		rows.push({
+			category: columns[0].toUpperCase(),
 			courseId,
 			courseName,
 			credits,
@@ -176,3 +190,14 @@ export const KIS_COMPLETION_EXTRACTOR = String.raw`(async function () {
     () => window.prompt('내용 칸을 클릭한 뒤 Ctrl+A, Ctrl+C로 복사하세요.', output)
   );
 })();`;
+
+const BOOKMARKLET_SCRIPT_PATH = '/portal-completion-bookmarklet.js';
+
+/**
+ * javascript: URL 자체 길이 제한(구형 브라우저 기준 ~2083자)을 피하려고,
+ * 추출 로직 전체 대신 매 클릭마다 최신 스크립트를 fetch하는 짧은 로더만 담는다.
+ */
+export function buildKisCompletionBookmarkletHref(origin: string): string {
+	const scriptUrl = `${origin}${BOOKMARKLET_SCRIPT_PATH}`;
+	return `javascript:(function(){var d=document,s=d.createElement('script');s.src=${JSON.stringify(scriptUrl)}+'?t='+Date.now();d.body.appendChild(s);})();`;
+}

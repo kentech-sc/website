@@ -343,20 +343,6 @@ export const graduationPolicies = academicSchema.table(
 	]
 );
 
-export const externalCourses = academicSchema.table(
-	'external_courses',
-	{
-		id: uuid().defaultRandom().primaryKey(),
-		institution: text().notNull(),
-		courseCode: text('course_code').notNull(),
-		name: text().notNull(),
-		...timestamps
-	},
-	(table) => [
-		unique('external_courses_institution_code_unique').on(table.institution, table.courseCode)
-	]
-);
-
 export const courseCompletions = academicSchema.table(
 	'course_completions',
 	{
@@ -366,7 +352,6 @@ export const courseCompletions = academicSchema.table(
 			.references(() => users.id, { onDelete: 'cascade' }),
 		courseId: text('course_id').references(() => courses.id),
 		offeringId: uuid('offering_id').references(() => courseOfferings.id),
-		externalCourseId: uuid('external_course_id').references(() => externalCourses.id),
 		year: integer().notNull(),
 		term: integer().notNull(),
 		credits: numeric({ precision: 4, scale: 1 }).notNull(),
@@ -383,16 +368,10 @@ export const courseCompletions = academicSchema.table(
 			table.term
 		),
 		unique('course_completions_user_offering_unique').on(table.userId, table.offeringId),
-		unique('course_completions_user_external_term_unique').on(
-			table.userId,
-			table.externalCourseId,
-			table.year,
-			table.term
-		),
 		index('course_completions_user_idx').on(table.userId),
 		check(
 			'course_completions_reference_check',
-			sql`num_nonnulls(${table.courseId}, ${table.offeringId}, ${table.externalCourseId}) = 1`
+			sql`num_nonnulls(${table.courseId}, ${table.offeringId}) = 1`
 		),
 		check('course_completions_term_check', sql`${table.term} between 1 and 4`),
 		check('course_completions_credits_check', sql`${table.credits} >= 0`),
@@ -460,14 +439,12 @@ export const reviews = academicSchema.table(
 	'reviews',
 	{
 		id: uuid().defaultRandom().primaryKey(),
-		offeringId: uuid('offering_id').references(() => courseOfferings.id),
-		courseId: text('course_id').references(() => courses.id),
-		professorId: uuid('professor_id').references(() => professors.id),
+		offeringId: uuid('offering_id')
+			.notNull()
+			.references(() => courseOfferings.id),
 		userId: uuid('user_id')
 			.notNull()
 			.references(() => users.id),
-		year: integer(),
-		term: integer(),
 		title: text().notNull(),
 		assignmentScore: doublePrecision('assignment_score').notNull(),
 		lectureScore: doublePrecision('lecture_score').notNull(),
@@ -478,14 +455,7 @@ export const reviews = academicSchema.table(
 	},
 	(table) => [
 		index('reviews_created_idx').on(table.createdAt),
-		uniqueIndex('reviews_user_offering_unique')
-			.on(table.userId, table.offeringId)
-			.where(sql`${table.offeringId} is not null`),
-		check('reviews_term_check', sql`${table.term} between 1 and 4`),
-		check(
-			'reviews_reference_check',
-			sql`${table.offeringId} is not null or (${table.courseId} is not null and ${table.year} is not null and ${table.term} is not null)`
-		),
+		uniqueIndex('reviews_user_offering_unique').on(table.userId, table.offeringId),
 		check(
 			'reviews_scores_check',
 			sql`${table.assignmentScore} between 1 and 5
@@ -655,7 +625,6 @@ export const activityLogs = appSchema.table('activity_logs', {
 	courseMeetings,
 	studentAcademicProfiles,
 	graduationPolicies,
-	externalCourses,
 	courseCompletions,
 	timetables,
 	timetableItems,

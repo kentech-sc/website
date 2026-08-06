@@ -17,37 +17,25 @@ export const actions = {
 			data.getAll('espWaivedCourseIds').map(String)
 		);
 	}),
-	addExternalCompletion: withActionErrorHandling(async ({ request, locals }) => {
-		const data = await request.formData();
-		await AcademicUsecase.addExternalCompletion(
-			locals.user,
-			String(data.get('institution') ?? ''),
-			String(data.get('courseCode') ?? ''),
-			String(data.get('courseName') ?? ''),
-			Number(data.get('year')),
-			Number(data.get('term')),
-			Number(data.get('credits')),
-			String(data.get('grade') ?? '') || null,
-			String(data.get('status') ?? 'passed') as CompletionStatus
-		);
-	}),
 	addCompletion: withActionErrorHandling(async ({ request, locals }) => {
 		const data = await request.formData();
-		await AcademicUsecase.addCompletion(
-			locals.user,
-			String(data.get('courseId')),
-			Number(data.get('year')),
-			Number(data.get('term')),
-			Number(data.get('credits')),
-			String(data.get('grade') ?? '') || null,
-			String(data.get('status') ?? 'passed') as CompletionStatus
-		);
+		await AcademicUsecase.addCompletion(locals.user, {
+			courseId: String(data.get('courseId') ?? ''),
+			courseName: String(data.get('courseName') ?? ''),
+			credits: Number(data.get('credits')),
+			category: String(data.get('category') ?? ''),
+			year: Number(data.get('year')),
+			term: Number(data.get('term')),
+			grade: String(data.get('grade') ?? '') || null,
+			status: String(data.get('status') ?? 'passed') as CompletionStatus
+		});
 	}),
 	importCompletions: withActionErrorHandling(async ({ request, locals }) => {
 		const data = await request.formData();
 		return await AcademicUsecase.importCompletions(
 			locals.user,
-			String(data.get('portalData') ?? '')
+			String(data.get('portalData') ?? ''),
+			data.get('hideGrade') === 'on'
 		);
 	}),
 	removeCompletion: withActionErrorHandling(async ({ request, locals }) => {

@@ -1,4 +1,4 @@
-import { and, desc, eq, exists, ilike, isNotNull, or, sql } from 'drizzle-orm';
+import { and, desc, eq, exists, ilike, or, sql } from 'drizzle-orm';
 
 import { asEntity, firstOrNull } from './repository.utils.js';
 
@@ -17,11 +17,7 @@ function toReview(row: ReviewRow): ReviewEntity {
 	return asEntity<ReviewEntity>({
 		id: row.id,
 		offeringId: row.offeringId,
-		courseId: row.courseId,
-		professorId: row.professorId,
 		userId: row.userId,
-		year: row.year,
-		term: row.term,
 		title: row.title,
 		score: {
 			assignment: row.assignmentScore,
@@ -58,10 +54,9 @@ function filter(professorId?: ProfessorId, courseId?: CourseId) {
 					eq(courseOfferingProfessors.professorId, professorId)
 				)
 			);
-		conditions.push(or(eq(reviews.professorId, professorId), exists(offeringProfessorMatch))!);
+		conditions.push(exists(offeringProfessorMatch));
 	}
-	if (courseId)
-		conditions.push(or(eq(reviews.courseId, courseId), eq(courseOfferings.courseId, courseId))!);
+	if (courseId) conditions.push(eq(courseOfferings.courseId, courseId));
 	return conditions.length > 0 ? and(...conditions) : undefined;
 }
 
@@ -121,8 +116,8 @@ export async function findReviewedOfferingIds(userId: UserId): Promise<Set<Offer
 	const rows = await getDatabase()
 		.select({ offeringId: reviews.offeringId })
 		.from(reviews)
-		.where(and(eq(reviews.userId, userId), isNotNull(reviews.offeringId)));
-	return new Set(rows.flatMap((row) => (row.offeringId ? [row.offeringId] : [])));
+		.where(eq(reviews.userId, userId));
+	return new Set(rows.map((row) => row.offeringId));
 }
 
 export async function findRecentReviews(
@@ -140,26 +135,6 @@ export async function findRecentReviews(
 		.offset(skip)
 		.limit(limit);
 	return rows.map(({ review }) => toReview(review));
-}
-
-export async function linkReviewOffering(
-	reviewId: ReviewId,
-	offeringId: OfferingId
-): Promise<ReviewEntity | null> {
-	const rows = await getDatabase()
-		.update(reviews)
-		.set({
-			offeringId,
-			courseId: null,
-			professorId: null,
-			year: null,
-			term: null,
-			updatedAt: sql`now()`
-		})
-		.where(eq(reviews.id, reviewId))
-		.returning();
-	const row = firstOrNull(rows);
-	return row ? toReview(row) : null;
 }
 
 export async function updateReviewById(

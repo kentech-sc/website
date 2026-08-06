@@ -23,19 +23,14 @@ FROM (
 	ORDER BY "course_id", "year" DESC, "term" DESC, "section"
 ) AS "definition"
 WHERE "course"."id" = "definition"."course_id";--> statement-breakpoint
+-- 개설 이력이 없어 학점을 알 수 없는 과목은 0학점·졸업요건 제외로 표시해둔다.
+-- 나중에 그 과목이 실제로 개설되어 엑셀로 들어오면 upsertOfferingImport가 정상 학점으로 덮어쓴다.
 UPDATE "academic"."courses"
 SET
-	"credits" = 2,
-	"credit_type" = 'numeric'
-WHERE "credits" IS NULL
-	AND "id" ~ '^[A-Z][0-9]{6}$';--> statement-breakpoint
-DO $$
-BEGIN
-	IF EXISTS (SELECT 1 FROM "academic"."courses" WHERE "credits" IS NULL) THEN
-		RAISE EXCEPTION 'A course without an offering has no credit definition.';
-	END IF;
-END
-$$;--> statement-breakpoint
+	"credits" = 0,
+	"credit_type" = 'numeric',
+	"grad_excluded" = true
+WHERE "credits" IS NULL;--> statement-breakpoint
 ALTER TABLE "academic"."courses" ALTER COLUMN "credits" SET NOT NULL;--> statement-breakpoint
 ALTER TABLE "academic"."course_offerings" DROP CONSTRAINT "course_offerings_credits_check";--> statement-breakpoint
 ALTER TABLE "academic"."course_offerings" DROP CONSTRAINT "course_offerings_credit_type_check";--> statement-breakpoint

@@ -146,7 +146,6 @@ ALTER TABLE "app"."courses" DROP COLUMN "content";
 --> statement-breakpoint
 UPDATE "app"."courses"
 SET "category" = CASE
-	WHEN "id" ~ '^[A-Z][0-9]{6}$' THEN 'EF'
 	WHEN "id" LIKE 'VC%' THEN 'VC'
 	WHEN "id" LIKE 'EF%' THEN 'EF'
 	WHEN "id" LIKE 'EL%' OR "id" LIKE 'GS%' THEN 'EL'
@@ -161,7 +160,6 @@ SET "category" = CASE
 	ELSE "category"
 END,
 "subcategory" = CASE
-	WHEN "id" ~ '^[A-Z][0-9]{6}$' THEN 'ap'
 	WHEN "id" IN ('EF1001','EF1008','EF1009','EF1011','EF1012','EF1013','EF1014','EF1015','EF1016','EF1017','EF2007','EF2008','EF2031','EF2032','EF2033') THEN 'math'
 	WHEN "id" IN ('EF1004','EF1005','EF1051','EF2004','EF2036') THEN 'physics'
 	WHEN "id" IN ('EF1002','EF1006','EF1007','EF2002','EF2005','EF2034') THEN 'chemistry'

@@ -16,6 +16,7 @@
 
 	import { enhance } from '$app/forms';
 	import AcademicHeader from '$components/AcademicHeader.svelte';
+	import { DEGREE_CATEGORIES } from '$lib/types/degree.type.js';
 
 	let { data, form } = $props();
 	let historyQuery = $state('');
@@ -24,7 +25,11 @@
 	let manualCredits = $state(3);
 	let manualAddOpen = $state(false);
 	let manualAddError = $state('');
-	let exchangeAddOpen = $state(false);
+	let manualMode = $state<'catalog' | 'new'>('catalog');
+	let newCourseCode = $state('');
+	let newCourseName = $state('');
+	let newCourseCredits = $state(3);
+	let newCourseCategory = $state<string>('FR');
 
 	const progress = $derived(data.degreeProgress);
 	const espProgress = $derived(
@@ -63,10 +68,16 @@
 	);
 	const filteredCompletions = $derived(
 		data.completions.filter((completion) =>
-			`${completion.courseCode} ${completion.courseName} ${completion.institution ?? ''} ${completion.year}`
+			`${completion.courseCode} ${completion.courseName} ${completion.year}`
 				.toLowerCase()
 				.includes(historyQuery.trim().toLowerCase())
 		)
+	);
+	/** 이미 카탈로그에 있는 코드를 새 강의로 넣으려 하면 제출 전에 막는다. */
+	const duplicateNewCourse = $derived(
+		manualMode === 'new' && newCourseCode.trim()
+			? (data.courses.find((course) => course.id === newCourseCode.trim().toUpperCase()) ?? null)
+			: null
 	);
 	const completionGroups = $derived(groupCompletions(filteredCompletions));
 	const detailRequirements = $derived([
@@ -319,23 +330,77 @@
 					use:enhance={manualAddEnhance}
 					class="completion-form"
 				>
-					<label class="course-select"
-						><span>강의</span><input
-							type="search"
-							bind:value={courseQuery}
-							placeholder="목록 안에서 검색"
-							aria-label="추가할 강의 검색"
-						/><select
-							name="courseId"
-							required
-							value={selectedCourseId}
-							onchange={updateManualCourse}
-							><option value="">과목 선택</option
-							>{#each filteredCourses as course (course.id)}<option value={course.id}
-									>[{course.id}] {course.name}</option
-								>{/each}</select
-						></label
-					>
+					<div class="mode-switch" role="group" aria-label="강의 선택 방식">
+						<button
+							type="button"
+							class:active={manualMode === 'catalog'}
+							onclick={() => (manualMode = 'catalog')}>목록에서 선택</button
+						>
+						<button
+							type="button"
+							class:active={manualMode === 'new'}
+							onclick={() => (manualMode = 'new')}>목록에 없음</button
+						>
+					</div>
+					{#if manualMode === 'catalog'}
+						<label class="course-select"
+							><span>강의</span><input
+								type="search"
+								bind:value={courseQuery}
+								placeholder="목록 안에서 검색"
+								aria-label="추가할 강의 검색"
+							/><select
+								name="courseId"
+								required
+								value={selectedCourseId}
+								onchange={updateManualCourse}
+								><option value="">과목 선택</option
+								>{#each filteredCourses as course (course.id)}<option value={course.id}
+										>[{course.id}] {course.name}</option
+									>{/each}</select
+							></label
+						>
+					{:else}
+						<label
+							><span>과목코드</span><input
+								name="courseId"
+								bind:value={newCourseCode}
+								placeholder="예: M3502.002200"
+								required
+							/></label
+						>
+						<label class="course-select"
+							><span>과목명</span><input
+								name="courseName"
+								bind:value={newCourseName}
+								placeholder="과목명"
+								required
+							/></label
+						>
+						<label
+							><span>영역</span><select name="category" bind:value={newCourseCategory}
+								>{#each DEGREE_CATEGORIES as category (category)}<option value={category}
+										>{category}</option
+									>{/each}</select
+							></label
+						>
+						<label
+							><span>학점</span><input
+								type="number"
+								name="credits"
+								min="0"
+								step="0.5"
+								bind:value={newCourseCredits}
+								required
+							/></label
+						>
+						{#if duplicateNewCourse}
+							<p class="warning" aria-live="polite">
+								이미 존재하는 과목 코드입니다. ({duplicateNewCourse.id} · {duplicateNewCourse.name})
+								목록에서 선택해주세요.
+							</p>
+						{/if}
+					{/if}
 					<label
 						><span>연도</span><input
 							type="number"
@@ -351,17 +416,19 @@
 							><option value="4">동계</option></select
 						></label
 					>
-					<div class="credit-readout" aria-live="polite">
-						<span>학점</span>
-						<strong class:empty={!selectedManualCourse}
-							>{selectedManualCourse
-								? selectedManualCourse.creditType === 'pass'
-									? 'P'
-									: `${manualCredits}학점`
-								: '강의를 선택하세요'}</strong
-						>
-						<input type="hidden" name="credits" value={manualCredits} />
-					</div>
+					{#if manualMode === 'catalog'}
+						<div class="credit-readout" aria-live="polite">
+							<span>학점</span>
+							<strong class:empty={!selectedManualCourse}
+								>{selectedManualCourse
+									? selectedManualCourse.creditType === 'pass'
+										? 'P'
+										: `${manualCredits}학점`
+									: '강의를 선택하세요'}</strong
+							>
+							<input type="hidden" name="credits" value={manualCredits} />
+						</div>
+					{/if}
 					<label
 						><span>결과</span><select name="status"
 							><option value="passed">이수</option><option value="failed">낙제</option><option
@@ -376,65 +443,7 @@
 						/></label
 					>
 					{#if manualAddError}<p class="warning" aria-live="polite">{manualAddError}</p>{/if}
-					<button>수강 이력에 추가</button>
-				</form>
-			</RecordEntryDialog>
-			<RecordEntryDialog
-				title="학점교류 과목 추가"
-				description="인정 학점은 자유선택(FR)으로 반영됩니다"
-				bind:open={exchangeAddOpen}
-			>
-				{#snippet icon()}<GraduationCap size="1rem" />{/snippet}
-				<form method="POST" action="?/addExternalCompletion" class="completion-form">
-					<label
-						><span>대학명</span><input name="institution" placeholder="대학명" required /></label
-					>
-					<label
-						><span>과목코드</span><input name="courseCode" placeholder="과목코드" required /></label
-					>
-					<label class="course-select"
-						><span>과목명</span><input name="courseName" placeholder="과목명" required /></label
-					>
-					<label
-						><span>연도</span><input
-							type="number"
-							name="year"
-							min="2022"
-							value={new Date().getFullYear()}
-							required
-						/></label
-					>
-					<label
-						><span>학기</span><select name="term"
-							><option value="1">1학기</option><option value="2">2학기</option><option value="3"
-								>하계</option
-							><option value="4">동계</option></select
-						></label
-					>
-					<label
-						><span>인정학점</span><input
-							type="number"
-							name="credits"
-							min="0"
-							step="0.5"
-							value="3"
-							required
-						/></label
-					>
-					<label
-						><span>결과</span><select name="status"
-							><option value="passed">이수</option><option value="failed">낙제</option><option
-								value="withdrawn">수강 철회</option
-							></select
-						></label
-					>
-					<label
-						><span>성적 <small>(선택)</small></span><input
-							name="grade"
-							placeholder="A+, P 등"
-						/></label
-					>
-					<button>수강 이력에 추가</button>
+					<button disabled={!!duplicateNewCourse}>수강 이력에 추가</button>
 				</form>
 			</RecordEntryDialog>
 		</div>
@@ -460,9 +469,7 @@
 												? 'P'
 												: `${completion.credits}학점`}{completion.grade
 												? ` · ${completion.grade}`
-												: ''}{completion.isExternal
-												? ` · 학점교류 · ${completion.institution}`
-												: ''}{completion.isCreditRecognition ? ' · AP 학점 인정' : ''}</span
+												: ''}</span
 										>
 									</div>
 									<span
@@ -915,8 +922,22 @@
 	}
 	.completion-form .course-select,
 	.completion-form .warning,
-	.completion-form button {
+	.completion-form .mode-switch,
+	.completion-form > button {
 		grid-column: 1 / -1;
+	}
+	.mode-switch {
+		display: flex;
+		gap: 0.3rem;
+	}
+	.mode-switch button {
+		flex: 1;
+		font-size: 0.72rem;
+	}
+	.mode-switch button.active {
+		border-color: var(--secondary);
+		color: var(--secondary);
+		font-weight: 700;
 	}
 	.completion-form .warning {
 		margin: 0;
@@ -926,7 +947,7 @@
 	.course-select input {
 		margin-bottom: 0.15rem;
 	}
-	.completion-form button {
+	.completion-form > button {
 		border-color: var(--secondary);
 		background: var(--secondary);
 		color: white;

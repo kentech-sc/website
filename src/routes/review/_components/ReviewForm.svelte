@@ -11,22 +11,17 @@
 
 	let {
 		reviewableOfferings = [],
-		linkableOfferings = [],
-		review,
-		canLinkOffering = false
+		review
 	}: {
 		reviewableOfferings?: Offering[];
-		linkableOfferings?: Offering[];
 		review?: Review;
-		canLinkOffering?: boolean;
 	} = $props();
 
 	let initializedFor = $state<string | null>(null);
 	let loading = $state(false);
 	let offeringQuery = $state('');
-	const selectableOfferings = $derived(review ? linkableOfferings : reviewableOfferings);
 	const filteredOfferings = $derived(
-		selectableOfferings.filter((offering) =>
+		reviewableOfferings.filter((offering) =>
 			`${offering.courseId} ${offering.courseName} ${offering.subtitle ?? ''} ${offering.professors.map((professor) => professor.name).join(' ')} ${offering.section}`
 				.toLowerCase()
 				.includes(offeringQuery.trim().toLowerCase())
@@ -87,27 +82,6 @@
 								'담당 교수 개별 배정'}
 						</span>
 					</p>
-
-					{#if canLinkOffering}
-						<div class="offering-picker">
-							<CommonLabel labelFor="offeringQuery" labelString="기존 평가 연결 대상 검색">
-								<input
-									id="offeringQuery"
-									type="search"
-									placeholder="강의 코드 또는 교수명"
-									bind:value={offeringQuery}
-								/>
-							</CommonLabel>
-							<CommonLabel labelFor="offeringId" labelString="실제 개설 강의와 연결">
-								<select id="offeringId" name="offeringId">
-									<option value="">연결하지 않음</option>
-									{#each filteredOfferings as offering (offering.id)}
-										<option value={offering.id}>{offeringLabel(offering)}</option>
-									{/each}
-								</select>
-							</CommonLabel>
-						</div>
-					{/if}
 				{:else}
 					<div class="offering-picker">
 						<CommonLabel labelFor="offeringQuery" labelString="개설 강의 검색">

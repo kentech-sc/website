@@ -71,6 +71,20 @@
 			"when": 1785937083673,
 			"tag": "0009_course_credits",
 			"breakpoints": true
+		},
+		{
+			"idx": 10,
+			"version": "7",
+			"when": 1786041535363,
+			"tag": "0010_merge_external_courses",
+			"breakpoints": true
+		},
+		{
+			"idx": 11,
+			"version": "7",
+			"when": 1786049226954,
+			"tag": "0011_reviews_offering_only",
+			"breakpoints": true
 		}
 	]
 }

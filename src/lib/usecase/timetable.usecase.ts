@@ -91,9 +91,7 @@ export async function getPage(year: number, term: number, user: User) {
 	const unscheduledCompletions: typeof completionViews = [];
 	for (const completion of completionViews) {
 		const exactOffering = completion.offering;
-		const candidates = completion.isExternal
-			? []
-			: (offeringsByCourse.get(completion.courseCode) ?? []);
+		const candidates = offeringsByCourse.get(completion.courseCode) ?? [];
 		const resolvedOffering = exactOffering ?? (candidates.length === 1 ? candidates[0] : null);
 		const appearsOnWeekdayGrid = resolvedOffering?.meetings.some(
 			(meeting) => meeting.weekday >= 1 && meeting.weekday <= 5

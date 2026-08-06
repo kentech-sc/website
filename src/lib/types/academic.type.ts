@@ -65,7 +65,6 @@ export interface CourseCompletion {
 	userId: UserId;
 	courseId: CourseId | null;
 	offeringId: OfferingId | null;
-	externalCourseId: string | null;
 	year: number;
 	term: number;
 	credits: number;
@@ -74,19 +73,9 @@ export interface CourseCompletion {
 	source: 'manual' | 'portal' | 'admin';
 }
 
-export interface ExternalCourse {
-	id: string;
-	institution: string;
-	courseCode: string;
-	name: string;
-}
-
 export interface CourseCompletionView extends CourseCompletion {
 	courseCode: string;
 	courseName: string;
-	institution: string | null;
-	isExternal: boolean;
-	isCreditRecognition: boolean;
 	offering: Offering | null;
 }
 

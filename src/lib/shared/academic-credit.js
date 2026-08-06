@@ -1,5 +1,4 @@
 const AP_CREDIT_CODE_PATTERN = /^[A-Z]\d{6}$/;
-export const AP_COURSE_CREDITS = 2;
 
 /** @param {string} courseId */
 export function isApCreditCode(courseId) {

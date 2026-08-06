@@ -291,16 +291,19 @@
 			const { toPng } = await import('html-to-image');
 			const dataUrl = await toPng(schedulePanel, { pixelRatio: 2 });
 			const filename = `${actualSelected ? '실제 수강' : (selected?.name ?? '시간표')}.png`;
-			const blob = await (await fetch(dataUrl)).blob();
-			const file = new File([blob], filename, { type: 'image/png' });
-			if (navigator.canShare?.({ files: [file] })) {
-				try {
-					await navigator.share({ files: [file], title: filename });
-				} catch (error) {
-					if (error instanceof DOMException && error.name === 'AbortError') return;
-					throw error;
+			const isTouchDevice = window.matchMedia('(pointer: coarse)').matches;
+			if (isTouchDevice) {
+				const blob = await (await fetch(dataUrl)).blob();
+				const file = new File([blob], filename, { type: 'image/png' });
+				if (navigator.canShare?.({ files: [file] })) {
+					try {
+						await navigator.share({ files: [file], title: filename });
+					} catch (error) {
+						if (error instanceof DOMException && error.name === 'AbortError') return;
+						throw error;
+					}
+					return;
 				}
-				return;
 			}
 			const link = document.createElement('a');
 			link.href = dataUrl;
@@ -651,15 +654,9 @@
 								<li>
 									<span>
 										<b>{completion.courseName}</b>
-										<small
-											>{completion.courseCode}{completion.institution
-												? ` · ${completion.institution}`
-												: ''}</small
-										>
+										<small>{completion.courseCode}</small>
 									</span>
-									<span class:external-record={completion.isExternal}
-										>{completion.isExternal ? '학점교류 · FR' : '분반 미상'}</span
-									>
+									<span>분반 미상</span>
 								</li>
 							{/each}
 						</ul>
@@ -1344,9 +1341,6 @@
 		flex: 0 0 auto;
 		color: var(--gray-text);
 		font-size: 0.62rem;
-	}
-	.unscheduled-records .external-record {
-		color: var(--secondary);
 	}
 	.disclosure-icon {
 		display: grid !important;

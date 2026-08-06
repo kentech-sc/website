@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import { isApCreditCode } from './academic-credit.js';
-import { parsePortalCompletionText } from './portal-completion-import.ts';
+import { isSameCourseName, parsePortalCompletionText } from './portal-completion-import.ts';
 
 test('parses portal rows and preserves failed and withdrawn grades', () => {
 	const result = parsePortalCompletionText(
@@ -18,6 +18,39 @@ test('parses portal rows and preserves failed and withdrawn grades', () => {
 			{ courseId: 'EF1001', year: 2022, term: 1, status: 'passed' },
 			{ courseId: 'EL2001', year: 2023, term: 2, status: 'failed' },
 			{ courseId: 'HA1001', year: 2024, term: 3, status: 'withdrawn' }
+		]
+	);
+});
+
+test('accepts course codes that start with a digit', () => {
+	const result = parsePortalCompletionText(
+		'FR\t0012345\t타 학교 계절학기 과목\t3\tA0\t2024 하계학기'
+	);
+	assert.equal(result.skippedCount, 0);
+	assert.deepEqual(
+		result.rows.map(({ courseId, year, term }) => ({ courseId, year, term })),
+		[{ courseId: '0012345', year: 2024, term: 3 }]
+	);
+});
+
+test('compares course names ignoring whitespace and prefix/suffix noise', () => {
+	assert.equal(isSameCourseName('일반물리학1', '일반물리학 1'), true);
+	assert.equal(isSameCourseName('양자화학 및 분광학', '1양자화학 및 분광학'), true);
+	assert.equal(isSameCourseName('일반물리학1', '일반화학1'), false);
+});
+
+test('keeps the KIS category column so uncataloged courses land in the right area', () => {
+	const result = parsePortalCompletionText(
+		[
+			'RC\tRC1001\tRC 신입생 세미나 1\t1.00\tS\t2022-spring',
+			'FR\tM3502.002200\t(공유)디지털논리회로\t1.00\tS\t2026-spring'
+		].join('\n')
+	);
+	assert.deepEqual(
+		result.rows.map(({ courseId, category }) => ({ courseId, category })),
+		[
+			{ courseId: 'RC1001', category: 'RC' },
+			{ courseId: 'M3502.002200', category: 'FR' }
 		]
 	);
 });

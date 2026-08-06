@@ -24,45 +24,20 @@ import { hasCapability } from '$lib/shared/permission.js';
 
 export async function fillReviews(reviews: ReviewEntity[]): Promise<Review[]> {
 	const offeringMap = await AcademicRepository.findOfferingMapByIds(
-		reviews.flatMap((review) => (review.offeringId ? [review.offeringId] : []))
+		reviews.map((review) => review.offeringId)
 	);
-	const resolved = reviews.map((review) => ({
-		review,
-		offering: review.offeringId ? offeringMap.get(review.offeringId) : undefined
-	}));
-	const [courseIdToCourse, professorIdToProfessor] = await Promise.all([
-		CourseService.findCourseMapByIds(
-			resolved.flatMap(({ review, offering }) => {
-				const id = offering?.courseId ?? review.courseId;
-				return id ? [id] : [];
-			})
-		),
-		ProfessorService.findProfessorMapByIds(
-			resolved.flatMap(({ review }) => (review.professorId ? [review.professorId] : []))
-		)
-	]);
-
-	return resolved.map(({ review, offering }) => {
-		const courseId = offering?.courseId ?? review.courseId;
-		const year = offering?.year ?? review.year;
-		const term = offering?.term ?? review.term;
-		if (!courseId || year === null || term === null)
-			throw new Error(`강의평 ${review.id}의 강좌 정보를 확인할 수 없습니다.`);
+	return reviews.map((review) => {
+		const offering = offeringMap.get(review.offeringId);
+		if (!offering) throw new Error(`강의평 ${review.id}의 강좌 정보를 확인할 수 없습니다.`);
 		return {
 			...review,
-			courseId,
-			year,
-			term,
-			section: offering?.section ?? null,
-			courseName: offering?.courseName ?? courseIdToCourse.get(courseId)?.name ?? courseId,
-			subtitle: offering?.subtitle ?? null,
-			professors:
-				offering?.professors ??
-				(review.professorId
-					? [professorIdToProfessor.get(review.professorId)].filter(
-							(professor) => professor !== undefined
-						)
-					: [])
+			courseId: offering.courseId,
+			year: offering.year,
+			term: offering.term,
+			section: offering.section,
+			courseName: offering.courseName,
+			subtitle: offering.subtitle,
+			professors: offering.professors
 		};
 	});
 }
@@ -120,18 +95,11 @@ export async function getReviewEditData(reviewId: ReviewId, user: User) {
 		getReviewFormOptions(user),
 		getReviewDetail(reviewId, user)
 	]);
-	const linkableOfferings = detail.permissions.canLinkOffering
-		? await AcademicRepository.findOfferings(
-				detail.review.year < 100 ? 2000 + detail.review.year : detail.review.year,
-				detail.review.term
-			)
-		: [];
 
 	return {
 		...formOptions,
 		review: detail.review,
-		permissions: detail.permissions,
-		linkableOfferings
+		permissions: detail.permissions
 	};
 }
 

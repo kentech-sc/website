@@ -6,15 +6,26 @@ import { readCourseOfferingWorkbook } from '$lib/server/course-workbook.js';
 import { transaction } from '$lib/server/db.js';
 import { AppError } from '$lib/server/errors.js';
 import * as CourseService from '$lib/services/course.service.js';
-import { AP_COURSE_CREDITS, isApCreditCode } from '$lib/shared/academic-credit.js';
 import { resolveCompletionStatus } from '$lib/shared/completion.js';
 import { calculateDegreeProgress } from '$lib/shared/degree.js';
 import { hasCapability } from '$lib/shared/permission.js';
-import { parsePortalCompletionText } from '$lib/shared/portal-completion-import.js';
+import {
+	isSameCourseName,
+	parsePortalCompletionText
+} from '$lib/shared/portal-completion-import.js';
 import { APP_ERROR } from '$lib/shared/rule.js';
 import { DEGREE_CATEGORIES, type DegreeCategory } from '$lib/types/degree.type.js';
 
-const UNCATALOGED_KIS_INSTITUTION = 'KENTECH (미등록 과목)';
+// 학교마다 코드 체계가 달라 형태를 제한하지 않는다. 이 값이 곧 강의 PK라 공백과 길이만 막는다.
+const COURSE_CODE_PATTERN = /^\S{1,20}$/;
+
+/** 이수구분을 졸업요건 영역으로 맞춘다. 모르는 값은 영역 없음으로 둔다. */
+function toDegreeCategory(category: string): DegreeCategory | null {
+	const normalized = category.trim().toUpperCase();
+	return (DEGREE_CATEGORIES as readonly string[]).includes(normalized)
+		? (normalized as DegreeCategory)
+		: null;
+}
 
 export async function getProfileData(user: User) {
 	const [academicProfile, completions, courses, completedDegreeCourses] = await Promise.all([
@@ -33,7 +44,7 @@ export async function getProfileData(user: User) {
 	return {
 		academicProfile,
 		completions,
-		courses: courses.filter((course) => !isApCreditCode(course.id)),
+		courses,
 		espCourses: espCourseIds.map((id) => ({ id, name: courseMap.get(id) ?? id })),
 		degreeProgress:
 			academicProfile && policy
@@ -64,89 +75,76 @@ export async function saveProfile(user: User, admissionYear: number, espWaivedCo
 	});
 }
 
+/**
+ * 수강 이력을 한 건 추가한다.
+ * `courseName`이 비어 있으면 목록에서 고른 기존 강의고, 채워져 있으면 목록에 없는 강의를 새로 등록하는 것이다.
+ */
 export async function addCompletion(
 	user: User,
-	courseId: string,
-	year: number,
-	term: number,
-	credits: number,
-	grade: string | null,
-	status: CompletionStatus
+	input: {
+		courseId: string;
+		courseName: string;
+		credits: number;
+		category: string;
+		year: number;
+		term: number;
+		grade: string | null;
+		status: CompletionStatus;
+	}
 ) {
-	if (!courseId || year < 2022 || term < 1 || term > 4 || !Number.isFinite(credits) || credits < 0)
+	const courseId = input.courseId.trim().toUpperCase();
+	const courseName = input.courseName.trim();
+	if (!courseId || input.year < 2022 || input.term < 1 || input.term > 4)
 		throw new AppError(APP_ERROR.BAD_REQUEST, '수강 이력을 확인해주세요.');
-	const course = (await CourseService.findCourseMapByIds([courseId])).get(courseId);
-	if (!course) throw new AppError(APP_ERROR.NOT_FOUND, '강의를 찾을 수 없습니다.');
-	credits = course.credits;
-	const normalizedGrade = grade?.trim().toUpperCase() || null;
-	status = resolveCompletionStatus(normalizedGrade, status);
-	if (!['passed', 'failed', 'withdrawn'].includes(status))
-		throw new AppError(APP_ERROR.BAD_REQUEST, '이수 결과를 확인해주세요.');
-	const completion = await AcademicRepository.createCompletion({
-		userId: user.id,
-		courseId,
-		offeringId: null,
-		externalCourseId: null,
-		year,
-		term,
-		credits,
-		grade: normalizedGrade,
-		status,
-		source: 'manual'
-	});
-	if (!completion) throw new AppError(APP_ERROR.CONFLICT, '이미 수강한 과목입니다.');
-	return completion;
-}
 
-export async function addExternalCompletion(
-	user: User,
-	institution: string,
-	courseCode: string,
-	courseName: string,
-	year: number,
-	term: number,
-	credits: number,
-	grade: string | null,
-	status: CompletionStatus
-) {
-	institution = institution.trim();
-	courseCode = courseCode.trim().toUpperCase();
-	courseName = courseName.trim();
-	if (
-		!institution ||
-		!courseCode ||
-		!courseName ||
-		year < 2022 ||
-		term < 1 ||
-		term > 4 ||
-		!Number.isFinite(credits) ||
-		credits < 0
-	)
-		throw new AppError(APP_ERROR.BAD_REQUEST, '학점교류 수강 이력을 확인해주세요.');
-	const normalizedGrade = grade?.trim().toUpperCase() || null;
-	status = resolveCompletionStatus(normalizedGrade, status);
+	const normalizedGrade = input.grade?.trim().toUpperCase() || null;
+	const status = resolveCompletionStatus(normalizedGrade, input.status);
 	if (!['passed', 'failed', 'withdrawn'].includes(status))
 		throw new AppError(APP_ERROR.BAD_REQUEST, '이수 결과를 확인해주세요.');
+
+	const existingCourse = (await CourseService.findCourseMapByIds([courseId])).get(courseId);
+	if (courseName && existingCourse)
+		throw new AppError(
+			APP_ERROR.CONFLICT,
+			`이미 존재하는 과목 코드입니다. (${courseId} · ${existingCourse.name})`
+		);
+	if (!courseName && !existingCourse)
+		throw new AppError(APP_ERROR.NOT_FOUND, '강의를 찾을 수 없습니다.');
+
+	const credits = existingCourse?.credits ?? input.credits;
+	if (!Number.isFinite(credits) || credits < 0)
+		throw new AppError(APP_ERROR.BAD_REQUEST, '학점을 확인해주세요.');
+
 	return await transaction(async () => {
-		const externalCourse = await AcademicRepository.upsertExternalCourse({
-			institution,
-			courseCode,
-			name: courseName
-		});
-		await AcademicRepository.upsertCompletions([
-			{
-				userId: user.id,
-				courseId: null,
-				offeringId: null,
-				externalCourseId: externalCourse.id,
-				year,
-				term,
+		if (!existingCourse) {
+			if (!COURSE_CODE_PATTERN.test(courseId))
+				throw new AppError(APP_ERROR.BAD_REQUEST, '강의 코드는 공백 없이 1~20자로 입력해주세요.');
+			if (courseName.length > 200)
+				throw new AppError(APP_ERROR.BAD_REQUEST, '강의명은 1~200자로 입력해주세요.');
+			await CourseService.createCourse({
+				id: courseId,
+				name: courseName,
 				credits,
-				grade: normalizedGrade,
-				status,
-				source: 'manual'
-			}
-		]);
+				creditType: 'numeric',
+				category: toDegreeCategory(input.category),
+				subcategory: null,
+				level: null,
+				gradExcluded: false
+			});
+		}
+		const completion = await AcademicRepository.createCompletion({
+			userId: user.id,
+			courseId,
+			offeringId: null,
+			year: input.year,
+			term: input.term,
+			credits,
+			grade: normalizedGrade,
+			status,
+			source: 'manual'
+		});
+		if (!completion) throw new AppError(APP_ERROR.CONFLICT, '이미 수강한 과목입니다.');
+		return completion;
 	});
 }
 
@@ -155,7 +153,7 @@ export async function removeCompletion(user: User, id: string) {
 		throw new AppError(APP_ERROR.NOT_FOUND, '수강 이력을 찾을 수 없습니다.');
 }
 
-export async function importCompletions(user: User, portalData: string) {
+export async function importCompletions(user: User, portalData: string, hideGrade = false) {
 	if (!portalData.trim() || portalData.length > 200_000)
 		throw new AppError(APP_ERROR.BAD_REQUEST, '붙여넣은 수강 이력 데이터를 확인해주세요.');
 	const parsed = parsePortalCompletionText(portalData);
@@ -168,17 +166,21 @@ export async function importCompletions(user: User, portalData: string) {
 		throw new AppError(APP_ERROR.BAD_REQUEST, '한 번에 1,000개 과목까지만 등록할 수 있습니다.');
 
 	const courseMap = await CourseService.findCourseMapByIds(parsed.rows.map((row) => row.courseId));
-	const matched = parsed.rows.filter(
-		(row) => courseMap.has(row.courseId) || isApCreditCode(row.courseId)
-	);
-	const frFallback = parsed.rows.filter(
-		(row) => !courseMap.has(row.courseId) && !isApCreditCode(row.courseId)
-	);
-	const frFallbackCodes = [...new Set(frFallback.map((row) => row.courseId))];
-	const creditMismatch = matched.find((row) => {
+	// 같은 코드가 이미 다른 강의명으로 있으면 남의 과목에 붙을 수 있으니 등록하지 않는다.
+	const nameMismatchRows = parsed.rows.filter((row) => {
 		const course = courseMap.get(row.courseId);
-		const expectedCredits = isApCreditCode(row.courseId) ? AP_COURSE_CREDITS : row.credits;
-		return course && course.credits !== expectedCredits;
+		return course && !isSameCourseName(course.name, row.courseName);
+	});
+	const nameMismatchCodes = [...new Set(nameMismatchRows.map((row) => row.courseId))];
+	const importable = parsed.rows.filter((row) => !nameMismatchCodes.includes(row.courseId));
+	const newCourseCodes = [
+		...new Set(importable.filter((row) => !courseMap.has(row.courseId)).map((row) => row.courseId))
+	];
+	const creditMismatch = importable.find((row) => {
+		const course = courseMap.get(row.courseId);
+		// P 학점 과목은 카탈로그에 0학점으로 저장되지만 KIS는 실제 학점을 알려주므로 비교하지 않는다.
+		if (!course || course.creditType === 'pass') return false;
+		return course.credits !== row.credits;
 	});
 	if (creditMismatch)
 		throw new AppError(
@@ -187,67 +189,41 @@ export async function importCompletions(user: User, portalData: string) {
 		);
 
 	await transaction(async () => {
-		await AcademicRepository.upsertApCreditCourses(
-			matched
-				.filter((row) => isApCreditCode(row.courseId))
-				.map((row) => ({ id: row.courseId, name: row.courseName }))
-		);
+		// 처음 보는 과목코드는 KIS가 알려준 정보 그대로 강의로 등록한다.
+		for (const code of newCourseCodes) {
+			const row = importable.find((item) => item.courseId === code)!;
+			await CourseService.createCourse({
+				id: code,
+				name: row.courseName,
+				credits: row.credits,
+				creditType: 'numeric',
+				category: toDegreeCategory(row.category),
+				subcategory: null,
+				level: null,
+				gradExcluded: false
+			});
+		}
+
 		await AcademicRepository.upsertCompletions(
-			matched.map((row) => ({
+			importable.map((row) => ({
 				userId: user.id,
 				courseId: row.courseId,
 				offeringId: null,
-				externalCourseId: null,
 				year: row.year,
 				term: row.term,
-				credits:
-					courseMap.get(row.courseId)?.credits ??
-					(isApCreditCode(row.courseId) ? AP_COURSE_CREDITS : row.credits),
-				grade: row.grade,
+				credits: courseMap.get(row.courseId)?.credits ?? row.credits,
+				grade: hideGrade ? null : row.grade,
 				status: row.status,
 				source: 'portal'
 			}))
 		);
-
-		if (frFallback.length) {
-			const externalCourseIdByCode = new Map<string, string>();
-			for (const code of frFallbackCodes) {
-				const row = frFallback.find((item) => item.courseId === code)!;
-				const externalCourse = await AcademicRepository.upsertExternalCourse({
-					institution: UNCATALOGED_KIS_INSTITUTION,
-					courseCode: code,
-					name: row.courseName
-				});
-				externalCourseIdByCode.set(code, externalCourse.id);
-			}
-			await AcademicRepository.upsertCompletions(
-				frFallback.map((row) => ({
-					userId: user.id,
-					courseId: null,
-					offeringId: null,
-					externalCourseId: externalCourseIdByCode.get(row.courseId)!,
-					year: row.year,
-					term: row.term,
-					credits: row.credits,
-					grade: row.grade,
-					status: row.status,
-					source: 'portal'
-				}))
-			);
-		}
-
-		if (matched.length)
-			await AcademicRepository.deleteUncatalogedFallbackCompletions(
-				user.id,
-				UNCATALOGED_KIS_INSTITUTION,
-				matched.map((row) => ({ courseCode: row.courseId, year: row.year, term: row.term }))
-			);
 	});
 	return {
-		importedCount: matched.length + frFallback.length,
-		failedCount: [...matched, ...frFallback].filter((row) => row.status === 'failed').length,
-		withdrawnCount: [...matched, ...frFallback].filter((row) => row.status === 'withdrawn').length,
-		frFallbackCodes,
+		importedCount: importable.length,
+		failedCount: importable.filter((row) => row.status === 'failed').length,
+		withdrawnCount: importable.filter((row) => row.status === 'withdrawn').length,
+		newCourseCodes,
+		nameMismatchCodes,
 		skippedCount: parsed.skippedCount
 	};
 }
@@ -278,10 +254,15 @@ export async function importOfferings(user: User, file: File, year: number, term
 		incomingCredits.set(offering.courseId, definition);
 	}
 	const existingCourses = await CourseService.findCourseMapByIds([...incomingCredits.keys()]);
+	// 개설된 적 없는 강의는 수강 이력에서 임시로 만들어진 것이므로, 엑셀 파일을 정본으로 보고 덮어쓴다.
+	const offeredCourseIds = await AcademicRepository.findOfferedCourseIds([
+		...incomingCredits.keys()
+	]);
 	for (const offering of result.offerings) {
 		const existing = existingCourses.get(offering.courseId);
 		if (
 			existing &&
+			offeredCourseIds.has(offering.courseId) &&
 			(existing.credits !== offering.credits || existing.creditType !== offering.creditType)
 		)
 			throw new AppError(
@@ -320,15 +301,12 @@ export async function createSpecialCourse(
 	const courseId = input.courseId.trim().toUpperCase();
 	const courseName = input.courseName.trim();
 	const category = input.category.trim().toUpperCase() as DegreeCategory;
-	let creditType: 'numeric' | 'pass' = input.creditType === 'pass' ? 'pass' : 'numeric';
+	const creditType: 'numeric' | 'pass' = input.creditType === 'pass' ? 'pass' : 'numeric';
 	let subcategory = input.subcategory?.trim().toLowerCase() || null;
 	let level = input.level;
 
-	if (!/^[A-Z][A-Z0-9_.-]{2,19}$/.test(courseId))
-		throw new AppError(
-			APP_ERROR.BAD_REQUEST,
-			'강의 코드는 영문으로 시작하는 3~20자로 입력해주세요.'
-		);
+	if (!COURSE_CODE_PATTERN.test(courseId))
+		throw new AppError(APP_ERROR.BAD_REQUEST, '강의 코드는 공백 없이 1~20자로 입력해주세요.');
 	if (!courseName || courseName.length > 200)
 		throw new AppError(APP_ERROR.BAD_REQUEST, '강의명은 1~200자로 입력해주세요.');
 	if (!Number.isFinite(input.credits) || input.credits < 0 || input.credits > 99)
@@ -342,11 +320,6 @@ export async function createSpecialCourse(
 
 	if (category !== 'EF') subcategory = null;
 	if (category !== 'EL') level = null;
-	if (isApCreditCode(courseId)) {
-		subcategory = 'ap';
-		level = null;
-		creditType = 'numeric';
-	}
 
 	const course = await CourseService.createCourse({
 		id: courseId,

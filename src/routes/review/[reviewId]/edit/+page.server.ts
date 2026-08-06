@@ -20,7 +20,6 @@ export const actions = {
 		const reviewId: ReviewId = reviewIdRaw;
 
 		const formData = await request.formData();
-		const offeringId = (formData.get('offeringId') ?? '').toString() || undefined;
 		const title = (formData.get('title') ?? '').toString();
 		const score = {
 			assignment: Number(formData.get('assignmentScore')),
@@ -37,7 +36,6 @@ export const actions = {
 		const review = await ReviewUsecase.editReview(
 			reviewId,
 			{
-				offeringId,
 				title,
 				score,
 				comment

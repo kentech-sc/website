@@ -7,9 +7,11 @@
 
 	import type { Course } from '$lib/types/course.type.js';
 
-	import { isApCreditCode } from '$lib/shared/academic-credit.js';
+	import { page } from '$app/state';
 	import {
 		KIS_COMPLETION_EXTRACTOR,
+		buildKisCompletionBookmarkletHref,
+		isSameCourseName,
 		parsePortalCompletionText
 	} from '$lib/shared/portal-completion-import.js';
 
@@ -22,7 +24,8 @@
 			importedCount?: number;
 			failedCount?: number;
 			withdrawnCount?: number;
-			frFallbackCodes?: string[];
+			newCourseCodes?: string[];
+			nameMismatchCodes?: string[];
 			skippedCount?: number;
 			message?: string;
 		} | null;
@@ -31,14 +34,24 @@
 	let portalData = $state('');
 	let scriptCopied = $state(false);
 	let importOpen = $state(false);
+	let hideGrade = $state(false);
+	const bookmarkletHref = $derived(buildKisCompletionBookmarkletHref(page.url.origin));
 	const parsed = $derived(parsePortalCompletionText(portalData));
-	const courseIds = $derived(new Set(courses.map((course) => course.id)));
+	const courseNameById = $derived(new Map(courses.map((course) => [course.id, course.name])));
+	/** 코드는 있는데 강의명이 다르면 남의 과목에 붙을 수 있어 등록 대상에서 뺀다. */
+	const nameMismatchRows = $derived(
+		parsed.rows.filter((row) => {
+			const name = courseNameById.get(row.courseId);
+			return name !== undefined && !isSameCourseName(name, row.courseName);
+		})
+	);
 	const matchedRows = $derived(
-		parsed.rows.filter((row) => courseIds.has(row.courseId) || isApCreditCode(row.courseId))
+		parsed.rows.filter((row) => {
+			const name = courseNameById.get(row.courseId);
+			return name !== undefined && isSameCourseName(name, row.courseName);
+		})
 	);
-	const frFallbackRows = $derived(
-		parsed.rows.filter((row) => !courseIds.has(row.courseId) && !isApCreditCode(row.courseId))
-	);
+	const newCourseRows = $derived(parsed.rows.filter((row) => !courseNameById.has(row.courseId)));
 
 	async function copyExtractor() {
 		await navigator.clipboard.writeText(KIS_COMPLETION_EXTRACTOR);
@@ -66,13 +79,30 @@
 		<ol class="guide">
 			<li>
 				<div>
-					<b>추출 스크립트 복사</b>
-					<p>아래 버튼을 눌러 필요한 스크립트를 복사합니다.</p>
-					<button type="button" class="copy-button" onclick={copyExtractor}>
-						{#if scriptCopied}<Check size="0.95rem" />복사 완료{:else}<Clipboard
-								size="0.95rem"
-							/>스크립트 복사{/if}
-					</button>
+					<b>추출 스크립트 준비</b>
+					<div class="method-columns">
+						<div class="method-column">
+							<p>아래 버튼을 <b>북마크 바</b>로 드래그하면 북마크에 추가됩니다.</p>
+							<!-- eslint-disable svelte/no-navigation-without-resolve -- javascript: bookmarklet href, not an app route -->
+							<a
+								href={bookmarkletHref}
+								class="copy-button"
+								draggable="true"
+								onclick={(event) => event.preventDefault()}
+							>
+								📎 이 버튼을 북마크 바로 드래그
+							</a>
+							<!-- eslint-enable svelte/no-navigation-without-resolve -->
+						</div>
+						<div class="method-column">
+							<p>또는, 아래 버튼을 눌러 필요한 스크립트를 복사합니다.</p>
+							<button type="button" class="copy-button" onclick={copyExtractor}>
+								{#if scriptCopied}<Check size="0.95rem" />복사 완료{:else}<Clipboard
+										size="0.95rem"
+									/>스크립트 복사{/if}
+							</button>
+						</div>
+					</div>
 				</div>
 			</li>
 			<li>
@@ -88,14 +118,13 @@
 			</li>
 			<li>
 				<div>
-					<b>Console 열기</b>
-					<p><kbd>F12</kbd>를 누르고 개발자 도구 위쪽의 <b>Console</b> 탭을 선택합니다.</p>
-				</div>
-			</li>
-			<li>
-				<div>
-					<b>스크립트 실행</b>
-					<p>Console에서 <kbd>Ctrl</kbd>+<kbd>V</kbd>로 붙여넣고 Enter를 누릅니다.</p>
+					<b>실행</b>
+					<p>
+						드래그해서 추가한 북마크를 클릭해서 실행합니다.
+						<br />
+						스크립트를 복사했다면 <kbd>F12</kbd>를 누르고 개발자 도구 위쪽의 <b>Console</b> 탭에서
+						<kbd>Ctrl</kbd>+<kbd>V</kbd>로 붙여넣고 Enter를 누릅니다.
+					</p>
 					<small>
 						붙여넣기가 막히면 <code>allow pasting</code>을 직접 입력하고 Enter를 누른 뒤 다시
 						붙여넣으세요.
@@ -106,7 +135,7 @@
 
 		<section class="result-section">
 			<header class="result-heading">
-				<span>5</span>
+				<span>4</span>
 				<div>
 					<b>결과 붙여넣기</b>
 					<p>복사한 결과를 아래 칸에 붙여 넣고, 과목을 확인한 뒤 등록합니다.</p>
@@ -136,24 +165,44 @@
 							</ul>
 						</section>
 					{/if}
-					{#if frFallbackRows.length || parsed.skippedCount}
+					{#if newCourseRows.length || nameMismatchRows.length || parsed.skippedCount}
 						<div class="preview-summary">
-							{#if frFallbackRows.length}<span>{frFallbackRows.length}개 강의 정보 없음</span>{/if}
+							{#if newCourseRows.length}<span>{newCourseRows.length}개 신규 강의</span>{/if}
+							{#if nameMismatchRows.length}<span>{nameMismatchRows.length}개 강의명 불일치</span
+								>{/if}
 							{#if parsed.skippedCount}<span>{parsed.skippedCount}개 제외</span>{/if}
 						</div>
 					{/if}
-					{#if frFallbackRows.length}
+					{#if newCourseRows.length}
 						<p class="note">
-							강의 정보가 없어 자유선택(FR)으로 등록됨: {[
-								...new Set(frFallbackRows.map((row) => row.courseId))
+							목록에 없어 새로 등록되는 강의: {[
+								...new Set(newCourseRows.map((row) => row.courseId))
+							].join(', ')}
+						</p>
+					{/if}
+					{#if nameMismatchRows.length}
+						<p class="warning">
+							같은 코드가 다른 강의명으로 등록되어 있어 제외됩니다: {[
+								...new Set(
+									nameMismatchRows.map(
+										(row) =>
+											`${row.courseId} (${courseNameById.get(row.courseId)} ≠ ${row.courseName})`
+									)
+								)
 							].join(', ')}
 						</p>
 					{/if}
 				{/if}
 
-				<button class="submit-button" disabled={!matchedRows.length && !frFallbackRows.length}
-					>확인한 {matchedRows.length + frFallbackRows.length}개 과목 등록</button
-				>
+				<div class="submit-row">
+					<label class="hide-grade-option">
+						<input type="checkbox" name="hideGrade" bind:checked={hideGrade} />
+						성적(학점)은 저장하지 않고 이수 여부만 등록
+					</label>
+					<button class="submit-button" disabled={!matchedRows.length && !newCourseRows.length}
+						>확인한 {matchedRows.length + newCourseRows.length}개 과목 등록</button
+					>
+				</div>
 			</form>
 		</section>
 
@@ -163,8 +212,11 @@
 					? ` 낙제 ${form.failedCount}개 포함.`
 					: ''}{form.withdrawnCount ? ` 철회 ${form.withdrawnCount}개 포함.` : ''}
 			</p>
-			{#if form.frFallbackCodes?.length}<p class="note">
-					강의 정보가 없어 자유선택(FR)으로 등록됨: {form.frFallbackCodes.join(', ')}
+			{#if form.newCourseCodes?.length}<p class="note">
+					목록에 없어 새로 등록된 강의: {form.newCourseCodes.join(', ')}
+				</p>{/if}
+			{#if form.nameMismatchCodes?.length}<p class="warning">
+					같은 코드가 다른 강의명으로 등록되어 있어 제외됨: {form.nameMismatchCodes.join(', ')}
 				</p>{/if}
 		{:else if form?.message}
 			<p class="warning" aria-live="polite">{form.message}</p>
@@ -270,13 +322,51 @@
 		color: var(--error-text);
 		font-size: 0.66rem;
 	}
+	.method-columns {
+		display: grid;
+		grid-template-columns: 1fr var(--divider-border-width) 1fr;
+		gap: 0.6rem;
+		margin-top: 0.3rem;
+	}
+	.method-columns::before {
+		grid-row: 1;
+		grid-column: 2;
+		background: var(--gray-border);
+		content: '';
+	}
+	.method-column {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 0.4rem;
+		min-width: 0;
+	}
 	.copy-button {
 		align-self: flex-start;
 		gap: 0.3rem;
+		cursor: pointer;
 		margin-top: 0.4rem;
-		border-color: color-mix(in srgb, var(--secondary) 35%, var(--gray-border));
+		border: var(--control-border-width) solid
+			color-mix(in srgb, var(--secondary) 35%, var(--gray-border));
+		border-radius: 0.4rem;
+		background-color: var(--white);
+		padding: 0.2rem 0.8rem;
 		color: var(--secondary);
+		font-weight: bold;
 		font-size: 0.72rem;
+		word-break: keep-all;
+	}
+	.copy-button:hover {
+		background-color: var(--white-hover);
+	}
+	// <a class="copy-button">는 .guide a의 밑줄/굵기 규칙보다 명시도를 높여 덮어써야 함
+	.guide a.copy-button,
+	.guide a.copy-button:hover {
+		font-weight: bold;
+		text-decoration: none;
+	}
+	.method-column .copy-button {
+		margin-top: 0;
 	}
 	.result-section {
 		border-top: var(--divider-border-width) solid var(--gray-border);
@@ -392,13 +482,33 @@
 	.note {
 		color: var(--info-text);
 	}
+	.submit-row {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: space-between;
+		align-items: center;
+		gap: 0.5rem;
+	}
+	.hide-grade-option {
+		display: flex;
+		align-items: center;
+		gap: 0.35rem;
+		color: var(--gray-text);
+		font-weight: 400;
+		font-size: 0.72rem;
+	}
 	.submit-button {
-		align-self: flex-end;
 		border-color: var(--secondary);
 		background: var(--secondary);
 		color: white;
 	}
 	@media (max-width: 680px) {
+		.method-columns {
+			grid-template-columns: 1fr;
+		}
+		.method-columns::before {
+			display: none;
+		}
 		.preview-list li {
 			flex-direction: column;
 			align-items: flex-start;

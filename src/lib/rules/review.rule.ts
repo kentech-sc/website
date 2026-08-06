@@ -17,9 +17,7 @@ export function canEditOrDeleteReview(review: ReviewEntity, user: User): RuleRes
 
 export function validateReviewYearAndTerm(year: number, term: number): RuleResult {
 	const currentYear = new Date().getFullYear();
-	const validYear =
-		(year >= 2022 && year <= currentYear) || (year >= 22 && year <= currentYear % 100); // Legacy reviews stored a two-digit year.
-	if (validYear && term >= 1 && term <= 4) return ok();
+	if (year >= 2022 && year <= currentYear && term >= 1 && term <= 4) return ok();
 	return ruleFail(APP_ERROR.BAD_REQUEST, '연도 또는 학기 값이 올바르지 않습니다.');
 }
 

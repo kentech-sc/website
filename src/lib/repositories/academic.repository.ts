@@ -1,9 +1,8 @@
-import { and, asc, desc, eq, gte, inArray, isNull, lte, or, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, gte, inArray, isNull, lte, sql } from 'drizzle-orm';
 
 import type {
 	CourseCompletion,
 	CourseCompletionView,
-	ExternalCourse,
 	Offering,
 	OfferingCreditType,
 	OfferingImportInput,
@@ -18,14 +17,12 @@ import {
 	courseOfferingProfessors,
 	courseOfferings,
 	courses,
-	externalCourses,
 	graduationPolicies,
 	professors,
 	studentAcademicProfiles,
 	timetables
 } from '$lib/server/database/schema.js';
 import { getDatabase } from '$lib/server/db.js';
-import { AP_COURSE_CREDITS, isApCreditCode } from '$lib/shared/academic-credit.js';
 
 export async function findOfferings(year: number, term: number): Promise<Offering[]> {
 	const rows = await getDatabase()
@@ -160,6 +157,17 @@ export async function findAllOfferings(): Promise<Offering[]> {
 	});
 }
 
+/** 한 번이라도 개설된 적 있는 강의 코드만 골라낸다. (보관된 개설도 포함) */
+export async function findOfferedCourseIds(courseIds: string[]): Promise<Set<string>> {
+	const uniqueIds = [...new Set(courseIds)];
+	if (!uniqueIds.length) return new Set();
+	const rows = await getDatabase()
+		.select({ courseId: courseOfferings.courseId })
+		.from(courseOfferings)
+		.where(inArray(courseOfferings.courseId, uniqueIds));
+	return new Set(rows.map((row) => row.courseId));
+}
+
 export async function findGraduationPolicy(
 	admissionYear: number
 ): Promise<GraduationPolicy | null> {
@@ -212,30 +220,14 @@ export async function findCompletions(
 	const predicates = [eq(courseCompletions.userId, userId)];
 	if (year !== undefined) predicates.push(eq(courseCompletions.year, year));
 	if (term !== undefined) predicates.push(eq(courseCompletions.term, term));
+	const termOrder = sql`case ${courseCompletions.term} when 1 then 1 when 3 then 2 when 2 then 3 when 4 then 4 else ${courseCompletions.term} end`;
 	return (
 		await getDatabase()
 			.select()
 			.from(courseCompletions)
 			.where(and(...predicates))
-			.orderBy(asc(courseCompletions.year), asc(courseCompletions.term))
+			.orderBy(asc(courseCompletions.year), termOrder)
 	).map((row) => ({ ...row, credits: Number(row.credits) })) as CourseCompletion[];
-}
-
-export async function findExternalCourseMapByIds(
-	ids: string[]
-): Promise<Map<string, ExternalCourse>> {
-	const uniqueIds = [...new Set(ids)];
-	if (!uniqueIds.length) return new Map();
-	const rows = await getDatabase()
-		.select({
-			id: externalCourses.id,
-			institution: externalCourses.institution,
-			courseCode: externalCourses.courseCode,
-			name: externalCourses.name
-		})
-		.from(externalCourses)
-		.where(inArray(externalCourses.id, uniqueIds));
-	return new Map(rows.map((row) => [row.id, row]));
 }
 
 export async function findCompletionViews(
@@ -244,11 +236,8 @@ export async function findCompletionViews(
 	term?: number
 ): Promise<CourseCompletionView[]> {
 	const completions = await findCompletions(userId, year, term);
-	const [offeringMap, externalMap, courseRows] = await Promise.all([
+	const [offeringMap, courseRows] = await Promise.all([
 		findOfferingMapByIds(completions.flatMap((item) => (item.offeringId ? [item.offeringId] : []))),
-		findExternalCourseMapByIds(
-			completions.flatMap((item) => (item.externalCourseId ? [item.externalCourseId] : []))
-		),
 		completions.some((item) => item.courseId)
 			? getDatabase()
 					.select({ id: courses.id, name: courses.name })
@@ -266,66 +255,19 @@ export async function findCompletionViews(
 		const offering = completion.offeringId
 			? (offeringMap.get(completion.offeringId) ?? null)
 			: null;
-		const external = completion.externalCourseId
-			? (externalMap.get(completion.externalCourseId) ?? null)
-			: null;
-		const courseCode = offering?.courseId ?? completion.courseId ?? external?.courseCode;
+		const courseCode = offering?.courseId ?? completion.courseId;
 		const courseName =
-			offering?.courseName ??
-			(completion.courseId ? courseMap.get(completion.courseId) : null) ??
-			external?.name;
+			offering?.courseName ?? (completion.courseId ? courseMap.get(completion.courseId) : null);
 		if (!courseCode || !courseName) return [];
 		return [
 			{
 				...completion,
 				courseCode,
 				courseName,
-				institution: external?.institution ?? null,
-				isExternal: external !== null,
-				isCreditRecognition: isApCreditCode(courseCode),
 				offering
 			}
 		];
 	});
-}
-
-export async function upsertApCreditCourses(
-	values: Array<{ id: string; name: string }>
-): Promise<void> {
-	const uniqueValues = [
-		...new Map(
-			values.map((value) => [value.id, { id: value.id, name: value.name || value.id }])
-		).values()
-	];
-	if (!uniqueValues.length) return;
-
-	await getDatabase()
-		.insert(courses)
-		.values(
-			uniqueValues.map((value) => ({
-				id: value.id,
-				name: value.name,
-				category: 'EF',
-				subcategory: 'ap',
-				level: null,
-				credits: String(AP_COURSE_CREDITS),
-				creditType: 'numeric',
-				gradExcluded: false
-			}))
-		)
-		.onConflictDoUpdate({
-			target: courses.id,
-			set: {
-				name: sql`case when ${courses.name} in (${courses.id}, 'AP 인정학점') then excluded.name else ${courses.name} end`,
-				category: 'EF',
-				subcategory: 'ap',
-				level: null,
-				credits: sql`${courses.credits}`,
-				creditType: sql`${courses.creditType}`,
-				gradExcluded: false,
-				updatedAt: sql`now()`
-			}
-		});
 }
 
 export async function findCompletedDegreeCourses(userId: UserId): Promise<DegreeCourseInput[]> {
@@ -333,7 +275,7 @@ export async function findCompletedDegreeCourses(userId: UserId): Promise<Degree
 		eq(courseCompletions.userId, userId),
 		eq(courseCompletions.status, 'passed')
 	);
-	const [courseRows, offeringRows, externalRows] = await Promise.all([
+	const [courseRows, offeringRows] = await Promise.all([
 		getDatabase()
 			.select({
 				code: courses.id,
@@ -358,79 +300,10 @@ export async function findCompletedDegreeCourses(userId: UserId): Promise<Degree
 			.from(courseCompletions)
 			.innerJoin(courseOfferings, eq(courseCompletions.offeringId, courseOfferings.id))
 			.innerJoin(courses, eq(courseOfferings.courseId, courses.id))
-			.where(completed),
-		getDatabase()
-			.select({
-				code: sql<string>`'EXT:' || ${externalCourses.id}::text`,
-				category: sql<string>`'FR'`,
-				subcategory: sql<string | null>`null`,
-				level: sql<number | null>`null`,
-				credits: courseCompletions.credits,
-				gradExcluded: sql<boolean>`false`
-			})
-			.from(courseCompletions)
-			.innerJoin(externalCourses, eq(courseCompletions.externalCourseId, externalCourses.id))
 			.where(completed)
 	]);
-	const rows = [...courseRows, ...offeringRows, ...externalRows];
+	const rows = [...courseRows, ...offeringRows];
 	return rows.map((row) => ({ ...row, credits: Number(row.credits ?? 0) }));
-}
-
-export async function upsertExternalCourse(value: {
-	institution: string;
-	courseCode: string;
-	name: string;
-}): Promise<ExternalCourse> {
-	const [row] = await getDatabase()
-		.insert(externalCourses)
-		.values(value)
-		.onConflictDoUpdate({
-			target: [externalCourses.institution, externalCourses.courseCode],
-			set: { name: value.name, updatedAt: sql`now()` }
-		})
-		.returning({
-			id: externalCourses.id,
-			institution: externalCourses.institution,
-			courseCode: externalCourses.courseCode,
-			name: externalCourses.name
-		});
-	return row;
-}
-
-export async function deleteUncatalogedFallbackCompletions(
-	userId: UserId,
-	institution: string,
-	entries: Array<{ courseCode: string; year: number; term: number }>
-): Promise<void> {
-	if (!entries.length) return;
-	const staleRows = await getDatabase()
-		.select({ id: courseCompletions.id })
-		.from(courseCompletions)
-		.innerJoin(externalCourses, eq(courseCompletions.externalCourseId, externalCourses.id))
-		.where(
-			and(
-				eq(courseCompletions.userId, userId),
-				eq(externalCourses.institution, institution),
-				or(
-					...entries.map((entry) =>
-						and(
-							eq(externalCourses.courseCode, entry.courseCode),
-							eq(courseCompletions.year, entry.year),
-							eq(courseCompletions.term, entry.term)
-						)
-					)
-				)
-			)
-		);
-	if (!staleRows.length) return;
-	await getDatabase()
-		.delete(courseCompletions)
-		.where(
-			inArray(
-				courseCompletions.id,
-				staleRows.map((row) => row.id)
-			)
-		);
 }
 
 export async function createCompletion(
@@ -468,16 +341,6 @@ export async function upsertCompletions(
 		if (value.offeringId) {
 			await insert.onConflictDoUpdate({
 				target: [courseCompletions.userId, courseCompletions.offeringId],
-				set
-			});
-		} else if (value.externalCourseId) {
-			await insert.onConflictDoUpdate({
-				target: [
-					courseCompletions.userId,
-					courseCompletions.externalCourseId,
-					courseCompletions.year,
-					courseCompletions.term
-				],
 				set
 			});
 		} else {

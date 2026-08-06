@@ -1,5 +1,3 @@
-import { isApCreditCode } from './academic-credit.js';
-
 import type { OfferingImportInput, OfferingWorkbookParseResult } from '$lib/types/academic.type.js';
 type CellValue = string | number | boolean | Date | null;
 type SheetData = CellValue[][];
@@ -82,8 +80,6 @@ function inferLevel(courseId: string): number | null {
 }
 
 function inferMetadata(courseId: string, category: string | null) {
-	if (isApCreditCode(courseId))
-		return { category: 'EF', subcategory: 'ap', level: null, gradExcluded: false };
 	return {
 		category,
 		subcategory: EF_SUBCATEGORY[courseId] ?? null,
