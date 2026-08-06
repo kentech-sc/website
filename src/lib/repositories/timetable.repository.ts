@@ -7,6 +7,7 @@ import type { UserId } from '$lib/types/user.type.js';
 
 import { timetableItems, timetables } from '$lib/server/database/schema.js';
 import { getDatabase } from '$lib/server/db.js';
+import { isDuplicateKeyError } from '$lib/server/errors.js';
 
 export async function findTimetables(
 	userId: UserId,
@@ -108,8 +109,14 @@ export async function nextPosition(userId: UserId, year: number, term: number): 
 }
 
 export async function createTimetable(value: TimetableCreate) {
-	const [row] = await getDatabase().insert(timetables).values(value).returning();
-	return row;
+	const [row] = await getDatabase()
+		.insert(timetables)
+		.values(value)
+		.onConflictDoNothing({
+			target: [timetables.userId, timetables.year, timetables.term, timetables.name]
+		})
+		.returning();
+	return row ?? null;
 }
 
 export async function updateTimetable(
@@ -123,6 +130,15 @@ export async function updateTimetable(
 		.where(and(eq(timetables.id, id), eq(timetables.userId, userId)))
 		.returning();
 	return row ?? null;
+}
+
+export async function renameTimetable(id: string, userId: UserId, name: string) {
+	try {
+		return await updateTimetable(id, userId, { name });
+	} catch (error) {
+		if (!isDuplicateKeyError(error)) throw error;
+		return null;
+	}
 }
 
 export async function clearConfirmed(userId: UserId, year: number, term: number) {

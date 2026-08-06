@@ -6,6 +6,7 @@
 	import Clock from '@lucide/svelte/icons/clock-3';
 	import Copy from '@lucide/svelte/icons/copy';
 	import GraduationCap from '@lucide/svelte/icons/graduation-cap';
+	import ImageDown from '@lucide/svelte/icons/image-down';
 	import Pencil from '@lucide/svelte/icons/pencil';
 	import Plus from '@lucide/svelte/icons/plus';
 	import Search from '@lucide/svelte/icons/search';
@@ -24,7 +25,9 @@
 	let selectedId = $state<string | null>(null);
 	let selectedTerm = $derived(String(data.term));
 	let editingName = $state(false);
+	let renameError = $state('');
 	let submitting = $state(false);
+	let savingImage = $state(false);
 	let query = $state('');
 	let category = $state('all');
 	let slotFilter = $state<{ weekday: number; minute: number } | null>(null);
@@ -301,6 +304,35 @@
 	function clearSlotFilter(): void {
 		slotFilter = null;
 	}
+	async function saveScheduleImage(): Promise<void> {
+		if (!schedulePanel || savingImage) return;
+		savingImage = true;
+		try {
+			const { toPng } = await import('html-to-image');
+			const dataUrl = await toPng(schedulePanel, { pixelRatio: 2 });
+			const filename = `${actualSelected ? '실제 수강' : (selected?.name ?? '시간표')}.png`;
+			const blob = await (await fetch(dataUrl)).blob();
+			const file = new File([blob], filename, { type: 'image/png' });
+			if (navigator.canShare?.({ files: [file] })) {
+				try {
+					await navigator.share({ files: [file], title: filename });
+				} catch (error) {
+					if (error instanceof DOMException && error.name === 'AbortError') return;
+					throw error;
+				}
+				return;
+			}
+			const link = document.createElement('a');
+			link.href = dataUrl;
+			link.download = filename;
+			link.click();
+		} catch (error) {
+			console.error('시간표 이미지 저장 오류:', error);
+			alert(error instanceof Error ? error.message : '이미지를 저장하지 못했습니다.');
+		} finally {
+			savingImage = false;
+		}
+	}
 	function scrollSlotBrowser(event: WheelEvent): void {
 		if (!slotFilter || !browserBody) return;
 		if (
@@ -372,6 +404,23 @@
 			return;
 		}
 		return pendingEnhance(input);
+	};
+	const renameEnhance: SubmitFunction = () => {
+		renameError = '';
+		submitting = true;
+		return async ({ result, update }) => {
+			try {
+				if (result.type === 'failure') {
+					renameError = String(result.data?.message ?? '시간표 이름을 저장하지 못했습니다.');
+					await update({ reset: false });
+					return;
+				}
+				editingName = false;
+				await update();
+			} finally {
+				submitting = false;
+			}
+		};
 	};
 
 	$effect(() => {
@@ -468,16 +517,18 @@
 			<section class="module slot-toolbar">
 				<div class="slot-title">
 					{#if editingName}
-						<form
-							method="POST"
-							action="?/rename"
-							use:enhance={pendingEnhance}
-							onsubmit={() => (editingName = false)}
-						>
+						<form method="POST" action="?/rename" use:enhance={renameEnhance}>
 							<input type="hidden" name="timetableId" value={selected.id} />
 							<input name="name" value={selected.name} aria-label="시간표 이름" />
 							<button>저장</button>
-							<button type="button" onclick={() => (editingName = false)}>취소</button>
+							<button
+								type="button"
+								onclick={() => {
+									editingName = false;
+									renameError = '';
+								}}>취소</button
+							>
+							{#if renameError}<p class="rename-error" aria-live="polite">{renameError}</p>{/if}
 						</form>
 					{:else}
 						<h2>{selected.name}</h2>
@@ -515,6 +566,14 @@
 						>
 					</form>
 					<div class="slot-utilities">
+						<button
+							type="button"
+							class="icon-button"
+							disabled={savingImage || !selected.offerings.length}
+							onclick={saveScheduleImage}
+							aria-label="시간표 이미지 저장"
+							title="이미지로 저장/공유"><ImageDown size="0.85rem" /></button
+						>
 						<form method="POST" action="?/copy" use:enhance={pendingEnhance}>
 							<input type="hidden" name="timetableId" value={selected.id} /><button
 								class="icon-button"
@@ -706,7 +765,17 @@
 						>
 						<span class="summary-end">
 							<small>{filtered.length}개</small>
-							<span class="disclosure-icon"><ChevronDown size="0.9rem" /></span>
+							<button
+								type="button"
+								class="disclosure-icon"
+								aria-label="강의 찾기 닫기"
+								title="닫기"
+								onclick={(event) => {
+									event.preventDefault();
+									event.stopPropagation();
+									closeSlotPicker();
+								}}><X size="0.9rem" /></button
+							>
 						</span>
 					</summary>
 					<div class="browser-body" bind:this={browserBody}>
@@ -1086,11 +1155,18 @@
 	}
 	.slot-title form {
 		flex: 1;
+		flex-wrap: wrap;
 		gap: 0.3rem;
 	}
 	.slot-title input {
 		min-width: 7rem;
 		max-width: 13rem;
+	}
+	.rename-error {
+		flex-basis: 100%;
+		margin: 0;
+		color: var(--error-text);
+		font-size: 0.7rem;
 	}
 	.slot-title h2 {
 		margin: 0;
@@ -1504,7 +1580,13 @@
 		flex: 0 0 auto;
 		place-items: center;
 		transition: transform 0.18s ease;
+		border: 0;
+		background: transparent;
+		padding: 0;
 		color: var(--gray-text);
+	}
+	.disclosure-icon:hover {
+		color: inherit;
 	}
 	details[open] > summary .disclosure-icon {
 		transform: rotate(180deg);
@@ -2013,6 +2095,9 @@
 			display: grid;
 			grid-template-columns: minmax(0, 1fr) auto auto;
 			width: 100%;
+		}
+		.rename-error {
+			grid-column: 1 / -1;
 		}
 		.slot-title input {
 			flex: 1;

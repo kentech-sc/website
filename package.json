@@ -73,6 +73,7 @@
 		"@vercel/functions": "^3.7.6",
 		"@vercel/speed-insights": "^2.0.0",
 		"drizzle-orm": "^0.45.2",
+		"html-to-image": "^1.11.13",
 		"isomorphic-dompurify": "^3.19.0",
 		"pg": "^8.22.0",
 		"read-excel-file": "^9.3.5",

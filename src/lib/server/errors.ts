@@ -21,6 +21,16 @@ export class AppError extends Error {
 	}
 }
 
+export function isDuplicateKeyError(error: unknown): boolean {
+	return (
+		typeof error === 'object' &&
+		error !== null &&
+		'code' in error &&
+		typeof error.code === 'string' &&
+		error.code === '23505'
+	);
+}
+
 export function assertRule(result: RuleResult): void {
 	if (result.ok) return;
 	throw new AppError(result.type, result.message);

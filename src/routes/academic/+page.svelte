@@ -12,6 +12,9 @@
 	import PortalCompletionImport from './_components/PortalCompletionImport.svelte';
 	import RecordEntryDialog from './_components/RecordEntryDialog.svelte';
 
+	import type { SubmitFunction } from '@sveltejs/kit';
+
+	import { enhance } from '$app/forms';
 	import AcademicHeader from '$components/AcademicHeader.svelte';
 
 	let { data, form } = $props();
@@ -20,6 +23,7 @@
 	let selectedCourseId = $state('');
 	let manualCredits = $state(3);
 	let manualAddOpen = $state(false);
+	let manualAddError = $state('');
 	let exchangeAddOpen = $state(false);
 
 	const progress = $derived(data.degreeProgress);
@@ -133,6 +137,18 @@
 		const course = data.courses.find((item) => item.id === selectedCourseId);
 		if (course) manualCredits = course.credits;
 	}
+	const manualAddEnhance: SubmitFunction = () => {
+		manualAddError = '';
+		return async ({ result, update }) => {
+			if (result.type === 'failure') {
+				manualAddError = String(result.data?.message ?? '수강 이력을 추가하지 못했습니다.');
+				await update({ reset: false });
+				return;
+			}
+			manualAddOpen = false;
+			await update();
+		};
+	};
 </script>
 
 <section class="academic-page">
@@ -297,7 +313,12 @@
 				bind:open={manualAddOpen}
 			>
 				{#snippet icon()}<Plus size="1rem" />{/snippet}
-				<form method="POST" action="?/addCompletion" class="completion-form">
+				<form
+					method="POST"
+					action="?/addCompletion"
+					use:enhance={manualAddEnhance}
+					class="completion-form"
+				>
 					<label class="course-select"
 						><span>강의</span><input
 							type="search"
@@ -354,6 +375,7 @@
 							placeholder="A+, P 등"
 						/></label
 					>
+					{#if manualAddError}<p class="warning" aria-live="polite">{manualAddError}</p>{/if}
 					<button>수강 이력에 추가</button>
 				</form>
 			</RecordEntryDialog>
@@ -892,8 +914,14 @@
 		font-weight: 400;
 	}
 	.completion-form .course-select,
+	.completion-form .warning,
 	.completion-form button {
 		grid-column: 1 / -1;
+	}
+	.completion-form .warning {
+		margin: 0;
+		color: var(--error-text);
+		font-size: 0.78rem;
 	}
 	.course-select input {
 		margin-bottom: 0.15rem;

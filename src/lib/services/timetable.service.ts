@@ -73,13 +73,15 @@ export async function create(year: number, term: number, name: string, user: Use
 	if (year < 2022 || term < 1 || term > 4)
 		throw new AppError(APP_ERROR.BAD_REQUEST, '학기 정보를 확인해주세요.');
 	const position = await TimetableRepository.nextPosition(user.id, year, term);
-	return await TimetableRepository.createTimetable({
+	const created = await TimetableRepository.createTimetable({
 		userId: user.id,
 		year,
 		term,
 		name: name.trim() || `시간표 ${position + 1}`,
 		position
 	});
+	if (!created) throw new AppError(APP_ERROR.CONFLICT, '이미 같은 이름의 시간표가 있습니다.');
+	return created;
 }
 
 export async function addOffering(id: string, offeringId: string, user: User) {
@@ -129,6 +131,7 @@ export async function copy(id: string, user: User) {
 		name: `${source.name} 복사본 ${position + 1}`,
 		position
 	});
+	if (!target) throw new AppError(APP_ERROR.CONFLICT, '이미 같은 이름의 시간표가 있습니다.');
 	await TimetableRepository.copyItems(source.id, target.id);
 	return target;
 }
@@ -159,7 +162,9 @@ export async function unconfirm(id: string, user: User) {
 export async function rename(id: string, name: string, user: User) {
 	await owned(id, user);
 	if (!name.trim()) throw new AppError(APP_ERROR.BAD_REQUEST, '시간표 이름을 입력해주세요.');
-	return await TimetableRepository.updateTimetable(id, user.id, { name: name.trim() });
+	const renamed = await TimetableRepository.renameTimetable(id, user.id, name.trim());
+	if (!renamed) throw new AppError(APP_ERROR.CONFLICT, '이미 같은 이름의 시간표가 있습니다.');
+	return renamed;
 }
 
 export async function remove(id: string, user: User) {

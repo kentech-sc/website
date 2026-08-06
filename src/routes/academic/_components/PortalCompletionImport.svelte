@@ -22,7 +22,7 @@
 			importedCount?: number;
 			failedCount?: number;
 			withdrawnCount?: number;
-			unmatchedCodes?: string[];
+			frFallbackCodes?: string[];
 			skippedCount?: number;
 			message?: string;
 		} | null;
@@ -36,7 +36,7 @@
 	const matchedRows = $derived(
 		parsed.rows.filter((row) => courseIds.has(row.courseId) || isApCreditCode(row.courseId))
 	);
-	const unmatchedRows = $derived(
+	const frFallbackRows = $derived(
 		parsed.rows.filter((row) => !courseIds.has(row.courseId) && !isApCreditCode(row.courseId))
 	);
 
@@ -136,23 +136,23 @@
 							</ul>
 						</section>
 					{/if}
-					{#if unmatchedRows.length || parsed.skippedCount}
+					{#if frFallbackRows.length || parsed.skippedCount}
 						<div class="preview-summary">
-							{#if unmatchedRows.length}<span>{unmatchedRows.length}개 강의 정보 없음</span>{/if}
+							{#if frFallbackRows.length}<span>{frFallbackRows.length}개 강의 정보 없음</span>{/if}
 							{#if parsed.skippedCount}<span>{parsed.skippedCount}개 제외</span>{/if}
 						</div>
 					{/if}
-					{#if unmatchedRows.length}
-						<p class="warning">
-							강의 데이터가 없어 제외됨: {[
-								...new Set(unmatchedRows.map((row) => row.courseId))
+					{#if frFallbackRows.length}
+						<p class="note">
+							강의 정보가 없어 자유선택(FR)으로 등록됨: {[
+								...new Set(frFallbackRows.map((row) => row.courseId))
 							].join(', ')}
 						</p>
 					{/if}
 				{/if}
 
-				<button class="submit-button" disabled={!matchedRows.length}
-					>확인한 {matchedRows.length}개 과목 등록</button
+				<button class="submit-button" disabled={!matchedRows.length && !frFallbackRows.length}
+					>확인한 {matchedRows.length + frFallbackRows.length}개 과목 등록</button
 				>
 			</form>
 		</section>
@@ -163,8 +163,8 @@
 					? ` 낙제 ${form.failedCount}개 포함.`
 					: ''}{form.withdrawnCount ? ` 철회 ${form.withdrawnCount}개 포함.` : ''}
 			</p>
-			{#if form.unmatchedCodes?.length}<p class="warning">
-					미연결 과목: {form.unmatchedCodes.join(', ')}
+			{#if form.frFallbackCodes?.length}<p class="note">
+					강의 정보가 없어 자유선택(FR)으로 등록됨: {form.frFallbackCodes.join(', ')}
 				</p>{/if}
 		{:else if form?.message}
 			<p class="warning" aria-live="polite">{form.message}</p>
@@ -378,7 +378,8 @@
 		color: var(--gray-text);
 	}
 	.warning,
-	.success {
+	.success,
+	.note {
 		margin: 0;
 		font-size: 0.78rem;
 	}
@@ -387,6 +388,9 @@
 	}
 	.success {
 		color: var(--success-text);
+	}
+	.note {
+		color: var(--info-text);
 	}
 	.submit-button {
 		align-self: flex-end;

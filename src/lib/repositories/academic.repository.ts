@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, gte, inArray, isNull, lte, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, gte, inArray, isNull, lte, or, sql } from 'drizzle-orm';
 
 import type {
 	CourseCompletion,
@@ -397,14 +397,58 @@ export async function upsertExternalCourse(value: {
 	return row;
 }
 
+export async function deleteUncatalogedFallbackCompletions(
+	userId: UserId,
+	institution: string,
+	entries: Array<{ courseCode: string; year: number; term: number }>
+): Promise<void> {
+	if (!entries.length) return;
+	const staleRows = await getDatabase()
+		.select({ id: courseCompletions.id })
+		.from(courseCompletions)
+		.innerJoin(externalCourses, eq(courseCompletions.externalCourseId, externalCourses.id))
+		.where(
+			and(
+				eq(courseCompletions.userId, userId),
+				eq(externalCourses.institution, institution),
+				or(
+					...entries.map((entry) =>
+						and(
+							eq(externalCourses.courseCode, entry.courseCode),
+							eq(courseCompletions.year, entry.year),
+							eq(courseCompletions.term, entry.term)
+						)
+					)
+				)
+			)
+		);
+	if (!staleRows.length) return;
+	await getDatabase()
+		.delete(courseCompletions)
+		.where(
+			inArray(
+				courseCompletions.id,
+				staleRows.map((row) => row.id)
+			)
+		);
+}
+
 export async function createCompletion(
 	value: Omit<CourseCompletion, 'id'>
-): Promise<CourseCompletion> {
+): Promise<CourseCompletion | null> {
 	const [row] = await getDatabase()
 		.insert(courseCompletions)
 		.values({ ...value, credits: String(value.credits) })
+		.onConflictDoNothing({
+			target: [
+				courseCompletions.userId,
+				courseCompletions.courseId,
+				courseCompletions.year,
+				courseCompletions.term
+			]
+		})
 		.returning();
-	return { ...row, credits: Number(row.credits) } as CourseCompletion;
+	return row ? ({ ...row, credits: Number(row.credits) } as CourseCompletion) : null;
 }
 
 export async function upsertCompletions(

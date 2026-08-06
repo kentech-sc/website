@@ -14,6 +14,8 @@ import { parsePortalCompletionText } from '$lib/shared/portal-completion-import.
 import { APP_ERROR } from '$lib/shared/rule.js';
 import { DEGREE_CATEGORIES, type DegreeCategory } from '$lib/types/degree.type.js';
 
+const UNCATALOGED_KIS_INSTITUTION = 'KENTECH (미등록 과목)';
+
 export async function getProfileData(user: User) {
 	const [academicProfile, completions, courses, completedDegreeCourses] = await Promise.all([
 		AcademicRepository.findAcademicProfile(user.id),
@@ -80,7 +82,7 @@ export async function addCompletion(
 	status = resolveCompletionStatus(normalizedGrade, status);
 	if (!['passed', 'failed', 'withdrawn'].includes(status))
 		throw new AppError(APP_ERROR.BAD_REQUEST, '이수 결과를 확인해주세요.');
-	return await AcademicRepository.createCompletion({
+	const completion = await AcademicRepository.createCompletion({
 		userId: user.id,
 		courseId,
 		offeringId: null,
@@ -92,6 +94,8 @@ export async function addCompletion(
 		status,
 		source: 'manual'
 	});
+	if (!completion) throw new AppError(APP_ERROR.CONFLICT, '이미 수강한 과목입니다.');
+	return completion;
 }
 
 export async function addExternalCompletion(
@@ -167,13 +171,10 @@ export async function importCompletions(user: User, portalData: string) {
 	const matched = parsed.rows.filter(
 		(row) => courseMap.has(row.courseId) || isApCreditCode(row.courseId)
 	);
-	const unmatchedCodes = [
-		...new Set(
-			parsed.rows
-				.filter((row) => !courseMap.has(row.courseId) && !isApCreditCode(row.courseId))
-				.map((row) => row.courseId)
-		)
-	];
+	const frFallback = parsed.rows.filter(
+		(row) => !courseMap.has(row.courseId) && !isApCreditCode(row.courseId)
+	);
+	const frFallbackCodes = [...new Set(frFallback.map((row) => row.courseId))];
 	const creditMismatch = matched.find((row) => {
 		const course = courseMap.get(row.courseId);
 		const expectedCredits = isApCreditCode(row.courseId) ? AP_COURSE_CREDITS : row.credits;
@@ -183,11 +184,6 @@ export async function importCompletions(user: User, portalData: string) {
 		throw new AppError(
 			APP_ERROR.CONFLICT,
 			`${creditMismatch.courseId}의 등록된 학점과 KIS 이수 학점이 다릅니다.`
-		);
-	if (!matched.length)
-		throw new AppError(
-			APP_ERROR.BAD_REQUEST,
-			`등록된 강의와 연결되는 과목이 없습니다.${unmatchedCodes.length ? ` 미연결: ${unmatchedCodes.join(', ')}` : ''}`
 		);
 
 	await transaction(async () => {
@@ -212,12 +208,46 @@ export async function importCompletions(user: User, portalData: string) {
 				source: 'portal'
 			}))
 		);
+
+		if (frFallback.length) {
+			const externalCourseIdByCode = new Map<string, string>();
+			for (const code of frFallbackCodes) {
+				const row = frFallback.find((item) => item.courseId === code)!;
+				const externalCourse = await AcademicRepository.upsertExternalCourse({
+					institution: UNCATALOGED_KIS_INSTITUTION,
+					courseCode: code,
+					name: row.courseName
+				});
+				externalCourseIdByCode.set(code, externalCourse.id);
+			}
+			await AcademicRepository.upsertCompletions(
+				frFallback.map((row) => ({
+					userId: user.id,
+					courseId: null,
+					offeringId: null,
+					externalCourseId: externalCourseIdByCode.get(row.courseId)!,
+					year: row.year,
+					term: row.term,
+					credits: row.credits,
+					grade: row.grade,
+					status: row.status,
+					source: 'portal'
+				}))
+			);
+		}
+
+		if (matched.length)
+			await AcademicRepository.deleteUncatalogedFallbackCompletions(
+				user.id,
+				UNCATALOGED_KIS_INSTITUTION,
+				matched.map((row) => ({ courseCode: row.courseId, year: row.year, term: row.term }))
+			);
 	});
 	return {
-		importedCount: matched.length,
-		failedCount: matched.filter((row) => row.status === 'failed').length,
-		withdrawnCount: matched.filter((row) => row.status === 'withdrawn').length,
-		unmatchedCodes,
+		importedCount: matched.length + frFallback.length,
+		failedCount: [...matched, ...frFallback].filter((row) => row.status === 'failed').length,
+		withdrawnCount: [...matched, ...frFallback].filter((row) => row.status === 'withdrawn').length,
+		frFallbackCodes,
 		skippedCount: parsed.skippedCount
 	};
 }
