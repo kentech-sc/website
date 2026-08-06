@@ -20,12 +20,23 @@
 	let initializedFor = $state<string | null>(null);
 	let loading = $state(false);
 	let offeringQuery = $state('');
+	let yearFilter = $state('');
+	let termFilter = $state('');
+	const availableYears = $derived(
+		[...new Set(reviewableOfferings.map((offering) => offering.year))].sort((a, b) => b - a)
+	);
+	const availableTerms = $derived(
+		[...new Set(reviewableOfferings.map((offering) => offering.term))].sort((a, b) => a - b)
+	);
 	const filteredOfferings = $derived(
-		reviewableOfferings.filter((offering) =>
-			`${offering.courseId} ${offering.courseName} ${offering.subtitle ?? ''} ${offering.professors.map((professor) => professor.name).join(' ')} ${offering.section}`
-				.toLowerCase()
-				.includes(offeringQuery.trim().toLowerCase())
-		)
+		reviewableOfferings
+			.filter((offering) => !yearFilter || offering.year === Number(yearFilter))
+			.filter((offering) => !termFilter || offering.term === Number(termFilter))
+			.filter((offering) =>
+				`${offering.courseId} ${offering.courseName} ${offering.subtitle ?? ''} ${offering.professors.map((professor) => professor.name).join(' ')} ${offering.section}`
+					.toLowerCase()
+					.includes(offeringQuery.trim().toLowerCase())
+			)
 	);
 	let scores = $state({ assignment: 3, lecture: 3, exam: 3, satisfaction: 10 });
 
@@ -57,6 +68,10 @@
 		return '매우 어려움';
 	}
 
+	function termLabel(term: number): string {
+		return ['1학기', '2학기', '하계', '동계'][term - 1] ?? `${term}학기`;
+	}
+
 	function offeringLabel(offering: Offering): string {
 		const section = offering.section ? ` · ${offering.section}분반` : '';
 		const professors = offering.professors.map((professor) => professor.name).join(', ');
@@ -83,7 +98,23 @@
 						</span>
 					</p>
 				{:else}
-					<div class="offering-picker">
+					<div class="offering-filter-row">
+						<CommonLabel labelFor="yearFilter" labelString="연도">
+							<select id="yearFilter" bind:value={yearFilter}>
+								<option value="">전체</option>
+								{#each availableYears as year (year)}
+									<option value={year}>{year}년</option>
+								{/each}
+							</select>
+						</CommonLabel>
+						<CommonLabel labelFor="termFilter" labelString="학기">
+							<select id="termFilter" bind:value={termFilter}>
+								<option value="">전체</option>
+								{#each availableTerms as term (term)}
+									<option value={term}>{termLabel(term)}</option>
+								{/each}
+							</select>
+						</CommonLabel>
 						<CommonLabel labelFor="offeringQuery" labelString="개설 강의 검색">
 							<input
 								id="offeringQuery"
@@ -92,6 +123,8 @@
 								bind:value={offeringQuery}
 							/>
 						</CommonLabel>
+					</div>
+					<div class="offering-picker">
 						<CommonLabel labelFor="offeringId" labelString="평가할 개설 강의">
 							<select id="offeringId" name="offeringId" required>
 								<option value="">선택</option>
@@ -211,14 +244,20 @@
 	.input-section {
 		gap: 0.6rem;
 	}
-	.offering-picker {
+	.offering-filter-row {
 		display: grid;
-		grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+		grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 2fr);
 		gap: 1rem;
 		width: 100%;
 		@include media.mobile {
-			grid-template-columns: minmax(0, 1fr);
+			grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 		}
+	}
+	.offering-picker {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr);
+		gap: 1rem;
+		width: 100%;
 	}
 	.fixed-offering {
 		display: flex;

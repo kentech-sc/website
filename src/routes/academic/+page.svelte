@@ -331,7 +331,7 @@
 						use:enhance={manualAddEnhance}
 						class="completion-form"
 					>
-						<div class="mode-switch" role="group" aria-label="강의 선택 방식">
+						<div class="mode-switch" role="group" aria-label="강의 선택 방식" hidden>
 							<button
 								type="button"
 								class:active={manualMode === 'catalog'}
@@ -928,7 +928,7 @@
 	.completion-form > button {
 		grid-column: 1 / -1;
 	}
-	.mode-switch {
+	.mode-switch:not([hidden]) {
 		display: flex;
 		gap: 0.3rem;
 	}
