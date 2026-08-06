@@ -6,5 +6,5 @@ export default defineConfig({
 		preset: '2023'
 	},
 	preset: minimal2023Preset,
-	images: ['static/icons/logo.png']
+	images: ['static/icons/kentech-sc-logo.svg']
 });
