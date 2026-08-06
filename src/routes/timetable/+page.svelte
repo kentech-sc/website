@@ -14,6 +14,10 @@
 	import Users from '@lucide/svelte/icons/users';
 	import X from '@lucide/svelte/icons/x';
 
+	import CourseSearchPanel from './_components/CourseSearchPanel.svelte';
+	import UnscheduledCourseLane from './_components/UnscheduledCourseLane.svelte';
+
+	import type { CourseSearchFilter } from './_components/course-search.js';
 	import type { SubmitFunction } from '@sveltejs/kit';
 
 	import { enhance } from '$app/forms';
@@ -28,11 +32,8 @@
 	let renameError = $state('');
 	let submitting = $state(false);
 	let savingImage = $state(false);
-	let query = $state('');
-	let category = $state('all');
-	let slotFilter = $state<{ weekday: number; minute: number } | null>(null);
-	let courseBrowser = $state<HTMLDetailsElement | null>(null);
-	let browserBody = $state<HTMLDivElement | null>(null);
+	let searchFilter = $state<CourseSearchFilter | null>(null);
+	let searchSession = $state(0);
 	let schedulePanel = $state<HTMLElement | null>(null);
 
 	const actualId = 'actual';
@@ -44,9 +45,6 @@
 		actualSelected ? data.actualSchedule.offerings : (selected?.offerings ?? [])
 	);
 	const busy = $derived(submitting || navigating.to !== null);
-	const selectedOfferingIds = $derived(
-		new Set(selected?.offerings.map((offering) => offering.id) ?? [])
-	);
 	const hiddenSelectedOfferings = $derived(
 		selected?.offerings.filter(
 			(offering) =>
@@ -148,28 +146,6 @@
 				]
 			: []
 	);
-	const availableCategories = $derived(
-		[...new Set(data.offerings.map((item) => item.category).filter(Boolean))].sort()
-	);
-	const filtered = $derived(
-		data.offerings
-			.filter((item) => {
-				const matchesQuery =
-					`${item.courseId} ${item.courseName} ${item.subtitle ?? ''} ${item.professors.map((professor) => professor.name).join(' ')}`
-						.toLowerCase()
-						.includes(query.trim().toLowerCase());
-				const matchesSlot =
-					!slotFilter ||
-					item.meetings.some(
-						(meeting) =>
-							meeting.weekday === slotFilter?.weekday &&
-							meeting.startsAt <= slotFilter.minute &&
-							slotFilter.minute < meeting.endsAt
-					);
-				return matchesQuery && matchesSlot && (category === 'all' || item.category === category);
-			})
-			.sort((a, b) => searchResultRank(a) - searchResultRank(b))
-	);
 	const selectedMeetings = $derived(displayOfferings.flatMap((offering) => offering.meetings));
 	const startMinute = $derived(
 		selectedMeetings.length
@@ -179,14 +155,7 @@
 				)
 			: 9 * 60
 	);
-	const endMinute = $derived(
-		selectedMeetings.length
-			? Math.max(
-					21 * 60,
-					Math.ceil(Math.max(...selectedMeetings.map((meeting) => meeting.endsAt)) / 60) * 60
-				)
-			: 21 * 60
-	);
+	const endMinute = 20 * 60;
 	const timeLabels = $derived(
 		Array.from(
 			{ length: Math.floor((endMinute - startMinute) / 60) + 1 },
@@ -195,12 +164,14 @@
 	);
 	const gridStep = 1.35;
 	const gridPadding = 0.65;
-	const gridSlots = $derived(
-		Array.from(
-			{ length: Math.ceil((endMinute - startMinute) / 30) },
-			(_, index) => startMinute + index * 30
-		)
-	);
+	const courseSlots = [
+		{ startsAt: 9 * 60, endsAt: 11 * 60 },
+		{ startsAt: 12 * 60, endsAt: 14 * 60 },
+		{ startsAt: 14 * 60, endsAt: 16 * 60 },
+		{ startsAt: 16 * 60, endsAt: 18 * 60 },
+		{ startsAt: 18 * 60, endsAt: 20 * 60 }
+	] as const;
+	const scheduleGuides = [9, 11, 12, 14, 16, 18, 20].map((hour) => hour * 60);
 	const gridHeight = $derived(((endMinute - startMinute) / 30) * gridStep + gridPadding * 2);
 	const totalCredits = $derived(
 		actualSelected
@@ -276,33 +247,42 @@
 		const height = Math.max(1.15, ((endsAt - startsAt) / 30) * gridStep);
 		return `--course-color: ${courseColor(categoryKey)}; top: ${top}rem; height: ${height}rem`;
 	}
-	function gridSlotStyle(minute: number): string {
-		return `top: ${gridPadding + ((minute - startMinute) / 30) * gridStep}rem; height: ${gridStep}rem`;
+	function gridSlotStyle(startsAt: number, endsAt: number): string {
+		const inset = 0.08;
+		const top = gridPadding + ((startsAt - startMinute) / 30) * gridStep + inset;
+		const height = ((endsAt - startsAt) / 30) * gridStep - inset * 2;
+		return `top: ${top}rem; height: ${height}rem`;
+	}
+	function scheduleGuideStyle(minute: number): string {
+		return `top: ${gridPadding + ((minute - startMinute) / 30) * gridStep}rem`;
+	}
+	function slotOccupied(weekday: number, startsAt: number, endsAt: number): boolean {
+		return displayOfferings.some((offering) =>
+			offering.meetings.some(
+				(meeting) =>
+					meeting.weekday === weekday && meeting.startsAt < endsAt && startsAt < meeting.endsAt
+			)
+		);
+	}
+	function openSearch(filter: CourseSearchFilter): void {
+		if (!selected || busy) return;
+		searchFilter = filter;
+		searchSession += 1;
 	}
 	function openSlotPicker(weekday: number, minute: number): void {
-		if (!selected || busy) return;
-		slotFilter = { weekday, minute };
-		query = '';
-		category = 'all';
-		if (courseBrowser) courseBrowser.open = true;
+		openSearch({ kind: 'slot', weekday, minute });
 	}
 	function openCourseBrowser(): void {
-		if (!selected || busy) return;
-		slotFilter = null;
-		if (courseBrowser) courseBrowser.open = true;
-		requestAnimationFrame(() =>
-			courseBrowser?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-		);
+		openSearch({ kind: 'all' });
 	}
-	function closeSlotPicker(): void {
-		slotFilter = null;
-		if (courseBrowser) courseBrowser.open = false;
-		requestAnimationFrame(() =>
-			schedulePanel?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
-		);
+	function openUnscheduledBrowser(): void {
+		openSearch({ kind: 'unscheduled' });
 	}
-	function clearSlotFilter(): void {
-		slotFilter = null;
+	function closeCourseBrowser(): void {
+		searchFilter = null;
+	}
+	function clearCourseSearchFilter(): void {
+		if (searchFilter) searchFilter = { kind: 'all' };
 	}
 	async function saveScheduleImage(): Promise<void> {
 		if (!schedulePanel || savingImage) return;
@@ -333,65 +313,10 @@
 			savingImage = false;
 		}
 	}
-	function scrollSlotBrowser(event: WheelEvent): void {
-		if (!slotFilter || !browserBody) return;
-		if (
-			Math.abs(event.deltaX) > Math.abs(event.deltaY) &&
-			(event.target as Element).closest('.search-filter-tags')
-		)
-			return;
-		event.preventDefault();
-		browserBody.scrollTop += event.deltaY;
-	}
-	function hasConflict(offering: (typeof data.offerings)[number]): boolean {
-		if (!selected) return false;
-		return offering.meetings.some((candidate) =>
-			selected.offerings.some(
-				(selectedOffering) =>
-					selectedOffering.id !== offering.id &&
-					selectedOffering.meetings.some(
-						(meeting) =>
-							meeting.weekday === candidate.weekday &&
-							meeting.startsAt < candidate.endsAt &&
-							candidate.startsAt < meeting.endsAt
-					)
-			)
-		);
-	}
-	type OfferingRestriction = { label: string; order: number };
-	function offeringRestriction(
-		offering: (typeof data.offerings)[number],
-		alreadyAdded: boolean
-	): OfferingRestriction | null {
-		if (alreadyAdded || !selected) return null;
-		if (selected.offerings.some((item) => item.courseId === offering.courseId))
-			return { label: '대체 분반', order: 0 };
-		if (hasConflict(offering)) return { label: '시간 겹침', order: 1 };
-		const catalogReason = data.offeringRestrictions[offering.id];
-		if (catalogReason) return { label: catalogReason, order: 2 };
-		return null;
-	}
-	function searchResultRank(offering: (typeof data.offerings)[number]): number {
-		const alreadyAdded = selectedOfferingIds.has(offering.id);
-		if (alreadyAdded) return 0;
-		const restriction = offeringRestriction(offering, false);
-		return restriction ? restriction.order + 2 : 1;
-	}
 	const pendingEnhance: SubmitFunction = () => {
 		submitting = true;
 		return async ({ update }) => {
 			try {
-				await update();
-			} finally {
-				submitting = false;
-			}
-		};
-	};
-	const slotAddEnhance: SubmitFunction = () => {
-		submitting = true;
-		return async ({ result, update }) => {
-			try {
-				if (result.type === 'success') closeSlotPicker();
 				await update();
 			} finally {
 				submitting = false;
@@ -593,284 +518,171 @@
 			</section>
 		{/if}
 
-		<div class="planner-workspace">
-			<section
-				class="module schedule-panel"
-				bind:this={schedulePanel}
-				aria-label={actualSelected ? '실제 수강 시간표' : `${selected?.name ?? '시간표'} 시간표`}
-			>
-				{#if selected && displayOfferings.length === 0}
-					<div class="schedule-onboarding">
-						<span class="onboarding-icon"><Plus size="0.9rem" aria-hidden="true" /></span>
-						<span>
-							<strong>빈 칸을 눌러 강의를 추가하세요</strong>
-							<small>선택한 요일과 시간에 맞는 강의만 바로 보여드려요.</small>
-						</span>
-						<button type="button" disabled={busy} onclick={openCourseBrowser}>전체 강의 찾기</button
-						>
-					</div>
-				{/if}
-				<div class="schedule-scroll">
-					<div
-						class="schedule-grid"
-						style={`--grid-step: ${gridStep}rem; --grid-padding: ${gridPadding}rem`}
-					>
-						<div class="corner">시간</div>
-						{#each weekdays as weekday (weekday)}<div class="day-header">{weekday}</div>{/each}
-						<div class="time-axis" style={`height: ${gridHeight}rem`}>
-							{#each timeLabels as minute (minute)}<span
-									style={`top: ${gridPadding + ((minute - startMinute) / 30) * gridStep}rem`}
-									>{formatTime(minute)}</span
-								>{/each}
-						</div>
-						{#each weekdays as weekday, day (weekday)}
-							<div class="day-lane" style={`height: ${gridHeight}rem`}>
-								{#if selected}
-									{#each gridSlots as minute (minute)}
-										<button
-											type="button"
-											class="grid-slot"
-											tabindex="-1"
-											style={gridSlotStyle(minute)}
-											disabled={busy}
-											onclick={() => openSlotPicker(day + 1, minute)}
-											aria-label={`${weekday} ${formatTime(minute)}에 강의 추가`}
-											title={`${weekday} ${formatTime(minute)} 강의 찾기`}
-										>
-											<Plus size="0.68rem" aria-hidden="true" />
-										</button>
-									{/each}
-								{/if}
-								{#each meetingsForDay(day + 1) as { offering, meeting } (`${offering.id}-${meeting.id}`)}
-									<article
-										class="course-block"
-										style={meetingStyle(offering.category, meeting.startsAt, meeting.endsAt)}
-										title={`${offering.courseName} · ${scheduleText(offering)}`}
-									>
-										<button
-											type="button"
-											class="course-block-copy"
-											aria-disabled={!selected}
-											tabindex={selected ? 0 : -1}
-											onclick={() => openSlotPicker(meeting.weekday, meeting.startsAt)}
-											aria-label={`${offering.courseName} 열기`}
-										>
-											<strong>{offering.courseName}</strong><small class="course-professor"
-												>{offering.professors.map((professor) => professor.name).join(', ') ||
-													'교수 미정'}</small
-											>
-											{#if meeting.room}<small class="course-room">{meeting.room}</small>{/if}
-										</button>
-										{#if selected}
-											<form
-												class="course-block-remove"
-												method="POST"
-												action="?/removeItem"
-												use:enhance={pendingEnhance}
-											>
-												<input type="hidden" name="timetableId" value={selected.id} /><input
-													type="hidden"
-													name="offeringId"
-													value={offering.id}
-												/><button
-													disabled={busy}
-													aria-label={`${offering.courseName} 시간표에서 제거`}
-													title={`${offering.courseName} 제거`}><X size="0.68rem" /></button
-												>
-											</form>
-										{/if}
-									</article>
-								{/each}
-							</div>
-						{/each}
-					</div>
-				</div>
-			</section>
-
-			{#if selected && hiddenSelectedOfferings.length}
-				<section class="module unscheduled-records">
-					<div class="unscheduled-heading">
-						<h3>시간표에 표시되지 않는 강의</h3>
-						<p>등록된 주중 수업 시간이 없어 격자 밖에 표시합니다.</p>
-					</div>
-					<ul>
-						{#each hiddenSelectedOfferings as offering (offering.id)}
-							<li>
-								<span>
-									<b>{offering.courseName}</b>
-									<small
-										>{offering.courseId} · {offering.section}분반 · {scheduleText(offering)}</small
-									>
-								</span>
-								<form method="POST" action="?/removeItem" use:enhance={pendingEnhance}>
-									<input type="hidden" name="timetableId" value={selected.id} />
-									<input type="hidden" name="offeringId" value={offering.id} />
-									<button
-										class="unscheduled-remove"
-										aria-label={`${offering.courseName} 제거`}
-										title="시간표에서 제거"><X size="0.78rem" /></button
-									>
-								</form>
-							</li>
-						{/each}
-					</ul>
-				</section>
-			{/if}
-
-			{#if actualSelected && data.actualSchedule.unscheduledCompletions.length}
-				<section class="module unscheduled-records">
-					<div class="unscheduled-heading">
-						<div>
-							<h3>시간표에 표시되지 않는 수강 과목</h3>
-							<p>수강 이력에서 수정하거나 삭제할 수 있습니다.</p>
-						</div>
-						<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- hash is appended to a resolved route -->
-						<a href={resolve('/academic') + '#course-history'}>수강 이력 관리</a>
-					</div>
-					<ul>
-						{#each data.actualSchedule.unscheduledCompletions as completion (completion.id)}
-							<li>
-								<span>
-									<b>{completion.courseName}</b>
-									<small
-										>{completion.courseCode}{completion.institution
-											? ` · ${completion.institution}`
-											: ''}</small
-									>
-								</span>
-								<span class:external-record={completion.isExternal}
-									>{completion.isExternal ? '학점교류 · FR' : '분반 미상'}</span
-								>
-							</li>
-						{/each}
-					</ul>
-				</section>
-			{/if}
-
-			{#if selected}<details
-					class="module course-browser"
-					class:slot-browser={slotFilter !== null}
-					class:slot-browser-left={(slotFilter?.weekday ?? 0) >= 4}
-					class:slot-browser-top={(slotFilter?.minute ?? 0) >= 15 * 60}
-					bind:this={courseBrowser}
-					onwheel={scrollSlotBrowser}
+		<div class="planner-workspace" class:search-open={searchFilter !== null}>
+			<div class="planner-main">
+				<section
+					class="module schedule-panel"
+					bind:this={schedulePanel}
+					aria-label={actualSelected ? '실제 수강 시간표' : `${selected?.name ?? '시간표'} 시간표`}
 				>
-					<summary class="browser-summary">
-						<span
-							><Search size="0.95rem" /><b
-								>{slotFilter
-									? `${weekdays[slotFilter.weekday - 1]} ${formatTime(slotFilter.minute)} 강의 찾기`
-									: '강의 찾기'}</b
-							></span
-						>
-						<span class="summary-end">
-							<small>{filtered.length}개</small>
-							<button
-								type="button"
-								class="disclosure-icon"
-								aria-label="강의 찾기 닫기"
-								title="닫기"
-								onclick={(event) => {
-									event.preventDefault();
-									event.stopPropagation();
-									closeSlotPicker();
-								}}><X size="0.9rem" /></button
-							>
-						</span>
-					</summary>
-					<div class="browser-body" bind:this={browserBody}>
-						<div class="browser-controls">
-							<label class="course-search"
-								><Search size="0.95rem" /><input
-									type="search"
-									bind:value={query}
-									placeholder="예: EF, 물리, 교수명"
-									aria-label="강의 검색"
-								/></label
+					{#if selected && displayOfferings.length === 0}
+						<div class="schedule-onboarding">
+							<span class="onboarding-icon"><Plus size="0.9rem" aria-hidden="true" /></span>
+							<span>
+								<strong>빈 칸을 눌러 강의를 추가하세요</strong>
+								<small>선택한 요일과 시간에 맞는 강의만 바로 보여드려요.</small>
+							</span>
+							<button type="button" disabled={busy} onclick={openCourseBrowser}
+								><Search size="0.82rem" />전체 강의 검색</button
 							>
 						</div>
-						<div class="search-filter-tags" aria-label="강의 검색 조건">
-							{#if slotFilter}<button
-									class="filter-tag active removable"
-									type="button"
-									onclick={clearSlotFilter}
-									title="시간 조건 지우기"
-									><span>{weekdays[slotFilter.weekday - 1]} {formatTime(slotFilter.minute)}</span><X
-										size="0.72rem"
-										aria-hidden="true"
-									/></button
-								>{/if}<button
-								class="filter-tag"
-								class:active={category === 'all'}
-								onclick={() => (category = 'all')}>전체</button
+					{:else if selected}
+						<div class="schedule-toolbar">
+							<button type="button" disabled={busy} onclick={openCourseBrowser}
+								><Search size="0.82rem" />전체 강의 검색</button
 							>
-							{#each availableCategories as item (item)}<button
-									class="filter-tag"
-									class:active={category === item}
-									onclick={() => (category = item!)}>{item}</button
-								>{/each}
 						</div>
-						<div class="offering-list">
-							{#each filtered as offering (offering.id)}
-								{@const alreadyAdded = selectedOfferingIds.has(offering.id)}
-								{@const restriction = offeringRestriction(offering, alreadyAdded)}
-								<article class:added={alreadyAdded} class:unavailable={Boolean(restriction)}>
-									<i style={`background: ${courseColor(offering.category)}`}></i>
-									<div class="offering-copy">
-										<div class="offering-tags">
-											<span>{offering.category ?? '기타'}</span><span>{offering.courseId}</span
-											>{#if restriction}<span class="unavailable-label">{restriction.label}</span
-												>{/if}
-										</div>
-										<strong
-											>{offering.courseName}{#if offering.subtitle}<small>{offering.subtitle}</small
-												>{/if}</strong
+					{/if}
+					<div class="schedule-scroll">
+						<div class="schedule-grid">
+							<div class="corner">시간</div>
+							{#each weekdays as weekday (weekday)}<div class="day-header">{weekday}</div>{/each}
+							<div class="time-axis" style={`height: ${gridHeight}rem`}>
+								{#each timeLabels as minute (minute)}<span
+										style={`top: ${gridPadding + ((minute - startMinute) / 30) * gridStep}rem`}
+										>{formatTime(minute)}</span
+									>{/each}
+							</div>
+							{#each weekdays as weekday, day (weekday)}
+								<div class="day-lane" style={`height: ${gridHeight}rem`}>
+									{#each scheduleGuides as minute (minute)}
+										<span
+											class="schedule-guide"
+											style={scheduleGuideStyle(minute)}
+											aria-hidden="true"
+										></span>
+									{/each}
+									{#if selected && day !== 2}
+										{#each courseSlots as slot (slot.startsAt)}
+											{#if !slotOccupied(day + 1, slot.startsAt, slot.endsAt)}
+												<button
+													type="button"
+													class="grid-slot"
+													tabindex="-1"
+													style={gridSlotStyle(slot.startsAt, slot.endsAt)}
+													disabled={busy}
+													onclick={() => openSlotPicker(day + 1, slot.startsAt)}
+													aria-label={`${weekday} ${formatTime(slot.startsAt)}에 강의 추가`}
+													title={`${weekday} ${formatTime(slot.startsAt)} 강의 찾기`}
+												>
+													<Plus size="0.78rem" aria-hidden="true" />
+												</button>
+											{/if}
+										{/each}
+									{/if}
+									{#each meetingsForDay(day + 1) as { offering, meeting } (`${offering.id}-${meeting.id}`)}
+										<article
+											class="course-block"
+											style={meetingStyle(offering.category, meeting.startsAt, meeting.endsAt)}
+											title={`${offering.courseName} · ${scheduleText(offering)}`}
 										>
-										<p>{scheduleText(offering)}</p>
-										<p>
-											{offering.professors.map((professor) => professor.name).join(', ') ||
-												'교수 미정'} ·
-											{offering.section}분반 · {offering.creditType === 'pass'
-												? 'P'
-												: `${offering.credits}학점`}
-										</p>
-									</div>
-									<div class="offering-actions">
-										<!-- eslint-disable svelte/no-navigation-without-resolve -- query string is appended to a resolved route -->
-										<a
-											href={`${resolve('/review')}?course=${encodeURIComponent(offering.courseId)}`}
-											>강의평가</a
-										>
-										<!-- eslint-enable svelte/no-navigation-without-resolve -->
-										<form
-											method="POST"
-											action={alreadyAdded ? '?/removeItem' : '?/add'}
-											use:enhance={slotFilter && !alreadyAdded ? slotAddEnhance : pendingEnhance}
-										>
-											<input type="hidden" name="timetableId" value={selected.id} /><input
-												type="hidden"
-												name="offeringId"
-												value={offering.id}
-											/><button
-												class:add-offering={!alreadyAdded}
-												class:remove-offering={alreadyAdded}
-												disabled={Boolean(restriction)}
-												>{#if alreadyAdded}<X size="0.82rem" />제거{:else}<Plus
-														size="0.82rem"
-													/>추가{/if}</button
+											<button
+												type="button"
+												class="course-block-copy"
+												aria-disabled={!selected}
+												tabindex={selected ? 0 : -1}
+												onclick={() => openSlotPicker(meeting.weekday, meeting.startsAt)}
+												aria-label={`${offering.courseName} 열기`}
 											>
-										</form>
-									</div>
-								</article>
-							{:else}
-								<div class="empty-list">
-									<Search size="1.2rem" />
-									<p>조건에 맞는 강의가 없습니다.</p>
+												<strong>{offering.courseName}</strong><small class="course-professor"
+													>{offering.professors.map((professor) => professor.name).join(', ') ||
+														'교수 미정'}</small
+												>
+												{#if meeting.room}<small class="course-room">{meeting.room}</small>{/if}
+											</button>
+											{#if selected}
+												<form
+													class="course-block-remove"
+													method="POST"
+													action="?/removeItem"
+													use:enhance={pendingEnhance}
+												>
+													<input type="hidden" name="timetableId" value={selected.id} /><input
+														type="hidden"
+														name="offeringId"
+														value={offering.id}
+													/><button
+														disabled={busy}
+														aria-label={`${offering.courseName} 시간표에서 제거`}
+														title={`${offering.courseName} 제거`}><X size="0.68rem" /></button
+													>
+												</form>
+											{/if}
+										</article>
+									{/each}
 								</div>
 							{/each}
 						</div>
 					</div>
-				</details>{/if}
+					{#if selected}
+						<UnscheduledCourseLane
+							offerings={hiddenSelectedOfferings}
+							timetableId={selected.id}
+							{busy}
+							{pendingEnhance}
+							onopen={openUnscheduledBrowser}
+							{courseColor}
+						/>
+					{/if}
+				</section>
+
+				{#if actualSelected && data.actualSchedule.unscheduledCompletions.length}
+					<section class="module unscheduled-records">
+						<div class="unscheduled-heading">
+							<div>
+								<h3>시간표에 표시되지 않는 수강 과목</h3>
+								<p>수강 이력에서 수정하거나 삭제할 수 있습니다.</p>
+							</div>
+							<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- hash is appended to a resolved route -->
+							<a href={resolve('/academic') + '#course-history'}>수강 이력 관리</a>
+						</div>
+						<ul>
+							{#each data.actualSchedule.unscheduledCompletions as completion (completion.id)}
+								<li>
+									<span>
+										<b>{completion.courseName}</b>
+										<small
+											>{completion.courseCode}{completion.institution
+												? ` · ${completion.institution}`
+												: ''}</small
+										>
+									</span>
+									<span class:external-record={completion.isExternal}
+										>{completion.isExternal ? '학점교류 · FR' : '분반 미상'}</span
+									>
+								</li>
+							{/each}
+						</ul>
+					</section>
+				{/if}
+			</div>
+
+			{#if selected && searchFilter}
+				{#key searchSession}
+					<CourseSearchPanel
+						offerings={data.offerings}
+						timetable={selected}
+						offeringRestrictions={data.offeringRestrictions}
+						filter={searchFilter}
+						{busy}
+						{pendingEnhance}
+						onclose={closeCourseBrowser}
+						onclearfilter={clearCourseSearchFilter}
+						{courseColor}
+						{scheduleText}
+					/>
+				{/key}
+			{/if}
 		</div>
 
 		{#if progress}
@@ -1029,12 +841,6 @@
 	.slot-actions button,
 	.confirmed-badge,
 	.actual-badge,
-	.course-search,
-	.browser-summary,
-	.browser-summary > span,
-	.offering-tags,
-	.offering-actions,
-	.offering-actions button,
 	.degree-preview summary,
 	.section-title,
 	.competition-empty {
@@ -1066,7 +872,7 @@
 	.term-picker input,
 	.term-picker select {
 		border-color: transparent;
-		background: var(--gray-bg);
+		background: var(--white);
 	}
 	.term-submit {
 		display: grid;
@@ -1087,6 +893,29 @@
 		color: white;
 		font-weight: 650;
 		font-size: 0.68rem;
+	}
+	.schedule-toolbar {
+		display: flex;
+		justify-content: flex-end;
+		border-bottom: var(--divider-border-width) solid var(--gray-border);
+		background: var(--white);
+		padding: 0.4rem 0.5rem;
+	}
+	.schedule-toolbar button {
+		display: flex;
+		align-items: center;
+		gap: 0.25rem;
+		border-color: color-mix(in srgb, var(--secondary) 36%, var(--gray-border));
+		background: var(--white);
+		padding: 0.32rem 0.52rem;
+		color: var(--secondary);
+		font-weight: 650;
+		font-size: 0.66rem;
+	}
+	.schedule-toolbar button:hover:not(:disabled),
+	.schedule-toolbar button:focus-visible {
+		outline: 0;
+		background: color-mix(in srgb, var(--secondary) 7%, var(--white));
 	}
 	.unconfirm-button {
 		gap: 0.25rem;
@@ -1236,15 +1065,21 @@
 		align-items: start;
 		gap: 0.8rem;
 	}
+	.planner-workspace.search-open {
+		grid-template-columns: minmax(0, 1fr) minmax(19rem, 25rem);
+	}
+	.planner-main {
+		display: grid;
+		gap: 0.8rem;
+		min-width: 0;
+	}
 	.schedule-panel,
-	.course-browser,
 	.degree-preview,
 	.competition-card {
 		border-radius: 0.8rem;
 		overflow: hidden;
 	}
 	.schedule-panel,
-	.course-browser,
 	.degree-preview {
 		padding: 0;
 	}
@@ -1283,12 +1118,17 @@
 		font-size: 0.62rem;
 	}
 	.schedule-onboarding button {
+		display: flex;
 		flex: 0 0 auto;
-		border-color: color-mix(in srgb, var(--secondary) 30%, var(--gray-border));
+		align-items: center;
+		gap: 0.25rem;
+		margin-left: auto;
+		border-color: color-mix(in srgb, var(--secondary) 36%, var(--gray-border));
 		background: var(--white);
-		padding: 0.32rem 0.5rem;
+		padding: 0.32rem 0.52rem;
 		color: var(--secondary);
-		font-size: 0.64rem;
+		font-weight: 650;
+		font-size: 0.66rem;
 	}
 	.schedule-grid {
 		display: grid;
@@ -1322,38 +1162,38 @@
 	.day-lane {
 		position: relative;
 		border-right: var(--divider-border-width) solid var(--gray-border);
-		background-image: linear-gradient(
-			to bottom,
-			color-mix(in srgb, var(--gray-border) 65%, transparent) 0,
-			color-mix(in srgb, var(--gray-border) 65%, transparent) var(--divider-border-width),
-			transparent var(--divider-border-width),
-			transparent var(--grid-step)
-		);
-		background-position: 0 var(--grid-padding);
-		background-size: 100% var(--grid-step);
-		background-repeat: repeat-y;
 	}
 	.day-lane:last-child {
 		border-right: 0;
 	}
-	.grid-slot {
-		display: grid;
+	.schedule-guide {
 		position: absolute;
 		right: 0;
 		left: 0;
+		z-index: 0;
+		border-top: var(--divider-border-width) solid
+			color-mix(in srgb, var(--gray-border) 75%, transparent);
+		pointer-events: none;
+	}
+	button.grid-slot {
+		display: grid;
+		position: absolute;
+		right: 0.12rem;
+		left: 0.12rem;
 		place-items: center;
 		z-index: 1;
 		cursor: cell;
 		border: 0;
-		border-radius: 0;
-		background: transparent;
+		border-radius: 0.28rem;
+		background-image: none;
+		background-color: var(--white);
 		padding: 0;
-		color: transparent;
+		color: color-mix(in srgb, var(--gray-text) 55%, transparent);
 	}
-	.grid-slot:hover,
-	.grid-slot:focus-visible {
+	button.grid-slot:hover:not(:disabled),
+	button.grid-slot:focus-visible {
 		outline: 0;
-		background: color-mix(in srgb, var(--secondary) 8%, transparent);
+		background-color: color-mix(in srgb, var(--secondary) 8%, var(--white));
 		color: var(--secondary);
 	}
 	.grid-slot:focus-visible {
@@ -1446,44 +1286,6 @@
 		background: var(--error-bg);
 		color: var(--error-text);
 	}
-	.course-browser {
-		position: static;
-		order: -1;
-	}
-	.course-browser.slot-browser {
-		--slot-browser-height: min(70vh, 38rem);
-		position: fixed;
-		right: 1rem;
-		bottom: 1rem;
-		z-index: 40;
-		box-shadow: 0 0.8rem 2.5rem color-mix(in srgb, var(--text) 18%, transparent);
-		background: var(--white);
-		width: min(27rem, calc(50vw - 1.25rem));
-		overflow: hidden;
-	}
-	.course-browser.slot-browser-left {
-		right: auto;
-		left: 1rem;
-	}
-	.course-browser.slot-browser-top {
-		top: 4.5rem;
-		bottom: auto;
-	}
-	.course-browser.slot-browser[open] {
-		display: block;
-	}
-	.course-browser.slot-browser .browser-body {
-		height: calc(var(--slot-browser-height) - 2.6rem);
-		max-height: calc(100vh - 8.1rem);
-		overflow-y: auto;
-		overscroll-behavior: contain;
-		scrollbar-gutter: stable;
-		touch-action: auto;
-	}
-	.course-browser.slot-browser .offering-list {
-		max-height: none;
-		overflow: visible;
-	}
 	.unscheduled-records {
 		padding: 0.8rem;
 	}
@@ -1543,37 +1345,8 @@
 		color: var(--gray-text);
 		font-size: 0.62rem;
 	}
-	.unscheduled-records form {
-		flex: 0 0 auto;
-	}
-	.unscheduled-remove {
-		display: grid;
-		place-items: center;
-		border: 0;
-		background: transparent;
-		padding: 0.3rem;
-		color: var(--gray-text);
-	}
-	.unscheduled-remove:hover {
-		color: var(--error-text);
-	}
 	.unscheduled-records .external-record {
 		color: var(--secondary);
-	}
-	.browser-summary {
-		justify-content: space-between;
-		cursor: pointer;
-		padding: 0.7rem 0.8rem;
-		list-style: none;
-	}
-	.browser-summary::-webkit-details-marker {
-		display: none;
-	}
-	.browser-summary > span {
-		gap: 0.4rem;
-	}
-	.summary-end {
-		align-items: center;
 	}
 	.disclosure-icon {
 		display: grid !important;
@@ -1591,167 +1364,12 @@
 	details[open] > summary .disclosure-icon {
 		transform: rotate(180deg);
 	}
-	.browser-summary b {
-		font-size: 0.82rem;
-	}
-	.browser-summary small {
-		color: var(--gray-text);
-		font-size: 0.65rem;
-	}
-	.course-browser[open] .browser-summary {
-		border-bottom: var(--divider-border-width) solid var(--gray-border);
-	}
-	.browser-controls {
-		display: flex;
-		flex-wrap: wrap;
-		align-items: center;
-		gap: 0.4rem;
-		padding: 0.65rem 0.65rem 0.45rem;
-	}
-	.course-search {
-		flex: 1 1 20rem;
-		gap: 0.35rem;
-		border: var(--control-border-width) solid var(--gray-border);
-		border-radius: 0.5rem;
-		padding-left: 0.5rem;
-		min-width: min(100%, 15rem);
-		max-width: 30rem;
-		color: var(--gray-text);
-	}
-	.course-search input {
-		border: 0;
-		width: 100%;
-	}
-	.search-filter-tags {
-		display: flex;
-		gap: 0.3rem;
-		padding: 0 0.65rem 0.55rem;
-		overflow-x: auto;
-		overscroll-behavior-inline: contain;
-		scrollbar-width: thin;
-		touch-action: pan-x;
-	}
-	.filter-tag {
-		display: flex;
-		flex: 0 0 auto;
-		align-items: center;
-		gap: 0.22rem;
-		border-width: var(--control-border-width);
-		border-radius: 999px;
-		background: var(--white);
-		padding: 0.28rem 0.5rem;
-		color: var(--gray-text);
-		font-size: 0.63rem;
-		line-height: 1;
-	}
-	.filter-tag.active {
-		border-color: var(--secondary);
-		background: color-mix(in srgb, var(--secondary) 8%, white);
-		color: var(--secondary);
-	}
-	.filter-tag.removable {
-		padding-right: 0.38rem;
-	}
-	.offering-list {
-		max-height: 35rem;
-		overflow-y: auto;
-	}
-	.offering-list > article {
-		display: grid;
-		grid-template-columns: 3px 1fr auto;
-		gap: 0.5rem;
-		border-top: var(--divider-border-width) solid var(--gray-border);
-		padding: 0.6rem 0.65rem;
-	}
-	.offering-list > article > i {
-		border-radius: 999px;
-		width: 3px;
-	}
-	.offering-list > article.added {
-		background: var(--success-bg);
-	}
-	.offering-list > article.unavailable {
-		opacity: 0.68;
-	}
-	.offering-copy {
-		display: flex;
-		flex-direction: column;
-		min-width: 0;
-	}
-	.offering-copy > strong {
-		display: flex;
-		flex-direction: column;
-		margin: 0.15rem 0;
-		font-size: 0.74rem;
-	}
-	.offering-copy > strong small {
-		color: var(--gray-text);
-		font-weight: 400;
-		font-size: 0.62rem;
-	}
-	.offering-copy p {
-		margin: 0.05rem 0;
-		color: var(--gray-text);
-		font-size: 0.61rem;
-		line-height: 1.35;
-	}
-	.offering-tags {
-		gap: 0.22rem;
-	}
-	.offering-tags span {
-		border-radius: 0.2rem;
-		background: var(--gray-bg);
-		padding: 0.12rem 0.25rem;
-		color: var(--gray-text);
-		font-size: 0.55rem;
-	}
-	.offering-tags .unavailable-label {
-		background: var(--error-bg);
-		color: var(--error-text);
-	}
-	.offering-actions {
-		flex-direction: column;
-		justify-content: center;
-		align-items: flex-end;
-		gap: 0.25rem;
-	}
-	.offering-actions a {
-		color: var(--gray-text);
-		font-size: 0.58rem;
-		text-decoration: underline;
-		text-decoration-color: color-mix(in srgb, currentColor 55%, transparent);
-		text-underline-offset: 0.16rem;
-	}
-	.offering-actions button {
-		gap: 0.18rem;
-		padding: 0.22rem 0.42rem;
-		font-size: 0.62rem;
-	}
-	.offering-actions .add-offering {
-		border-color: var(--secondary);
-		background: var(--secondary);
-		color: var(--white);
-	}
-	.offering-actions .remove-offering {
-		border-color: color-mix(in srgb, var(--error-text) 35%, var(--gray-border));
-		background: var(--white);
-		color: var(--error-text);
-	}
-	.empty-list,
 	.empty-timetable {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
 		color: var(--gray-text);
 		text-align: center;
-	}
-	.empty-list {
-		gap: 0.25rem;
-		padding: 2rem;
-	}
-	.empty-list p {
-		margin: 0;
-		font-size: 0.72rem;
 	}
 	.degree-preview summary {
 		display: grid;
@@ -2044,9 +1662,14 @@
 	.empty-timetable p {
 		font-size: 0.76rem;
 	}
-	@media (max-width: 1050px) {
-		.offering-list {
-			max-height: 27rem;
+	@media (max-width: 1100px) {
+		.planner-workspace.search-open {
+			grid-template-columns: minmax(0, 1fr) minmax(18rem, 21rem);
+		}
+	}
+	@media (max-width: 900px) {
+		.planner-workspace.search-open {
+			grid-template-columns: minmax(0, 1fr);
 		}
 	}
 	@media (max-width: 760px) {
@@ -2145,23 +1768,9 @@
 			grid-row: 2;
 			grid-column: 2 / 4;
 		}
-		.course-browser.slot-browser {
-			--slot-browser-height: min(68vh, 34rem);
-			top: auto;
-			right: 0.5rem;
-			bottom: 0.5rem;
-			left: 0.5rem;
-			width: auto;
-		}
-		.course-browser.slot-browser .browser-body {
-			max-height: calc(100vh - 3.6rem);
-		}
 		.schedule-onboarding {
 			flex-wrap: wrap;
 			align-items: flex-start;
-		}
-		.schedule-onboarding button {
-			margin-left: 2.35rem;
 		}
 		.competition-list > div {
 			grid-template-columns: 1fr 3rem 3rem 4rem;
