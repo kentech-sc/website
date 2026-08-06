@@ -6,8 +6,8 @@
 	"scope": "/",
 	"display": "standalone",
 	"orientation": "portrait",
-	"background_color": "#eff4ff",
-	"theme_color": "#eff4ff",
+	"background_color": "#0084ca",
+	"theme_color": "#0084ca",
 	"description": "KENTECH 총학생회 웹사이트",
 	"lang": "ko-KR",
 	"icons": [

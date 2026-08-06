@@ -1,0 +1,19 @@
+<svg
+	xmlns="http://www.w3.org/2000/svg"
+	viewBox="0 0 512 512"
+	role="img"
+	aria-labelledby="logo-title logo-description"
+>
+	<title id="logo-title">KENTECH 총학생회 임시 로고</title>
+	<desc id="logo-description">파란 원 안에 흰색 K가 있는 단순한 로고</desc>
+
+	<circle cx="256" cy="256" r="220" fill="#0084ca" />
+	<path
+		d="M188 148v216m4-98 126-118M192 266l138 98"
+		fill="none"
+		stroke="#fff"
+		stroke-linecap="round"
+		stroke-linejoin="round"
+		stroke-width="48"
+	/>
+</svg>
