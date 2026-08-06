@@ -71,7 +71,6 @@
 			<span>
 				<Calendar size="0.8rem" color="var(--gray-text)" />
 				{(item as Review).year}년 {translatedTerm[(item as Review).term]}학기 수강
-				{(item as Review).section ? ` · ${(item as Review).section}분반` : ''}
 			</span>
 		{/if}
 	</p>

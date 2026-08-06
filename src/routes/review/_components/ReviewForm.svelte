@@ -28,12 +28,25 @@
 	const availableTerms = $derived(
 		[...new Set(reviewableOfferings.map((offering) => offering.term))].sort((a, b) => a - b)
 	);
+	/** 분반은 개설강좌를 구분하지 않는다 — 같은 강의·학기·교수진이면 대표 개설강좌 하나로 합친다. */
+	function offeringGroupKey(offering: Offering): string {
+		const professorIds = offering.professors
+			.map((professor) => professor.id)
+			.sort()
+			.join(',');
+		return `${offering.courseId}|${offering.year}|${offering.term}|${professorIds}`;
+	}
+	const groupedOfferings = $derived([
+		...new Map(
+			reviewableOfferings.map((offering) => [offeringGroupKey(offering), offering])
+		).values()
+	]);
 	const filteredOfferings = $derived(
-		reviewableOfferings
+		groupedOfferings
 			.filter((offering) => !yearFilter || offering.year === Number(yearFilter))
 			.filter((offering) => !termFilter || offering.term === Number(termFilter))
 			.filter((offering) =>
-				`${offering.courseId} ${offering.courseName} ${offering.subtitle ?? ''} ${offering.professors.map((professor) => professor.name).join(' ')} ${offering.section}`
+				`${offering.courseId} ${offering.courseName} ${offering.subtitle ?? ''} ${offering.professors.map((professor) => professor.name).join(' ')}`
 					.toLowerCase()
 					.includes(offeringQuery.trim().toLowerCase())
 			)
@@ -73,9 +86,8 @@
 	}
 
 	function offeringLabel(offering: Offering): string {
-		const section = offering.section ? ` · ${offering.section}분반` : '';
 		const professors = offering.professors.map((professor) => professor.name).join(', ');
-		return `[${offering.courseId}] ${offering.courseName} · ${offering.year}-${offering.term}${section} · ${professors || '담당 교수 개별 배정'}`;
+		return `[${offering.courseId}] ${offering.courseName} · ${offering.year}-${offering.term} · ${professors || '담당 교수 개별 배정'}`;
 	}
 </script>
 
@@ -91,10 +103,9 @@
 					<p class="fixed-offering">
 						<strong>[{review.courseId}] {review.courseName}</strong>
 						<span>
-							{review.year}년 {translatedTerm[review.term]}학기
-							{review.section ? ` · ${review.section}분반` : ''}
-							· {review.professors.map((professor) => professor.name).join(', ') ||
-								'담당 교수 개별 배정'}
+							{review.year}년 {translatedTerm[review.term]}학기 · {review.professors
+								.map((professor) => professor.name)
+								.join(', ') || '담당 교수 개별 배정'}
 						</span>
 					</p>
 				{:else}

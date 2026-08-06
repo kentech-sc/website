@@ -53,10 +53,7 @@
 					{item.professors.length
 						? `${item.professors.map((professor) => professor.name).join(', ')} 교수`
 						: '담당 교수 개별 배정'} | {item.courseName}
-					| {item.year}년 {translatedTerm[item.term]}학기{item.section
-						? ` · ${item.section}분반`
-						: ''}
-					| 만족도 {item.score.satisfaction}/10
+					| {item.year}년 {translatedTerm[item.term]}학기 | 만족도 {item.score.satisfaction}/10
 				{/if}
 			</span>
 			<span class="time">{parseRelativeDate(item.createdAt)}</span>
