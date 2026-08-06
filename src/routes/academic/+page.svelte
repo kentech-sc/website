@@ -297,206 +297,208 @@
 		</section>
 	{/if}
 
-	<section class="module records-card" id="course-history">
-		<div class="section-header">
-			<div class="section-title">
-				<BookOpenCheck size="1.1rem" />
-				<div>
-					<h2>수강 이력</h2>
-					<p>직접 등록한 내용을 기준으로 계산합니다.</p>
-				</div>
-			</div>
-			<label class="search-field"
-				><Search size="0.9rem" /><input
-					type="search"
-					bind:value={historyQuery}
-					placeholder="과목명·코드 검색"
-					aria-label="수강 이력 검색"
-				/></label
-			>
-		</div>
-
-		<div class="record-tools">
-			<PortalCompletionImport courses={data.courses} {form} />
-			<RecordEntryDialog
-				title="한 과목 직접 추가"
-				description="KIS 일괄 등록이 어려울 때 사용합니다"
-				bind:open={manualAddOpen}
-			>
-				{#snippet icon()}<Plus size="1rem" />{/snippet}
-				<form
-					method="POST"
-					action="?/addCompletion"
-					use:enhance={manualAddEnhance}
-					class="completion-form"
-				>
-					<div class="mode-switch" role="group" aria-label="강의 선택 방식">
-						<button
-							type="button"
-							class:active={manualMode === 'catalog'}
-							onclick={() => (manualMode = 'catalog')}>목록에서 선택</button
-						>
-						<button
-							type="button"
-							class:active={manualMode === 'new'}
-							onclick={() => (manualMode = 'new')}>목록에 없음</button
-						>
+	{#if data.academicProfile}
+		<section class="module records-card" id="course-history">
+			<div class="section-header">
+				<div class="section-title">
+					<BookOpenCheck size="1.1rem" />
+					<div>
+						<h2>수강 이력</h2>
+						<p>직접 등록한 내용을 기준으로 계산합니다.</p>
 					</div>
-					{#if manualMode === 'catalog'}
-						<label class="course-select"
-							><span>강의</span><input
-								type="search"
-								bind:value={courseQuery}
-								placeholder="목록 안에서 검색"
-								aria-label="추가할 강의 검색"
-							/><select
-								name="courseId"
-								required
-								value={selectedCourseId}
-								onchange={updateManualCourse}
-								><option value="">과목 선택</option
-								>{#each filteredCourses as course (course.id)}<option value={course.id}
-										>[{course.id}] {course.name}</option
-									>{/each}</select
-							></label
-						>
-					{:else}
-						<label
-							><span>과목코드</span><input
-								name="courseId"
-								bind:value={newCourseCode}
-								placeholder="예: M3502.002200"
-								required
-							/></label
-						>
-						<label class="course-select"
-							><span>과목명</span><input
-								name="courseName"
-								bind:value={newCourseName}
-								placeholder="과목명"
-								required
-							/></label
-						>
-						<label
-							><span>영역</span><select name="category" bind:value={newCourseCategory}
-								>{#each DEGREE_CATEGORIES as category (category)}<option value={category}
-										>{category}</option
-									>{/each}</select
-							></label
-						>
-						<label
-							><span>학점</span><input
-								type="number"
-								name="credits"
-								min="0"
-								step="0.5"
-								bind:value={newCourseCredits}
-								required
-							/></label
-						>
-						{#if duplicateNewCourse}
-							<p class="warning" aria-live="polite">
-								이미 존재하는 과목 코드입니다. ({duplicateNewCourse.id} · {duplicateNewCourse.name})
-								목록에서 선택해주세요.
-							</p>
-						{/if}
-					{/if}
-					<label
-						><span>연도</span><input
-							type="number"
-							name="year"
-							min="2022"
-							value={new Date().getFullYear()}
-						/></label
-					>
-					<label
-						><span>학기</span><select name="term"
-							><option value="1">1학기</option><option value="2">2학기</option><option value="3"
-								>하계</option
-							><option value="4">동계</option></select
-						></label
-					>
-					{#if manualMode === 'catalog'}
-						<div class="credit-readout" aria-live="polite">
-							<span>학점</span>
-							<strong class:empty={!selectedManualCourse}
-								>{selectedManualCourse
-									? selectedManualCourse.creditType === 'pass'
-										? 'P'
-										: `${manualCredits}학점`
-									: '강의를 선택하세요'}</strong
-							>
-							<input type="hidden" name="credits" value={manualCredits} />
-						</div>
-					{/if}
-					<label
-						><span>결과</span><select name="status"
-							><option value="passed">이수</option><option value="failed">낙제</option><option
-								value="withdrawn">수강 철회</option
-							></select
-						></label
-					>
-					<label
-						><span>성적 <small>(선택)</small></span><input
-							name="grade"
-							placeholder="A+, P 등"
-						/></label
-					>
-					{#if manualAddError}<p class="warning" aria-live="polite">{manualAddError}</p>{/if}
-					<button disabled={!!duplicateNewCourse}>수강 이력에 추가</button>
-				</form>
-			</RecordEntryDialog>
-		</div>
+				</div>
+				<label class="search-field"
+					><Search size="0.9rem" /><input
+						type="search"
+						bind:value={historyQuery}
+						placeholder="과목명·코드 검색"
+						aria-label="수강 이력 검색"
+					/></label
+				>
+			</div>
 
-		{#if completionGroups.length}
-			<div class="record-groups">
-				{#each completionGroups as [period, completions] (period)}
-					<details class="record-group" open={historyQuery.trim().length > 0}>
-						<summary>
-							<span class="record-period"
-								><b>{completions[0].year}년 {termLabel(completions[0].term)}</b><small
-									>{completions.length}과목</small
-								></span
+			<div class="record-tools">
+				<PortalCompletionImport courses={data.courses} {form} />
+				<RecordEntryDialog
+					title="한 과목 직접 추가"
+					description="KIS 일괄 등록이 어려울 때 사용합니다"
+					bind:open={manualAddOpen}
+				>
+					{#snippet icon()}<Plus size="1rem" />{/snippet}
+					<form
+						method="POST"
+						action="?/addCompletion"
+						use:enhance={manualAddEnhance}
+						class="completion-form"
+					>
+						<div class="mode-switch" role="group" aria-label="강의 선택 방식">
+							<button
+								type="button"
+								class:active={manualMode === 'catalog'}
+								onclick={() => (manualMode = 'catalog')}>목록에서 선택</button
 							>
-							<span class="disclosure-icon"><ChevronDown size="0.9rem" /></span>
-						</summary>
-						<ul>
-							{#each completions as completion (completion.id)}
-								<li>
-									<div class="course-copy">
-										<b>{completion.courseName}</b><span
-											>{completion.courseCode} · {completion.credits === 0
-												? 'P'
-												: `${completion.credits}학점`}{completion.grade
-												? ` · ${completion.grade}`
-												: ''}</span
-										>
-									</div>
-									<span
-										class:failed={completion.status === 'failed'}
-										class:withdrawn={completion.status === 'withdrawn'}
-										class="status-badge">{statusLabel(completion.status)}</span
-									>
-									<form method="POST" action="?/removeCompletion">
-										<input type="hidden" name="completionId" value={completion.id} /><button
-											class="remove-button"
-											aria-label={`${completion.courseName} 삭제`}
-											title="삭제"><Trash size="0.85rem" /></button
-										>
-									</form>
-								</li>
-							{/each}
-						</ul>
-					</details>
-				{/each}
+							<button
+								type="button"
+								class:active={manualMode === 'new'}
+								onclick={() => (manualMode = 'new')}>목록에 없음</button
+							>
+						</div>
+						{#if manualMode === 'catalog'}
+							<label class="course-select"
+								><span>강의</span><input
+									type="search"
+									bind:value={courseQuery}
+									placeholder="목록 안에서 검색"
+									aria-label="추가할 강의 검색"
+								/><select
+									name="courseId"
+									required
+									value={selectedCourseId}
+									onchange={updateManualCourse}
+									><option value="">과목 선택</option
+									>{#each filteredCourses as course (course.id)}<option value={course.id}
+											>[{course.id}] {course.name}</option
+										>{/each}</select
+								></label
+							>
+						{:else}
+							<label
+								><span>과목코드</span><input
+									name="courseId"
+									bind:value={newCourseCode}
+									placeholder="예: M3502.002200"
+									required
+								/></label
+							>
+							<label class="course-select"
+								><span>과목명</span><input
+									name="courseName"
+									bind:value={newCourseName}
+									placeholder="과목명"
+									required
+								/></label
+							>
+							<label
+								><span>영역</span><select name="category" bind:value={newCourseCategory}
+									>{#each DEGREE_CATEGORIES as category (category)}<option value={category}
+											>{category}</option
+										>{/each}</select
+								></label
+							>
+							<label
+								><span>학점</span><input
+									type="number"
+									name="credits"
+									min="0"
+									step="0.5"
+									bind:value={newCourseCredits}
+									required
+								/></label
+							>
+							{#if duplicateNewCourse}
+								<p class="warning" aria-live="polite">
+									이미 존재하는 과목 코드입니다. ({duplicateNewCourse.id} · {duplicateNewCourse.name})
+									목록에서 선택해주세요.
+								</p>
+							{/if}
+						{/if}
+						<label
+							><span>연도</span><input
+								type="number"
+								name="year"
+								min="2022"
+								value={new Date().getFullYear()}
+							/></label
+						>
+						<label
+							><span>학기</span><select name="term"
+								><option value="1">1학기</option><option value="2">2학기</option><option value="3"
+									>하계</option
+								><option value="4">동계</option></select
+							></label
+						>
+						{#if manualMode === 'catalog'}
+							<div class="credit-readout" aria-live="polite">
+								<span>학점</span>
+								<strong class:empty={!selectedManualCourse}
+									>{selectedManualCourse
+										? selectedManualCourse.creditType === 'pass'
+											? 'P'
+											: `${manualCredits}학점`
+										: '강의를 선택하세요'}</strong
+								>
+								<input type="hidden" name="credits" value={manualCredits} />
+							</div>
+						{/if}
+						<label
+							><span>결과</span><select name="status"
+								><option value="passed">이수</option><option value="failed">낙제</option><option
+									value="withdrawn">수강 철회</option
+								></select
+							></label
+						>
+						<label
+							><span>성적 <small>(선택)</small></span><input
+								name="grade"
+								placeholder="A+, P 등"
+							/></label
+						>
+						{#if manualAddError}<p class="warning" aria-live="polite">{manualAddError}</p>{/if}
+						<button disabled={!!duplicateNewCourse}>수강 이력에 추가</button>
+					</form>
+				</RecordEntryDialog>
 			</div>
-		{:else}
-			<div class="empty-records">
-				<BookOpenCheck size="1.4rem" />
-				<p>{historyQuery ? '검색 결과가 없습니다.' : '아직 등록된 수강 이력이 없습니다.'}</p>
-			</div>
-		{/if}
-	</section>
+
+			{#if completionGroups.length}
+				<div class="record-groups">
+					{#each completionGroups as [period, completions] (period)}
+						<details class="record-group" open={historyQuery.trim().length > 0}>
+							<summary>
+								<span class="record-period"
+									><b>{completions[0].year}년 {termLabel(completions[0].term)}</b><small
+										>{completions.length}과목</small
+									></span
+								>
+								<span class="disclosure-icon"><ChevronDown size="0.9rem" /></span>
+							</summary>
+							<ul>
+								{#each completions as completion (completion.id)}
+									<li>
+										<div class="course-copy">
+											<b>{completion.courseName}</b><span
+												>{completion.courseCode} · {completion.credits === 0
+													? 'P'
+													: `${completion.credits}학점`}{completion.grade
+													? ` · ${completion.grade}`
+													: ''}</span
+											>
+										</div>
+										<span
+											class:failed={completion.status === 'failed'}
+											class:withdrawn={completion.status === 'withdrawn'}
+											class="status-badge">{statusLabel(completion.status)}</span
+										>
+										<form method="POST" action="?/removeCompletion">
+											<input type="hidden" name="completionId" value={completion.id} /><button
+												class="remove-button"
+												aria-label={`${completion.courseName} 삭제`}
+												title="삭제"><Trash size="0.85rem" /></button
+											>
+										</form>
+									</li>
+								{/each}
+							</ul>
+						</details>
+					{/each}
+				</div>
+			{:else}
+				<div class="empty-records">
+					<BookOpenCheck size="1.4rem" />
+					<p>{historyQuery ? '검색 결과가 없습니다.' : '아직 등록된 수강 이력이 없습니다.'}</p>
+				</div>
+			{/if}
+		</section>
+	{/if}
 
 	<details class="module profile-settings" open={!data.academicProfile}>
 		<summary

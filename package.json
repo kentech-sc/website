@@ -17,6 +17,7 @@
 		"db:migrate": "drizzle-kit migrate",
 		"db:studio": "drizzle-kit studio",
 		"fix": "prettier --write . && eslint src vite.config.ts eslint.config.js --fix",
+		"lint": "prettier --check src/routes/academic/+page.svelte && eslint src/routes/academic/+page.svelte",
 		"prepare": "husky"
 	},
 	"lint-staged": {
