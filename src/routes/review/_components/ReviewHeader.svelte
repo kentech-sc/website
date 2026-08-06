@@ -1,6 +1,5 @@
 <script lang="ts">
 	import Pen from '@lucide/svelte/icons/pencil';
-	import Plus from '@lucide/svelte/icons/plus';
 	import List from '@lucide/svelte/icons/text';
 
 	import { resolve } from '$app/paths';
@@ -8,12 +7,10 @@
 
 	let {
 		pageType,
-		canCreateReview = false,
-		canManageCatalog = false
+		canCreateReview = false
 	}: {
 		pageType: string;
 		canCreateReview?: boolean;
-		canManageCatalog?: boolean;
 	} = $props();
 
 	const title = '강의평가';
@@ -22,12 +19,6 @@
 
 <CommonHeader {title} {description}>
 	{#if pageType === 'list'}
-		{#if canManageCatalog}
-			<a href={resolve('/course/new')} class="link-btn">
-				<Plus size="0.8rem" />
-				<span>추가하기</span>
-			</a>
-		{/if}
 		{#if canCreateReview}
 			<a href={resolve('/review/new')} class="link-btn">
 				<Pen size="0.8rem" />

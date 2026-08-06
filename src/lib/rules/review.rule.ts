@@ -16,17 +16,17 @@ export function canEditOrDeleteReview(review: ReviewEntity, user: User): RuleRes
 }
 
 export function validateReviewYearAndTerm(year: number, term: number): RuleResult {
-	const years = Array.from({ length: new Date().getFullYear() - 2021 }, (_, i) => 22 + i);
-	if (years.includes(year) && term >= 1 && term <= 4) return ok();
+	const currentYear = new Date().getFullYear();
+	if (year >= 2022 && year <= currentYear && term >= 1 && term <= 4) return ok();
 	return ruleFail(APP_ERROR.BAD_REQUEST, '연도 또는 학기 값이 올바르지 않습니다.');
 }
 
 export function validateReviewScore(score: ReviewScore): RuleResult {
 	const fivePointScores = [score.assignment, score.lecture, score.exam];
-	if (fivePointScores.some((value) => value < 1 || value > 5)) {
+	if (fivePointScores.some((value) => !Number.isFinite(value) || value < 1 || value > 5)) {
 		return ruleFail(APP_ERROR.BAD_REQUEST, '과제, 난이도, 시험 점수는 1에서 5 사이여야 합니다.');
 	}
-	if (score.satisfaction < 1 || score.satisfaction > 10) {
+	if (!Number.isFinite(score.satisfaction) || score.satisfaction < 1 || score.satisfaction > 10) {
 		return ruleFail(APP_ERROR.BAD_REQUEST, '만족도는 1에서 10 사이여야 합니다.');
 	}
 

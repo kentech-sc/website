@@ -8,7 +8,7 @@
 	import CommonListPaginationBtn from '$components/CommonListPaginationBtn.svelte';
 	import FileAttachmentIcons from '$components/FileAttachmentIcons.svelte';
 	import { parseRelativeDate } from '$lib/shared/utils.js';
-	import { translatedTerm, colorStatus, translatedStatus } from '$lib/shared/view';
+	import { colorStatus, translatedStatus, translatedTerm } from '$lib/shared/view';
 
 	let {
 		page,
@@ -41,9 +41,7 @@
 				hasImage={filePresence[item.id.toString()]?.hasImage}
 				hasFile={filePresence[item.id.toString()]?.hasFile}
 			/>
-			{#if 'commentCnt' in item}
-				<span class="comment-cnt">[{item.commentCnt}]</span>
-			{/if}
+			{#if 'commentCnt' in item}<span class="comment-cnt">[{item.commentCnt}]</span>{/if}
 		</div>
 		<div class="row2">
 			<span>
@@ -52,9 +50,10 @@
 				{:else if 'signedBy' in item}
 					{item.petitionerName} | 조회 {item.viewCnt} | 동의 {item.signedBy.length}
 				{:else if 'score' in item}
-					{item.professorName} 교수님 | {item.courseName} | {item.year}년 {translatedTerm[
-						item.term
-					]}학기 | 만족도 {item.score.satisfaction}/10
+					{item.professors.length
+						? `${item.professors.map((professor) => professor.name).join(', ')} 교수`
+						: '담당 교수 개별 배정'} | {item.courseName}
+					| {item.year}년 {translatedTerm[item.term]}학기 | 만족도 {item.score.satisfaction}/10
 				{/if}
 			</span>
 			<span class="time">{parseRelativeDate(item.createdAt)}</span>
@@ -62,36 +61,27 @@
 	</a>
 {/snippet}
 
-{#each page.items as item (item.id)}
-	{@render ListItem(item)}
-{/each}
+{#each page.items as item (item.id)}{@render ListItem(item)}{/each}
 <CommonListPaginationBtn currentPage={page.currentPage} totalPages={page.totalPages} />
 
 <style lang="scss">
 	.list-item {
 		display: flex;
 		flex-direction: column;
-
 		border-bottom: solid var(--gray-border) 0.05rem;
 		padding: 0.6rem 0.8rem;
-
 		width: 100%;
-
 		color: black;
 		text-decoration: none;
-
 		&:first-child {
 			border-radius: 0.6rem 0.6rem 0 0;
 		}
-
 		&:hover {
 			background-color: var(--gray-bg);
 		}
-
 		.row1 {
 			display: flex;
 			align-items: center;
-
 			.title {
 				flex: 1;
 				overflow: hidden;
@@ -101,20 +91,17 @@
 				white-space: nowrap;
 			}
 		}
-
 		.row2 {
 			display: flex;
 			justify-content: space-between;
 			align-items: center;
 			color: var(--gray-text);
 			font-size: 0.8rem;
-
 			.time {
 				flex-shrink: 0;
 			}
 		}
 	}
-
 	.comment-cnt {
 		flex-shrink: 0;
 		margin-left: 0.2rem;
@@ -122,7 +109,6 @@
 		font-weight: 600;
 		font-size: 0.7rem;
 	}
-
 	.petition-status {
 		margin-right: 0.2rem;
 		font-weight: 600;

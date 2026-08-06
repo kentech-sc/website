@@ -1,12 +1,14 @@
-import { and, desc, eq, ilike, or, sql } from 'drizzle-orm';
+import { and, desc, eq, exists, ilike, or, sql } from 'drizzle-orm';
 
 import { asEntity, firstOrNull } from './repository.utils.js';
 
+import type { OfferingId } from '$lib/types/academic.type.js';
 import type { CourseId } from '$lib/types/course.type.js';
 import type { ProfessorId } from '$lib/types/professor.type.js';
 import type { ReviewCreate, ReviewEntity, ReviewId, ReviewUpdate } from '$lib/types/review.type.js';
+import type { UserId } from '$lib/types/user.type.js';
 
-import { reviews } from '$lib/server/database/schema.js';
+import { courseOfferingProfessors, courseOfferings, reviews } from '$lib/server/database/schema.js';
 import { getDatabase } from '$lib/server/db.js';
 
 type ReviewRow = typeof reviews.$inferSelect;
@@ -14,11 +16,8 @@ type ReviewRow = typeof reviews.$inferSelect;
 function toReview(row: ReviewRow): ReviewEntity {
 	return asEntity<ReviewEntity>({
 		id: row.id,
-		courseId: row.courseId,
-		professorId: row.professorId,
+		offeringId: row.offeringId,
 		userId: row.userId,
-		year: row.year,
-		term: row.term,
 		title: row.title,
 		score: {
 			assignment: row.assignmentScore,
@@ -45,8 +44,19 @@ function toReviewValues(review: ReviewCreate | ReviewUpdate) {
 
 function filter(professorId?: ProfessorId, courseId?: CourseId) {
 	const conditions = [];
-	if (professorId) conditions.push(eq(reviews.professorId, professorId));
-	if (courseId) conditions.push(eq(reviews.courseId, courseId));
+	if (professorId) {
+		const offeringProfessorMatch = getDatabase()
+			.select({ professorId: courseOfferingProfessors.professorId })
+			.from(courseOfferingProfessors)
+			.where(
+				and(
+					eq(courseOfferingProfessors.offeringId, reviews.offeringId),
+					eq(courseOfferingProfessors.professorId, professorId)
+				)
+			);
+		conditions.push(exists(offeringProfessorMatch));
+	}
+	if (courseId) conditions.push(eq(courseOfferings.courseId, courseId));
 	return conditions.length > 0 ? and(...conditions) : undefined;
 }
 
@@ -62,6 +72,7 @@ export async function countReviews(
 	const [result] = await getDatabase()
 		.select({ count: sql<number>`count(*)::int` })
 		.from(reviews)
+		.leftJoin(courseOfferings, eq(reviews.offeringId, courseOfferings.id))
 		.where(filter(professorId, courseId));
 	return result.count;
 }
@@ -88,6 +99,27 @@ export async function findReviewById(reviewId: ReviewId): Promise<ReviewEntity |
 	return row ? toReview(row) : null;
 }
 
+export async function findReviewByUserAndOffering(
+	userId: UserId,
+	offeringId: OfferingId
+): Promise<ReviewEntity | null> {
+	const rows = await getDatabase()
+		.select()
+		.from(reviews)
+		.where(and(eq(reviews.userId, userId), eq(reviews.offeringId, offeringId)))
+		.limit(1);
+	const row = firstOrNull(rows);
+	return row ? toReview(row) : null;
+}
+
+export async function findReviewedOfferingIds(userId: UserId): Promise<Set<OfferingId>> {
+	const rows = await getDatabase()
+		.select({ offeringId: reviews.offeringId })
+		.from(reviews)
+		.where(eq(reviews.userId, userId));
+	return new Set(rows.map((row) => row.offeringId));
+}
+
 export async function findRecentReviews(
 	limit = 10,
 	skip = 0,
@@ -95,13 +127,14 @@ export async function findRecentReviews(
 	courseId?: CourseId
 ): Promise<ReviewEntity[]> {
 	const rows = await getDatabase()
-		.select()
+		.select({ review: reviews })
 		.from(reviews)
+		.leftJoin(courseOfferings, eq(reviews.offeringId, courseOfferings.id))
 		.where(filter(professorId, courseId))
 		.orderBy(desc(reviews.createdAt))
 		.offset(skip)
 		.limit(limit);
-	return rows.map(toReview);
+	return rows.map(({ review }) => toReview(review));
 }
 
 export async function updateReviewById(

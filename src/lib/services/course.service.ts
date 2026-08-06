@@ -1,21 +1,18 @@
-import type { Course, CourseCreate, CourseId } from '$lib/types/course.type.js';
-import type { User } from '$lib/types/user.type.js';
+import type { CatalogCourseCreate, Course, CourseId } from '$lib/types/course.type.js';
 
 import * as CourseRepository from '$lib/repositories/course.repository.js';
-import * as CourseRule from '$lib/rules/course.rule.js';
-import { assertRule } from '$lib/server/errors.js';
-
-export async function createCourse(course: CourseCreate, user: User): Promise<Course> {
-	assertRule(CourseRule.canManageCourse(user));
-
-	const duplicate = await CourseRepository.findCourseById(course.id);
-	assertRule(CourseRule.validateCourseCreate(duplicate !== null));
-
-	return await CourseRepository.createCourse(course);
-}
+import { isApCreditCode } from '$lib/shared/academic-credit.js';
 
 export async function findCourses(): Promise<Course[]> {
 	return await CourseRepository.findCourses();
+}
+
+export async function findInstructionalCourses(): Promise<Course[]> {
+	return (await findCourses()).filter((course) => !isApCreditCode(course.id));
+}
+
+export async function createCourse(value: CatalogCourseCreate): Promise<Course | null> {
+	return await CourseRepository.createCourse(value);
 }
 
 export async function findCourseMapByIds(courseIds: CourseId[]): Promise<Map<string, Course>> {

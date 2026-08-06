@@ -1,5 +1,6 @@
+import type { OfferingId } from './academic.type.js';
 import type { CourseId } from './course.type.js';
-import type { ProfessorId } from './professor.type.js';
+import type { Professor } from './professor.type.js';
 import type { UserId } from './user.type.js';
 
 export type ReviewId = string;
@@ -12,11 +13,8 @@ export interface ReviewScore {
 }
 
 export interface ReviewCreate {
-	courseId: CourseId;
-	professorId: ProfessorId;
+	offeringId: OfferingId;
 	userId: UserId;
-	year: number;
-	term: number; // 1 ~ 4
 	title: string;
 	score: ReviewScore;
 	comment: string;
@@ -29,8 +27,13 @@ export interface ReviewEntity extends ReviewCreate {
 }
 
 export interface Review extends ReviewEntity {
-	courseName: string | null;
-	professorName: string | null;
+	courseId: CourseId;
+	year: number;
+	term: number;
+	section: string | null;
+	courseName: string;
+	subtitle: string | null;
+	professors: Professor[];
 }
 
 export interface ReviewPermissions {
@@ -38,6 +41,4 @@ export interface ReviewPermissions {
 	canDelete: boolean;
 }
 
-export type ReviewUpdate = Partial<
-	Pick<ReviewEntity, 'courseId' | 'professorId' | 'year' | 'term' | 'title' | 'score' | 'comment'>
->;
+export type ReviewUpdate = Partial<Pick<ReviewEntity, 'title' | 'score' | 'comment'>>;

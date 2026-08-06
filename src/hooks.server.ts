@@ -91,8 +91,10 @@ const authorizationHandle: Handle = async ({ event, resolve }) => {
 
 	if (
 		event.url.pathname.startsWith('/petition') ||
+		event.url.pathname.startsWith('/academic') ||
 		event.url.pathname.startsWith('/course') ||
 		event.url.pathname.startsWith('/review') ||
+		event.url.pathname.startsWith('/timetable') ||
 		event.url.pathname.startsWith('/profile') ||
 		/^\/board\/(?:free|notice|bylaw)\/(?:new|[^/]+\/edit)\/?$/.test(event.url.pathname)
 	) {

@@ -27,7 +27,7 @@
 			<h3 class="ellipsis"><span class="board-tag">게시글</span>{item.title}</h3>
 			<p class="ellipsis">{getPlainTextFromHtml(item.content)}</p>
 		</a>
-	{:else if 'courseId' in item}
+	{:else if 'offeringId' in item}
 		<a class="list-item" href={resolve('/review/[reviewId]', { reviewId: item.id.toString() })}>
 			<h3 class="ellipsis"><span class="review-tag">강의평가</span> {item.title}</h3>
 			<p class="ellipsis">{getPlainTextFromHtml(item.comment)}</p>

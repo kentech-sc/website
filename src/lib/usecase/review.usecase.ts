@@ -11,6 +11,8 @@ import type {
 } from '$lib/types/review.type.js';
 import type { User } from '$lib/types/user.type.js';
 
+import * as AcademicRepository from '$lib/repositories/academic.repository.js';
+import * as ReviewRepository from '$lib/repositories/review.repository.js';
 import { transaction } from '$lib/server/db.js';
 import * as ActivityLogService from '$lib/services/activity-log.service.js';
 import * as CourseService from '$lib/services/course.service.js';
@@ -18,28 +20,47 @@ import * as PointService from '$lib/services/point.service.js';
 import * as ProfessorService from '$lib/services/professor.service.js';
 import * as ReviewService from '$lib/services/review.service.js';
 import * as ThrottleService from '$lib/services/throttle.service.js';
-import { hasAnyCapability, hasCapability } from '$lib/shared/permission.js';
+import { hasCapability } from '$lib/shared/permission.js';
 
 export async function fillReviews(reviews: ReviewEntity[]): Promise<Review[]> {
-	const [courseIdToCourse, professorIdToProfessor] = await Promise.all([
-		CourseService.findCourseMapByIds(reviews.map((review) => review.courseId)),
-		ProfessorService.findProfessorMapByIds(reviews.map((review) => review.professorId))
-	]);
-
-	return reviews.map((review) => ({
-		...review,
-		courseName: courseIdToCourse.get(review.courseId.toString())?.name ?? null,
-		professorName: professorIdToProfessor.get(review.professorId.toString())?.name ?? null
-	}));
+	const offeringMap = await AcademicRepository.findOfferingMapByIds(
+		reviews.map((review) => review.offeringId)
+	);
+	return reviews.map((review) => {
+		const offering = offeringMap.get(review.offeringId);
+		if (!offering) throw new Error(`강의평 ${review.id}의 강좌 정보를 확인할 수 없습니다.`);
+		return {
+			...review,
+			courseId: offering.courseId,
+			year: offering.year,
+			term: offering.term,
+			section: offering.section,
+			courseName: offering.courseName,
+			subtitle: offering.subtitle,
+			professors: offering.professors
+		};
+	});
 }
 
-export async function getReviewFormOptions() {
+export async function getReviewFilterOptions() {
 	const [courses, professors] = await Promise.all([
-		CourseService.findCourses(),
+		CourseService.findInstructionalCourses(),
 		ProfessorService.findProfessors()
 	]);
-
 	return { courses, professors };
+}
+
+export async function getReviewFormOptions(user: User) {
+	const [reviewableOfferings, reviewedOfferingIds] = await Promise.all([
+		AcademicRepository.findAllOfferings(),
+		ReviewRepository.findReviewedOfferingIds(user.id)
+	]);
+
+	return {
+		reviewableOfferings: reviewableOfferings.filter(
+			(offering) => !reviewedOfferingIds.has(offering.id)
+		)
+	};
 }
 
 export async function getReviewPage(
@@ -55,8 +76,7 @@ export async function getReviewPage(
 
 	return {
 		reviewPage: reviewPage as Page<Review>,
-		canCreateReview: hasCapability(user, 'review.write'),
-		canManageCatalog: hasAnyCapability(user, ['course.manage', 'professor.manage'])
+		canCreateReview: hasCapability(user, 'review.write')
 	};
 }
 
@@ -72,7 +92,7 @@ export async function getReviewDetail(reviewId: ReviewId, user: User) {
 
 export async function getReviewEditData(reviewId: ReviewId, user: User) {
 	const [formOptions, detail] = await Promise.all([
-		getReviewFormOptions(),
+		getReviewFormOptions(user),
 		getReviewDetail(reviewId, user)
 	]);
 
@@ -98,7 +118,7 @@ export async function createReview(reviewCreate: ReviewCreate, user: User) {
 			afterSnapshot: review
 		};
 		await ActivityLogService.create(activityLog);
-		await PointService.awardReviewCreate(user.id);
+		await PointService.awardReviewCreate(user.id, review.id);
 		return review;
 	});
 }

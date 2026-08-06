@@ -29,6 +29,62 @@
 			"when": 1785576634091,
 			"tag": "0003_funny_rachel_grey",
 			"breakpoints": true
+		},
+		{
+			"idx": 4,
+			"version": "7",
+			"when": 1785911307206,
+			"tag": "0004_academic_platform",
+			"breakpoints": true
+		},
+		{
+			"idx": 5,
+			"version": "7",
+			"when": 1785917541301,
+			"tag": "0005_domain_schemas",
+			"breakpoints": true
+		},
+		{
+			"idx": 6,
+			"version": "7",
+			"when": 1785917547132,
+			"tag": "0006_points_ledger",
+			"breakpoints": true
+		},
+		{
+			"idx": 7,
+			"version": "7",
+			"when": 1785927034918,
+			"tag": "0007_external_courses_esp_waivers",
+			"breakpoints": true
+		},
+		{
+			"idx": 8,
+			"version": "7",
+			"when": 1785927054162,
+			"tag": "0008_migrate_esp_start_levels",
+			"breakpoints": true
+		},
+		{
+			"idx": 9,
+			"version": "7",
+			"when": 1785937083673,
+			"tag": "0009_course_credits",
+			"breakpoints": true
+		},
+		{
+			"idx": 10,
+			"version": "7",
+			"when": 1786041535363,
+			"tag": "0010_merge_external_courses",
+			"breakpoints": true
+		},
+		{
+			"idx": 11,
+			"version": "7",
+			"when": 1786049226954,
+			"tag": "0011_reviews_offering_only",
+			"breakpoints": true
 		}
 	]
 }

@@ -12,10 +12,12 @@
 		"preview": "vite preview",
 		"generate:pwa-assets": "pwa-assets-generator",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+		"test": "node --test src/lib/shared/degree.test.mjs src/lib/shared/course-offering-import.test.mjs src/lib/shared/portal-completion-import.test.mjs",
 		"db:generate": "drizzle-kit generate",
 		"db:migrate": "drizzle-kit migrate",
 		"db:studio": "drizzle-kit studio",
 		"fix": "prettier --write . && eslint src vite.config.ts eslint.config.js --fix",
+		"lint": "prettier --check src/routes/academic/+page.svelte && eslint src/routes/academic/+page.svelte",
 		"prepare": "husky"
 	},
 	"lint-staged": {
@@ -48,6 +50,7 @@
 		"prettier-plugin-css-order": "^2.2.0",
 		"prettier-plugin-svelte": "^4.1.1",
 		"sass": "^1.102.0",
+		"supabase": "^2.111.0",
 		"svelte": "^5.56.8",
 		"svelte-check": "^4.7.4",
 		"typescript": "^6.0.3",
@@ -71,8 +74,10 @@
 		"@vercel/functions": "^3.7.6",
 		"@vercel/speed-insights": "^2.0.0",
 		"drizzle-orm": "^0.45.2",
+		"html-to-image": "^1.11.13",
 		"isomorphic-dompurify": "^3.19.0",
 		"pg": "^8.22.0",
+		"read-excel-file": "^9.3.5",
 		"secure-s3-storage": "^4.0.0",
 		"web-push": "^3.6.7"
 	}

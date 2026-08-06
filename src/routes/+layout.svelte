@@ -15,6 +15,27 @@
 
 	let flash = $state<FlashMessage | null>(null);
 	let navigationKey = $derived(`${page.url.pathname}${page.url.search}`);
+	let pageTitle = $derived(titleForPath(page.url.pathname));
+
+	function titleForPath(pathname: string): string {
+		const sections: Array<[string, string]> = [
+			['/course/import', '강의 데이터'],
+			['/board/notice', '공지사항'],
+			['/board/free', '자유게시판'],
+			['/board/bylaw', '회칙·세칙'],
+			['/review', '강의평가'],
+			['/academic', '이수·졸업'],
+			['/timetable', '시간표'],
+			['/petition', '청원'],
+			['/profile', '내 정보'],
+			['/search', '검색'],
+			['/signin', '로그인'],
+			['/privacy', '개인정보처리방침'],
+			['/terms', '서비스 이용약관']
+		];
+		const section = sections.find(([prefix]) => pathname.startsWith(prefix));
+		return section ? `${section[1]} | 켄텍 총학생회` : '켄텍 총학생회';
+	}
 
 	$effect(() => {
 		void navigationKey;
@@ -33,6 +54,8 @@
 		if (!browser || !flash) return;
 	});
 </script>
+
+<svelte:head><title>{pageTitle}</title></svelte:head>
 
 {#snippet Flash()}
 	{#if flash}

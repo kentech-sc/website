@@ -11,7 +11,7 @@ export default defineConfig({
 	dbCredentials: {
 		url: process.env.DIRECT_DATABASE_URL
 	},
-	schemaFilter: ['app', 'private'],
+	schemaFilter: ['app', 'private', 'community', 'academic', 'points'],
 	strict: true,
 	verbose: true
 });

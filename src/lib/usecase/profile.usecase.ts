@@ -1,5 +1,7 @@
 import type { User, UserGroup, UserId } from '$lib/types/user.type.js';
 
+import * as AcademicRepository from '$lib/repositories/academic.repository.js';
+import { transaction } from '$lib/server/db.js';
 import * as FileMetaService from '$lib/services/file-meta.service.js';
 import * as UserService from '$lib/services/user.service.js';
 import { hasCapability } from '$lib/shared/permission.js';
@@ -33,7 +35,10 @@ export async function unblockUserById(userId: UserId, operator: User) {
 }
 
 export async function deleteUser(operator: User) {
-	await UserService.deleteUser(operator);
+	await transaction(async () => {
+		await AcademicRepository.deleteStudentData(operator.id);
+		await UserService.deleteUser(operator);
+	});
 }
 
 export async function cleanup(hours: number, user: User) {
