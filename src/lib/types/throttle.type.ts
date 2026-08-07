@@ -14,5 +14,3 @@ export interface ThrottleEntity extends ThrottleCreate {
 	createdAt: string;
 	updatedAt: string;
 }
-
-export type Throttle = ThrottleEntity;

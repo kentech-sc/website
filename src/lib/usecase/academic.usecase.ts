@@ -6,7 +6,7 @@ import { readCourseOfferingWorkbook } from '$lib/server/course-workbook.js';
 import { transaction } from '$lib/server/db.js';
 import { AppError } from '$lib/server/errors.js';
 import * as CourseService from '$lib/services/course.service.js';
-import { resolveCompletionStatus } from '$lib/shared/completion.js';
+import { resolveCompletionStatus } from '$lib/shared/completion-status.js';
 import { calculateDegreeProgress } from '$lib/shared/degree.js';
 import { hasCapability } from '$lib/shared/permission.js';
 import {

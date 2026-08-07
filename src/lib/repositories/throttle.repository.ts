@@ -1,4 +1,4 @@
-import { and, eq, inArray, lte, sql } from 'drizzle-orm';
+import { and, eq, lte, sql } from 'drizzle-orm';
 
 import { asEntity, firstOrNull } from './repository.utils.js';
 
@@ -11,13 +11,6 @@ import { getDatabase } from '$lib/server/db.js';
 export async function createThrottle(throttle: ThrottleCreate): Promise<ThrottleEntity> {
 	const [created] = await getDatabase().insert(throttles).values(throttle).returning();
 	return asEntity<ThrottleEntity>(created);
-}
-
-export async function findThrottlesByUserIds(userIds: UserId[]): Promise<ThrottleEntity[]> {
-	if (userIds.length === 0) return [];
-	return asEntity<ThrottleEntity[]>(
-		await getDatabase().select().from(throttles).where(inArray(throttles.userId, userIds))
-	);
 }
 
 export async function updateThrottleByUserIdAndBucket(

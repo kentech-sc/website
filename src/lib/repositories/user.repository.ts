@@ -133,11 +133,6 @@ export async function findUsersByIds(userIds: UserId[]): Promise<Array<UserEntit
 	return userIds.map((userId) => userIdToUser.get(userId) ?? null);
 }
 
-export async function findUserIds(): Promise<UserId[]> {
-	const rows = await getDatabase().select({ id: users.id }).from(users);
-	return rows.map(({ id }) => id);
-}
-
 export async function updateUserById(
 	userId: UserId,
 	userUpdate: UserUpdate

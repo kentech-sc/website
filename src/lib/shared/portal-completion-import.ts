@@ -185,10 +185,67 @@ export const KIS_COMPLETION_EXTRACTOR = String.raw`(async function () {
     return;
   }
   const output = rows.join('\n');
-  navigator.clipboard.writeText(output).then(
-    () => alert(rows.length + '개 수강 과목을 복사했습니다.'),
-    () => window.prompt('내용 칸을 클릭한 뒤 Ctrl+A, Ctrl+C로 복사하세요.', output)
-  );
+  const notifyCopied = () => alert(rows.length + '개 수강 과목을 복사했습니다.');
+  // execCommand는 비동기 클립보드 API와 달리 오래된 사용자 제스처에도 동작한다.
+  const copyByExecCommand = () => {
+    const area = document.createElement('textarea');
+    area.value = output;
+    area.setAttribute('readonly', '');
+    area.style.cssText = 'position:fixed;top:0;left:0;width:1px;height:1px;opacity:0;';
+    document.body.appendChild(area);
+    area.focus();
+    area.select();
+    area.setSelectionRange(0, output.length);
+    let copied = false;
+    try {
+      copied = document.execCommand('copy');
+    } catch (error) {
+      copied = false;
+    }
+    area.remove();
+    return copied;
+  };
+  const tryCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(output);
+      return true;
+    } catch (error) {
+      /* 포커스나 제스처가 없으면 거부된다. 아래 방식으로 한 번 더 시도한다. */
+    }
+    try {
+      return copyByExecCommand();
+    } catch (error) {
+      return false;
+    }
+  };
+  // 북마클릿은 페이지에 포커스가 남아 있어 여기서 바로 끝난다.
+  if (document.hasFocus() && (await tryCopy())) {
+    notifyCopied();
+    return;
+  }
+  // F12 콘솔 실행 등 포커스가 페이지 밖에 있는 경우: 클릭 한 번으로 포커스와 제스처를 함께 얻는다.
+  await new Promise((resolve) => {
+    const overlay = document.createElement('div');
+    overlay.style.cssText =
+      'position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;' +
+      'justify-content:center;background:rgba(0,0,0,.45);font-family:sans-serif;';
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.textContent = rows.length + '개 과목 복사하기';
+    button.style.cssText =
+      'cursor:pointer;border:0;border-radius:8px;background:#1f6feb;color:#fff;' +
+      'padding:14px 22px;font-size:15px;font-weight:700;box-shadow:0 6px 24px rgba(0,0,0,.3);';
+    button.addEventListener('click', async () => {
+      const copied = await tryCopy();
+      overlay.remove();
+      if (copied) notifyCopied();
+      else window.prompt('내용 칸을 클릭한 뒤 Ctrl+A, Ctrl+C로 복사하세요.', output);
+      resolve();
+    });
+    overlay.appendChild(button);
+    document.body.appendChild(overlay);
+    button.focus();
+  });
 })();`;
 
 const BOOKMARKLET_SCRIPT_PATH = '/portal-completion-bookmarklet.js';
