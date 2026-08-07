@@ -46,13 +46,18 @@ export async function getPage(year: number, term: number, user: User) {
 	const offeringRestrictions = Object.fromEntries(
 		offerings.flatMap((offering) => {
 			let reason: string | null = null;
-			if (completedCourseIds.has(offering.courseId)) reason = '이수 완료';
-			else if (offering.category === 'ESP' && !profile) reason = 'ESP 정보 필요';
+			if (offering.category === 'ESP' && !profile) reason = 'ESP 정보 필요';
 			else if (offering.category === 'ESP' && !espSequence) reason = 'ESP 정책 확인 필요';
 			else if (offering.category === 'ESP' && !availableEspCourseIds.has(offering.courseId))
 				reason = 'ESP 단계 제한';
 			return reason ? [[offering.id, reason]] : [];
 		})
+	);
+	/** 담는 것을 막지 않고 알려만 주는 정보 — 이수한 과목도 재수강으로 담을 수 있다. */
+	const offeringNotices = Object.fromEntries(
+		offerings.flatMap((offering) =>
+			completedCourseIds.has(offering.courseId) ? [[offering.id, '이수 완료']] : []
+		)
 	);
 	const baseDegreeProgress = policy
 		? calculateDegreeProgress(completedDegreeCourses, policy.rules, {
@@ -112,6 +117,7 @@ export async function getPage(year: number, term: number, user: User) {
 		timetableProgress,
 		competition,
 		offeringRestrictions,
+		offeringNotices,
 		canManageCatalog: hasCapability(user, 'course.manage')
 	};
 }

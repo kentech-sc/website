@@ -670,6 +670,7 @@
 						offerings={data.offerings}
 						timetable={selected}
 						offeringRestrictions={data.offeringRestrictions}
+						offeringNotices={data.offeringNotices}
 						filter={searchFilter}
 						{busy}
 						{pendingEnhance}
