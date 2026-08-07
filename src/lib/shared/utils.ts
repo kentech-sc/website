@@ -1,10 +1,5 @@
 import type { DisplayType, User } from '$lib/types/user.type.js';
 
-export function toPojo<T>(data: unknown): T {
-	if (data === undefined || data === null) return data as T;
-	return JSON.parse(JSON.stringify(data)) as T;
-}
-
 export function getPlainTextFromHtml(html: string): string {
 	return html
 		.replace(/<[^>]*>/g, ' ')

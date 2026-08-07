@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { resolveCompletionStatus } from './completion.ts';
+import { resolveCompletionStatus } from './completion-status.js';
 import {
 	calculateDegreeProgress,
 	getCourseSequenceProgress,

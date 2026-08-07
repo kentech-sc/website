@@ -37,9 +37,3 @@ export async function getOrCreateUser(profile: Profile): Promise<User> {
 		throw error;
 	}
 }
-
-// Temporary helper: run manually once before production, then remove it.
-export async function backfillMissingLegacyUserThrottles(): Promise<number> {
-	const userIds = await UserService.findUserIds();
-	return await ThrottleService.backfillMissingThrottles(userIds);
-}

@@ -1,4 +1,4 @@
-import type { Offering, OfferingId, TimetableId } from './academic.type.js';
+import type { Offering, TimetableId } from './academic.type.js';
 import type { UserId } from './user.type.js';
 
 export interface Timetable {
@@ -20,9 +20,4 @@ export interface TimetableCreate {
 	term: number;
 	name: string;
 	position: number;
-}
-
-export interface TimetableItemCreate {
-	timetableId: TimetableId;
-	offeringId: OfferingId;
 }

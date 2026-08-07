@@ -49,33 +49,6 @@ export async function createUserThrottles(userId: UserId): Promise<number> {
 	return createdCount;
 }
 
-export async function backfillMissingThrottles(userIds: UserId[]): Promise<number> {
-	if (userIds.length === 0) return 0;
-
-	const uniqueUserIds = Array.from(new Set(userIds));
-	const existingThrottles = await ThrottleRepository.findThrottlesByUserIds(uniqueUserIds);
-	const existingThrottleKeys = new Set(
-		existingThrottles.map((throttle) => `${throttle.userId}:${throttle.bucket}`)
-	);
-	const availableAt = new Date().toISOString();
-	const missingThrottleCreates = uniqueUserIds.flatMap((userId) =>
-		createThrottleCreates(userId, availableAt).filter(
-			(throttleCreate) =>
-				!existingThrottleKeys.has(`${throttleCreate.userId}:${throttleCreate.bucket}`)
-		)
-	);
-
-	if (missingThrottleCreates.length === 0) return 0;
-
-	let createdCount = 0;
-	for (const throttleCreate of missingThrottleCreates) {
-		await ThrottleRepository.createThrottle(throttleCreate);
-		createdCount += 1;
-	}
-
-	return createdCount;
-}
-
 export async function reserve(userId: UserId, bucket: ThrottleBucket) {
 	const now = new Date();
 	const availableAt = new Date(now.getTime() + THROTTLE_MS[bucket]);
