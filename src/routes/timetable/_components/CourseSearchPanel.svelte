@@ -390,6 +390,10 @@
 		border-color: var(--secondary);
 		background: var(--secondary);
 		color: var(--white);
+
+		&:hover:not(:disabled) {
+			background: var(--secondary-strong-hover);
+		}
 	}
 	.remove-offering {
 		border-color: color-mix(in srgb, var(--error-text) 35%, var(--gray-border));
