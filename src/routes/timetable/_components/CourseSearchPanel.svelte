@@ -15,6 +15,7 @@
 		offerings: Offering[];
 		timetable: Pick<Timetable, 'id' | 'offerings'>;
 		offeringRestrictions: Record<string, string>;
+		offeringNotices: Record<string, string>;
 		filter: CourseSearchFilter;
 		busy: boolean;
 		pendingEnhance: SubmitFunction;
@@ -28,6 +29,7 @@
 		offerings,
 		timetable,
 		offeringRestrictions,
+		offeringNotices,
 		filter,
 		busy,
 		pendingEnhance,
@@ -103,10 +105,15 @@
 		if (catalogReason) return { label: catalogReason, order: 2 };
 		return null;
 	}
+	/** 담을 수는 있지만 알아두면 좋은 정보 (예: 이미 이수한 과목의 재수강). */
+	function offeringNotice(offering: Offering): string | null {
+		return offeringNotices[offering.id] ?? null;
+	}
 	function resultRank(offering: Offering): number {
 		if (selectedOfferingIds.has(offering.id)) return 0;
 		const restriction = offeringRestriction(offering, false);
-		return restriction ? restriction.order + 2 : 1;
+		if (restriction) return restriction.order + 3;
+		return offeringNotice(offering) ? 2 : 1;
 	}
 </script>
 
@@ -156,12 +163,14 @@
 			{#each filteredOfferings as offering (offering.id)}
 				{@const alreadyAdded = selectedOfferingIds.has(offering.id)}
 				{@const restriction = offeringRestriction(offering, alreadyAdded)}
+				{@const notice = offeringNotice(offering)}
 				<article class:added={alreadyAdded} class:unavailable={Boolean(restriction)}>
 					<i style={`background: ${courseColor(offering.category)}`}></i>
 					<div class="offering-copy">
 						<div class="offering-tags">
 							<span>{offering.category ?? '기타'}</span><span>{offering.courseId}</span>
-							{#if restriction}<span class="unavailable-label">{restriction.label}</span>{/if}
+							{#if restriction}<span class="unavailable-label">{restriction.label}</span>
+							{:else if notice}<span class="notice-label">{notice}</span>{/if}
 						</div>
 						<strong>
 							{offering.courseName}
@@ -364,6 +373,11 @@
 	.offering-tags .unavailable-label {
 		background: var(--error-bg);
 		color: var(--error-text);
+	}
+	// 차단이 아니라 안내이므로 경고색이 아닌 성공색으로 구분한다.
+	.offering-tags .notice-label {
+		background: var(--success-bg);
+		color: var(--success-text);
 	}
 	.offering-actions {
 		display: flex;

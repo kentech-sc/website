@@ -13,30 +13,7 @@ async function owned(id: string, user: User): Promise<Timetable> {
 	return timetable;
 }
 
-async function validateCompletedCourses(
-	courseIds: string[],
-	user: User,
-	completedCourseIds?: Set<string>
-) {
-	const completed =
-		completedCourseIds ??
-		new Set(
-			(await AcademicRepository.findCompletedDegreeCourses(user.id)).map((course) => course.code)
-		);
-	const alreadyCompleted = [...new Set(courseIds)].filter((courseId) => completed.has(courseId));
-	if (alreadyCompleted.length)
-		throw new AppError(
-			APP_ERROR.BAD_REQUEST,
-			`이미 이수한 과목은 시간표에 담을 수 없습니다: ${alreadyCompleted.join(', ')}`
-		);
-	return completed;
-}
-
-async function validateEspSequence(
-	courseIds: string[],
-	user: User,
-	completedCourseIds?: Set<string>
-) {
+async function validateEspSequence(courseIds: string[], user: User) {
 	if (!courseIds.length) return;
 	const profile = await AcademicRepository.findAcademicProfile(user.id);
 	if (!profile)
@@ -47,11 +24,9 @@ async function validateEspSequence(
 	const policy = await AcademicRepository.findGraduationPolicy(profile.admissionYear);
 	const sequence = policy?.rules.courseSequences?.find((item) => item.category === 'ESP');
 	if (!sequence) throw new AppError(APP_ERROR.INTERNAL, 'ESP 이수 순서 정책을 찾을 수 없습니다.');
-	const completedCourses =
-		completedCourseIds ??
-		new Set(
-			(await AcademicRepository.findCompletedDegreeCourses(user.id)).map((course) => course.code)
-		);
+	const completedCourses = new Set(
+		(await AcademicRepository.findCompletedDegreeCourses(user.id)).map((course) => course.code)
+	);
 	const progress = getCourseSequenceProgress(
 		sequence,
 		completedCourses,
@@ -92,7 +67,6 @@ export async function addOffering(id: string, offeringId: string, user: User) {
 	if (timetable.offerings.some((item) => item.id === offering.id)) return;
 	if (timetable.offerings.some((item) => item.courseId === offering.courseId))
 		throw new AppError(APP_ERROR.CONFLICT, '같은 과목의 다른 분반이 이미 들어 있습니다.');
-	const completedCourseIds = await validateCompletedCourses([offering.courseId], user);
 	if (offering.category === 'ESP')
 		await validateEspSequence(
 			[
@@ -101,8 +75,7 @@ export async function addOffering(id: string, offeringId: string, user: User) {
 					.map((item) => item.courseId),
 				offering.courseId
 			],
-			user,
-			completedCourseIds
+			user
 		);
 	const conflict = timetable.offerings.find((item) =>
 		item.meetings.some((a) => offering.meetings.some((b) => hasMeetingConflict(a, b)))
@@ -138,16 +111,11 @@ export async function copy(id: string, user: User) {
 
 export async function confirm(id: string, user: User) {
 	const timetable = await owned(id, user);
-	const completedCourseIds = await validateCompletedCourses(
-		timetable.offerings.map((offering) => offering.courseId),
-		user
-	);
 	await validateEspSequence(
 		timetable.offerings
 			.filter((offering) => offering.category === 'ESP')
 			.map((offering) => offering.courseId),
-		user,
-		completedCourseIds
+		user
 	);
 	await TimetableRepository.clearConfirmed(user.id, timetable.year, timetable.term);
 	return await TimetableRepository.updateTimetable(id, user.id, { isConfirmed: true });
