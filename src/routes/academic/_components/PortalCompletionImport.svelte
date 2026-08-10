@@ -71,7 +71,7 @@
 
 <RecordEntryDialog
 	title="KIS에서 한 번에 가져오기"
-	description="여러 학기의 수강 이력을 빠르게 등록합니다"
+	description="여러 학기의 이수 내역을 빠르게 등록합니다"
 	emphasis
 	bind:open={importOpen}
 >
@@ -209,7 +209,7 @@
 
 		{#if form?.importedCount}
 			<p class="success" aria-live="polite">
-				{form.importedCount}개 수강 이력을 반영했습니다.{form.failedCount
+				{form.importedCount}개 이수 내역을 반영했습니다.{form.failedCount
 					? ` 낙제 ${form.failedCount}개 포함.`
 					: ''}{form.withdrawnCount ? ` 철회 ${form.withdrawnCount}개 포함.` : ''}
 			</p>

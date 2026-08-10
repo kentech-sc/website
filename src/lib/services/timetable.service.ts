@@ -19,7 +19,7 @@ async function validateEspSequence(courseIds: string[], user: User) {
 	if (!profile)
 		throw new AppError(
 			APP_ERROR.BAD_REQUEST,
-			'이수·졸업에서 입학연도와 ESP 면제 과목을 먼저 저장해주세요.'
+			'이수·졸업에서 입학연도와 ESP 면제 교과목을 먼저 저장해주세요.'
 		);
 	const policy = await AcademicRepository.findGraduationPolicy(profile.admissionYear);
 	const sequence = policy?.rules.courseSequences?.find((item) => item.category === 'ESP');

@@ -681,10 +681,10 @@
 						<div class="unscheduled-heading">
 							<div>
 								<h3>시간표에 표시되지 않는 수강 과목</h3>
-								<p>수강 이력에서 수정하거나 삭제할 수 있습니다.</p>
+								<p>이수 내역에서 수정하거나 삭제할 수 있습니다.</p>
 							</div>
 							<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- hash is appended to a resolved route -->
-							<a href={resolve('/academic') + '#course-history'}>수강 이력 관리</a>
+							<a href={resolve('/academic') + '#course-history'}>이수 내역 관리</a>
 						</div>
 						<ul>
 							{#each data.actualSchedule.unscheduledCompletions as completion (completion.id)}

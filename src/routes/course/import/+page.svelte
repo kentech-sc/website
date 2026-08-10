@@ -201,7 +201,7 @@
 				<span>졸업학점 계산에서 제외</span>
 			</label>
 			<div class="special-submit">
-				<p>이수 학기와 성적은 학생이 수강 이력에 추가할 때 입력합니다.</p>
+				<p>이수 학기와 성적은 학생이 이수 내역에 추가할 때 입력합니다.</p>
 				<button><BookPlus size="0.95rem" />공통 강의 등록</button>
 			</div>
 		</form>
@@ -235,7 +235,7 @@
 						? 'P'
 						: `${form.createdCourse.credits}학점`}으로 등록했습니다.</strong
 				>
-				<small>이제 수강 이력의 ‘한 과목 직접 추가’에서 검색할 수 있습니다.</small>
+				<small>이제 이수 내역의 ‘교과목 직접 등록’에서 검색할 수 있습니다.</small>
 			</div>
 		</div>
 	{/if}
