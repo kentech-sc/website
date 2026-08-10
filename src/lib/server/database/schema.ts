@@ -125,6 +125,7 @@ export const courseOfferings = academicSchema.table(
 			.references(() => courses.id),
 		year: integer().notNull(),
 		term: integer().notNull(),
+		academicCareer: text('academic_career').notNull().default('undergraduate'),
 		section: text().notNull().default('01'),
 		subtitle: text(),
 		capacity: integer(),
@@ -132,14 +133,19 @@ export const courseOfferings = academicSchema.table(
 		...timestamps
 	},
 	(table) => [
-		unique('course_offerings_term_course_section_unique').on(
+		unique('course_offerings_term_career_course_section_unique').on(
 			table.year,
 			table.term,
+			table.academicCareer,
 			table.courseId,
 			table.section
 		),
 		index('course_offerings_term_idx').on(table.year, table.term),
 		check('course_offerings_term_check', sql`${table.term} between 1 and 4`),
+		check(
+			'course_offerings_academic_career_check',
+			sql`${table.academicCareer} in ('undergraduate', 'graduate')`
+		),
 		check(
 			'course_offerings_capacity_check',
 			sql`${table.capacity} is null or ${table.capacity} >= 0`

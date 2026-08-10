@@ -11,6 +11,7 @@
 	import Plus from '@lucide/svelte/icons/plus';
 	import Search from '@lucide/svelte/icons/search';
 	import Trash from '@lucide/svelte/icons/trash-2';
+	import AlertTriangle from '@lucide/svelte/icons/triangle-alert';
 	import Users from '@lucide/svelte/icons/users';
 	import X from '@lucide/svelte/icons/x';
 
@@ -35,6 +36,7 @@
 	let searchFilter = $state<CourseSearchFilter | null>(null);
 	let searchSession = $state(0);
 	let schedulePanel = $state<HTMLElement | null>(null);
+	let hoveredLaneSlot = $state<{ weekday: number; minute: number } | null>(null);
 
 	const actualId = 'actual';
 	const selected = $derived(data.timetables.find((item) => item.id === selectedId) ?? null);
@@ -43,6 +45,14 @@
 	);
 	const displayOfferings = $derived(
 		actualSelected ? data.actualSchedule.offerings : (selected?.offerings ?? [])
+	);
+	const archivedOfferings = $derived(
+		selected?.offerings.filter((offering) => offering.archivedAt !== null) ?? []
+	);
+	const activeDisplayOfferings = $derived(
+		actualSelected
+			? displayOfferings
+			: displayOfferings.filter((offering) => offering.archivedAt === null)
 	);
 	const busy = $derived(submitting || navigating.to !== null);
 	const hiddenSelectedOfferings = $derived(
@@ -147,11 +157,14 @@
 			: []
 	);
 	const selectedMeetings = $derived(displayOfferings.flatMap((offering) => offering.meetings));
+	const rangeMeetings = $derived(
+		selected ? data.offerings.flatMap((offering) => offering.meetings) : selectedMeetings
+	);
 	const startMinute = $derived(
-		selectedMeetings.length
+		rangeMeetings.length
 			? Math.min(
 					9 * 60,
-					Math.floor(Math.min(...selectedMeetings.map((meeting) => meeting.startsAt)) / 60) * 60
+					Math.floor(Math.min(...rangeMeetings.map((meeting) => meeting.startsAt)) / 60) * 60
 				)
 			: 9 * 60
 	);
@@ -164,24 +177,16 @@
 	);
 	const gridStep = 1.35;
 	const gridPadding = 0.65;
-	const courseSlots = [
-		{ startsAt: 9 * 60, endsAt: 11 * 60 },
-		{ startsAt: 12 * 60, endsAt: 14 * 60 },
-		{ startsAt: 14 * 60, endsAt: 16 * 60 },
-		{ startsAt: 16 * 60, endsAt: 18 * 60 },
-		{ startsAt: 18 * 60, endsAt: 20 * 60 }
-	] as const;
-	const scheduleGuides = [9, 11, 12, 14, 16, 18, 20].map((hour) => hour * 60);
 	const gridHeight = $derived(((endMinute - startMinute) / 30) * gridStep + gridPadding * 2);
 	const totalCredits = $derived(
 		actualSelected
 			? data.actualSchedule.completions
 					.filter((completion) => completion.status === 'passed')
 					.reduce((sum, completion) => sum + completion.credits, 0)
-			: displayOfferings.reduce((sum, offering) => sum + offering.credits, 0)
+			: activeDisplayOfferings.reduce((sum, offering) => sum + offering.credits, 0)
 	);
 	const totalHours = $derived(
-		displayOfferings.reduce(
+		activeDisplayOfferings.reduce(
 			(sum, offering) =>
 				sum +
 				offering.meetings.reduce(
@@ -247,22 +252,31 @@
 		const height = Math.max(1.15, ((endsAt - startsAt) / 30) * gridStep);
 		return `--course-color: ${courseColor(categoryKey)}; top: ${top}rem; height: ${height}rem`;
 	}
-	function gridSlotStyle(startsAt: number, endsAt: number): string {
-		const inset = 0.08;
-		const top = gridPadding + ((startsAt - startMinute) / 30) * gridStep + inset;
-		const height = ((endsAt - startsAt) / 30) * gridStep - inset * 2;
-		return `top: ${top}rem; height: ${height}rem`;
+	function laneSlotStyle(minute: number): string {
+		const top = gridPadding + ((minute - startMinute) / 30) * gridStep + 0.1;
+		return `top: ${top}rem; height: ${gridStep - 0.2}rem`;
 	}
 	function scheduleGuideStyle(minute: number): string {
 		return `top: ${gridPadding + ((minute - startMinute) / 30) * gridStep}rem`;
 	}
-	function slotOccupied(weekday: number, startsAt: number, endsAt: number): boolean {
-		return displayOfferings.some((offering) =>
-			offering.meetings.some(
-				(meeting) =>
-					meeting.weekday === weekday && meeting.startsAt < endsAt && startsAt < meeting.endsAt
-			)
-		);
+	function pointerMinute(event: Pick<PointerEvent, 'currentTarget' | 'clientY'>): number {
+		const bounds = (event.currentTarget as HTMLElement).getBoundingClientRect();
+		const padding = bounds.height * (gridPadding / gridHeight);
+		const usableHeight = Math.max(1, bounds.height - padding * 2);
+		const ratio = Math.min(1, Math.max(0, (event.clientY - bounds.top - padding) / usableHeight));
+		const slotCount = (endMinute - startMinute) / 30;
+		const slotIndex = Math.min(slotCount - 1, Math.floor(ratio * slotCount));
+		return startMinute + slotIndex * 30;
+	}
+	function previewLaneSlot(event: PointerEvent, weekday: number): void {
+		hoveredLaneSlot = { weekday, minute: pointerMinute(event) };
+	}
+	function openLanePicker(event: MouseEvent, weekday: number): void {
+		if (event.detail === 0) {
+			openSearch({ kind: 'day', weekday });
+			return;
+		}
+		openSlotPicker(weekday, pointerMinute(event));
 	}
 	function openSearch(filter: CourseSearchFilter): void {
 		if (!selected || busy) return;
@@ -473,7 +487,8 @@
 						>{/if}
 				</div>
 				<div class="slot-stats">
-					<span><b>{selected.offerings.length}</b>과목</span><span><b>{totalCredits}</b>학점</span
+					<span><b>{activeDisplayOfferings.length}</b>과목</span><span
+						><b>{totalCredits}</b>학점</span
 					><span
 						><b>{Number.isInteger(totalHours) ? totalHours : totalHours.toFixed(1)}</b>시간/주</span
 					>
@@ -487,7 +502,11 @@
 						<input type="hidden" name="timetableId" value={selected.id} /><button
 							class:confirm-button={!selected.isConfirmed}
 							class:unconfirm-button={selected.isConfirmed}
-							disabled={!selected.isConfirmed && !selected.offerings.length}
+							disabled={!selected.isConfirmed &&
+								(!activeDisplayOfferings.length || archivedOfferings.length > 0)}
+							title={archivedOfferings.length
+								? '폐강된 강의를 제거한 뒤 확정할 수 있습니다.'
+								: undefined}
 							>{#if selected.isConfirmed}<X size="0.85rem" />확정 취소{:else}<Check
 									size="0.85rem"
 								/>확정{/if}</button
@@ -546,6 +565,15 @@
 							>
 						</div>
 					{/if}
+					{#if selected && archivedOfferings.length}
+						<div class="cancelled-notice" role="alert">
+							<AlertTriangle size="0.9rem" aria-hidden="true" />
+							<span
+								><strong>폐강된 강의가 {archivedOfferings.length}개 있습니다.</strong>
+								시간표에서 제거해야 다시 확정할 수 있습니다.</span
+							>
+						</div>
+					{/if}
 					<div class="schedule-scroll">
 						<div class="schedule-grid">
 							<div class="corner">시간</div>
@@ -558,45 +586,54 @@
 							</div>
 							{#each weekdays as weekday, day (weekday)}
 								<div class="day-lane" style={`height: ${gridHeight}rem`}>
-									{#each scheduleGuides as minute (minute)}
+									{#each timeLabels as minute (minute)}
 										<span
 											class="schedule-guide"
 											style={scheduleGuideStyle(minute)}
 											aria-hidden="true"
 										></span>
 									{/each}
-									{#if selected && day !== 2}
-										{#each courseSlots as slot (slot.startsAt)}
-											{#if !slotOccupied(day + 1, slot.startsAt, slot.endsAt)}
-												<button
-													type="button"
-													class="grid-slot"
-													tabindex="-1"
-													style={gridSlotStyle(slot.startsAt, slot.endsAt)}
-													disabled={busy}
-													onclick={() => openSlotPicker(day + 1, slot.startsAt)}
-													aria-label={`${weekday} ${formatTime(slot.startsAt)}에 강의 추가`}
-													title={`${weekday} ${formatTime(slot.startsAt)} 강의 찾기`}
+									{#if selected}
+										<button
+											type="button"
+											class="lane-picker"
+											disabled={busy}
+											onpointermove={(event) => previewLaneSlot(event, day + 1)}
+											onpointerleave={() => (hoveredLaneSlot = null)}
+											onclick={(event) => openLanePicker(event, day + 1)}
+											aria-label={`${weekday}요일 강의 추가`}
+											title={`${weekday}요일 강의 찾기`}
+										>
+											<span class="keyboard-add"><Plus size="0.72rem" />추가</span>
+											{#if hoveredLaneSlot?.weekday === day + 1}
+												<span
+													class="lane-slot-indicator"
+													style={laneSlotStyle(hoveredLaneSlot.minute)}
 												>
-													<Plus size="0.78rem" aria-hidden="true" />
-												</button>
+													<Plus size="0.7rem" aria-hidden="true" />
+													<span>{formatTime(hoveredLaneSlot.minute)}</span>
+												</span>
 											{/if}
-										{/each}
+										</button>
 									{/if}
 									{#each meetingsForDay(day + 1) as { offering, meeting } (`${offering.id}-${meeting.id}`)}
 										<article
 											class="course-block"
+											class:cancelled={offering.archivedAt !== null}
 											style={meetingStyle(offering.category, meeting.startsAt, meeting.endsAt)}
 											title={`${offering.courseName} · ${scheduleText(offering)}`}
 										>
 											<button
 												type="button"
 												class="course-block-copy"
-												aria-disabled={!selected}
-												tabindex={selected ? 0 : -1}
+												disabled={!selected || offering.archivedAt !== null}
+												aria-disabled={!selected || offering.archivedAt !== null}
+												tabindex={selected && offering.archivedAt === null ? 0 : -1}
 												onclick={() => openSlotPicker(meeting.weekday, meeting.startsAt)}
 												aria-label={`${offering.courseName} 열기`}
 											>
+												{#if offering.archivedAt !== null}<span class="cancelled-badge">폐강</span
+													>{/if}
 												<strong>{offering.courseName}</strong><small class="course-professor"
 													>{offering.professors.map((professor) => professor.name).join(', ') ||
 														'교수 미정'}</small
@@ -923,6 +960,22 @@
 		outline: 0;
 		background: color-mix(in srgb, var(--secondary) 7%, var(--white));
 	}
+	.cancelled-notice {
+		display: flex;
+		align-items: center;
+		gap: 0.45rem;
+		border-bottom: var(--divider-border-width) solid
+			color-mix(in srgb, var(--error-text) 25%, var(--gray-border));
+		background: var(--error-bg);
+		padding: 0.5rem 0.65rem;
+		color: var(--error-text);
+		font-size: 0.68rem;
+	}
+	.cancelled-notice span {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.2rem 0.35rem;
+	}
 	.unconfirm-button {
 		gap: 0.25rem;
 		border-color: var(--error-text);
@@ -977,6 +1030,7 @@
 		padding: 0;
 		width: 2rem;
 		height: 2rem;
+		touch-action: pan-y;
 		color: var(--secondary);
 	}
 	.slot-toolbar {
@@ -1189,29 +1243,57 @@
 			color-mix(in srgb, var(--gray-border) 75%, transparent);
 		pointer-events: none;
 	}
-	button.grid-slot {
-		display: grid;
+	button.lane-picker {
+		position: absolute;
+		z-index: 1;
+		cursor: pointer;
+		inset: 0;
+		border: 0;
+		border-radius: 0;
+		background: transparent;
+		padding: 0;
+	}
+	button.lane-picker:disabled {
+		cursor: default;
+	}
+	button.lane-picker:focus-visible {
+		outline: var(--control-border-width) solid var(--secondary);
+		outline-offset: calc(-1 * var(--control-border-width));
+	}
+	.keyboard-add {
+		display: none;
+		position: absolute;
+		top: 0.2rem;
+		left: 50%;
+		align-items: center;
+		gap: 0.15rem;
+		transform: translateX(-50%);
+		border-radius: 999px;
+		background: var(--white);
+		padding: 0.18rem 0.35rem;
+		color: var(--secondary);
+		font-weight: 650;
+		font-size: 0.56rem;
+	}
+	button.lane-picker:focus-visible .keyboard-add {
+		display: flex;
+	}
+	.lane-slot-indicator {
+		display: flex;
 		position: absolute;
 		right: 0.12rem;
 		left: 0.12rem;
-		place-items: center;
-		z-index: 1;
-		cursor: cell;
-		border: 0;
-		border-radius: 0.28rem;
-		background-image: none;
-		background-color: var(--white);
-		padding: 0;
-		color: color-mix(in srgb, var(--gray-text) 55%, transparent);
-	}
-	button.grid-slot:hover:not(:disabled),
-	button.grid-slot:focus-visible {
-		outline: 0;
-		background-color: color-mix(in srgb, var(--secondary) 8%, var(--white));
+		justify-content: center;
+		align-items: center;
+		gap: 0.18rem;
+		border: var(--control-border-width) solid
+			color-mix(in srgb, var(--secondary) 32%, var(--gray-border));
+		border-radius: 0.3rem;
+		background: color-mix(in srgb, var(--secondary) 8%, var(--white));
+		pointer-events: none;
 		color: var(--secondary);
-	}
-	.grid-slot:focus-visible {
-		box-shadow: inset 0 0 0 var(--control-border-width) var(--secondary);
+		font-weight: 650;
+		font-size: 0.58rem;
 	}
 	.course-block {
 		position: absolute;
@@ -1225,6 +1307,21 @@
 		padding: 0;
 		overflow: hidden;
 		color: var(--text);
+	}
+	.course-block.cancelled {
+		--course-color: var(--gray-text) !important;
+		background: color-mix(in srgb, var(--error-bg) 65%, var(--white));
+		color: var(--gray-text);
+	}
+	.cancelled-badge {
+		align-self: flex-start;
+		border-radius: 999px;
+		background: var(--error-text);
+		padding: 0.05rem 0.28rem;
+		color: var(--white);
+		font-weight: 750;
+		font-size: 0.48rem;
+		line-height: 1.35;
 	}
 	.course-block-copy {
 		display: flex;

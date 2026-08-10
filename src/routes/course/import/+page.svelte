@@ -114,6 +114,7 @@
 			<summary>가져올 때 적용되는 기준</summary>
 			<ul>
 				<li>파일명의 연도와 학기를 자동 입력하며, 관리자가 직접 수정할 수 있습니다.</li>
+				<li>학부·대학원 형식을 자동 판별하며, 같은 과정의 해당 학기 강의만 갱신합니다.</li>
 				<li>대표교수가 여러 명이면 모두 해당 개설 강의의 교수로 저장합니다.</li>
 				<li>
 					P 과목은 개별 학점을 0으로 보존하며, ESP는 단계 이수 규칙으로 졸업학점에 반영합니다.
@@ -210,7 +211,10 @@
 		<div class="result-card" aria-live="polite">
 			<CheckCircle size="1.25rem" />
 			<div>
-				<strong>{form.importedCount}개 개설 강의를 반영했습니다.</strong>
+				<strong
+					>{form.academicCareer === 'graduate' ? '대학원' : '학부'}
+					{form.importedCount}개 개설 강의를 반영했습니다.</strong
+				>
 				<div>
 					{#if form.skippedClosedCount}<span>폐강 제외 {form.skippedClosedCount}</span
 						>{/if}{#if form.passCreditCount}<span>P 과목 {form.passCreditCount}</span

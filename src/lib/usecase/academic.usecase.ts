@@ -271,10 +271,16 @@ export async function importOfferings(user: User, file: File, year: number, term
 			);
 	}
 	await transaction(async () => {
-		await AcademicRepository.archiveOfferings(year, term);
+		await AcademicRepository.archiveOfferings(year, term, result.academicCareer);
 		for (const value of result.offerings) await AcademicRepository.upsertOfferingImport(value);
+		await AcademicRepository.unconfirmTimetablesWithArchivedOfferings(
+			year,
+			term,
+			result.academicCareer
+		);
 	});
 	return {
+		academicCareer: result.academicCareer,
 		importedCount: result.offerings.length,
 		skippedClosedCount: result.skippedClosedCount,
 		passCreditCount: result.passCreditCount,

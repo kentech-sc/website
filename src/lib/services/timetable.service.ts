@@ -62,22 +62,26 @@ export async function create(year: number, term: number, name: string, user: Use
 export async function addOffering(id: string, offeringId: string, user: User) {
 	const timetable = await owned(id, user);
 	const offering = await AcademicRepository.findOffering(offeringId);
-	if (!offering || offering.year !== timetable.year || offering.term !== timetable.term)
+	if (
+		!offering ||
+		offering.archivedAt !== null ||
+		offering.year !== timetable.year ||
+		offering.term !== timetable.term
+	)
 		throw new AppError(APP_ERROR.BAD_REQUEST, '해당 학기의 개설 강좌가 아닙니다.');
-	if (timetable.offerings.some((item) => item.id === offering.id)) return;
-	if (timetable.offerings.some((item) => item.courseId === offering.courseId))
+	const activeOfferings = timetable.offerings.filter((item) => item.archivedAt === null);
+	if (activeOfferings.some((item) => item.id === offering.id)) return;
+	if (activeOfferings.some((item) => item.courseId === offering.courseId))
 		throw new AppError(APP_ERROR.CONFLICT, '같은 과목의 다른 분반이 이미 들어 있습니다.');
 	if (offering.category === 'ESP')
 		await validateEspSequence(
 			[
-				...timetable.offerings
-					.filter((item) => item.category === 'ESP')
-					.map((item) => item.courseId),
+				...activeOfferings.filter((item) => item.category === 'ESP').map((item) => item.courseId),
 				offering.courseId
 			],
 			user
 		);
-	const conflict = timetable.offerings.find((item) =>
+	const conflict = activeOfferings.find((item) =>
 		item.meetings.some((a) => offering.meetings.some((b) => hasMeetingConflict(a, b)))
 	);
 	if (conflict)
@@ -111,6 +115,8 @@ export async function copy(id: string, user: User) {
 
 export async function confirm(id: string, user: User) {
 	const timetable = await owned(id, user);
+	if (timetable.offerings.some((offering) => offering.archivedAt !== null))
+		throw new AppError(APP_ERROR.CONFLICT, '폐강된 강의를 시간표에서 제거한 뒤 확정해 주세요.');
 	await validateEspSequence(
 		timetable.offerings
 			.filter((offering) => offering.category === 'ESP')

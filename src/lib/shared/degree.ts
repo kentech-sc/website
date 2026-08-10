@@ -25,6 +25,7 @@ const PREFIX_CATEGORY: Record<string, DegreeCategory> = {
 };
 
 function categoryOf(course: DegreeCourseInput): DegreeCategory | null {
+	if (course.academicCareer === 'graduate') return 'FR';
 	if (course.category && (Object.values(PREFIX_CATEGORY) as string[]).includes(course.category))
 		return course.category as DegreeCategory;
 	const prefix = course.code.match(/^[A-Z]+/)?.[0] ?? '';
@@ -99,7 +100,8 @@ export function calculateDegreeProgress(
 	const seen = new Set<string>();
 
 	for (const course of courses) {
-		if (seen.has(course.code) || course.gradExcluded) continue;
+		if (seen.has(course.code) || (course.gradExcluded && course.academicCareer !== 'graduate'))
+			continue;
 		seen.add(course.code);
 		const category = categoryOf(course);
 		if (!category || !(category in policy.categoryRequirements)) continue;

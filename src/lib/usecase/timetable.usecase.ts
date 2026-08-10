@@ -71,14 +71,17 @@ export async function getPage(year: number, term: number, user: User) {
 					calculateDegreeProgress(
 						[
 							...completedDegreeCourses,
-							...timetable.offerings.map((offering) => ({
-								code: offering.courseId,
-								category: offering.category,
-								subcategory: offering.subcategory,
-								level: offering.level,
-								credits: offering.credits,
-								gradExcluded: offering.gradExcluded
-							}))
+							...timetable.offerings
+								.filter((offering) => offering.archivedAt === null)
+								.map((offering) => ({
+									code: offering.courseId,
+									category: offering.category,
+									subcategory: offering.subcategory,
+									level: offering.level,
+									credits: offering.credits,
+									gradExcluded: offering.gradExcluded,
+									academicCareer: offering.academicCareer
+								}))
 						],
 						policy.rules,
 						{ ESP: profile?.espWaivedCourseIds ?? [] }

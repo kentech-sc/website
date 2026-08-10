@@ -1,22 +1,45 @@
-import type { OfferingImportInput, OfferingWorkbookParseResult } from '$lib/types/academic.type.js';
+import type {
+	AcademicCareer,
+	OfferingImportInput,
+	OfferingWorkbookParseResult
+} from '$lib/types/academic.type.js';
+
 type CellValue = string | number | boolean | Date | null;
 type SheetData = CellValue[][];
 
-const COLUMN = {
-	code: 2,
-	englishName: 3,
-	koreanName: 4,
-	subtitle: 5,
-	section: 6,
-	category: 7,
-	professor: 8,
-	capacity: 9,
-	openingStatus: 14,
-	closedAt: 18,
-	room: 19,
-	time: 20,
-	credits: 21
-} as const;
+interface WorkbookFormat {
+	academicCareer: AcademicCareer;
+	courseNameHeaders: string[];
+	professorHeader: string;
+}
+
+interface ResolvedColumns {
+	code: number;
+	courseNames: number[];
+	subtitle: number;
+	section: number;
+	category: number;
+	professor: number;
+	capacity: number;
+	openingStatus: number;
+	closedAt: number;
+	room: number;
+	time: number;
+	credits: number;
+}
+
+const WORKBOOK_FORMATS: WorkbookFormat[] = [
+	{
+		academicCareer: 'undergraduate',
+		courseNameHeaders: ['교과목명(국문)', '교과목명(영문)'],
+		professorHeader: '대표교수명'
+	},
+	{
+		academicCareer: 'graduate',
+		courseNameHeaders: ['교과목명'],
+		professorHeader: '교수명'
+	}
+];
 
 const WEEKDAY: Record<string, number> = {
 	월: 1,
@@ -58,11 +81,60 @@ const EF_SUBCATEGORY: Record<string, string> = Object.fromEntries([
 	...['EF1003', 'EF2003', 'EF2006', 'EF2035', 'EF2039'].map((id) => [id, 'data_literacy'])
 ]);
 
-function text(value: SheetData[number][number]): string {
-	return value === null ? '' : String(value).trim();
+function text(value: CellValue | undefined): string {
+	return value === null || value === undefined ? '' : String(value).trim();
 }
 
-function numberOrNull(value: SheetData[number][number]): number | null {
+function normalizedHeader(value: CellValue | undefined): string {
+	return text(value).replace(/\s+/g, '');
+}
+
+function headerIndex(row: SheetData[number], name: string): number {
+	const normalized = normalizedHeader(name);
+	return row.findIndex((value) => normalizedHeader(value) === normalized);
+}
+
+function requiredHeaderIndex(row: SheetData[number], name: string): number {
+	const index = headerIndex(row, name);
+	if (index < 0) throw new Error(`${name} 열을 찾을 수 없습니다.`);
+	return index;
+}
+
+function resolveFormat(rows: SheetData): {
+	headerRowIndex: number;
+	format: WorkbookFormat;
+	columns: ResolvedColumns;
+} {
+	for (let headerRowIndex = 0; headerRowIndex < rows.length; headerRowIndex += 1) {
+		const row = rows[headerRowIndex];
+		if (headerIndex(row, '교과목코드') < 0) continue;
+		const format = WORKBOOK_FORMATS.find((candidate) =>
+			candidate.courseNameHeaders.some((name) => headerIndex(row, name) >= 0)
+		);
+		if (!format) continue;
+		return {
+			headerRowIndex,
+			format,
+			columns: {
+				code: requiredHeaderIndex(row, '교과목코드'),
+				courseNames: format.courseNameHeaders.map((name) => requiredHeaderIndex(row, name)),
+				subtitle: requiredHeaderIndex(row, '부제목'),
+				section: requiredHeaderIndex(row, '분반'),
+				category: requiredHeaderIndex(row, '영역구분'),
+				professor: requiredHeaderIndex(row, format.professorHeader),
+				capacity: requiredHeaderIndex(row, '수강제한인원'),
+				openingStatus: requiredHeaderIndex(row, '개설구분'),
+				closedAt: requiredHeaderIndex(row, '폐강일자'),
+				room: requiredHeaderIndex(row, '강의실'),
+				time: requiredHeaderIndex(row, '시간표'),
+				credits: requiredHeaderIndex(row, '학점')
+			}
+		};
+	}
+	throw new Error('지원하는 학부 또는 대학원 개설교과목 형식을 찾을 수 없습니다.');
+}
+
+function numberOrNull(value: CellValue | undefined): number | null {
 	const raw = text(value);
 	if (!raw) return null;
 	const parsed = Number(raw);
@@ -111,32 +183,27 @@ export function parseCourseOfferingWorkbook(
 	year: number,
 	term: number
 ): OfferingWorkbookParseResult {
-	const headerIndex = rows.findIndex(
-		(row) =>
-			text(row[COLUMN.code]) === '교과목코드' && text(row[COLUMN.koreanName]) === '교과목명(국문)'
-	);
-	if (headerIndex < 0) throw new Error('교과목코드와 교과목명(국문) 열을 찾을 수 없습니다.');
-
+	const { headerRowIndex, format, columns } = resolveFormat(rows);
 	const offerings: OfferingImportInput[] = [];
 	let skippedClosedCount = 0;
 	let passCreditCount = 0;
 	let multipleProfessorCount = 0;
 
-	for (let index = headerIndex + 1; index < rows.length; index += 1) {
+	for (let index = headerRowIndex + 1; index < rows.length; index += 1) {
 		const row = rows[index];
-		const courseId = text(row[COLUMN.code]);
+		const courseId = text(row[columns.code]);
 		if (!courseId || courseId === '교과목코드') continue;
-		if (text(row[COLUMN.openingStatus]) === '폐강' || text(row[COLUMN.closedAt])) {
+		if (/^(폐강|폐지)$/.test(text(row[columns.openingStatus])) || text(row[columns.closedAt])) {
 			skippedClosedCount += 1;
 			continue;
 		}
 
-		const courseName = text(row[COLUMN.koreanName]) || text(row[COLUMN.englishName]);
-		const category = text(row[COLUMN.category]) || null;
+		const courseName = columns.courseNames.map((column) => text(row[column])).find(Boolean) ?? '';
+		const category = text(row[columns.category]) || null;
 		const metadata = inferMetadata(courseId, category);
 		const professorNames = [
 			...new Set(
-				text(row[COLUMN.professor])
+				text(row[columns.professor])
 					.split(',')
 					.map((name) => name.trim())
 					.filter(Boolean)
@@ -144,24 +211,25 @@ export function parseCourseOfferingWorkbook(
 		];
 		if (professorNames.length > 1) multipleProfessorCount += 1;
 
-		const creditValue = text(row[COLUMN.credits]).toUpperCase();
+		const creditValue = text(row[columns.credits]).toUpperCase();
 		const isPassCredit = creditValue === 'P';
 		const credits = isPassCredit ? 0 : Number(creditValue);
 		if (isPassCredit) passCreditCount += 1;
-		const meetings = parseMeetings(text(row[COLUMN.time]), text(row[COLUMN.room]), index + 1);
+		const meetings = parseMeetings(text(row[columns.time]), text(row[columns.room]), index + 1);
 
 		const offering: OfferingImportInput = {
 			courseId,
 			courseName,
-			subtitle: text(row[COLUMN.subtitle]) || null,
+			subtitle: text(row[columns.subtitle]) || null,
 			...metadata,
 			professorNames,
 			year,
 			term,
-			section: (text(row[COLUMN.section]) || '01').padStart(2, '0'),
+			academicCareer: format.academicCareer,
+			section: (text(row[columns.section]) || '01').padStart(2, '0'),
 			credits,
 			creditType: isPassCredit ? 'pass' : 'numeric',
-			capacity: numberOrNull(row[COLUMN.capacity]),
+			capacity: numberOrNull(row[columns.capacity]),
 			meetings
 		};
 		if (
@@ -175,5 +243,11 @@ export function parseCourseOfferingWorkbook(
 	}
 
 	if (!offerings.length) throw new Error('가져올 수 있는 개설 강의가 없습니다.');
-	return { offerings, skippedClosedCount, passCreditCount, multipleProfessorCount };
+	return {
+		academicCareer: format.academicCareer,
+		offerings,
+		skippedClosedCount,
+		passCreditCount,
+		multipleProfessorCount
+	};
 }

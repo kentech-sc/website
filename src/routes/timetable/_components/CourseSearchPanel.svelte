@@ -40,6 +40,7 @@
 	}: Props = $props();
 	let query = $state('');
 	let category = $state('all');
+	let academicCareer = $state<'all' | 'undergraduate' | 'graduate'>('all');
 
 	const weekdays = ['월', '화', '수', '목', '금'];
 	const selectedOfferingIds = $derived(new Set(timetable.offerings.map((offering) => offering.id)));
@@ -54,6 +55,7 @@
 					`${offering.courseId} ${offering.courseName} ${offering.subtitle ?? ''} ${offering.professors.map((professor) => professor.name).join(' ')}`.toLowerCase();
 				return (
 					searchText.includes(query.trim().toLowerCase()) &&
+					(academicCareer === 'all' || offering.academicCareer === academicCareer) &&
 					(category === 'all' || offering.category === category)
 				);
 			})
@@ -69,14 +71,20 @@
 		if (filter.kind === 'all') return true;
 		if (filter.kind === 'unscheduled')
 			return !offering.meetings.some((meeting) => meeting.weekday >= 1 && meeting.weekday <= 5);
+		if (filter.kind === 'day')
+			return offering.meetings.some((meeting) => meeting.weekday === filter.weekday);
 		return offering.meetings.some(
-			(meeting) => meeting.weekday === filter.weekday && meeting.startsAt === filter.minute
+			(meeting) =>
+				meeting.weekday === filter.weekday &&
+				meeting.startsAt <= filter.minute &&
+				filter.minute < meeting.endsAt
 		);
 	}
 	function filterLabel(): string | null {
 		if (filter.kind === 'all') return null;
 		if (filter.kind === 'unscheduled') return '시간 미정';
-		return `${weekdays[filter.weekday - 1]} ${formatTime(filter.minute)}`;
+		if (filter.kind === 'day') return `${weekdays[filter.weekday - 1]}요일`;
+		return `${weekdays[filter.weekday - 1]} ${formatTime(filter.minute)} 포함`;
 	}
 	function hasConflict(offering: Offering): boolean {
 		return offering.meetings.some((candidate) =>
@@ -148,8 +156,23 @@
 				>{/if}
 			<button
 				class="filter-tag"
+				class:active={academicCareer === 'all'}
+				onclick={() => (academicCareer = 'all')}>전체 과정</button
+			>
+			<button
+				class="filter-tag"
+				class:active={academicCareer === 'undergraduate'}
+				onclick={() => (academicCareer = 'undergraduate')}>학부</button
+			>
+			<button
+				class="filter-tag"
+				class:active={academicCareer === 'graduate'}
+				onclick={() => (academicCareer = 'graduate')}>대학원</button
+			>
+			<button
+				class="filter-tag"
 				class:active={category === 'all'}
-				onclick={() => (category = 'all')}>전체</button
+				onclick={() => (category = 'all')}>전체 영역</button
 			>
 			{#each availableCategories as item (item)}
 				<button
@@ -168,6 +191,8 @@
 					<i style={`background: ${courseColor(offering.category)}`}></i>
 					<div class="offering-copy">
 						<div class="offering-tags">
+							{#if offering.academicCareer === 'graduate'}<span class="graduate-label">대학원</span
+								>{/if}
 							<span>{offering.category ?? '기타'}</span><span>{offering.courseId}</span>
 							{#if restriction}<span class="unavailable-label">{restriction.label}</span>
 							{:else if notice}<span class="notice-label">{notice}</span>{/if}
@@ -373,6 +398,10 @@
 	.offering-tags .unavailable-label {
 		background: var(--error-bg);
 		color: var(--error-text);
+	}
+	.offering-tags .graduate-label {
+		background: color-mix(in srgb, var(--secondary) 10%, white);
+		color: var(--secondary);
 	}
 	// 차단이 아니라 안내이므로 경고색이 아닌 성공색으로 구분한다.
 	.offering-tags .notice-label {

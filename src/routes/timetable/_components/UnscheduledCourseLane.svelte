@@ -22,8 +22,12 @@
 <div class="unscheduled-lane">
 	<span class="lane-label">시간 미정</span>
 	{#each offerings as offering (offering.id)}
-		<article style={`--course-color: ${courseColor(offering.category)}`}>
+		<article
+			class:cancelled={offering.archivedAt !== null}
+			style={`--course-color: ${courseColor(offering.category)}`}
+		>
 			<div>
+				{#if offering.archivedAt !== null}<span class="cancelled-badge">폐강</span>{/if}
 				<strong>{offering.courseName}</strong>
 				<small
 					>{offering.professors.map((professor) => professor.name).join(', ') || '교수 미정'} ·
@@ -85,6 +89,21 @@
 		border-radius: 0 0 0.34rem 0.34rem;
 		background: color-mix(in srgb, var(--course-color) 11%, var(--white));
 		overflow: hidden;
+	}
+	article.cancelled {
+		--course-color: var(--gray-text) !important;
+		background: color-mix(in srgb, var(--error-bg) 65%, var(--white));
+		color: var(--gray-text);
+	}
+	.cancelled-badge {
+		align-self: flex-start;
+		border-radius: 999px;
+		background: var(--error-text);
+		padding: 0.05rem 0.28rem;
+		color: var(--white);
+		font-weight: 750;
+		font-size: 0.48rem;
+		line-height: 1.35;
 	}
 	article > div {
 		display: flex;
