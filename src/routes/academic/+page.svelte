@@ -299,14 +299,15 @@
 	{#if data.gpa}
 		<details class="module gpa-card">
 			<summary aria-label="누적 평점평균 및 학기별 평점평균 펼치기">
-				<div class="gpa-icon"><GraduationCap size="1.15rem" aria-hidden="true" /></div>
-				<div class="gpa-summary-copy">
-					<span>누적 평점평균</span>
-					<strong>{data.gpa.value.toFixed(2)}<small> / 4.30</small></strong>
-				</div>
-				<p>
-					성적이 등록된 {data.gpa.courseCount}과목 · 평점 반영 {data.gpa.gradedCredits}학점
-				</p>
+				<GraduationCap size="1rem" aria-hidden="true" />
+				<span class="gpa-summary-copy">
+					<b>누적 평점평균</b>
+					<small
+						>성적이 등록된 {data.gpa.courseCount}과목 · 평점 반영 {data.gpa
+							.gradedCredits}학점</small
+					>
+				</span>
+				<strong class="gpa-value">{data.gpa.value.toFixed(2)}<small> / 4.30</small></strong>
 				<span class="disclosure-icon"><ChevronDown size="0.9rem" /></span>
 			</summary>
 			<div class="term-gpa-list" aria-label="학기별 평점평균">
@@ -610,53 +611,61 @@
 	.gpa-card summary::-webkit-details-marker {
 		display: none;
 	}
-	.gpa-icon {
-		display: grid;
-		place-items: center;
-		border-radius: 0.65rem;
-		background: color-mix(in srgb, var(--secondary) 10%, var(--white));
-		width: 2rem;
-		height: 2rem;
+	.gpa-card summary > :global(svg) {
+		flex: 0 0 auto;
 		color: var(--secondary);
 	}
 	.gpa-summary-copy {
 		display: flex;
 		flex-direction: column;
-		gap: 0.05rem;
+		min-width: 0;
 	}
-	.gpa-card span,
-	.gpa-card p {
+	.gpa-summary-copy small {
 		color: var(--gray-text);
-		font-size: 0.7rem;
+		font-weight: 400;
+		font-size: 0.68rem;
 	}
-	.gpa-card strong {
-		font-size: 1.25rem;
+	.gpa-value {
+		flex: 0 0 auto;
+		margin-left: auto;
+		font-size: 1rem;
 		line-height: 1.1;
 	}
-	.gpa-card strong small {
+	.gpa-value small {
 		color: var(--gray-text);
-		font-size: 0.7rem;
+		font-weight: 500;
+		font-size: 0.65rem;
 	}
-	.gpa-card summary p {
-		margin: 0 0 0 auto;
+	.gpa-card summary > .disclosure-icon {
+		margin-left: 0;
 	}
 	.term-gpa-list {
 		display: grid;
 		grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr));
-		gap: 0.45rem;
+		gap: 0.5rem;
 		border-top: var(--divider-border-width) solid var(--gray-border);
-		padding: 0.7rem 1rem 0.85rem;
+		padding: 0.75rem;
 	}
 	.term-gpa-list article {
 		display: flex;
 		flex-direction: column;
-		gap: 0.12rem;
+		gap: 0.3rem;
+		border: var(--divider-border-width) solid transparent;
 		border-radius: 0.55rem;
 		background: var(--gray-bg);
-		padding: 0.55rem 0.65rem;
+		padding: 0.65rem;
+	}
+	.term-gpa-list article > span {
+		color: var(--gray-text);
+		font-size: 0.7rem;
 	}
 	.term-gpa-list strong {
 		font-size: 0.95rem;
+	}
+	.term-gpa-list strong small {
+		color: var(--gray-text);
+		font-weight: 500;
+		font-size: 0.65rem;
 	}
 	.term-gpa-list article > small {
 		color: var(--gray-text);

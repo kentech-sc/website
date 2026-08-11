@@ -37,6 +37,9 @@
 	let searchSession = $state(0);
 	let schedulePanel = $state<HTMLElement | null>(null);
 	let hoveredLaneSlot = $state<{ weekday: number; minute: number } | null>(null);
+	let searchRangeHighlighted = $state(false);
+	let recentlySelectedOfferingId = $state<string | null>(null);
+	let replacementHighlightTimeout: ReturnType<typeof setTimeout> | null = null;
 
 	const actualId = 'actual';
 	const selected = $derived(data.timetables.find((item) => item.id === selectedId) ?? null);
@@ -92,8 +95,9 @@
 			? Object.entries(progress.required)
 					.filter(([key]) => key !== 'total')
 					.map(([key, required]) => {
-						const value = earned(key);
-						const baseline = baselineEarned(key, value);
+						const rawValue = earned(key);
+						const value = Math.min(rawValue, required);
+						const baseline = Math.min(baselineEarned(key, rawValue), required);
 						return { key, value, baseline, delta: Math.max(0, value - baseline), required };
 					})
 			: []
@@ -260,10 +264,15 @@
 		return `top: ${gridPadding + ((minute - startMinute) / 30) * gridStep}rem`;
 	}
 	function pointerMinute(event: Pick<PointerEvent, 'currentTarget' | 'clientY'>): number {
-		const bounds = (event.currentTarget as HTMLElement).getBoundingClientRect();
+		return minuteAtPosition(
+			(event.currentTarget as HTMLElement).getBoundingClientRect(),
+			event.clientY
+		);
+	}
+	function minuteAtPosition(bounds: DOMRect, clientY: number): number {
 		const padding = bounds.height * (gridPadding / gridHeight);
 		const usableHeight = Math.max(1, bounds.height - padding * 2);
-		const ratio = Math.min(1, Math.max(0, (event.clientY - bounds.top - padding) / usableHeight));
+		const ratio = Math.min(1, Math.max(0, (clientY - bounds.top - padding) / usableHeight));
 		const slotCount = (endMinute - startMinute) / 30;
 		const slotIndex = Math.min(slotCount - 1, Math.floor(ratio * slotCount));
 		return startMinute + slotIndex * 30;
@@ -281,10 +290,38 @@
 	function openSearch(filter: CourseSearchFilter): void {
 		if (!selected || busy) return;
 		searchFilter = filter;
+		searchRangeHighlighted = filter.kind === 'slot' || filter.kind === 'replace';
 		searchSession += 1;
 	}
 	function openSlotPicker(weekday: number, minute: number): void {
 		openSearch({ kind: 'slot', weekday, minute });
+	}
+	function openReplacementPicker(
+		sourceOfferingId: string,
+		weekday: number,
+		startsAt: number,
+		endsAt: number
+	): void {
+		openSearch({ kind: 'replace', sourceOfferingId, weekday, startsAt, endsAt });
+	}
+	function activeSearchRange(weekday: number): { startsAt: number; endsAt: number } | null {
+		if (
+			!searchRangeHighlighted ||
+			!searchFilter ||
+			(searchFilter.kind !== 'slot' && searchFilter.kind !== 'replace') ||
+			searchFilter.weekday !== weekday
+		)
+			return null;
+		if (searchFilter.kind === 'slot')
+			return { startsAt: searchFilter.minute, endsAt: searchFilter.minute + 30 };
+		if (searchFilter.kind === 'replace')
+			return { startsAt: searchFilter.startsAt, endsAt: searchFilter.endsAt };
+		return null;
+	}
+	function activeSearchRangeStyle(range: { startsAt: number; endsAt: number }): string {
+		const top = gridPadding + ((range.startsAt - startMinute) / 30) * gridStep + 0.1;
+		const height = Math.max(0.8, ((range.endsAt - range.startsAt) / 30) * gridStep - 0.2);
+		return `top: ${top}rem; height: ${height}rem`;
 	}
 	function openCourseBrowser(): void {
 		openSearch({ kind: 'all' });
@@ -294,16 +331,21 @@
 	}
 	function closeCourseBrowser(): void {
 		searchFilter = null;
+		searchRangeHighlighted = false;
 	}
 	function clearCourseSearchFilter(): void {
 		if (searchFilter) searchFilter = { kind: 'all' };
+		searchRangeHighlighted = false;
 	}
 	async function saveScheduleImage(): Promise<void> {
 		if (!schedulePanel || savingImage) return;
 		savingImage = true;
 		try {
 			const { toPng } = await import('html-to-image');
-			const dataUrl = await toPng(schedulePanel, { pixelRatio: 2 });
+			const dataUrl = await toPng(schedulePanel, {
+				pixelRatio: 2,
+				filter: (node) => !(node instanceof HTMLElement && node.hasAttribute('data-image-exclude'))
+			});
 			const filename = `${actualSelected ? '실제 수강' : (selected?.name ?? '시간표')}.png`;
 			const isTouchDevice = window.matchMedia('(pointer: coarse)').matches;
 			if (isTouchDevice) {
@@ -335,6 +377,98 @@
 		return async ({ update }) => {
 			try {
 				await update();
+			} finally {
+				submitting = false;
+			}
+		};
+	};
+	type SearchRange = { weekday: number; startsAt: number; endsAt: number };
+	function currentSearchRange(): SearchRange | null {
+		if (searchFilter?.kind === 'slot')
+			return {
+				weekday: searchFilter.weekday,
+				startsAt: searchFilter.minute,
+				endsAt: searchFilter.minute + 30
+			};
+		if (searchFilter?.kind === 'replace')
+			return {
+				weekday: searchFilter.weekday,
+				startsAt: searchFilter.startsAt,
+				endsAt: searchFilter.endsAt
+			};
+		return null;
+	}
+	function selectOfferingForReplacement(
+		offeringId: string,
+		preferredRange: SearchRange | null
+	): void {
+		const target = data.offerings.find((offering) => offering.id === offeringId);
+		const weekdayMeetings =
+			target?.meetings.filter((meeting) => meeting.weekday >= 1 && meeting.weekday <= 5) ?? [];
+		const overlappingMeeting = preferredRange
+			? weekdayMeetings.find(
+					(meeting) =>
+						meeting.weekday === preferredRange.weekday &&
+						meeting.startsAt < preferredRange.endsAt &&
+						preferredRange.startsAt < meeting.endsAt
+				)
+			: null;
+		const meeting = overlappingMeeting ?? weekdayMeetings[0];
+		if (!target || !meeting) {
+			closeCourseBrowser();
+			return;
+		}
+		searchFilter = {
+			kind: 'replace',
+			sourceOfferingId: target.id,
+			weekday: meeting.weekday,
+			startsAt: meeting.startsAt,
+			endsAt: meeting.endsAt
+		};
+		searchRangeHighlighted = true;
+		searchSession += 1;
+		recentlySelectedOfferingId = target.id;
+		if (replacementHighlightTimeout) clearTimeout(replacementHighlightTimeout);
+		replacementHighlightTimeout = setTimeout(() => {
+			recentlySelectedOfferingId = null;
+			replacementHighlightTimeout = null;
+		}, 1200);
+	}
+	const addEnhance: SubmitFunction = ({ formData }) => {
+		const offeringId = String(formData.get('offeringId') ?? '');
+		const previousRange = currentSearchRange();
+		submitting = true;
+		return async ({ result, update }) => {
+			try {
+				await update();
+				if (result.type === 'success') selectOfferingForReplacement(offeringId, previousRange);
+			} finally {
+				submitting = false;
+			}
+		};
+	};
+	const replaceEnhance: SubmitFunction = ({ formData }) => {
+		const toOfferingId = String(formData.get('toOfferingId') ?? '');
+		const previousRange = currentSearchRange();
+		submitting = true;
+		return async ({ result, update }) => {
+			try {
+				await update();
+				if (result.type === 'success') selectOfferingForReplacement(toOfferingId, previousRange);
+			} finally {
+				submitting = false;
+			}
+		};
+	};
+	const cancelSelectionEnhance: SubmitFunction = () => {
+		submitting = true;
+		return async ({ result, update }) => {
+			try {
+				await update();
+				if (result.type === 'success') {
+					recentlySelectedOfferingId = null;
+					closeCourseBrowser();
+				}
 			} finally {
 				submitting = false;
 			}
@@ -554,12 +688,12 @@
 								<strong>빈 칸을 눌러 강의를 추가하세요</strong>
 								<small>선택한 요일과 시간에 맞는 강의만 바로 보여드려요.</small>
 							</span>
-							<button type="button" disabled={busy} onclick={openCourseBrowser}
+							<button type="button" data-image-exclude disabled={busy} onclick={openCourseBrowser}
 								><Search size="0.82rem" />전체 강의 검색</button
 							>
 						</div>
 					{:else if selected}
-						<div class="schedule-toolbar">
+						<div class="schedule-toolbar" data-image-exclude>
 							<button type="button" disabled={busy} onclick={openCourseBrowser}
 								><Search size="0.82rem" />전체 강의 검색</button
 							>
@@ -585,6 +719,7 @@
 									>{/each}
 							</div>
 							{#each weekdays as weekday, day (weekday)}
+								{@const activeRange = activeSearchRange(day + 1)}
 								<div class="day-lane" style={`height: ${gridHeight}rem`}>
 									{#each timeLabels as minute (minute)}
 										<span
@@ -597,6 +732,7 @@
 										<button
 											type="button"
 											class="lane-picker"
+											data-image-exclude
 											disabled={busy}
 											onpointermove={(event) => previewLaneSlot(event, day + 1)}
 											onpointerleave={() => (hoveredLaneSlot = null)}
@@ -616,21 +752,36 @@
 											{/if}
 										</button>
 									{/if}
+									{#if activeRange}
+										<span
+											class="active-search-slot"
+											data-image-exclude
+											style={activeSearchRangeStyle(activeRange)}
+											aria-hidden="true"
+										></span>
+									{/if}
 									{#each meetingsForDay(day + 1) as { offering, meeting } (`${offering.id}-${meeting.id}`)}
 										<article
 											class="course-block"
 											class:cancelled={offering.archivedAt !== null}
+											class:recently-replaced={offering.id === recentlySelectedOfferingId}
 											style={meetingStyle(offering.category, meeting.startsAt, meeting.endsAt)}
 											title={`${offering.courseName} · ${scheduleText(offering)}`}
 										>
 											<button
 												type="button"
 												class="course-block-copy"
-												disabled={!selected || offering.archivedAt !== null}
-												aria-disabled={!selected || offering.archivedAt !== null}
-												tabindex={selected && offering.archivedAt === null ? 0 : -1}
-												onclick={() => openSlotPicker(meeting.weekday, meeting.startsAt)}
-												aria-label={`${offering.courseName} 열기`}
+												disabled={!selected}
+												aria-disabled={!selected}
+												tabindex={selected ? 0 : -1}
+												onclick={() =>
+													openReplacementPicker(
+														offering.id,
+														meeting.weekday,
+														meeting.startsAt,
+														meeting.endsAt
+													)}
+												aria-label={`${offering.courseName}와 교체할 강의 찾기`}
 											>
 												{#if offering.archivedAt !== null}<span class="cancelled-badge">폐강</span
 													>{/if}
@@ -640,24 +791,6 @@
 												>
 												{#if meeting.room}<small class="course-room">{meeting.room}</small>{/if}
 											</button>
-											{#if selected}
-												<form
-													class="course-block-remove"
-													method="POST"
-													action="?/removeItem"
-													use:enhance={pendingEnhance}
-												>
-													<input type="hidden" name="timetableId" value={selected.id} /><input
-														type="hidden"
-														name="offeringId"
-														value={offering.id}
-													/><button
-														disabled={busy}
-														aria-label={`${offering.courseName} 시간표에서 제거`}
-														title={`${offering.courseName} 제거`}><X size="0.68rem" /></button
-													>
-												</form>
-											{/if}
 										</article>
 									{/each}
 								</div>
@@ -711,6 +844,9 @@
 						filter={searchFilter}
 						{busy}
 						{pendingEnhance}
+						{addEnhance}
+						{replaceEnhance}
+						{cancelSelectionEnhance}
 						onclose={closeCourseBrowser}
 						onclearfilter={clearCourseSearchFilter}
 						{courseColor}
@@ -1295,6 +1431,18 @@
 		font-weight: 650;
 		font-size: 0.58rem;
 	}
+	.active-search-slot {
+		position: absolute;
+		right: 0.08rem;
+		left: 0.08rem;
+		z-index: 3;
+		box-shadow: 0 0 0 1px color-mix(in srgb, var(--white) 55%, transparent) inset;
+		border: var(--control-border-width) solid
+			color-mix(in srgb, var(--secondary) 62%, var(--gray-border));
+		border-radius: 0.28rem;
+		background: color-mix(in srgb, var(--secondary) 13%, transparent);
+		pointer-events: none;
+	}
 	.course-block {
 		position: absolute;
 		right: 0.1rem;
@@ -1312,6 +1460,28 @@
 		--course-color: var(--gray-text) !important;
 		background: color-mix(in srgb, var(--error-bg) 65%, var(--white));
 		color: var(--gray-text);
+	}
+	.course-block.recently-replaced {
+		animation: replacement-highlight 1.2s ease-out;
+	}
+	@keyframes replacement-highlight {
+		0%,
+		35% {
+			box-shadow:
+				0 0 0 2px var(--white),
+				0 0 0 4px color-mix(in srgb, var(--secondary) 72%, transparent);
+		}
+		100% {
+			box-shadow:
+				0 0 0 0 var(--white),
+				0 0 0 0 transparent;
+		}
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.course-block.recently-replaced {
+			animation: none;
+			box-shadow: 0 0 0 2px color-mix(in srgb, var(--secondary) 72%, transparent);
+		}
 	}
 	.cancelled-badge {
 		align-self: flex-start;
@@ -1370,32 +1540,6 @@
 	}
 	.course-room {
 		color: var(--gray-text);
-	}
-	.course-block-remove {
-		position: absolute;
-		top: 0.14rem;
-		right: 0.12rem;
-		z-index: 3;
-	}
-	.course-block-remove button {
-		display: grid;
-		place-items: center;
-		opacity: 0.55;
-		cursor: pointer;
-		border: 0;
-		border-radius: 0.2rem;
-		background: transparent;
-		padding: 0;
-		width: 0.95rem;
-		height: 0.95rem;
-		color: var(--gray-text);
-	}
-	.course-block-remove button:hover,
-	.course-block-remove button:focus-visible {
-		opacity: 1;
-		outline: 0;
-		background: var(--error-bg);
-		color: var(--error-text);
 	}
 	.unscheduled-records {
 		padding: 0.8rem;

@@ -26,7 +26,7 @@
 			class:cancelled={offering.archivedAt !== null}
 			style={`--course-color: ${courseColor(offering.category)}`}
 		>
-			<div>
+			<div class="offering-copy">
 				{#if offering.archivedAt !== null}<span class="cancelled-badge">폐강</span>{/if}
 				<strong>{offering.courseName}</strong>
 				<small
@@ -34,7 +34,7 @@
 					{offering.section}분반</small
 				>
 			</div>
-			<form method="POST" action="?/removeItem" use:enhance={pendingEnhance}>
+			<form data-image-exclude method="POST" action="?/removeItem" use:enhance={pendingEnhance}>
 				<input type="hidden" name="timetableId" value={timetableId} />
 				<input type="hidden" name="offeringId" value={offering.id} />
 				<button
@@ -49,6 +49,7 @@
 		<button
 			type="button"
 			class="unscheduled-slot"
+			data-image-exclude
 			disabled={busy}
 			onclick={onopen}
 			aria-label="시간 미정 강의 추가"
@@ -105,7 +106,7 @@
 		font-size: 0.48rem;
 		line-height: 1.35;
 	}
-	article > div {
+	.offering-copy {
 		display: flex;
 		flex: 1;
 		flex-direction: column;
