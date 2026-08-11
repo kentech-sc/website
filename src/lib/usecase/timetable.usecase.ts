@@ -131,6 +131,12 @@ export const addOffering = (id: string, offeringId: string, user: User) =>
 	transaction(() => TimetableService.addOffering(id, offeringId, user));
 export const removeOffering = (id: string, offeringId: string, user: User) =>
 	transaction(() => TimetableService.removeOffering(id, offeringId, user));
+export const replaceOffering = (
+	id: string,
+	fromOfferingId: string,
+	toOfferingId: string,
+	user: User
+) => transaction(() => TimetableService.replaceOffering(id, fromOfferingId, toOfferingId, user));
 export const copy = (id: string, user: User) => transaction(() => TimetableService.copy(id, user));
 export const confirm = (id: string, user: User) =>
 	transaction(() => TimetableService.confirm(id, user));

@@ -15,7 +15,11 @@
 	import Users from '@lucide/svelte/icons/users';
 	import X from '@lucide/svelte/icons/x';
 
-	import { COURSE_SLOTS, overlapsBlock } from './_components/course-search.js';
+	import {
+		COURSE_SLOTS,
+		getFreeTimeRanges,
+		overlapsTimeRange
+	} from './_components/course-search.js';
 	import CourseSearchPanel from './_components/CourseSearchPanel.svelte';
 	import UnscheduledCourseLane from './_components/UnscheduledCourseLane.svelte';
 
@@ -255,12 +259,8 @@
 		return `--course-color: ${courseColor(categoryKey)}; top: ${top}rem; height: ${height}rem`;
 	}
 	/** 상시 + 버튼을 띄울지만 정한다. 덮여 있어도 블럭 자체는 계속 클릭할 수 있다. */
-	function slotOccupied(weekday: number, block: TimeBlock): boolean {
-		return displayOfferings.some((offering) =>
-			offering.meetings.some((meeting) =>
-				overlapsBlock(meeting, { weekday, startsAt: block.startsAt, endsAt: block.endsAt })
-			)
-		);
+	function freeSlotRanges(weekday: number, block: TimeBlock): TimeBlock[] {
+		return getFreeTimeRanges(weekday, block, selectedMeetings);
 	}
 	function gridSlotStyle(startsAt: number, endsAt: number): string {
 		const inset = 0.08;
@@ -278,6 +278,19 @@
 	}
 	function openSlotPicker(weekday: number, block: TimeBlock): void {
 		openSearch({ kind: 'slot', weekday, startsAt: block.startsAt, endsAt: block.endsAt });
+	}
+	function openReplacementPicker(
+		offeringId: string,
+		meeting: { id: string; weekday: number; startsAt: number; endsAt: number }
+	): void {
+		openSearch({
+			kind: 'replace',
+			sourceOfferingId: offeringId,
+			meetingId: meeting.id,
+			weekday: meeting.weekday,
+			startsAt: meeting.startsAt,
+			endsAt: meeting.endsAt
+		});
 	}
 	function openCourseBrowser(): void {
 		openSearch({ kind: 'all' });
@@ -331,6 +344,47 @@
 		return async ({ update }) => {
 			try {
 				await update();
+			} finally {
+				submitting = false;
+			}
+		};
+	};
+	const replaceEnhance: SubmitFunction = ({ formData }) => {
+		const targetOfferingId = String(formData.get('toOfferingId'));
+		const previousFilter = searchFilter?.kind === 'replace' ? searchFilter : null;
+		submitting = true;
+		return async ({ result, update }) => {
+			let nextSelection: Parameters<typeof openReplacementPicker> | null = null;
+			let shouldClose = false;
+			try {
+				await update();
+				if (result.type === 'success' && previousFilter) {
+					const target = data.offerings.find((offering) => offering.id === targetOfferingId);
+					const meeting =
+						target?.meetings.find((item) => overlapsTimeRange(item, previousFilter)) ??
+						target?.meetings.find((item) => item.weekday >= 1 && item.weekday <= 5);
+					if (target && meeting) nextSelection = [target.id, meeting];
+					else shouldClose = true;
+				}
+			} finally {
+				submitting = false;
+			}
+			if (nextSelection) openReplacementPicker(...nextSelection);
+			else if (shouldClose) closeCourseBrowser();
+		};
+	};
+	const removeOfferingEnhance: SubmitFunction = ({ formData }) => {
+		const removedOfferingId = String(formData.get('offeringId'));
+		submitting = true;
+		return async ({ result, update }) => {
+			try {
+				await update();
+				if (
+					result.type === 'success' &&
+					searchFilter?.kind === 'replace' &&
+					searchFilter.sourceOfferingId === removedOfferingId
+				)
+					closeCourseBrowser();
 			} finally {
 				submitting = false;
 			}
@@ -592,21 +646,20 @@
 									<!-- 수요일은 정규 강의가 열리지 않아 블럭 버튼을 두지 않는다. -->
 									{#if selected && day !== 2}
 										{#each COURSE_SLOTS as slot (slot.startsAt)}
-											<button
-												type="button"
-												class="grid-slot"
-												class:idle={slot.primary && !slotOccupied(day + 1, slot)}
-												class:covered={slotOccupied(day + 1, slot)}
-												data-image-exclude
-												tabindex="-1"
-												style={gridSlotStyle(slot.startsAt, slot.endsAt)}
-												disabled={busy}
-												onclick={() => openSlotPicker(day + 1, slot)}
-												aria-label={`${weekday} ${formatTime(slot.startsAt)}에 강의 추가`}
-												title={`${weekday} ${formatTime(slot.startsAt)}–${formatTime(slot.endsAt)} 강의 찾기`}
-											>
-												<Plus size="0.78rem" aria-hidden="true" />
-											</button>
+											{#each freeSlotRanges(day + 1, slot) as freeRange (`${freeRange.startsAt}-${freeRange.endsAt}`)}
+												<button
+													type="button"
+													class="grid-slot"
+													data-image-exclude
+													style={gridSlotStyle(freeRange.startsAt, freeRange.endsAt)}
+													disabled={busy}
+													onclick={() => openSlotPicker(day + 1, freeRange)}
+													aria-label={`${weekday} ${formatTime(freeRange.startsAt)}에 강의 추가`}
+													title={`${weekday} ${formatTime(freeRange.startsAt)}–${formatTime(freeRange.endsAt)} 강의 찾기`}
+												>
+													<Plus size="0.78rem" aria-hidden="true" />
+												</button>
+											{/each}
 										{/each}
 									{/if}
 									{#each meetingsForDay(day + 1) as { offering, meeting } (`${offering.id}-${meeting.id}`)}
@@ -615,7 +668,17 @@
 											class:cancelled={offering.archivedAt !== null}
 											style={meetingStyle(offering.category, meeting.startsAt, meeting.endsAt)}
 										>
-											<span class="course-block-copy">
+											<button
+												type="button"
+												class="course-block-copy"
+												class:selected-course={searchFilter?.kind === 'replace' &&
+													searchFilter.sourceOfferingId === offering.id &&
+													searchFilter.meetingId === meeting.id}
+												disabled={!selected || busy || offering.archivedAt !== null}
+												onclick={() => openReplacementPicker(offering.id, meeting)}
+												aria-label={`${offering.courseName} 선택`}
+												title={selected ? `${offering.courseName} 교체하기` : offering.courseName}
+											>
 												{#if offering.archivedAt !== null}<span class="cancelled-badge">폐강</span
 													>{/if}
 												<strong>{offering.courseName}</strong><small class="course-professor"
@@ -623,14 +686,17 @@
 														'교수 미정'}</small
 												>
 												{#if meeting.room}<small class="course-room">{meeting.room}</small>{/if}
-											</span>
+												<small class="course-time"
+													>{formatTime(meeting.startsAt)}–{formatTime(meeting.endsAt)}</small
+												>
+											</button>
 											{#if selected}
 												<form
 													class="course-block-remove"
 													data-image-exclude
 													method="POST"
 													action="?/removeItem"
-													use:enhance={pendingEnhance}
+													use:enhance={removeOfferingEnhance}
 												>
 													<input type="hidden" name="timetableId" value={selected.id} /><input
 														type="hidden"
@@ -696,6 +762,8 @@
 						filter={searchFilter}
 						{busy}
 						{pendingEnhance}
+						{replaceEnhance}
+						{removeOfferingEnhance}
 						onclose={closeCourseBrowser}
 						onclearfilter={clearCourseSearchFilter}
 						{courseColor}
@@ -1228,25 +1296,17 @@
 			color-mix(in srgb, var(--gray-border) 75%, transparent);
 		pointer-events: none;
 	}
-	// z-index를 두지 않아 강의 블럭(z-index 2) 아래에 남는다. 눈금선(0)보다는 위다.
-	// 스택 컨텍스트를 만들지 않아야 아래 ::after 링이 강의 위로 올라갈 수 있다.
 	button.grid-slot {
 		display: grid;
 		position: absolute;
 		right: 0.12rem;
 		left: 0.12rem;
 		place-items: center;
-		cursor: cell;
+		cursor: pointer;
 		border: 0;
 		border-radius: 0.28rem;
-		background-image: none;
-		background-color: transparent;
+		background: var(--white);
 		padding: 0;
-		color: transparent;
-	}
-	// 학부 정규 블럭이 비어 있을 때만 예전처럼 회색 + 를 상시 노출한다.
-	button.grid-slot.idle {
-		background-color: var(--white);
 		color: color-mix(in srgb, var(--gray-text) 55%, transparent);
 	}
 	button.grid-slot:hover:not(:disabled),
@@ -1258,33 +1318,9 @@
 	.grid-slot:focus-visible {
 		box-shadow: inset 0 0 0 var(--control-border-width) var(--secondary);
 	}
-	// 덮인 블럭은 hover 색을 버튼 배경이 아니라 아래 ::after 한 겹으로만 칠한다.
-	// 둘을 같이 칠하면 빈 영역이 이중으로 물들어 빈 블럭보다 진해진다.
-	button.grid-slot.covered:hover:not(:disabled),
-	button.grid-slot.covered:focus-visible {
-		background-color: transparent;
-	}
-	// 같은 hover 색을 강의 위까지 이어서 얹되, 흰색 대신 투명과 섞어 강의 내용이 비쳐 보이게 한다.
-	// 빈 영역에서는 흰 배경과 합성돼 빈 블럭의 hover 색과 정확히 같아진다.
-	button.grid-slot.covered::after {
-		position: absolute;
-		opacity: 0;
-		z-index: 3;
-		inset: 0;
-		border-radius: 0.28rem;
-		background-color: color-mix(in srgb, var(--secondary) 8%, transparent);
-		// 강의 블럭 위에 깔리므로 클릭을 받으면 x 버튼을 가로챈다. 표시 전용으로 둔다.
-		pointer-events: none;
-		content: '';
-	}
-	button.grid-slot.covered:hover:not(:disabled)::after,
-	button.grid-slot.covered:focus-visible::after {
-		opacity: 1;
-	}
 	button.grid-slot:disabled {
 		cursor: default;
 	}
-	// 클릭 단위는 강의가 아니라 블럭이다. 강의는 표시만 하고 클릭은 아래 블럭 버튼으로 통과시킨다.
 	.course-block {
 		position: absolute;
 		right: 0.1rem;
@@ -1296,7 +1332,6 @@
 		background: color-mix(in srgb, var(--course-color) 11%, var(--white));
 		padding: 0;
 		overflow: hidden;
-		pointer-events: none;
 		color: var(--text);
 	}
 	.course-block.cancelled {
@@ -1319,6 +1354,10 @@
 		flex-direction: column;
 		justify-content: flex-start;
 		align-items: stretch;
+		cursor: pointer;
+		border: 0;
+		border-radius: 0;
+		background: transparent;
 		padding: 0.22rem 1rem 0.22rem 0.32rem;
 		width: 100%;
 		min-width: 0;
@@ -1326,11 +1365,21 @@
 		color: inherit;
 		text-align: left;
 	}
+	.course-block-copy:hover:not(:disabled),
+	.course-block-copy:focus-visible,
+	.course-block-copy.selected-course {
+		outline: 0;
+		box-shadow: inset 0 0 0 var(--control-border-width) var(--course-color);
+		background: color-mix(in srgb, var(--course-color) 12%, transparent);
+	}
+	.course-block-copy:disabled {
+		cursor: default;
+	}
 	.course-block-remove {
 		position: absolute;
 		top: 0.12rem;
 		right: 0.12rem;
-		pointer-events: auto;
+		z-index: 3;
 	}
 	.course-block-remove button {
 		display: flex;
@@ -1368,6 +1417,10 @@
 	}
 	.course-room {
 		color: var(--gray-text);
+	}
+	.course-time {
+		color: var(--gray-text);
+		font-variant-numeric: tabular-nums;
 	}
 	.unscheduled-records {
 		padding: 0.8rem;

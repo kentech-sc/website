@@ -41,6 +41,15 @@ export const actions = {
 			locals.user
 		);
 	}),
+	replace: withActionErrorHandling(async ({ request, locals }) => {
+		const data = await request.formData();
+		await TimetableUsecase.replaceOffering(
+			String(data.get('timetableId')),
+			String(data.get('fromOfferingId')),
+			String(data.get('toOfferingId')),
+			locals.user
+		);
+	}),
 	copy: withActionErrorHandling(async ({ request, locals }) => {
 		const data = await request.formData();
 		await TimetableUsecase.copy(String(data.get('timetableId')), locals.user);

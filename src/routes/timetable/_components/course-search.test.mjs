@@ -1,66 +1,115 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { COURSE_SLOTS, matchesCourseSearchFilter } from './course-search.ts';
+import {
+	COURSE_SLOTS,
+	getFreeTimeRanges,
+	matchesCourseSearchFilter,
+	overlapsTimeRange
+} from './course-search.ts';
 
 const MON = 1;
 const TUE = 2;
 
-const BLOCK_9_11 = 0;
-const BLOCK_11_12 = 1;
-const BLOCK_12_14 = 2;
-const BLOCK_14_16 = 3;
-const BLOCK_16_18 = 4;
+function block(startsAt) {
+	const result = COURSE_SLOTS.find((item) => item.startsAt === startsAt);
+	assert.ok(result);
+	return result;
+}
 
-/** 요일과 블럭 인덱스로 slot 필터를 만든다. */
-function slot(weekday, index) {
-	return { kind: 'slot', weekday, ...COURSE_SLOTS[index] };
+function slot(weekday, startsAt) {
+	return { kind: 'slot', weekday, ...block(startsAt) };
 }
 
 function meeting(weekday, startsAt, endsAt) {
 	return { weekday, startsAt, endsAt };
 }
 
-test('학부 강의는 블럭과 정확히 맞아 그 블럭에서 검색된다', () => {
+test('정규 시간대와 점심시간을 추가 버튼 블록으로 정의한다', () => {
+	assert.deepEqual(COURSE_SLOTS, [
+		{ startsAt: 9 * 60, endsAt: 11 * 60 },
+		{ startsAt: 11 * 60, endsAt: 12 * 60 },
+		{ startsAt: 12 * 60, endsAt: 14 * 60 },
+		{ startsAt: 14 * 60, endsAt: 16 * 60 },
+		{ startsAt: 16 * 60, endsAt: 18 * 60 },
+		{ startsAt: 18 * 60, endsAt: 20 * 60 }
+	]);
+});
+
+test('블록과 정확히 맞는 강의를 찾는다', () => {
 	const meetings = [meeting(MON, 9 * 60, 11 * 60)];
-	assert.equal(matchesCourseSearchFilter(meetings, slot(MON, BLOCK_9_11)), true);
-	assert.equal(matchesCourseSearchFilter(meetings, slot(MON, BLOCK_11_12)), false);
+	assert.equal(matchesCourseSearchFilter(meetings, slot(MON, 9 * 60)), true);
+	assert.equal(matchesCourseSearchFilter(meetings, slot(MON, 11 * 60)), false);
 });
 
-test('두 블럭에 걸친 대학원 강의는 양쪽 블럭에서 모두 검색된다', () => {
+test('점심시간 강의를 점심 블록에서 검색한다', () => {
+	const meetings = [meeting(MON, 11 * 60, 12 * 60)];
+	assert.equal(matchesCourseSearchFilter(meetings, slot(MON, 11 * 60)), true);
+	assert.equal(matchesCourseSearchFilter(meetings, slot(MON, 12 * 60)), false);
+});
+
+test('불규칙한 대학원 강의는 걸쳐 있는 정규 블록에서 검색된다', () => {
 	const meetings = [meeting(MON, 13 * 60 + 30, 15 * 60)];
-	assert.equal(matchesCourseSearchFilter(meetings, slot(MON, BLOCK_12_14)), true);
-	assert.equal(matchesCourseSearchFilter(meetings, slot(MON, BLOCK_14_16)), true);
-	assert.equal(matchesCourseSearchFilter(meetings, slot(MON, BLOCK_16_18)), false);
+	assert.equal(matchesCourseSearchFilter(meetings, slot(MON, 12 * 60)), true);
+	assert.equal(matchesCourseSearchFilter(meetings, slot(MON, 14 * 60)), true);
+	assert.equal(matchesCourseSearchFilter(meetings, slot(MON, 16 * 60)), false);
 });
 
-test('경계가 맞닿기만 하면 겹치지 않는다', () => {
-	const meetings = [meeting(MON, 18 * 60, 20 * 60)];
-	assert.equal(matchesCourseSearchFilter(meetings, slot(MON, BLOCK_16_18)), false);
+test('경계만 맞닿은 시간은 겹치지 않는다', () => {
+	assert.equal(overlapsTimeRange(meeting(MON, 18 * 60, 20 * 60), slot(MON, 16 * 60)), false);
 });
 
-test('10:30~12:00 강의는 점심 블럭에서도 검색된다', () => {
-	const meetings = [meeting(MON, 10 * 60 + 30, 12 * 60)];
-	assert.equal(matchesCourseSearchFilter(meetings, slot(MON, BLOCK_9_11)), true);
-	assert.equal(matchesCourseSearchFilter(meetings, slot(MON, BLOCK_11_12)), true);
+test('부분 점유 블록에서는 강의 앞뒤의 연속된 빈 구간만 반환한다', () => {
+	assert.deepEqual(getFreeTimeRanges(MON, block(12 * 60), [meeting(MON, 13 * 60 + 30, 15 * 60)]), [
+		{ startsAt: 12 * 60, endsAt: 13 * 60 + 30 }
+	]);
+	assert.deepEqual(getFreeTimeRanges(MON, block(14 * 60), [meeting(MON, 13 * 60 + 30, 15 * 60)]), [
+		{ startsAt: 15 * 60, endsAt: 16 * 60 }
+	]);
+});
+
+test('겹치거나 이어진 여러 강의 시간은 하나의 점유 구간처럼 처리한다', () => {
+	assert.deepEqual(
+		getFreeTimeRanges(MON, block(12 * 60), [
+			meeting(MON, 12 * 60 + 30, 13 * 60 + 30),
+			meeting(MON, 13 * 60, 14 * 60)
+		]),
+		[{ startsAt: 12 * 60, endsAt: 12 * 60 + 30 }]
+	);
+});
+
+test('완전히 빈 블록은 기존과 동일하게 블록 전체를 반환한다', () => {
+	assert.deepEqual(getFreeTimeRanges(MON, block(9 * 60), []), [block(9 * 60)]);
+});
+
+test('교체 기준은 선택한 강의의 실제 시간 전체를 사용한다', () => {
+	const replacementFilter = {
+		kind: 'replace',
+		sourceOfferingId: 'source',
+		meetingId: 'meeting',
+		weekday: MON,
+		startsAt: 16 * 60 + 30,
+		endsAt: 18 * 60
+	};
+	assert.equal(
+		matchesCourseSearchFilter([meeting(MON, 16 * 60, 17 * 60 + 30)], replacementFilter),
+		true
+	);
+	assert.equal(
+		matchesCourseSearchFilter([meeting(MON, 18 * 60, 20 * 60)], replacementFilter),
+		false
+	);
 });
 
 test('요일이 다르면 검색되지 않는다', () => {
-	const meetings = [meeting(MON, 9 * 60, 11 * 60)];
-	assert.equal(matchesCourseSearchFilter(meetings, slot(TUE, BLOCK_9_11)), false);
+	assert.equal(
+		matchesCourseSearchFilter([meeting(MON, 9 * 60, 11 * 60)], slot(TUE, 9 * 60)),
+		false
+	);
 });
 
-test('여러 미팅 중 하나만 겹쳐도 검색된다', () => {
-	const meetings = [meeting(MON, 9 * 60, 10 * 60 + 30), meeting(TUE, 15 * 60, 16 * 60 + 30)];
-	assert.equal(matchesCourseSearchFilter(meetings, slot(TUE, BLOCK_14_16)), true);
-});
-
-test('전체 검색은 시간과 무관하게 모두 통과한다', () => {
+test('전체 검색과 시간 미정 검색을 구분한다', () => {
 	assert.equal(matchesCourseSearchFilter([], { kind: 'all' }), true);
-	assert.equal(matchesCourseSearchFilter([meeting(MON, 9 * 60, 11 * 60)], { kind: 'all' }), true);
-});
-
-test('시간 미정 검색은 평일 미팅이 없는 강의만 통과한다', () => {
 	assert.equal(matchesCourseSearchFilter([], { kind: 'unscheduled' }), true);
 	assert.equal(
 		matchesCourseSearchFilter([meeting(MON, 9 * 60, 11 * 60)], { kind: 'unscheduled' }),

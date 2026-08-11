@@ -98,6 +98,22 @@ export async function removeOffering(id: string, offeringId: string, user: User)
 	await TimetableRepository.removeItem(id, offeringId);
 }
 
+export async function replaceOffering(
+	id: string,
+	fromOfferingId: string,
+	toOfferingId: string,
+	user: User
+) {
+	const timetable = await owned(id, user);
+	const source = timetable.offerings.find((offering) => offering.id === fromOfferingId);
+	if (!source) throw new AppError(APP_ERROR.NOT_FOUND, '교체할 강의가 시간표에 없습니다.');
+	if (fromOfferingId === toOfferingId)
+		throw new AppError(APP_ERROR.BAD_REQUEST, '같은 강의로 교체할 수 없습니다.');
+
+	await removeOffering(id, fromOfferingId, user);
+	await addOffering(id, toOfferingId, user);
+}
+
 export async function copy(id: string, user: User) {
 	const source = await owned(id, user);
 	const position = await TimetableRepository.nextPosition(user.id, source.year, source.term);
