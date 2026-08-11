@@ -1258,8 +1258,14 @@
 	.grid-slot:focus-visible {
 		box-shadow: inset 0 0 0 var(--control-border-width) var(--secondary);
 	}
-	// 강의가 덮은 블럭은 hover 배경이 강의에 가려 보이지 않는다.
-	// 같은 hover 색을 강의 위에 얹되, 흰색 대신 투명과 섞어 강의 내용이 비쳐 보이게 한다.
+	// 덮인 블럭은 hover 색을 버튼 배경이 아니라 아래 ::after 한 겹으로만 칠한다.
+	// 둘을 같이 칠하면 빈 영역이 이중으로 물들어 빈 블럭보다 진해진다.
+	button.grid-slot.covered:hover:not(:disabled),
+	button.grid-slot.covered:focus-visible {
+		background-color: transparent;
+	}
+	// 같은 hover 색을 강의 위까지 이어서 얹되, 흰색 대신 투명과 섞어 강의 내용이 비쳐 보이게 한다.
+	// 빈 영역에서는 흰 배경과 합성돼 빈 블럭의 hover 색과 정확히 같아진다.
 	button.grid-slot.covered::after {
 		position: absolute;
 		opacity: 0;
