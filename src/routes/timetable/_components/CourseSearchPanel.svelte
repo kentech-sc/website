@@ -1,8 +1,9 @@
 <script lang="ts">
 	import Plus from '@lucide/svelte/icons/plus';
-	import Repeat2 from '@lucide/svelte/icons/repeat-2';
 	import Search from '@lucide/svelte/icons/search';
 	import X from '@lucide/svelte/icons/x';
+
+	import { matchesCourseSearchFilter } from './course-search.js';
 
 	import type { Offering } from '$lib/types/academic.type.js';
 	import type { Timetable } from '$lib/types/timetable.type.js';
@@ -20,9 +21,6 @@
 		filter: CourseSearchFilter;
 		busy: boolean;
 		pendingEnhance: SubmitFunction;
-		addEnhance: SubmitFunction;
-		replaceEnhance: SubmitFunction;
-		cancelSelectionEnhance: SubmitFunction;
 		onclose: () => void;
 		onclearfilter: () => void;
 		courseColor: (category: string | null) => string;
@@ -37,9 +35,6 @@
 		filter,
 		busy,
 		pendingEnhance,
-		addEnhance,
-		replaceEnhance,
-		cancelSelectionEnhance,
 		onclose,
 		onclearfilter,
 		courseColor,
@@ -47,7 +42,6 @@
 	}: Props = $props();
 	let query = $state('');
 	let category = $state('all');
-	let academicCareer = $state<'all' | 'undergraduate' | 'graduate'>('all');
 
 	const weekdays = ['월', '화', '수', '목', '금'];
 	const selectedOfferingIds = $derived(new Set(timetable.offerings.map((offering) => offering.id)));
@@ -56,116 +50,38 @@
 	);
 	const filteredOfferings = $derived(
 		offerings
-			.filter((offering) => matchesFilter(offering))
+			.filter((offering) => matchesCourseSearchFilter(offering.meetings, filter))
 			.filter((offering) => {
 				const searchText =
 					`${offering.courseId} ${offering.courseName} ${offering.subtitle ?? ''} ${offering.professors.map((professor) => professor.name).join(' ')}`.toLowerCase();
 				return (
 					searchText.includes(query.trim().toLowerCase()) &&
-					(academicCareer === 'all' || offering.academicCareer === academicCareer) &&
 					(category === 'all' || offering.category === category)
 				);
 			})
 			.sort((a, b) => resultRank(a) - resultRank(b))
 	);
-	const availableOfferings = $derived(
-		filteredOfferings.filter(
-			(offering) => !offeringRestriction(offering, selectedOfferingIds.has(offering.id))
-		)
-	);
-	const unavailableOfferings = $derived(
-		filteredOfferings.filter((offering) =>
-			Boolean(offeringRestriction(offering, selectedOfferingIds.has(offering.id)))
-		)
-	);
-	const sectionAlternatives = $derived(
-		availableOfferings.filter((offering) => replacementKind(offering) === 'section')
-	);
-	const timeslotAlternatives = $derived(
-		availableOfferings.filter((offering) => replacementKind(offering) === 'timeslot')
-	);
-	const selectedSourceOffering = $derived(selectedReplacementSource());
 
 	function formatTime(minutes: number): string {
 		return `${Math.floor(minutes / 60)
 			.toString()
 			.padStart(2, '0')}:${(minutes % 60).toString().padStart(2, '0')}`;
 	}
-	function selectedReplacementSource(): Offering | null {
-		if (filter.kind !== 'replace') return null;
-		return (
-			timetable.offerings.find(
-				(selectedOffering) => selectedOffering.id === filter.sourceOfferingId
-			) ?? null
-		);
-	}
-	function matchesFilter(offering: Offering): boolean {
-		if (filter.kind === 'all') return true;
-		if (filter.kind === 'unscheduled')
-			return !offering.meetings.some((meeting) => meeting.weekday >= 1 && meeting.weekday <= 5);
-		if (filter.kind === 'day')
-			return offering.meetings.some((meeting) => meeting.weekday === filter.weekday);
-		if (filter.kind === 'replace') {
-			const source = selectedReplacementSource();
-			if (offering.id === filter.sourceOfferingId) return false;
-			return (
-				(source !== null && offering.courseId === source.courseId) ||
-				offering.meetings.some(
-					(meeting) =>
-						meeting.weekday === filter.weekday &&
-						meeting.startsAt < filter.endsAt &&
-						filter.startsAt < meeting.endsAt
-				)
-			);
-		}
-		return offering.meetings.some(
-			(meeting) =>
-				meeting.weekday === filter.weekday &&
-				meeting.startsAt < filter.minute + 30 &&
-				filter.minute < meeting.endsAt
-		);
-	}
-	function panelTitle(): string {
-		const source = selectedReplacementSource();
-		return source ? `${source.courseName} 교체` : '강의 찾기';
-	}
 	function searchContextLabel(): string | null {
-		if (filter.kind !== 'slot' && filter.kind !== 'replace') return null;
-		const startsAt = filter.kind === 'slot' ? filter.minute : filter.startsAt;
-		const endsAt = filter.kind === 'slot' ? filter.minute + 30 : filter.endsAt;
-		return `${weekdays[filter.weekday - 1]} ${formatTime(startsAt)}–${formatTime(endsAt)} 기준`;
+		if (filter.kind !== 'slot') return null;
+		return `${weekdays[filter.weekday - 1]} ${formatTime(filter.startsAt)}–${formatTime(filter.endsAt)} 기준`;
 	}
 	function filterLabel(): string | null {
-		if (filter.kind === 'all') return null;
 		if (filter.kind === 'unscheduled') return '시간 미정';
-		if (filter.kind === 'day') return `${weekdays[filter.weekday - 1]}요일`;
+		if (filter.kind === 'slot')
+			return `${weekdays[filter.weekday - 1]} ${formatTime(filter.startsAt)}`;
 		return null;
 	}
-	function replacementSource(offering: Offering): Offering | null {
-		if (filter.kind !== 'replace' || offering.id === filter.sourceOfferingId) return null;
-		return selectedReplacementSource();
-	}
-	type ReplacementKind = 'section' | 'timeslot';
-	function replacementKind(offering: Offering): ReplacementKind | null {
-		const source = replacementSource(offering);
-		if (!source) return null;
-		return offering.courseId === source.courseId ? 'section' : 'timeslot';
-	}
-	function fitsInsideReplacementWindow(offering: Offering): boolean {
-		if (filter.kind !== 'replace') return false;
-		return offering.meetings.some(
-			(meeting) =>
-				meeting.weekday === filter.weekday &&
-				filter.startsAt <= meeting.startsAt &&
-				meeting.endsAt <= filter.endsAt
-		);
-	}
-	function hasConflict(offering: Offering, ignoredOfferingId?: string): boolean {
+	function hasConflict(offering: Offering): boolean {
 		return offering.meetings.some((candidate) =>
 			timetable.offerings.some(
 				(selectedOffering) =>
 					selectedOffering.id !== offering.id &&
-					selectedOffering.id !== ignoredOfferingId &&
 					selectedOffering.meetings.some(
 						(meeting) =>
 							meeting.weekday === candidate.weekday &&
@@ -181,10 +97,9 @@
 		alreadyAdded: boolean
 	): OfferingRestriction | null {
 		if (alreadyAdded) return null;
-		const replacement = replacementSource(offering);
-		if (!replacement && timetable.offerings.some((item) => item.courseId === offering.courseId))
+		if (timetable.offerings.some((item) => item.courseId === offering.courseId))
 			return { label: '대체 분반', order: 0 };
-		if (hasConflict(offering, replacement?.id)) return { label: '시간 겹침', order: 1 };
+		if (hasConflict(offering)) return { label: '시간 겹침', order: 1 };
 		const catalogReason = offeringRestrictions[offering.id];
 		if (catalogReason) return { label: catalogReason, order: 2 };
 		return null;
@@ -195,28 +110,22 @@
 	}
 	function resultRank(offering: Offering): number {
 		if (selectedOfferingIds.has(offering.id)) return 0;
+		// 학부생 중심 서비스라 조건이 같으면 대학원 강의를 뒤로 민다. 목록에서 따로 표시하지는 않는다.
+		const careerRank = offering.academicCareer === 'graduate' ? 1 : 0;
 		const restriction = offeringRestriction(offering, false);
-		if (restriction) return restriction.order + 10;
-		const replacement = replacementKind(offering);
-		if (replacement === 'section') return offeringNotice(offering) ? 2 : 1;
-		const careerRank = offering.academicCareer === 'graduate' ? 2 : 1;
-		const windowRank =
-			replacement === 'timeslot' ? (fitsInsideReplacementWindow(offering) ? 2 : 4) : 0;
-		return careerRank + windowRank + (offeringNotice(offering) ? 4 : 0);
+		if (restriction) return 10 + restriction.order * 2 + careerRank;
+		return 1 + careerRank + (offeringNotice(offering) ? 4 : 0);
 	}
 </script>
 
 {#snippet offeringResult(offering: Offering)}
 	{@const alreadyAdded = selectedOfferingIds.has(offering.id)}
-	{@const selectedSource = offering.id === selectedSourceOffering?.id}
-	{@const replacement = replacementSource(offering)}
 	{@const restriction = offeringRestriction(offering, alreadyAdded)}
 	{@const notice = offeringNotice(offering)}
 	<article class:added={alreadyAdded} class:unavailable={Boolean(restriction)}>
 		<i style={`background: ${courseColor(offering.category)}`}></i>
 		<div class="offering-copy">
 			<div class="offering-tags">
-				{#if offering.academicCareer === 'graduate'}<span class="graduate-label">대학원</span>{/if}
 				<span>{offering.category ?? '기타'}</span><span>{offering.courseId}</span>
 				{#if restriction}<span class="unavailable-label">{restriction.label}</span>
 				{:else if notice}<span class="notice-label">{notice}</span>{/if}
@@ -236,32 +145,17 @@
 			<a href={`${resolve('/review')}?course=${encodeURIComponent(offering.courseId)}`}>강의평가</a>
 			<form
 				method="POST"
-				action={alreadyAdded ? '?/removeItem' : replacement ? '?/replace' : '?/add'}
-				use:enhance={selectedSource
-					? cancelSelectionEnhance
-					: alreadyAdded
-						? pendingEnhance
-						: replacement
-							? replaceEnhance
-							: addEnhance}
+				action={alreadyAdded ? '?/removeItem' : '?/add'}
+				use:enhance={pendingEnhance}
 			>
 				<input type="hidden" name="timetableId" value={timetable.id} />
-				{#if replacement}
-					<input type="hidden" name="fromOfferingId" value={replacement.id} />
-					<input type="hidden" name="toOfferingId" value={offering.id} />
-				{:else}
-					<input type="hidden" name="offeringId" value={offering.id} />
-				{/if}
+				<input type="hidden" name="offeringId" value={offering.id} />
 				<button
 					class:add-offering={!alreadyAdded}
 					class:remove-offering={alreadyAdded}
 					disabled={busy || Boolean(restriction)}
 				>
-					{#if selectedSource}<X size="0.82rem" />취소{:else if alreadyAdded}<X
-							size="0.82rem"
-						/>제거{:else if replacement}<Repeat2 size="0.82rem" />교체{:else}<Plus
-							size="0.82rem"
-						/>추가{/if}
+					{#if alreadyAdded}<X size="0.82rem" />제거{:else}<Plus size="0.82rem" />추가{/if}
 				</button>
 			</form>
 		</div>
@@ -272,7 +166,7 @@
 	<header>
 		<span class="panel-heading">
 			<Search size="0.95rem" />
-			<span><b>{panelTitle()}</b></span>
+			<span><b>강의 찾기</b></span>
 		</span>
 		<span>
 			<small>{filteredOfferings.length}개</small>
@@ -302,21 +196,6 @@
 				>{/if}
 			<button
 				class="filter-tag"
-				class:active={academicCareer === 'all'}
-				onclick={() => (academicCareer = 'all')}>전체 과정</button
-			>
-			<button
-				class="filter-tag"
-				class:active={academicCareer === 'undergraduate'}
-				onclick={() => (academicCareer = 'undergraduate')}>학부</button
-			>
-			<button
-				class="filter-tag"
-				class:active={academicCareer === 'graduate'}
-				onclick={() => (academicCareer = 'graduate')}>대학원</button
-			>
-			<button
-				class="filter-tag"
 				class:active={category === 'all'}
 				onclick={() => (category = 'all')}>전체 영역</button
 			>
@@ -329,68 +208,23 @@
 			{/each}
 		</div>
 		<div class="offering-list">
-			{#if selectedSourceOffering}
-				<section class="selected-result" aria-labelledby="selected-offering-title">
-					<div class="result-group-heading selected-heading">
-						<span
-							><b id="selected-offering-title">선택한 강의</b><small>시간표에 추가됨</small></span
-						>
-					</div>
-					{@render offeringResult(selectedSourceOffering)}
-				</section>
-			{/if}
-			{#if filter.kind === 'replace'}
-				{#if sectionAlternatives.length}
-					<section class="result-group" aria-labelledby="section-alternatives-title">
-						<div class="result-group-heading">
-							<span><b id="section-alternatives-title">다른 분반</b><small>같은 과목</small></span>
-							<small>{sectionAlternatives.length}개</small>
-						</div>
-						{#each sectionAlternatives as offering (offering.id)}
-							{@render offeringResult(offering)}
-						{/each}
-					</section>
-				{/if}
-				{#if timeslotAlternatives.length}
-					<section class="result-group" aria-labelledby="timeslot-alternatives-title">
-						<div class="result-group-heading">
-							<span
-								><b id="timeslot-alternatives-title">이 시간대 강의</b><small
-									>{searchContextLabel()}</small
-								></span
-							>
-							<small>{timeslotAlternatives.length}개</small>
-						</div>
-						{#each timeslotAlternatives as offering (offering.id)}
-							{@render offeringResult(offering)}
-						{/each}
-					</section>
-				{/if}
-			{:else if filter.kind === 'slot'}
+			{#if filter.kind === 'slot'}
 				<section class="result-group" aria-labelledby="slot-results-title">
 					<div class="result-group-heading">
 						<span
 							><b id="slot-results-title">이 시간대 강의</b><small>{searchContextLabel()}</small
 							></span
 						>
-						<small>{availableOfferings.length}개</small>
+						<small>{filteredOfferings.length}개</small>
 					</div>
-					{#each availableOfferings as offering (offering.id)}
+					{#each filteredOfferings as offering (offering.id)}
 						{@render offeringResult(offering)}
 					{/each}
 				</section>
 			{:else}
-				{#each availableOfferings as offering (offering.id)}
+				{#each filteredOfferings as offering (offering.id)}
 					{@render offeringResult(offering)}
 				{/each}
-			{/if}
-			{#if unavailableOfferings.length}
-				<details class="unavailable-results">
-					<summary>추가할 수 없는 강의 {unavailableOfferings.length}개</summary>
-					{#each unavailableOfferings as offering (offering.id)}
-						{@render offeringResult(offering)}
-					{/each}
-				</details>
 			{/if}
 			{#if !filteredOfferings.length}
 				<div class="empty-list">
@@ -537,21 +371,6 @@
 	.offering-list article.unavailable {
 		opacity: 0.68;
 	}
-	.result-group + .result-group {
-		border-top: var(--divider-border-width) solid var(--gray-border);
-	}
-	.selected-result {
-		box-shadow: 0 0.3rem 0.65rem color-mix(in srgb, var(--text) 7%, transparent);
-		border-bottom: var(--control-border-width) solid
-			color-mix(in srgb, var(--secondary) 28%, var(--gray-border));
-		background: var(--white);
-	}
-	.selected-heading {
-		background: color-mix(in srgb, var(--secondary) 7%, var(--white));
-	}
-	.selected-heading b {
-		color: var(--secondary);
-	}
 	.result-group-heading {
 		display: flex;
 		justify-content: space-between;
@@ -609,10 +428,6 @@
 		background: var(--error-bg);
 		color: var(--error-text);
 	}
-	.offering-tags .graduate-label {
-		background: color-mix(in srgb, var(--secondary) 10%, white);
-		color: var(--secondary);
-	}
 	// 차단이 아니라 안내이므로 경고색이 아닌 성공색으로 구분한다.
 	.offering-tags .notice-label {
 		background: var(--success-bg);
@@ -652,18 +467,6 @@
 		border-color: color-mix(in srgb, var(--error-text) 35%, var(--gray-border));
 		background: var(--white);
 		color: var(--error-text);
-	}
-	.unavailable-results {
-		border-top: var(--divider-border-width) solid var(--gray-border);
-	}
-	.unavailable-results summary {
-		cursor: pointer;
-		background: var(--gray-bg);
-		padding: 0.55rem 0.65rem;
-		color: var(--gray-text);
-		font-weight: 650;
-		font-size: 0.63rem;
-		list-style-position: inside;
 	}
 	.empty-list {
 		display: flex;
