@@ -1,11 +1,11 @@
-import { and, asc, countDistinct, eq, inArray, max, sql } from 'drizzle-orm';
+import { and, asc, countDistinct, eq, inArray, isNull, max, sql } from 'drizzle-orm';
 
 import * as AcademicRepository from './academic.repository.js';
 
 import type { Timetable, TimetableCreate } from '$lib/types/timetable.type.js';
 import type { UserId } from '$lib/types/user.type.js';
 
-import { timetableItems, timetables } from '$lib/server/database/schema.js';
+import { courseOfferings, timetableItems, timetables } from '$lib/server/database/schema.js';
 import { getDatabase } from '$lib/server/db.js';
 import { isDuplicateKeyError } from '$lib/server/errors.js';
 
@@ -26,8 +26,9 @@ export async function findTimetables(
 				.from(timetableItems)
 				.where(inArray(timetableItems.timetableId, ids))
 		: [];
-	const offerings = await AcademicRepository.findOfferings(year, term);
-	const offeringMap = new Map(offerings.map((offering) => [offering.id, offering]));
+	const offeringMap = await AcademicRepository.findOfferingMapByIds(
+		items.map((item) => item.offeringId)
+	);
 	return rows.map((row) => ({
 		...row,
 		offerings: items
@@ -66,7 +67,8 @@ export async function findConfirmedCompetition(userId: UserId, year: number, ter
 	const ownItems = await getDatabase()
 		.select({ offeringId: timetableItems.offeringId })
 		.from(timetableItems)
-		.where(eq(timetableItems.timetableId, confirmed.id));
+		.innerJoin(courseOfferings, eq(timetableItems.offeringId, courseOfferings.id))
+		.where(and(eq(timetableItems.timetableId, confirmed.id), isNull(courseOfferings.archivedAt)));
 	const offeringIds = ownItems.map((item) => item.offeringId);
 	if (!offeringIds.length)
 		return { confirmed: true, confirmedTimetableName: confirmed.name, items: [] };
@@ -77,11 +79,13 @@ export async function findConfirmedCompetition(userId: UserId, year: number, ter
 		})
 		.from(timetableItems)
 		.innerJoin(timetables, eq(timetableItems.timetableId, timetables.id))
+		.innerJoin(courseOfferings, eq(timetableItems.offeringId, courseOfferings.id))
 		.where(
 			and(
 				eq(timetables.year, year),
 				eq(timetables.term, term),
 				eq(timetables.isConfirmed, true),
+				isNull(courseOfferings.archivedAt),
 				inArray(timetableItems.offeringId, offeringIds)
 			)
 		)

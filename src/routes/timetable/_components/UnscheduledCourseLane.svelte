@@ -22,15 +22,19 @@
 <div class="unscheduled-lane">
 	<span class="lane-label">시간 미정</span>
 	{#each offerings as offering (offering.id)}
-		<article style={`--course-color: ${courseColor(offering.category)}`}>
-			<div>
+		<article
+			class:cancelled={offering.archivedAt !== null}
+			style={`--course-color: ${courseColor(offering.category)}`}
+		>
+			<div class="offering-copy">
+				{#if offering.archivedAt !== null}<span class="cancelled-badge">폐강</span>{/if}
 				<strong>{offering.courseName}</strong>
 				<small
 					>{offering.professors.map((professor) => professor.name).join(', ') || '교수 미정'} ·
 					{offering.section}분반</small
 				>
 			</div>
-			<form method="POST" action="?/removeItem" use:enhance={pendingEnhance}>
+			<form data-image-exclude method="POST" action="?/removeItem" use:enhance={pendingEnhance}>
 				<input type="hidden" name="timetableId" value={timetableId} />
 				<input type="hidden" name="offeringId" value={offering.id} />
 				<button
@@ -45,6 +49,7 @@
 		<button
 			type="button"
 			class="unscheduled-slot"
+			data-image-exclude
 			disabled={busy}
 			onclick={onopen}
 			aria-label="시간 미정 강의 추가"
@@ -86,7 +91,22 @@
 		background: color-mix(in srgb, var(--course-color) 11%, var(--white));
 		overflow: hidden;
 	}
-	article > div {
+	article.cancelled {
+		--course-color: var(--gray-text) !important;
+		background: color-mix(in srgb, var(--error-bg) 65%, var(--white));
+		color: var(--gray-text);
+	}
+	.cancelled-badge {
+		align-self: flex-start;
+		border-radius: 999px;
+		background: var(--error-text);
+		padding: 0.05rem 0.28rem;
+		color: var(--white);
+		font-weight: 750;
+		font-size: 0.48rem;
+		line-height: 1.35;
+	}
+	.offering-copy {
 		display: flex;
 		flex: 1;
 		flex-direction: column;

@@ -11,13 +11,19 @@
 	import Plus from '@lucide/svelte/icons/plus';
 	import Search from '@lucide/svelte/icons/search';
 	import Trash from '@lucide/svelte/icons/trash-2';
+	import AlertTriangle from '@lucide/svelte/icons/triangle-alert';
 	import Users from '@lucide/svelte/icons/users';
 	import X from '@lucide/svelte/icons/x';
 
+	import {
+		COURSE_SLOTS,
+		getFreeTimeRanges,
+		overlapsTimeRange
+	} from './_components/course-search.js';
 	import CourseSearchPanel from './_components/CourseSearchPanel.svelte';
 	import UnscheduledCourseLane from './_components/UnscheduledCourseLane.svelte';
 
-	import type { CourseSearchFilter } from './_components/course-search.js';
+	import type { CourseSearchFilter, TimeBlock } from './_components/course-search.js';
 	import type { SubmitFunction } from '@sveltejs/kit';
 
 	import { enhance } from '$app/forms';
@@ -43,6 +49,14 @@
 	);
 	const displayOfferings = $derived(
 		actualSelected ? data.actualSchedule.offerings : (selected?.offerings ?? [])
+	);
+	const archivedOfferings = $derived(
+		selected?.offerings.filter((offering) => offering.archivedAt !== null) ?? []
+	);
+	const activeDisplayOfferings = $derived(
+		actualSelected
+			? displayOfferings
+			: displayOfferings.filter((offering) => offering.archivedAt === null)
 	);
 	const busy = $derived(submitting || navigating.to !== null);
 	const hiddenSelectedOfferings = $derived(
@@ -82,8 +96,9 @@
 			? Object.entries(progress.required)
 					.filter(([key]) => key !== 'total')
 					.map(([key, required]) => {
-						const value = earned(key);
-						const baseline = baselineEarned(key, value);
+						const rawValue = earned(key);
+						const value = Math.min(rawValue, required);
+						const baseline = Math.min(baselineEarned(key, rawValue), required);
 						return { key, value, baseline, delta: Math.max(0, value - baseline), required };
 					})
 			: []
@@ -147,11 +162,14 @@
 			: []
 	);
 	const selectedMeetings = $derived(displayOfferings.flatMap((offering) => offering.meetings));
+	const rangeMeetings = $derived(
+		selected ? data.offerings.flatMap((offering) => offering.meetings) : selectedMeetings
+	);
 	const startMinute = $derived(
-		selectedMeetings.length
+		rangeMeetings.length
 			? Math.min(
 					9 * 60,
-					Math.floor(Math.min(...selectedMeetings.map((meeting) => meeting.startsAt)) / 60) * 60
+					Math.floor(Math.min(...rangeMeetings.map((meeting) => meeting.startsAt)) / 60) * 60
 				)
 			: 9 * 60
 	);
@@ -164,13 +182,6 @@
 	);
 	const gridStep = 1.35;
 	const gridPadding = 0.65;
-	const courseSlots = [
-		{ startsAt: 9 * 60, endsAt: 11 * 60 },
-		{ startsAt: 12 * 60, endsAt: 14 * 60 },
-		{ startsAt: 14 * 60, endsAt: 16 * 60 },
-		{ startsAt: 16 * 60, endsAt: 18 * 60 },
-		{ startsAt: 18 * 60, endsAt: 20 * 60 }
-	] as const;
 	const scheduleGuides = [9, 11, 12, 14, 16, 18, 20].map((hour) => hour * 60);
 	const gridHeight = $derived(((endMinute - startMinute) / 30) * gridStep + gridPadding * 2);
 	const totalCredits = $derived(
@@ -178,10 +189,10 @@
 			? data.actualSchedule.completions
 					.filter((completion) => completion.status === 'passed')
 					.reduce((sum, completion) => sum + completion.credits, 0)
-			: displayOfferings.reduce((sum, offering) => sum + offering.credits, 0)
+			: activeDisplayOfferings.reduce((sum, offering) => sum + offering.credits, 0)
 	);
 	const totalHours = $derived(
-		displayOfferings.reduce(
+		activeDisplayOfferings.reduce(
 			(sum, offering) =>
 				sum +
 				offering.meetings.reduce(
@@ -247,6 +258,10 @@
 		const height = Math.max(1.15, ((endsAt - startsAt) / 30) * gridStep);
 		return `--course-color: ${courseColor(categoryKey)}; top: ${top}rem; height: ${height}rem`;
 	}
+	/** 상시 + 버튼을 띄울지만 정한다. 덮여 있어도 블럭 자체는 계속 클릭할 수 있다. */
+	function freeSlotRanges(weekday: number, block: TimeBlock): TimeBlock[] {
+		return getFreeTimeRanges(weekday, block, selectedMeetings);
+	}
 	function gridSlotStyle(startsAt: number, endsAt: number): string {
 		const inset = 0.08;
 		const top = gridPadding + ((startsAt - startMinute) / 30) * gridStep + inset;
@@ -256,21 +271,26 @@
 	function scheduleGuideStyle(minute: number): string {
 		return `top: ${gridPadding + ((minute - startMinute) / 30) * gridStep}rem`;
 	}
-	function slotOccupied(weekday: number, startsAt: number, endsAt: number): boolean {
-		return displayOfferings.some((offering) =>
-			offering.meetings.some(
-				(meeting) =>
-					meeting.weekday === weekday && meeting.startsAt < endsAt && startsAt < meeting.endsAt
-			)
-		);
-	}
 	function openSearch(filter: CourseSearchFilter): void {
 		if (!selected || busy) return;
 		searchFilter = filter;
 		searchSession += 1;
 	}
-	function openSlotPicker(weekday: number, minute: number): void {
-		openSearch({ kind: 'slot', weekday, minute });
+	function openSlotPicker(weekday: number, block: TimeBlock): void {
+		openSearch({ kind: 'slot', weekday, startsAt: block.startsAt, endsAt: block.endsAt });
+	}
+	function openReplacementPicker(
+		offeringId: string,
+		meeting: { id: string; weekday: number; startsAt: number; endsAt: number }
+	): void {
+		openSearch({
+			kind: 'replace',
+			sourceOfferingId: offeringId,
+			meetingId: meeting.id,
+			weekday: meeting.weekday,
+			startsAt: meeting.startsAt,
+			endsAt: meeting.endsAt
+		});
 	}
 	function openCourseBrowser(): void {
 		openSearch({ kind: 'all' });
@@ -289,7 +309,10 @@
 		savingImage = true;
 		try {
 			const { toPng } = await import('html-to-image');
-			const dataUrl = await toPng(schedulePanel, { pixelRatio: 2 });
+			const dataUrl = await toPng(schedulePanel, {
+				pixelRatio: 2,
+				filter: (node) => !(node instanceof HTMLElement && node.hasAttribute('data-image-exclude'))
+			});
 			const filename = `${actualSelected ? '실제 수강' : (selected?.name ?? '시간표')}.png`;
 			const isTouchDevice = window.matchMedia('(pointer: coarse)').matches;
 			if (isTouchDevice) {
@@ -321,6 +344,47 @@
 		return async ({ update }) => {
 			try {
 				await update();
+			} finally {
+				submitting = false;
+			}
+		};
+	};
+	const replaceEnhance: SubmitFunction = ({ formData }) => {
+		const targetOfferingId = String(formData.get('toOfferingId'));
+		const previousFilter = searchFilter?.kind === 'replace' ? searchFilter : null;
+		submitting = true;
+		return async ({ result, update }) => {
+			let nextSelection: Parameters<typeof openReplacementPicker> | null = null;
+			let shouldClose = false;
+			try {
+				await update();
+				if (result.type === 'success' && previousFilter) {
+					const target = data.offerings.find((offering) => offering.id === targetOfferingId);
+					const meeting =
+						target?.meetings.find((item) => overlapsTimeRange(item, previousFilter)) ??
+						target?.meetings.find((item) => item.weekday >= 1 && item.weekday <= 5);
+					if (target && meeting) nextSelection = [target.id, meeting];
+					else shouldClose = true;
+				}
+			} finally {
+				submitting = false;
+			}
+			if (nextSelection) openReplacementPicker(...nextSelection);
+			else if (shouldClose) closeCourseBrowser();
+		};
+	};
+	const removeOfferingEnhance: SubmitFunction = ({ formData }) => {
+		const removedOfferingId = String(formData.get('offeringId'));
+		submitting = true;
+		return async ({ result, update }) => {
+			try {
+				await update();
+				if (
+					result.type === 'success' &&
+					searchFilter?.kind === 'replace' &&
+					searchFilter.sourceOfferingId === removedOfferingId
+				)
+					closeCourseBrowser();
 			} finally {
 				submitting = false;
 			}
@@ -473,7 +537,8 @@
 						>{/if}
 				</div>
 				<div class="slot-stats">
-					<span><b>{selected.offerings.length}</b>과목</span><span><b>{totalCredits}</b>학점</span
+					<span><b>{activeDisplayOfferings.length}</b>과목</span><span
+						><b>{totalCredits}</b>학점</span
 					><span
 						><b>{Number.isInteger(totalHours) ? totalHours : totalHours.toFixed(1)}</b>시간/주</span
 					>
@@ -487,7 +552,11 @@
 						<input type="hidden" name="timetableId" value={selected.id} /><button
 							class:confirm-button={!selected.isConfirmed}
 							class:unconfirm-button={selected.isConfirmed}
-							disabled={!selected.isConfirmed && !selected.offerings.length}
+							disabled={!selected.isConfirmed &&
+								(!activeDisplayOfferings.length || archivedOfferings.length > 0)}
+							title={archivedOfferings.length
+								? '폐강된 강의를 제거한 뒤 확정할 수 있습니다.'
+								: undefined}
 							>{#if selected.isConfirmed}<X size="0.85rem" />확정 취소{:else}<Check
 									size="0.85rem"
 								/>확정{/if}</button
@@ -535,14 +604,23 @@
 								<strong>빈 칸을 눌러 강의를 추가하세요</strong>
 								<small>선택한 요일과 시간에 맞는 강의만 바로 보여드려요.</small>
 							</span>
-							<button type="button" disabled={busy} onclick={openCourseBrowser}
+							<button type="button" data-image-exclude disabled={busy} onclick={openCourseBrowser}
 								><Search size="0.82rem" />전체 강의 검색</button
 							>
 						</div>
 					{:else if selected}
-						<div class="schedule-toolbar">
+						<div class="schedule-toolbar" data-image-exclude>
 							<button type="button" disabled={busy} onclick={openCourseBrowser}
 								><Search size="0.82rem" />전체 강의 검색</button
+							>
+						</div>
+					{/if}
+					{#if selected && archivedOfferings.length}
+						<div class="cancelled-notice" role="alert">
+							<AlertTriangle size="0.9rem" aria-hidden="true" />
+							<span
+								><strong>폐강된 강의가 {archivedOfferings.length}개 있습니다.</strong>
+								시간표에서 제거해야 다시 확정할 수 있습니다.</span
 							>
 						</div>
 					{/if}
@@ -565,50 +643,60 @@
 											aria-hidden="true"
 										></span>
 									{/each}
+									<!-- 수요일은 정규 강의가 열리지 않아 블럭 버튼을 두지 않는다. -->
 									{#if selected && day !== 2}
-										{#each courseSlots as slot (slot.startsAt)}
-											{#if !slotOccupied(day + 1, slot.startsAt, slot.endsAt)}
+										{#each COURSE_SLOTS as slot (slot.startsAt)}
+											{#each freeSlotRanges(day + 1, slot) as freeRange (`${freeRange.startsAt}-${freeRange.endsAt}`)}
 												<button
 													type="button"
 													class="grid-slot"
-													tabindex="-1"
-													style={gridSlotStyle(slot.startsAt, slot.endsAt)}
+													data-image-exclude
+													style={gridSlotStyle(freeRange.startsAt, freeRange.endsAt)}
 													disabled={busy}
-													onclick={() => openSlotPicker(day + 1, slot.startsAt)}
-													aria-label={`${weekday} ${formatTime(slot.startsAt)}에 강의 추가`}
-													title={`${weekday} ${formatTime(slot.startsAt)} 강의 찾기`}
+													onclick={() => openSlotPicker(day + 1, freeRange)}
+													aria-label={`${weekday} ${formatTime(freeRange.startsAt)}에 강의 추가`}
+													title={`${weekday} ${formatTime(freeRange.startsAt)}–${formatTime(freeRange.endsAt)} 강의 찾기`}
 												>
 													<Plus size="0.78rem" aria-hidden="true" />
 												</button>
-											{/if}
+											{/each}
 										{/each}
 									{/if}
 									{#each meetingsForDay(day + 1) as { offering, meeting } (`${offering.id}-${meeting.id}`)}
 										<article
 											class="course-block"
+											class:cancelled={offering.archivedAt !== null}
 											style={meetingStyle(offering.category, meeting.startsAt, meeting.endsAt)}
-											title={`${offering.courseName} · ${scheduleText(offering)}`}
 										>
 											<button
 												type="button"
 												class="course-block-copy"
-												aria-disabled={!selected}
-												tabindex={selected ? 0 : -1}
-												onclick={() => openSlotPicker(meeting.weekday, meeting.startsAt)}
-												aria-label={`${offering.courseName} 열기`}
+												class:selected-course={searchFilter?.kind === 'replace' &&
+													searchFilter.sourceOfferingId === offering.id &&
+													searchFilter.meetingId === meeting.id}
+												disabled={!selected || busy || offering.archivedAt !== null}
+												onclick={() => openReplacementPicker(offering.id, meeting)}
+												aria-label={`${offering.courseName} 선택`}
+												title={selected ? `${offering.courseName} 교체하기` : offering.courseName}
 											>
+												{#if offering.archivedAt !== null}<span class="cancelled-badge">폐강</span
+													>{/if}
 												<strong>{offering.courseName}</strong><small class="course-professor"
 													>{offering.professors.map((professor) => professor.name).join(', ') ||
 														'교수 미정'}</small
 												>
 												{#if meeting.room}<small class="course-room">{meeting.room}</small>{/if}
+												<small class="course-time"
+													>{formatTime(meeting.startsAt)}–{formatTime(meeting.endsAt)}</small
+												>
 											</button>
 											{#if selected}
 												<form
 													class="course-block-remove"
+													data-image-exclude
 													method="POST"
 													action="?/removeItem"
-													use:enhance={pendingEnhance}
+													use:enhance={removeOfferingEnhance}
 												>
 													<input type="hidden" name="timetableId" value={selected.id} /><input
 														type="hidden"
@@ -644,10 +732,10 @@
 						<div class="unscheduled-heading">
 							<div>
 								<h3>시간표에 표시되지 않는 수강 과목</h3>
-								<p>수강 이력에서 수정하거나 삭제할 수 있습니다.</p>
+								<p>이수 내역에서 수정하거나 삭제할 수 있습니다.</p>
 							</div>
 							<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- hash is appended to a resolved route -->
-							<a href={resolve('/academic') + '#course-history'}>수강 이력 관리</a>
+							<a href={resolve('/academic') + '#course-history'}>이수 내역 관리</a>
 						</div>
 						<ul>
 							{#each data.actualSchedule.unscheduledCompletions as completion (completion.id)}
@@ -674,6 +762,8 @@
 						filter={searchFilter}
 						{busy}
 						{pendingEnhance}
+						{replaceEnhance}
+						{removeOfferingEnhance}
 						onclose={closeCourseBrowser}
 						onclearfilter={clearCourseSearchFilter}
 						{courseColor}
@@ -923,6 +1013,22 @@
 		outline: 0;
 		background: color-mix(in srgb, var(--secondary) 7%, var(--white));
 	}
+	.cancelled-notice {
+		display: flex;
+		align-items: center;
+		gap: 0.45rem;
+		border-bottom: var(--divider-border-width) solid
+			color-mix(in srgb, var(--error-text) 25%, var(--gray-border));
+		background: var(--error-bg);
+		padding: 0.5rem 0.65rem;
+		color: var(--error-text);
+		font-size: 0.68rem;
+	}
+	.cancelled-notice span {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.2rem 0.35rem;
+	}
 	.unconfirm-button {
 		gap: 0.25rem;
 		border-color: var(--error-text);
@@ -977,6 +1083,7 @@
 		padding: 0;
 		width: 2rem;
 		height: 2rem;
+		touch-action: pan-y;
 		color: var(--secondary);
 	}
 	.slot-toolbar {
@@ -1195,12 +1302,10 @@
 		right: 0.12rem;
 		left: 0.12rem;
 		place-items: center;
-		z-index: 1;
-		cursor: cell;
+		cursor: pointer;
 		border: 0;
 		border-radius: 0.28rem;
-		background-image: none;
-		background-color: var(--white);
+		background: var(--white);
 		padding: 0;
 		color: color-mix(in srgb, var(--gray-text) 55%, transparent);
 	}
@@ -1212,6 +1317,9 @@
 	}
 	.grid-slot:focus-visible {
 		box-shadow: inset 0 0 0 var(--control-border-width) var(--secondary);
+	}
+	button.grid-slot:disabled {
+		cursor: default;
 	}
 	.course-block {
 		position: absolute;
@@ -1226,11 +1334,27 @@
 		overflow: hidden;
 		color: var(--text);
 	}
+	.course-block.cancelled {
+		--course-color: var(--gray-text) !important;
+		background: color-mix(in srgb, var(--error-bg) 65%, var(--white));
+		color: var(--gray-text);
+	}
+	.cancelled-badge {
+		align-self: flex-start;
+		border-radius: 999px;
+		background: var(--error-text);
+		padding: 0.05rem 0.28rem;
+		color: var(--white);
+		font-weight: 750;
+		font-size: 0.48rem;
+		line-height: 1.35;
+	}
 	.course-block-copy {
 		display: flex;
 		flex-direction: column;
 		justify-content: flex-start;
 		align-items: stretch;
+		cursor: pointer;
 		border: 0;
 		border-radius: 0;
 		background: transparent;
@@ -1241,16 +1365,36 @@
 		color: inherit;
 		text-align: left;
 	}
-	.course-block-copy:not([aria-disabled='true']) {
-		cursor: pointer;
-	}
-	.course-block-copy[aria-disabled='true'] {
-		pointer-events: none;
-	}
-	.course-block-copy:hover:not([aria-disabled='true']),
-	.course-block-copy:focus-visible {
+	.course-block-copy:hover:not(:disabled),
+	.course-block-copy:focus-visible,
+	.course-block-copy.selected-course {
 		outline: 0;
-		background: color-mix(in srgb, var(--course-color) 6%, transparent);
+		box-shadow: inset 0 0 0 var(--control-border-width) var(--course-color);
+		background: color-mix(in srgb, var(--course-color) 12%, transparent);
+	}
+	.course-block-copy:disabled {
+		cursor: default;
+	}
+	.course-block-remove {
+		position: absolute;
+		top: 0.12rem;
+		right: 0.12rem;
+		z-index: 3;
+	}
+	.course-block-remove button {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		border: 0;
+		border-radius: 999px;
+		background: color-mix(in srgb, var(--white) 72%, transparent);
+		padding: 0.12rem;
+		color: var(--gray-text);
+	}
+	.course-block-remove button:hover,
+	.course-block-remove button:focus-visible {
+		background: var(--error-bg);
+		color: var(--error-text);
 	}
 	.course-block strong {
 		overflow: hidden;
@@ -1274,31 +1418,9 @@
 	.course-room {
 		color: var(--gray-text);
 	}
-	.course-block-remove {
-		position: absolute;
-		top: 0.14rem;
-		right: 0.12rem;
-		z-index: 3;
-	}
-	.course-block-remove button {
-		display: grid;
-		place-items: center;
-		opacity: 0.55;
-		cursor: pointer;
-		border: 0;
-		border-radius: 0.2rem;
-		background: transparent;
-		padding: 0;
-		width: 0.95rem;
-		height: 0.95rem;
+	.course-time {
 		color: var(--gray-text);
-	}
-	.course-block-remove button:hover,
-	.course-block-remove button:focus-visible {
-		opacity: 1;
-		outline: 0;
-		background: var(--error-bg);
-		color: var(--error-text);
+		font-variant-numeric: tabular-nums;
 	}
 	.unscheduled-records {
 		padding: 0.8rem;

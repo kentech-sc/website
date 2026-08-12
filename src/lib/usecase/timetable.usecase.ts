@@ -71,14 +71,17 @@ export async function getPage(year: number, term: number, user: User) {
 					calculateDegreeProgress(
 						[
 							...completedDegreeCourses,
-							...timetable.offerings.map((offering) => ({
-								code: offering.courseId,
-								category: offering.category,
-								subcategory: offering.subcategory,
-								level: offering.level,
-								credits: offering.credits,
-								gradExcluded: offering.gradExcluded
-							}))
+							...timetable.offerings
+								.filter((offering) => offering.archivedAt === null)
+								.map((offering) => ({
+									code: offering.courseId,
+									category: offering.category,
+									subcategory: offering.subcategory,
+									level: offering.level,
+									credits: offering.credits,
+									gradExcluded: offering.gradExcluded,
+									academicCareer: offering.academicCareer
+								}))
 						],
 						policy.rules,
 						{ ESP: profile?.espWaivedCourseIds ?? [] }
@@ -128,6 +131,12 @@ export const addOffering = (id: string, offeringId: string, user: User) =>
 	transaction(() => TimetableService.addOffering(id, offeringId, user));
 export const removeOffering = (id: string, offeringId: string, user: User) =>
 	transaction(() => TimetableService.removeOffering(id, offeringId, user));
+export const replaceOffering = (
+	id: string,
+	fromOfferingId: string,
+	toOfferingId: string,
+	user: User
+) => transaction(() => TimetableService.replaceOffering(id, fromOfferingId, toOfferingId, user));
 export const copy = (id: string, user: User) => transaction(() => TimetableService.copy(id, user));
 export const confirm = (id: string, user: User) =>
 	transaction(() => TimetableService.confirm(id, user));

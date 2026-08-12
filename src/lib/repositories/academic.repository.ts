@@ -3,6 +3,7 @@ import { and, asc, desc, eq, gte, inArray, isNull, lte, sql } from 'drizzle-orm'
 import type {
 	CourseCompletion,
 	CourseCompletionView,
+	AcademicCareer,
 	Offering,
 	OfferingCreditType,
 	OfferingImportInput,
@@ -20,6 +21,7 @@ import {
 	graduationPolicies,
 	professors,
 	studentAcademicProfiles,
+	timetableItems,
 	timetables
 } from '$lib/server/database/schema.js';
 import { getDatabase } from '$lib/server/db.js';
@@ -124,6 +126,7 @@ export async function findOfferingMapByIds(ids: string[]): Promise<Map<string, O
 				offering.id,
 				{
 					...offering,
+					academicCareer: offering.academicCareer as AcademicCareer,
 					credits: Number(credits),
 					creditType: creditType as OfferingCreditType,
 					courseName,
@@ -279,6 +282,22 @@ export async function findCompletedDegreeCourses(userId: UserId): Promise<Degree
 		getDatabase()
 			.select({
 				code: courses.id,
+				academicCareer: sql<'undergraduate' | 'graduate'>`case
+					when exists (
+						select 1 from ${courseOfferings}
+						where ${courseOfferings.courseId} = ${courses.id}
+							and ${courseOfferings.year} = ${courseCompletions.year}
+							and ${courseOfferings.term} = ${courseCompletions.term}
+							and ${courseOfferings.academicCareer} = 'graduate'
+					) and not exists (
+						select 1 from ${courseOfferings}
+						where ${courseOfferings.courseId} = ${courses.id}
+							and ${courseOfferings.year} = ${courseCompletions.year}
+							and ${courseOfferings.term} = ${courseCompletions.term}
+							and ${courseOfferings.academicCareer} = 'undergraduate'
+					) then 'graduate'
+					else 'undergraduate'
+				end`,
 				category: courses.category,
 				subcategory: courses.subcategory,
 				level: courses.level,
@@ -295,7 +314,8 @@ export async function findCompletedDegreeCourses(userId: UserId): Promise<Degree
 				subcategory: courses.subcategory,
 				level: courses.level,
 				credits: courseCompletions.credits,
-				gradExcluded: courses.gradExcluded
+				gradExcluded: courses.gradExcluded,
+				academicCareer: courseOfferings.academicCareer
 			})
 			.from(courseCompletions)
 			.innerJoin(courseOfferings, eq(courseCompletions.offeringId, courseOfferings.id))
@@ -303,7 +323,11 @@ export async function findCompletedDegreeCourses(userId: UserId): Promise<Degree
 			.where(completed)
 	]);
 	const rows = [...courseRows, ...offeringRows];
-	return rows.map((row) => ({ ...row, credits: Number(row.credits ?? 0) }));
+	return rows.map((row) => ({
+		...row,
+		academicCareer: row.academicCareer as AcademicCareer,
+		credits: Number(row.credits ?? 0)
+	}));
 }
 
 export async function createCompletion(
@@ -365,11 +389,43 @@ export async function deleteCompletion(id: string, userId: UserId): Promise<bool
 	return rows.length > 0;
 }
 
-export async function archiveOfferings(year: number, term: number): Promise<void> {
+export async function archiveOfferings(
+	year: number,
+	term: number,
+	academicCareer: AcademicCareer
+): Promise<void> {
 	await getDatabase()
 		.update(courseOfferings)
 		.set({ archivedAt: sql`now()`, updatedAt: sql`now()` })
-		.where(and(eq(courseOfferings.year, year), eq(courseOfferings.term, term)));
+		.where(
+			and(
+				eq(courseOfferings.year, year),
+				eq(courseOfferings.term, term),
+				eq(courseOfferings.academicCareer, academicCareer)
+			)
+		);
+}
+
+export async function unconfirmTimetablesWithArchivedOfferings(
+	year: number,
+	term: number,
+	academicCareer: AcademicCareer
+): Promise<void> {
+	await getDatabase().execute(sql`
+		update ${timetables} as timetable
+		set is_confirmed = false, updated_at = now()
+		where timetable.year = ${year}
+			and timetable.term = ${term}
+			and timetable.is_confirmed = true
+			and exists (
+				select 1
+				from ${timetableItems} as item
+				inner join ${courseOfferings} as offering on offering.id = item.offering_id
+				where item.timetable_id = timetable.id
+					and offering.academic_career = ${academicCareer}
+					and offering.archived_at is not null
+			)
+	`);
 }
 
 export async function deleteStudentData(userId: UserId): Promise<void> {
@@ -421,6 +477,7 @@ export async function upsertOfferingImport(value: OfferingImportInput) {
 			courseId: value.courseId,
 			year: value.year,
 			term: value.term,
+			academicCareer: value.academicCareer,
 			section: value.section,
 			subtitle: value.subtitle,
 			capacity: value.capacity
@@ -429,6 +486,7 @@ export async function upsertOfferingImport(value: OfferingImportInput) {
 			target: [
 				courseOfferings.year,
 				courseOfferings.term,
+				courseOfferings.academicCareer,
 				courseOfferings.courseId,
 				courseOfferings.section
 			],

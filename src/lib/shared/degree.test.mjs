@@ -88,6 +88,22 @@ test('duplicate and explicitly excluded courses do not add graduation credit', (
 	assert.equal(result.earned.FR, 0);
 });
 
+test('graduate courses always count as free electives', () => {
+	const result = calculateDegreeProgress(
+		[
+			course('EE5304', 'EE', 3, {
+				academicCareer: 'graduate',
+				gradExcluded: true
+			}),
+			course('GS5101', 'EL', 3, { academicCareer: 'graduate' })
+		],
+		policy()
+	);
+	assert.equal(result.earned.FR, 6);
+	assert.equal(result.earned.EL, 0);
+	assert.equal(result.earned.total, 6);
+});
+
 test('upper-level EL requirement is credit based', () => {
 	const result = calculateDegreeProgress(
 		[course('EL4001', 'EL', 4, { level: 4 }), course('EL5001', 'EL', 4, { level: 5 })],

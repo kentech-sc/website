@@ -6,6 +6,7 @@ export type OfferingId = string;
 export type TimetableId = string;
 export type CompletionStatus = 'passed' | 'failed' | 'withdrawn';
 export type OfferingCreditType = 'numeric' | 'pass';
+export type AcademicCareer = 'undergraduate' | 'graduate';
 
 export interface Meeting {
 	id: string;
@@ -28,10 +29,12 @@ export interface Offering {
 	professors: Professor[];
 	year: number;
 	term: number;
+	academicCareer: AcademicCareer;
 	section: string;
 	credits: number;
 	creditType: OfferingCreditType;
 	capacity: number | null;
+	archivedAt: string | null;
 	meetings: Meeting[];
 }
 
@@ -46,6 +49,7 @@ export interface OfferingImportInput {
 	professorNames: string[];
 	year: number;
 	term: number;
+	academicCareer: AcademicCareer;
 	section: string;
 	credits: number;
 	creditType: OfferingCreditType;
@@ -54,6 +58,7 @@ export interface OfferingImportInput {
 }
 
 export interface OfferingWorkbookParseResult {
+	academicCareer: AcademicCareer;
 	offerings: OfferingImportInput[];
 	skippedClosedCount: number;
 	passCreditCount: number;

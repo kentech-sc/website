@@ -8,6 +8,7 @@ import { AppError } from '$lib/server/errors.js';
 import * as CourseService from '$lib/services/course.service.js';
 import { resolveCompletionStatus } from '$lib/shared/completion-status.js';
 import { calculateDegreeProgress } from '$lib/shared/degree.js';
+import { calculateGpa, calculateTermGpas } from '$lib/shared/gpa.js';
 import { hasCapability } from '$lib/shared/permission.js';
 import {
 	isSameCourseName,
@@ -44,6 +45,8 @@ export async function getProfileData(user: User) {
 	return {
 		academicProfile,
 		completions,
+		gpa: calculateGpa(completions),
+		gpaByTerm: calculateTermGpas(completions),
 		courses,
 		espCourses: espCourseIds.map((id) => ({ id, name: courseMap.get(id) ?? id })),
 		degreeProgress:
@@ -76,7 +79,7 @@ export async function saveProfile(user: User, admissionYear: number, espWaivedCo
 }
 
 /**
- * 수강 이력을 한 건 추가한다.
+ * 이수 내역을 한 건 추가한다.
  * `courseName`이 비어 있으면 목록에서 고른 기존 강의고, 채워져 있으면 목록에 없는 강의를 새로 등록하는 것이다.
  */
 export async function addCompletion(
@@ -95,7 +98,7 @@ export async function addCompletion(
 	const courseId = input.courseId.trim().toUpperCase();
 	const courseName = input.courseName.trim();
 	if (!courseId || input.year < 2022 || input.term < 1 || input.term > 4)
-		throw new AppError(APP_ERROR.BAD_REQUEST, '수강 이력을 확인해주세요.');
+		throw new AppError(APP_ERROR.BAD_REQUEST, '이수 내역을 확인해주세요.');
 
 	const normalizedGrade = input.grade?.trim().toUpperCase() || null;
 	const status = resolveCompletionStatus(normalizedGrade, input.status);
@@ -150,17 +153,17 @@ export async function addCompletion(
 
 export async function removeCompletion(user: User, id: string) {
 	if (!(await AcademicRepository.deleteCompletion(id, user.id)))
-		throw new AppError(APP_ERROR.NOT_FOUND, '수강 이력을 찾을 수 없습니다.');
+		throw new AppError(APP_ERROR.NOT_FOUND, '이수 내역을 찾을 수 없습니다.');
 }
 
 export async function importCompletions(user: User, portalData: string, hideGrade = false) {
 	if (!portalData.trim() || portalData.length > 200_000)
-		throw new AppError(APP_ERROR.BAD_REQUEST, '붙여넣은 수강 이력 데이터를 확인해주세요.');
+		throw new AppError(APP_ERROR.BAD_REQUEST, '붙여넣은 이수 내역 데이터를 확인해주세요.');
 	const parsed = parsePortalCompletionText(portalData);
 	if (!parsed.rows.length)
 		throw new AppError(
 			APP_ERROR.BAD_REQUEST,
-			'등록할 수강 이력을 찾지 못했습니다. KIS 전체성적조회에서 다시 추출해주세요.'
+			'등록할 이수 내역을 찾지 못했습니다. KIS 전체성적조회에서 다시 추출해주세요.'
 		);
 	if (parsed.rows.length > 1_000)
 		throw new AppError(APP_ERROR.BAD_REQUEST, '한 번에 1,000개 과목까지만 등록할 수 있습니다.');
@@ -254,7 +257,7 @@ export async function importOfferings(user: User, file: File, year: number, term
 		incomingCredits.set(offering.courseId, definition);
 	}
 	const existingCourses = await CourseService.findCourseMapByIds([...incomingCredits.keys()]);
-	// 개설된 적 없는 강의는 수강 이력에서 임시로 만들어진 것이므로, 엑셀 파일을 정본으로 보고 덮어쓴다.
+	// 개설된 적 없는 강의는 이수 내역에서 임시로 만들어진 것이므로, 엑셀 파일을 정본으로 보고 덮어쓴다.
 	const offeredCourseIds = await AcademicRepository.findOfferedCourseIds([
 		...incomingCredits.keys()
 	]);
@@ -271,10 +274,16 @@ export async function importOfferings(user: User, file: File, year: number, term
 			);
 	}
 	await transaction(async () => {
-		await AcademicRepository.archiveOfferings(year, term);
+		await AcademicRepository.archiveOfferings(year, term, result.academicCareer);
 		for (const value of result.offerings) await AcademicRepository.upsertOfferingImport(value);
+		await AcademicRepository.unconfirmTimetablesWithArchivedOfferings(
+			year,
+			term,
+			result.academicCareer
+		);
 	});
 	return {
+		academicCareer: result.academicCareer,
 		importedCount: result.offerings.length,
 		skippedClosedCount: result.skippedClosedCount,
 		passCreditCount: result.passCreditCount,

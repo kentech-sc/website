@@ -16,6 +16,7 @@ export type DegreeCategory = (typeof DEGREE_CATEGORIES)[number];
 
 export interface DegreeCourseInput {
 	code: string;
+	academicCareer?: 'undergraduate' | 'graduate';
 	category: string | null;
 	subcategory: string | null;
 	level: number | null;

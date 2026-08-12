@@ -152,7 +152,7 @@
 		manualAddError = '';
 		return async ({ result, update }) => {
 			if (result.type === 'failure') {
-				manualAddError = String(result.data?.message ?? '수강 이력을 추가하지 못했습니다.');
+				manualAddError = String(result.data?.message ?? '이수 내역을 추가하지 못했습니다.');
 				await update({ reset: false });
 				return;
 			}
@@ -165,10 +165,9 @@
 <section class="academic-page">
 	<AcademicHeader
 		title="이수·졸업"
-		description="지금까지 들은 강의와 졸업까지 남은 요건을 한눈에 확인하세요."
+		description="지금까지 이수한 교과목과 졸업까지 남은 요건을 한눈에 확인하세요."
 		canManageCatalog={data.canManageCatalog}
 	/>
-
 	{#if progress}
 		<section class="module overview-card">
 			<div class="total-progress">
@@ -185,7 +184,7 @@
 							<GraduationCap size="0.8rem" />
 							<span>{data.academicProfile.admissionYear}학번</span>
 							<i></i>
-							<span>ESP {data.academicProfile.espWaivedCourseIds.length}개 스킵</span>
+							<span>ESP 면제 {data.academicProfile.espWaivedCourseIds.length}과목</span>
 						</div>
 					{/if}
 					<span>총 이수 학점</span>
@@ -292,9 +291,35 @@
 			<GraduationCap size="1.5rem" />
 			<div>
 				<h2>먼저 학사 기준을 설정해 주세요</h2>
-				<p>입학연도와 ESP 면제 과목을 저장하면 내 졸업요건을 계산합니다.</p>
+				<p>입학연도와 ESP 면제 교과목을 저장하면 졸업요건을 계산합니다.</p>
 			</div>
 		</section>
+	{/if}
+
+	{#if data.gpa}
+		<details class="module gpa-card">
+			<summary aria-label="누적 평점평균 및 학기별 평점평균 펼치기">
+				<GraduationCap size="1rem" aria-hidden="true" />
+				<span class="gpa-summary-copy">
+					<b>누적 평점평균</b>
+					<small
+						>성적이 등록된 {data.gpa.courseCount}과목 · 평점 반영 {data.gpa
+							.gradedCredits}학점</small
+					>
+				</span>
+				<strong class="gpa-value">{data.gpa.value.toFixed(2)}<small> / 4.30</small></strong>
+				<span class="disclosure-icon"><ChevronDown size="0.9rem" /></span>
+			</summary>
+			<div class="term-gpa-list" aria-label="학기별 평점평균">
+				{#each [...data.gpaByTerm].reverse() as termGpa (`${termGpa.year}-${termGpa.term}`)}
+					<article>
+						<span>{termGpa.year}년 {termLabel(termGpa.term)}</span>
+						<strong>{termGpa.value.toFixed(2)}<small> / 4.30</small></strong>
+						<small>{termGpa.gradedCredits}학점 · {termGpa.courseCount}과목</small>
+					</article>
+				{/each}
+			</div>
+		</details>
 	{/if}
 
 	{#if data.academicProfile}
@@ -303,7 +328,7 @@
 				<div class="section-title">
 					<BookOpenCheck size="1.1rem" />
 					<div>
-						<h2>수강 이력</h2>
+						<h2>이수 내역</h2>
 						<p>직접 등록한 내용을 기준으로 계산합니다.</p>
 					</div>
 				</div>
@@ -312,7 +337,7 @@
 						type="search"
 						bind:value={historyQuery}
 						placeholder="과목명·코드 검색"
-						aria-label="수강 이력 검색"
+						aria-label="이수 내역 검색"
 					/></label
 				>
 			</div>
@@ -320,7 +345,7 @@
 			<div class="record-tools">
 				<PortalCompletionImport courses={data.courses} {form} />
 				<RecordEntryDialog
-					title="한 과목 직접 추가"
+					title="교과목 직접 등록"
 					description="KIS 일괄 등록이 어려울 때 사용합니다"
 					bind:open={manualAddOpen}
 				>
@@ -444,7 +469,7 @@
 							/></label
 						>
 						{#if manualAddError}<p class="warning" aria-live="polite">{manualAddError}</p>{/if}
-						<button disabled={!!duplicateNewCourse}>수강 이력에 추가</button>
+						<button disabled={!!duplicateNewCourse}>이수 내역에 추가</button>
 					</form>
 				</RecordEntryDialog>
 			</div>
@@ -494,7 +519,7 @@
 			{:else}
 				<div class="empty-records">
 					<BookOpenCheck size="1.4rem" />
-					<p>{historyQuery ? '검색 결과가 없습니다.' : '아직 등록된 수강 이력이 없습니다.'}</p>
+					<p>{historyQuery ? '검색 결과가 없습니다.' : '아직 등록된 이수 내역이 없습니다.'}</p>
 				</div>
 			{/if}
 		</section>
@@ -503,7 +528,7 @@
 	<details class="module profile-settings" open={!data.academicProfile}>
 		<summary
 			><Settings2 size="1rem" /><span
-				><b>학사 기준 설정</b><small>입학연도와 ESP 면제 과목</small></span
+				><b>학사 기준 설정</b><small>입학연도와 ESP 면제 교과목</small></span
 			><span class="disclosure-icon"><ChevronDown size="0.9rem" /></span></summary
 		>
 		<form method="POST" action="?/saveAcademicProfile">
@@ -518,7 +543,7 @@
 				/></label
 			>
 			<fieldset class="esp-waivers">
-				<legend>ESP 면제 과목</legend>
+				<legend>ESP 면제 교과목</legend>
 				<p>배치 결과로 수강하지 않아도 되는 과목만 선택하세요.</p>
 				<div>
 					{#each data.espCourses as course (course.id)}
@@ -551,7 +576,8 @@
 	.setup-callout,
 	.profile-settings summary,
 	.search-field,
-	.detail-card summary {
+	.detail-card summary,
+	.gpa-card summary {
 		display: flex;
 		align-items: center;
 	}
@@ -562,6 +588,7 @@
 		font-size: 0.84rem;
 	}
 	.overview-card,
+	.gpa-card,
 	.detail-card,
 	.records-card,
 	.setup-callout,
@@ -569,6 +596,80 @@
 		border: var(--control-border-width) solid var(--gray-border);
 		border-radius: 0.8rem;
 		background: var(--white);
+	}
+	.gpa-card,
+	.profile-settings {
+		padding: 0;
+		overflow: hidden;
+	}
+	.gpa-card summary {
+		gap: 0.5rem;
+		cursor: pointer;
+		padding: 0.7rem 0.85rem;
+		list-style: none;
+	}
+	.gpa-card summary::-webkit-details-marker {
+		display: none;
+	}
+	.gpa-card summary > :global(svg) {
+		flex: 0 0 auto;
+		color: var(--secondary);
+	}
+	.gpa-summary-copy {
+		display: flex;
+		flex-direction: column;
+		min-width: 0;
+	}
+	.gpa-summary-copy small {
+		color: var(--gray-text);
+		font-weight: 400;
+		font-size: 0.68rem;
+	}
+	.gpa-value {
+		flex: 0 0 auto;
+		margin-left: auto;
+		font-size: 1rem;
+		line-height: 1.1;
+	}
+	.gpa-value small {
+		color: var(--gray-text);
+		font-weight: 500;
+		font-size: 0.65rem;
+	}
+	.gpa-card summary > .disclosure-icon {
+		margin-left: 0;
+	}
+	.term-gpa-list {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr));
+		gap: 0.5rem;
+		border-top: var(--divider-border-width) solid var(--gray-border);
+		padding: 0.75rem;
+	}
+	.term-gpa-list article {
+		display: flex;
+		flex-direction: column;
+		gap: 0.3rem;
+		border: var(--divider-border-width) solid transparent;
+		border-radius: 0.55rem;
+		background: var(--gray-bg);
+		padding: 0.65rem;
+	}
+	.term-gpa-list article > span {
+		color: var(--gray-text);
+		font-size: 0.7rem;
+	}
+	.term-gpa-list strong {
+		font-size: 0.95rem;
+	}
+	.term-gpa-list strong small {
+		color: var(--gray-text);
+		font-weight: 500;
+		font-size: 0.65rem;
+	}
+	.term-gpa-list article > small {
+		color: var(--gray-text);
+		font-size: 0.6rem;
 	}
 	.overview-card {
 		display: grid;
