@@ -36,22 +36,37 @@ function parseDiningMenus(_body: DiningResponseBody, date: string): DiningMenus 
 		seoksik_husik_contents: string;
 	};
 
-	const breakfast = menu['josik_menu_contents']
-		.split('\n')
-		.concat(menu['josik_husik_contents'].split('\n'))
-		.join(', ');
-	const lunch_AB = menu['jungsik_menu_contents'].split('\n');
-	const lunch_dessert = menu['jungsik_husik_contents'].split('\n');
-	const dinner = menu['seoksik_menu_contents']
-		.split('\n')
-		.concat(menu['seoksik_husik_contents'].split('\n'))
-		.join(', ');
+	// Breakfast
+	const breakfast_menu = menu['josik_menu_contents'].split('\n').filter((item) => item !== '');
+	const breakfast_dessert = menu['josik_husik_contents'].split('\n').filter((item) => item !== '');
 
-	let lunch = lunch_AB.concat(lunch_dessert).join(', ');
+	let breakfast =
+		breakfast_menu.length === 0
+			? '학식 정보가 없습니다.'
+			: breakfast_menu.concat(breakfast_dessert).join(', ');
+
+	if (breakfast_menu.includes('[주말 및 공휴일 조식]')) {
+		breakfast = breakfast_menu[1];
+	}
+
+	// Dinner
+	const dinner_menu = menu['seoksik_menu_contents'].split('\n').filter((item) => item !== '');
+	const dinner_dessert = menu['seoksik_husik_contents'].split('\n').filter((item) => item !== '');
+	const dinner =
+		dinner_menu.length === 0
+			? '학식 정보가 없습니다.'
+			: dinner_menu.concat(dinner_dessert).join(', ');
+
+	// Lunch
+	const lunch_AB = menu['jungsik_menu_contents'].split('\n').filter((item) => item !== '');
+	const lunch_dessert = menu['jungsik_husik_contents'].split('\n').filter((item) => item !== '');
+
+	let lunch =
+		lunch_AB.length === 0 ? '학식 정보가 없습니다.' : lunch_AB.concat(lunch_dessert).join(', ');
 
 	if (lunch_AB.includes('A코너')) {
-		const lunch_A = new Set(lunch_AB.splice(0, lunch_AB.indexOf('')).slice(1));
-		const lunch_B = new Set(lunch_AB.splice(lunch_AB.indexOf('') + 1).slice(1));
+		const lunch_A = new Set(lunch_AB.splice(0, lunch_AB.indexOf('B코너')).slice(1));
+		const lunch_B = new Set(lunch_AB.splice(lunch_AB.indexOf('B코너'), lunch_AB.length).slice(1));
 
 		const onlyA = [...lunch_A].filter((item) => !lunch_B.has(item)); // a에만 있는 것
 		const onlyB = [...lunch_B].filter((item) => !lunch_A.has(item)); // b에만 있는 것
