@@ -1,4 +1,7 @@
 <script lang="ts">
+	import 'nprogress/nprogress.css';
+	import NProgress from 'nprogress';
+
 	import Footer from './_components/Footer.svelte';
 	import NavBar from './_components/NavBar.svelte';
 	import Slideshow from './_components/Slideshow.svelte';
@@ -7,6 +10,7 @@
 
 	import { browser } from '$app/environment';
 	import { page } from '$app/state';
+	import { navigating } from '$app/state';
 	import { popClientFlash } from '$lib/shared/flash.js';
 
 	import '$style/main.scss';
@@ -36,6 +40,16 @@
 		const section = sections.find(([prefix]) => pathname.startsWith(prefix));
 		return section ? `${section[1]} | 켄텍 총학생회` : '켄텍 총학생회';
 	}
+
+	NProgress.configure({
+		showSpinner: false
+	});
+
+	$effect(() => {
+		if (navigating.to) {
+			NProgress.start();
+		} else NProgress.done();
+	});
 
 	$effect(() => {
 		void navigationKey;
