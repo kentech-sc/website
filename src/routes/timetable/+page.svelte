@@ -14,6 +14,7 @@
 	import AlertTriangle from '@lucide/svelte/icons/triangle-alert';
 	import Users from '@lucide/svelte/icons/users';
 	import X from '@lucide/svelte/icons/x';
+	import { tick } from 'svelte';
 
 	import {
 		COURSE_SLOTS,
@@ -173,7 +174,14 @@
 				)
 			: 9 * 60
 	);
-	const endMinute = 20 * 60;
+	const endMinute = $derived(
+		savingImage && selectedMeetings.length
+			? Math.max(
+					startMinute + 60,
+					Math.ceil(Math.max(...selectedMeetings.map((meeting) => meeting.endsAt)) / 30) * 30
+				)
+			: 20 * 60
+	);
 	const timeLabels = $derived(
 		Array.from(
 			{ length: Math.floor((endMinute - startMinute) / 60) + 1 },
@@ -309,8 +317,18 @@
 		savingImage = true;
 		try {
 			const { toPng } = await import('html-to-image');
+			await tick();
+			const panelRect = schedulePanel.getBoundingClientRect();
+			const lastContent = schedulePanel.lastElementChild;
+			const bottomBorder =
+				Number.parseFloat(getComputedStyle(schedulePanel).borderBottomWidth) || 0;
+			const captureHeight =
+				lastContent instanceof HTMLElement
+					? Math.ceil(lastContent.getBoundingClientRect().bottom - panelRect.top + bottomBorder)
+					: Math.ceil(panelRect.height);
 			const dataUrl = await toPng(schedulePanel, {
 				pixelRatio: 2,
+				height: captureHeight,
 				filter: (node) => !(node instanceof HTMLElement && node.hasAttribute('data-image-exclude'))
 			});
 			const filename = `${actualSelected ? '실제 수강' : (selected?.name ?? '시간표')}.png`;
@@ -608,8 +626,8 @@
 								><Search size="0.82rem" />전체 강의 검색</button
 							>
 						</div>
-					{:else if selected}
-						<div class="schedule-toolbar" data-image-exclude>
+					{:else if selected && !savingImage}
+						<div class="schedule-toolbar">
 							<button type="button" disabled={busy} onclick={openCourseBrowser}
 								><Search size="0.82rem" />전체 강의 검색</button
 							>
@@ -723,6 +741,7 @@
 							{pendingEnhance}
 							onopen={openUnscheduledBrowser}
 							{courseColor}
+							imageSaving={savingImage}
 						/>
 					{/if}
 				</section>
@@ -863,6 +882,15 @@
 					<h2>수강 희망 경쟁률</h2>
 					<p>확정된 시간표에 담긴 강의만 표시됩니다.</p>
 				</div>
+				{#if data.competition.confirmed}
+					<div
+						class="competition-sample"
+						aria-label={`확정 시간표 ${data.competition.confirmedTimetableCount}개 기준`}
+					>
+						<span>확정 시간표</span>
+						<strong>{data.competition.confirmedTimetableCount}개</strong>
+					</div>
+				{/if}
 			</div>
 			{#if !data.competition.confirmed}
 				<div class="competition-empty">
@@ -871,9 +899,10 @@
 					>
 				</div>
 			{:else if !data.competition.items.length}
+				<p class="competition-slot">내 시간표 · {data.competition.confirmedTimetableName}</p>
 				<div class="competition-empty"><span>확정 시간표에 등록된 강의가 없습니다.</span></div>
 			{:else}
-				<p class="competition-slot">확정 시간표 · {data.competition.confirmedTimetableName}</p>
+				<p class="competition-slot">내 시간표 · {data.competition.confirmedTimetableName}</p>
 				<div class="competition-list">
 					{#each data.competition.items as item (item.offering.id)}
 						<div>
@@ -1716,6 +1745,25 @@
 	}
 	.section-title {
 		gap: 0.5rem;
+	}
+	.competition-sample {
+		display: flex;
+		flex: 0 0 auto;
+		align-items: center;
+		gap: 0.38rem;
+		margin-left: auto;
+		border-radius: 0.4rem;
+		background: var(--gray-bg);
+		padding: 0.34rem 0.5rem;
+		color: var(--gray-text);
+	}
+	.competition-sample strong {
+		color: var(--secondary);
+		font-size: 0.76rem;
+		line-height: 1;
+	}
+	.competition-sample span {
+		font-size: 0.6rem;
 	}
 	.section-title > :global(svg) {
 		color: var(--secondary);

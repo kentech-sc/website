@@ -71,11 +71,18 @@ export async function saveProfile(user: User, admissionYear: number, espWaivedCo
 	const normalizedWaivedIds = [...new Set(espWaivedCourseIds.filter((id) => allowedIds.has(id)))];
 	if (normalizedWaivedIds.length !== new Set(espWaivedCourseIds).size)
 		throw new AppError(APP_ERROR.BAD_REQUEST, 'ESP 면제 과목을 확인해주세요.');
+	const existingProfile = await AcademicRepository.findAcademicProfile(user.id);
 	return await AcademicRepository.upsertAcademicProfile({
 		userId: user.id,
 		admissionYear,
-		espWaivedCourseIds: normalizedWaivedIds
+		espWaivedCourseIds: normalizedWaivedIds,
+		hideGrades: existingProfile?.hideGrades ?? false
 	});
+}
+
+export async function setGradeVisibility(user: User, hideGrades: boolean) {
+	const updated = await AcademicRepository.updateGradeVisibility(user.id, hideGrades);
+	if (!updated) throw new AppError(APP_ERROR.NOT_FOUND, '학사 기준을 먼저 설정해주세요.');
 }
 
 /**

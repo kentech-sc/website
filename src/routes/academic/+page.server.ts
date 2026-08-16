@@ -9,6 +9,10 @@ export const load: PageServerLoad = async ({ locals }) => {
 };
 
 export const actions = {
+	setGradeVisibility: withActionErrorHandling(async ({ request, locals }) => {
+		const data = await request.formData();
+		await AcademicUsecase.setGradeVisibility(locals.user, data.get('hideGrades') === 'true');
+	}),
 	saveAcademicProfile: withActionErrorHandling(async ({ request, locals }) => {
 		const data = await request.formData();
 		await AcademicUsecase.saveProfile(

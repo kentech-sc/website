@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Plus from '@lucide/svelte/icons/plus';
+	import Repeat2 from '@lucide/svelte/icons/repeat-2';
 	import Search from '@lucide/svelte/icons/search';
 	import X from '@lucide/svelte/icons/x';
 
@@ -212,7 +213,7 @@
 					class:remove-offering={alreadyAdded && filter.kind !== 'replace'}
 					disabled={busy || Boolean(restriction)}
 				>
-					{#if filter.kind === 'replace'}교체{:else if alreadyAdded}<X
+					{#if filter.kind === 'replace'}<Repeat2 size="0.82rem" />교체{:else if alreadyAdded}<X
 							size="0.82rem"
 						/>제거{:else}<Plus size="0.82rem" />추가{/if}
 				</button>
@@ -230,6 +231,8 @@
 			<p>{scheduleText(offering)}</p>
 		</div>
 		<div class="offering-actions">
+			<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- query string is appended to a resolved route -->
+			<a href={`${resolve('/review')}?course=${encodeURIComponent(offering.courseId)}`}>강의평가</a>
 			<form method="POST" action="?/removeItem" use:enhance={removeOfferingEnhance}>
 				<input type="hidden" name="timetableId" value={timetable.id} />
 				<input type="hidden" name="offeringId" value={offering.id} />

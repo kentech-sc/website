@@ -1,0 +1,1 @@
+ALTER TABLE "academic"."student_academic_profiles" ADD COLUMN "hide_grades" boolean DEFAULT false NOT NULL;

@@ -2,6 +2,8 @@
 	import BookOpenCheck from '@lucide/svelte/icons/book-open-check';
 	import Check from '@lucide/svelte/icons/check';
 	import ChevronDown from '@lucide/svelte/icons/chevron-down';
+	import Eye from '@lucide/svelte/icons/eye';
+	import EyeOff from '@lucide/svelte/icons/eye-off';
 	import GraduationCap from '@lucide/svelte/icons/graduation-cap';
 	import Plus from '@lucide/svelte/icons/plus';
 	import Search from '@lucide/svelte/icons/search';
@@ -30,6 +32,7 @@
 	let newCourseName = $state('');
 	let newCourseCredits = $state(3);
 	let newCourseCategory = $state<string>('FR');
+	let hideGrades = $derived(data.academicProfile?.hideGrades ?? false);
 
 	const progress = $derived(data.degreeProgress);
 	const espProgress = $derived(
@@ -158,6 +161,13 @@
 			}
 			manualAddOpen = false;
 			await update();
+		};
+	};
+	const gradeVisibilityEnhance: SubmitFunction = () => {
+		hideGrades = !hideGrades;
+		return async ({ result, update }) => {
+			if (result.type === 'failure') hideGrades = !hideGrades;
+			await update({ reset: false });
 		};
 	};
 </script>
@@ -297,7 +307,7 @@
 	{/if}
 
 	{#if data.gpa}
-		<details class="module gpa-card">
+		<details class="module gpa-card" class:grades-hidden={hideGrades}>
 			<summary aria-label="누적 평점평균 및 학기별 평점평균 펼치기">
 				<GraduationCap size="1rem" aria-hidden="true" />
 				<span class="gpa-summary-copy">
@@ -307,14 +317,35 @@
 							.gradedCredits}학점</small
 					>
 				</span>
-				<strong class="gpa-value">{data.gpa.value.toFixed(2)}<small> / 4.30</small></strong>
+				<strong class="gpa-value"
+					>{hideGrades ? '••••' : data.gpa.value.toFixed(2)}{#if !hideGrades}<small>
+							/ 4.30</small
+						>{/if}</strong
+				>
+				<form method="POST" action="?/setGradeVisibility" use:enhance={gradeVisibilityEnhance}>
+					<input type="hidden" name="hideGrades" value={String(!hideGrades)} />
+					<button
+						type="submit"
+						class="grade-visibility"
+						aria-pressed={hideGrades}
+						aria-label={hideGrades ? '학점 표시' : '학점 숨기기'}
+						title={hideGrades ? '학점 표시' : '학점 숨기기'}
+						onclick={(event) => event.stopPropagation()}
+					>
+						{#if hideGrades}<Eye size="0.9rem" />{:else}<EyeOff size="0.9rem" />{/if}
+					</button>
+				</form>
 				<span class="disclosure-icon"><ChevronDown size="0.9rem" /></span>
 			</summary>
 			<div class="term-gpa-list" aria-label="학기별 평점평균">
 				{#each [...data.gpaByTerm].reverse() as termGpa (`${termGpa.year}-${termGpa.term}`)}
 					<article>
 						<span>{termGpa.year}년 {termLabel(termGpa.term)}</span>
-						<strong>{termGpa.value.toFixed(2)}<small> / 4.30</small></strong>
+						<strong
+							>{hideGrades ? '••••' : termGpa.value.toFixed(2)}{#if !hideGrades}<small>
+									/ 4.30</small
+								>{/if}</strong
+						>
 						<small>{termGpa.gradedCredits}학점 · {termGpa.courseCount}과목</small>
 					</article>
 				{/each}
@@ -493,7 +524,7 @@
 											<b>{completion.courseName}</b><span
 												>{completion.courseCode} · {completion.credits === 0
 													? 'P'
-													: `${completion.credits}학점`}{completion.grade
+													: `${completion.credits}학점`}{completion.grade && !hideGrades
 													? ` · ${completion.grade}`
 													: ''}</span
 											>
@@ -635,6 +666,24 @@
 		color: var(--gray-text);
 		font-weight: 500;
 		font-size: 0.65rem;
+	}
+	.gpa-card summary > form {
+		display: flex;
+		flex: 0 0 auto;
+	}
+	.grade-visibility {
+		display: grid;
+		flex: 0 0 auto;
+		place-items: center;
+		border-color: transparent;
+		background: transparent;
+		padding: 0.25rem;
+		color: var(--gray-text);
+	}
+	.grade-visibility:hover,
+	.grade-visibility:focus-visible {
+		border-color: var(--gray-border);
+		color: var(--secondary);
 	}
 	.gpa-card summary > .disclosure-icon {
 		margin-left: 0;

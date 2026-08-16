@@ -208,11 +208,21 @@ export async function upsertAcademicProfile(
 			set: {
 				admissionYear: profile.admissionYear,
 				espWaivedCourseIds: profile.espWaivedCourseIds,
+				hideGrades: profile.hideGrades,
 				updatedAt: sql`now()`
 			}
 		})
 		.returning();
 	return row;
+}
+
+export async function updateGradeVisibility(userId: UserId, hideGrades: boolean): Promise<boolean> {
+	const rows = await getDatabase()
+		.update(studentAcademicProfiles)
+		.set({ hideGrades, updatedAt: sql`now()` })
+		.where(eq(studentAcademicProfiles.userId, userId))
+		.returning({ userId: studentAcademicProfiles.userId });
+	return rows.length > 0;
 }
 
 export async function findCompletions(

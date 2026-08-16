@@ -313,6 +313,7 @@ export const studentAcademicProfiles = academicSchema.table(
 			.$type<string[]>()
 			.notNull()
 			.default(sql`'[]'::jsonb`),
+		hideGrades: boolean('hide_grades').notNull().default(false),
 		...timestamps
 	},
 	(table) => [
