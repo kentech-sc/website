@@ -63,7 +63,20 @@ export async function findConfirmedCompetition(userId: UserId, year: number, ter
 			)
 		)
 		.limit(1);
-	if (!confirmed) return { confirmed: false, confirmedTimetableName: null, items: [] };
+	if (!confirmed)
+		return {
+			confirmed: false,
+			confirmedTimetableName: null,
+			confirmedTimetableCount: 0,
+			items: []
+		};
+	const [confirmedCount] = await getDatabase()
+		.select({ value: countDistinct(timetables.userId) })
+		.from(timetables)
+		.where(
+			and(eq(timetables.year, year), eq(timetables.term, term), eq(timetables.isConfirmed, true))
+		);
+	const confirmedTimetableCount = Number(confirmedCount?.value ?? 0);
 	const ownItems = await getDatabase()
 		.select({ offeringId: timetableItems.offeringId })
 		.from(timetableItems)
@@ -71,7 +84,12 @@ export async function findConfirmedCompetition(userId: UserId, year: number, ter
 		.where(and(eq(timetableItems.timetableId, confirmed.id), isNull(courseOfferings.archivedAt)));
 	const offeringIds = ownItems.map((item) => item.offeringId);
 	if (!offeringIds.length)
-		return { confirmed: true, confirmedTimetableName: confirmed.name, items: [] };
+		return {
+			confirmed: true,
+			confirmedTimetableName: confirmed.name,
+			confirmedTimetableCount,
+			items: []
+		};
 	const counts = await getDatabase()
 		.select({
 			offeringId: timetableItems.offeringId,
@@ -95,6 +113,7 @@ export async function findConfirmedCompetition(userId: UserId, year: number, ter
 	return {
 		confirmed: true,
 		confirmedTimetableName: confirmed.name,
+		confirmedTimetableCount,
 		items: offeringIds.flatMap((offeringId) => {
 			const offering = offeringMap.get(offeringId);
 			return offering ? [{ offering, applicants: countMap.get(offeringId) ?? 0 }] : [];

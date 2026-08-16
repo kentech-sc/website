@@ -14,9 +14,18 @@
 		pendingEnhance: SubmitFunction;
 		onopen: () => void;
 		courseColor: (category: string | null) => string;
+		imageSaving?: boolean;
 	}
 
-	let { offerings, timetableId, busy, pendingEnhance, onopen, courseColor }: Props = $props();
+	let {
+		offerings,
+		timetableId,
+		busy,
+		pendingEnhance,
+		onopen,
+		courseColor,
+		imageSaving = false
+	}: Props = $props();
 </script>
 
 <div class="unscheduled-lane">
@@ -46,17 +55,20 @@
 		</article>
 	{/each}
 	{#if offerings.length < 5}
-		<button
-			type="button"
-			class="unscheduled-slot"
-			data-image-exclude
-			disabled={busy}
-			onclick={onopen}
-			aria-label="시간 미정 강의 추가"
-			title="시간 미정 강의 찾기"
-		>
-			<Plus size="0.78rem" aria-hidden="true" />
-		</button>
+		{#if imageSaving}
+			<span class="unscheduled-slot image-placeholder" aria-hidden="true"></span>
+		{:else}
+			<button
+				type="button"
+				class="unscheduled-slot"
+				disabled={busy}
+				onclick={onopen}
+				aria-label="시간 미정 강의 추가"
+				title="시간 미정 강의 찾기"
+			>
+				<Plus size="0.78rem" aria-hidden="true" />
+			</button>
+		{/if}
 	{/if}
 </div>
 
@@ -81,6 +93,9 @@
 	.unscheduled-slot {
 		margin: 0.25rem;
 		min-height: 2.9rem;
+	}
+	.image-placeholder {
+		visibility: hidden;
 	}
 	article {
 		display: flex;

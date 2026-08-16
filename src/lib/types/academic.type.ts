@@ -88,4 +88,5 @@ export interface StudentAcademicProfile {
 	userId: UserId;
 	admissionYear: number;
 	espWaivedCourseIds: string[];
+	hideGrades: boolean;
 }
