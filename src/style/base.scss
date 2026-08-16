@@ -38,6 +38,10 @@ html {
 	}
 }
 
+#nprogress .bar {
+	background: var(--secondary) !important;
+}
+
 .mode-web .only-pwa {
 	display: none !important;
 }
