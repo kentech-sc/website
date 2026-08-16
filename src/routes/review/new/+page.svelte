@@ -2,10 +2,10 @@
 	import ReviewForm from '../_components/ReviewForm.svelte';
 	import ReviewHeader from '../_components/ReviewHeader.svelte';
 
-	import type { Offering } from '$lib/types/academic.type.js';
+	import type { ReviewableOffering } from '$lib/types/academic.type.js';
 
 	let { data } = $props();
-	const reviewableOfferings = $derived<Offering[]>(data.reviewableOfferings);
+	const reviewableOfferings = $derived<ReviewableOffering[]>(data.reviewableOfferings);
 </script>
 
 <ReviewHeader pageType="new" />

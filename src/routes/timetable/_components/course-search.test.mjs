@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
+import { buildCourseSearchModel } from './course-search-model.ts';
 import {
 	COURSE_SLOTS,
 	getFreeTimeRanges,
@@ -23,6 +24,19 @@ function slot(weekday, startsAt) {
 
 function meeting(weekday, startsAt, endsAt) {
 	return { weekday, startsAt, endsAt };
+}
+
+function offering(id, courseId, meetings, options = {}) {
+	return {
+		id,
+		courseId,
+		courseName: options.courseName ?? courseId,
+		subtitle: null,
+		category: options.category ?? 'EL',
+		academicCareer: options.academicCareer ?? 'undergraduate',
+		professors: [],
+		meetings
+	};
 }
 
 test('정규 시간대와 점심시간을 추가 버튼 블록으로 정의한다', () => {
@@ -115,4 +129,51 @@ test('전체 검색과 시간 미정 검색을 구분한다', () => {
 		matchesCourseSearchFilter([meeting(MON, 9 * 60, 11 * 60)], { kind: 'unscheduled' }),
 		false
 	);
+});
+
+test('교체 검색 결과를 같은 과목의 다른 분반과 같은 시간대 강의로 나눈다', () => {
+	const source = offering('source', 'EL101', [meeting(MON, 9 * 60, 11 * 60)]);
+	const otherSection = offering('section', 'EL101', [meeting(TUE, 9 * 60, 11 * 60)]);
+	const sameTime = offering('same-time', 'EF101', [meeting(MON, 9 * 60, 11 * 60)]);
+	const model = buildCourseSearchModel({
+		offerings: [source, otherSection, sameTime],
+		selectedOfferings: [source],
+		offeringRestrictions: {},
+		offeringNotices: {},
+		filter: {
+			kind: 'replace',
+			sourceOfferingId: source.id,
+			meetingId: 'source-meeting',
+			weekday: MON,
+			startsAt: 9 * 60,
+			endsAt: 11 * 60
+		},
+		query: '',
+		category: 'all'
+	});
+
+	assert.deepEqual(
+		model.sectionReplacements.map((item) => item.id),
+		['section']
+	);
+	assert.deepEqual(
+		model.timeReplacements.map((item) => item.id),
+		['same-time']
+	);
+});
+
+test('이미 선택한 강의와 겹치는 검색 결과의 제한 이유를 계산한다', () => {
+	const selected = offering('selected', 'EL101', [meeting(MON, 9 * 60, 11 * 60)]);
+	const conflict = offering('conflict', 'EF101', [meeting(MON, 10 * 60, 12 * 60)]);
+	const model = buildCourseSearchModel({
+		offerings: [conflict],
+		selectedOfferings: [selected],
+		offeringRestrictions: {},
+		offeringNotices: {},
+		filter: { kind: 'all' },
+		query: '',
+		category: 'all'
+	});
+
+	assert.equal(model.restrictionFor(conflict, false)?.label, '시간 겹침');
 });

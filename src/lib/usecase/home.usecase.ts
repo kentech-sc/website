@@ -8,10 +8,10 @@ import * as UserService from '$lib/services/user.service.js';
 
 export async function getHomeData() {
 	const [reviewsResult, freePostsResult, noticePostsResult, petitionsResult] = await Promise.all([
-		ReviewService.getReviewPage(),
-		PostService.getPostPageByBoardId('free'),
-		PostService.getPostPageByBoardId('notice'),
-		PetitionService.getPetitionPage()
+		ReviewService.getReviewPage(5),
+		PostService.getPostPageByBoardId('free', 5),
+		PostService.getPostPageByBoardId('notice', 5),
+		PetitionService.getPetitionPage(5)
 	]);
 
 	const [postUserMap, petitionUserMap, reviews] = await Promise.all([

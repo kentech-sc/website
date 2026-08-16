@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Pencil from '@lucide/svelte/icons/pencil';
 
-	import type { Offering } from '$lib/types/academic.type.js';
+	import type { ReviewableOffering } from '$lib/types/academic.type.js';
 	import type { Review } from '$lib/types/review.type.js';
 
 	import CommonForm from '$components/CommonForm.svelte';
@@ -13,7 +13,7 @@
 		reviewableOfferings = [],
 		review
 	}: {
-		reviewableOfferings?: Offering[];
+		reviewableOfferings?: ReviewableOffering[];
 		review?: Review;
 	} = $props();
 
@@ -29,7 +29,7 @@
 		[...new Set(reviewableOfferings.map((offering) => offering.term))].sort((a, b) => a - b)
 	);
 	/** 분반은 개설강좌를 구분하지 않는다 — 같은 강의·학기·교수진이면 대표 개설강좌 하나로 합친다. */
-	function offeringGroupKey(offering: Offering): string {
+	function offeringGroupKey(offering: ReviewableOffering): string {
 		const professorIds = offering.professors
 			.map((professor) => professor.id)
 			.sort()
@@ -85,7 +85,7 @@
 		return ['1학기', '2학기', '하계', '동계'][term - 1] ?? `${term}학기`;
 	}
 
-	function offeringLabel(offering: Offering): string {
+	function offeringLabel(offering: ReviewableOffering): string {
 		const professors = offering.professors.map((professor) => professor.name).join(', ');
 		return `[${offering.courseId}] ${offering.courseName} · ${offering.year}-${offering.term} · ${professors || '담당 교수 개별 배정'}`;
 	}

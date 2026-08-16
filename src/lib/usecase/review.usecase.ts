@@ -52,7 +52,7 @@ export async function getReviewFilterOptions() {
 
 export async function getReviewFormOptions(user: User) {
 	const [reviewableOfferings, reviewedOfferingIds] = await Promise.all([
-		AcademicRepository.findAllOfferings(),
+		AcademicRepository.findAllReviewableOfferings(),
 		ReviewRepository.findReviewedOfferingIds(user.id)
 	]);
 
@@ -91,16 +91,7 @@ export async function getReviewDetail(reviewId: ReviewId, user: User) {
 }
 
 export async function getReviewEditData(reviewId: ReviewId, user: User) {
-	const [formOptions, detail] = await Promise.all([
-		getReviewFormOptions(user),
-		getReviewDetail(reviewId, user)
-	]);
-
-	return {
-		...formOptions,
-		review: detail.review,
-		permissions: detail.permissions
-	};
+	return await getReviewDetail(reviewId, user);
 }
 
 export async function createReview(reviewCreate: ReviewCreate, user: User) {

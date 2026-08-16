@@ -1,0 +1,16 @@
+@use './_styles/degree-and-responsive.scss';
+
+.timetable-page {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+	width: 100%;
+}
+.timetable-page[aria-busy='true'] {
+	cursor: progress;
+}
+:global(.timetable-page[aria-busy='true'] :is(button, input, select)) {
+	opacity: 0.55;
+	cursor: progress;
+	pointer-events: none;
+}

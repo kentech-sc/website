@@ -2,6 +2,8 @@
 	import Plus from '@lucide/svelte/icons/plus';
 	import X from '@lucide/svelte/icons/x';
 
+	import { courseColor } from './schedule-display.js';
+
 	import type { Offering } from '$lib/types/academic.type.js';
 	import type { SubmitFunction } from '@sveltejs/kit';
 
@@ -12,8 +14,7 @@
 		timetableId: string;
 		busy: boolean;
 		pendingEnhance: SubmitFunction;
-		onopen: () => void;
-		courseColor: (category: string | null) => string;
+		onOpen: () => void;
 		imageSaving?: boolean;
 	}
 
@@ -22,8 +23,7 @@
 		timetableId,
 		busy,
 		pendingEnhance,
-		onopen,
-		courseColor,
+		onOpen,
 		imageSaving = false
 	}: Props = $props();
 </script>
@@ -32,7 +32,7 @@
 	<span class="lane-label">시간 미정</span>
 	{#each offerings as offering (offering.id)}
 		<article
-			class:cancelled={offering.archivedAt !== null}
+			class:is-cancelled={offering.archivedAt !== null}
 			style={`--course-color: ${courseColor(offering.category)}`}
 		>
 			<div class="offering-copy">
@@ -62,7 +62,7 @@
 				type="button"
 				class="unscheduled-slot"
 				disabled={busy}
-				onclick={onopen}
+				onclick={onOpen}
 				aria-label="시간 미정 강의 추가"
 				title="시간 미정 강의 찾기"
 			>
@@ -106,7 +106,7 @@
 		background: color-mix(in srgb, var(--course-color) 11%, var(--white));
 		overflow: hidden;
 	}
-	article.cancelled {
+	article.is-cancelled {
 		--course-color: var(--gray-text) !important;
 		background: color-mix(in srgb, var(--error-bg) 65%, var(--white));
 		color: var(--gray-text);

@@ -27,13 +27,13 @@
 		if (!open && dialog.open) dialog.close();
 	});
 
-	function close() {
+	const close = () => {
 		open = false;
-	}
+	};
 
-	function closeFromBackdrop(event: MouseEvent) {
+	const closeFromBackdrop = (event: MouseEvent) => {
 		if (event.target === dialog) close();
-	}
+	};
 </script>
 
 <button class:emphasis class="record-tool" type="button" onclick={() => (open = true)}>

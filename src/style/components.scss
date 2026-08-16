@@ -47,48 +47,150 @@
 	white-space: nowrap;
 }
 
-@mixin action-btn {
+.module.is-flush {
+	padding: 0;
+	overflow: hidden;
+}
+
+.ui-button,
+button.action-btn,
+.error-btn,
+.warn-btn,
+.success-btn,
+.info-btn {
 	display: inline-flex;
 	justify-content: center;
 	align-items: center;
 	gap: 0.2rem;
+	transition:
+		background-color 0.2s ease,
+		border-color 0.2s ease,
+		color 0.2s ease,
+		opacity 0.2s ease;
+	border-color: var(--ui-button-border, transparent);
+	background: var(--ui-button-bg, var(--white));
+	color: var(--ui-button-color, var(--text));
+	font-weight: 650;
 
-	transition: opacity 0.2s ease;
-
-	border: none;
-	border-radius: 0.2rem;
-
-	background-color: var(--secondary);
-
-	padding: 0.2rem 0.6rem;
-	color: var(--white);
-
-	font-size: 0.9rem;
-
-	&:hover:not(:disabled) {
-		opacity: 0.9;
+	&:hover:not(:disabled),
+	&:focus-visible {
+		border-color: var(--ui-button-hover-border, var(--ui-button-border, transparent));
+		background: var(--ui-button-hover-bg, var(--gray-bg));
+		color: var(--ui-button-hover-color, var(--ui-button-color, var(--text)));
 	}
 
 	&:disabled {
-		opacity: 0.6;
+		opacity: 0.55;
 		cursor: not-allowed;
 	}
 
-	&:hover:disabled {
-		opacity: 0.5;
+	&.is-primary {
+		--ui-button-bg: var(--secondary);
+		--ui-button-border: var(--secondary);
+		--ui-button-color: var(--white);
+		--ui-button-hover-bg: var(--secondary-strong-hover);
+	}
+
+	&.is-secondary {
+		--ui-button-bg: var(--white);
+		--ui-button-border: color-mix(in srgb, var(--secondary) 36%, var(--gray-border));
+		--ui-button-color: var(--secondary);
+		--ui-button-hover-bg: color-mix(in srgb, var(--secondary) 7%, var(--white));
+	}
+
+	&.is-danger {
+		--ui-button-bg: var(--error-text);
+		--ui-button-border: var(--error-text);
+		--ui-button-color: var(--white);
+		--ui-button-hover-bg: var(--error-strong-hover);
+	}
+
+	&.is-danger-outline {
+		--ui-button-bg: var(--white);
+		--ui-button-border: color-mix(in srgb, var(--error-text) 36%, var(--gray-border));
+		--ui-button-color: var(--error-text);
+		--ui-button-hover-bg: var(--error-bg);
+		--ui-button-hover-border: var(--error-text);
+	}
+
+	&.is-compact {
+		padding: 0.4rem 0.6rem;
+		font-size: 0.7rem;
+	}
+
+	&.is-icon {
+		display: grid;
+		place-items: center;
+		padding: 0;
+	}
+
+	&.is-icon:not(.is-danger) {
+		--ui-button-bg: transparent;
+		--ui-button-border: transparent;
+		--ui-button-color: var(--gray-text);
+		--ui-button-hover-bg: var(--gray-bg);
+		--ui-button-hover-border: var(--gray-border);
+		--ui-button-hover-color: var(--secondary);
 	}
 }
 
-button.action-btn {
-	@include action-btn;
+button.action-btn,
+.error-btn,
+.warn-btn,
+.success-btn,
+.info-btn {
+	padding: 0.2rem 0.6rem;
+	font-size: 0.9rem;
+}
 
-	&:hover {
-		background-color: var(--secondary-strong-hover);
-	}
+.status-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.2rem;
+	border-radius: 999px;
+	background: var(--success-bg);
+	padding: 0.2rem 0.4rem;
+	color: var(--success-text);
+	font-weight: 600;
+	font-size: 0.7rem;
+}
+
+.progress-track {
+	display: block;
+	position: relative;
+	border-radius: 999px;
+	background: var(--gray-bg);
+	overflow: hidden;
+}
+
+.progress-fill {
+	display: block;
+	border-radius: inherit;
+	background: var(--secondary);
+	height: 100%;
+}
+
+.disclosure-icon {
+	display: grid;
+	flex: 0 0 auto;
+	place-items: center;
+	transition: transform 0.2s ease;
+	color: var(--gray-text);
+}
+
+details[open] > summary .disclosure-icon {
+	transform: rotate(180deg);
+}
+
+button.action-btn {
+	--ui-button-bg: var(--secondary);
+	--ui-button-border: var(--secondary);
+	--ui-button-color: var(--white);
+	--ui-button-hover-bg: var(--secondary-strong-hover);
 
 	&:disabled {
-		background-color: var(--gray-border);
-		color: var(--gray-text);
+		--ui-button-bg: var(--gray-border);
+		--ui-button-color: var(--gray-text);
 	}
 }
 
@@ -142,13 +244,10 @@ label.input-label {
 }
 
 .error-btn {
-	@include action-btn;
-	background: var(--error);
-	color: var(--tertiary-text);
-
-	&:hover {
-		background-color: var(--error-strong-hover);
-	}
+	--ui-button-bg: var(--error);
+	--ui-button-border: var(--error);
+	--ui-button-color: var(--tertiary-text);
+	--ui-button-hover-bg: var(--error-strong-hover);
 }
 
 .warn {
@@ -160,13 +259,10 @@ label.input-label {
 }
 
 .warn-btn {
-	@include action-btn;
-	background: var(--warn);
-	color: var(--tertiary-text);
-
-	&:hover {
-		background-color: var(--warn-strong-hover);
-	}
+	--ui-button-bg: var(--warn);
+	--ui-button-border: var(--warn);
+	--ui-button-color: var(--tertiary-text);
+	--ui-button-hover-bg: var(--warn-strong-hover);
 }
 
 .success {
@@ -178,13 +274,10 @@ label.input-label {
 }
 
 .success-btn {
-	@include action-btn;
-	background: var(--success);
-	color: var(--tertiary-text);
-
-	&:hover {
-		background-color: var(--success-strong-hover);
-	}
+	--ui-button-bg: var(--success);
+	--ui-button-border: var(--success);
+	--ui-button-color: var(--tertiary-text);
+	--ui-button-hover-bg: var(--success-strong-hover);
 }
 
 .info {
@@ -196,11 +289,8 @@ label.input-label {
 }
 
 .info-btn {
-	@include action-btn;
-	background: var(--info);
-	color: var(--tertiary-text);
-
-	&:hover {
-		background-color: var(--info-strong-hover);
-	}
+	--ui-button-bg: var(--info);
+	--ui-button-border: var(--info);
+	--ui-button-color: var(--tertiary-text);
+	--ui-button-hover-bg: var(--info-strong-hover);
 }
