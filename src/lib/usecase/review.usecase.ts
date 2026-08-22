@@ -43,11 +43,12 @@ export async function fillReviews(reviews: ReviewEntity[]): Promise<Review[]> {
 }
 
 export async function getReviewFilterOptions() {
-	const [courses, professors] = await Promise.all([
+	const [courses, professors, courseIdsByProfessor] = await Promise.all([
 		CourseService.findInstructionalCourses(),
-		ProfessorService.findProfessors()
+		ProfessorService.findProfessors(),
+		AcademicRepository.findCourseIdsByProfessor()
 	]);
-	return { courses, professors };
+	return { courses, professors, courseIdsByProfessor };
 }
 
 export async function getReviewFormOptions(user: User) {

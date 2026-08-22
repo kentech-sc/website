@@ -220,6 +220,22 @@ export async function findOfferedCourseIds(courseIds: string[]): Promise<Set<str
 	return new Set(rows.map((row) => row.courseId));
 }
 
+/** 교수별로 담당한 적 있는 강의 코드 목록. (강의평 필터에서 교수 -> 강의 좁히기에 사용) */
+export async function findCourseIdsByProfessor(): Promise<Record<string, string[]>> {
+	const rows = await getDatabase()
+		.selectDistinct({
+			professorId: courseOfferingProfessors.professorId,
+			courseId: courseOfferings.courseId
+		})
+		.from(courseOfferingProfessors)
+		.innerJoin(courseOfferings, eq(courseOfferings.id, courseOfferingProfessors.offeringId));
+
+	const courseIdsByProfessor: Record<string, string[]> = {};
+	for (const { professorId, courseId } of rows)
+		(courseIdsByProfessor[professorId] ??= []).push(courseId);
+	return courseIdsByProfessor;
+}
+
 export async function findGraduationPolicy(
 	admissionYear: number
 ): Promise<GraduationPolicy | null> {
