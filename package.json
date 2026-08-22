@@ -18,16 +18,7 @@
 		"db:studio": "drizzle-kit studio",
 		"format": "prettier --write .",
 		"fix": "prettier --write . && eslint src vite.config.ts eslint.config.js --fix",
-		"lint": "prettier --check . && eslint src vite.config.ts eslint.config.js",
-		"prepare": "husky"
-	},
-	"lint-staged": {
-		"*": [
-			"prettier --write --ignore-unknown"
-		],
-		"*.{js,ts,svelte}": [
-			"eslint --fix"
-		]
+		"lint": "prettier --check . && eslint src vite.config.ts eslint.config.js"
 	},
 	"devDependencies": {
 		"@eslint/compat": "^2.1.0",
@@ -46,8 +37,6 @@
 		"eslint-plugin-import-x": "^4.17.1",
 		"eslint-plugin-svelte": "^3.22.0",
 		"globals": "^17.8.0",
-		"husky": "^9.1.7",
-		"lint-staged": "^17.2.0",
 		"prettier": "^3.9.6",
 		"prettier-plugin-css-order": "^2.2.0",
 		"prettier-plugin-svelte": "^4.1.1",
