@@ -1,0 +1,2 @@
+npx lint-staged --relative --max-arg-length 7000 --concurrent false
+npm run check
