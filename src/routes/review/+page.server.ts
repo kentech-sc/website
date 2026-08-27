@@ -10,12 +10,14 @@ export const load = withLoadErrorHandling(async ({ url, locals }) => {
 
 	const page = Math.max(1, Number(url.searchParams.get('page') ?? '1') || 1);
 	const reviewResult = await ReviewUsecase.getReviewPage(page, locals.user, courseId, professorId);
-	const { courses, professors } = await ReviewUsecase.getReviewFilterOptions();
+	const { courses, professors, courseIdsByProfessor } =
+		await ReviewUsecase.getReviewFilterOptions();
 
 	return {
 		reviewPage: reviewResult.reviewPage,
 		courses,
 		professors,
+		courseIdsByProfessor,
 		courseId,
 		professorId,
 		canCreateReview: reviewResult.canCreateReview

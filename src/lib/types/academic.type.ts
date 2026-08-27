@@ -38,6 +38,11 @@ export interface Offering {
 	meetings: Meeting[];
 }
 
+export type ReviewableOffering = Pick<
+	Offering,
+	'id' | 'courseId' | 'courseName' | 'subtitle' | 'professors' | 'year' | 'term'
+>;
+
 export interface OfferingImportInput {
 	courseId: string;
 	courseName: string;

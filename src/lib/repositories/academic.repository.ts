@@ -7,6 +7,7 @@ import type {
 	Offering,
 	OfferingCreditType,
 	OfferingImportInput,
+	ReviewableOffering,
 	StudentAcademicProfile
 } from '$lib/types/academic.type.js';
 import type { DegreeCourseInput, GraduationPolicy } from '$lib/types/degree.type.js';
@@ -160,6 +161,54 @@ export async function findAllOfferings(): Promise<Offering[]> {
 	});
 }
 
+export async function findAllReviewableOfferings(): Promise<ReviewableOffering[]> {
+	const rows = await getDatabase()
+		.select({
+			id: courseOfferings.id,
+			courseId: courseOfferings.courseId,
+			courseName: courses.name,
+			subtitle: courseOfferings.subtitle,
+			year: courseOfferings.year,
+			term: courseOfferings.term
+		})
+		.from(courseOfferings)
+		.innerJoin(courses, eq(courseOfferings.courseId, courses.id))
+		.where(isNull(courseOfferings.archivedAt))
+		.orderBy(
+			desc(courseOfferings.year),
+			desc(courseOfferings.term),
+			asc(courseOfferings.courseId),
+			asc(courseOfferings.section)
+		);
+	const professorRows = rows.length
+		? await getDatabase()
+				.select({
+					offeringId: courseOfferingProfessors.offeringId,
+					id: professors.id,
+					name: professors.name
+				})
+				.from(courseOfferingProfessors)
+				.innerJoin(professors, eq(courseOfferingProfessors.professorId, professors.id))
+				.where(
+					inArray(
+						courseOfferingProfessors.offeringId,
+						rows.map((row) => row.id)
+					)
+				)
+				.orderBy(asc(courseOfferingProfessors.position))
+		: [];
+	const professorsByOffering = new Map<string, Array<{ id: string; name: string }>>();
+	for (const { offeringId, id, name } of professorRows)
+		professorsByOffering.set(offeringId, [
+			...(professorsByOffering.get(offeringId) ?? []),
+			{ id, name }
+		]);
+	return rows.map((row) => ({
+		...row,
+		professors: professorsByOffering.get(row.id) ?? []
+	}));
+}
+
 /** 한 번이라도 개설된 적 있는 강의 코드만 골라낸다. (보관된 개설도 포함) */
 export async function findOfferedCourseIds(courseIds: string[]): Promise<Set<string>> {
 	const uniqueIds = [...new Set(courseIds)];
@@ -169,6 +218,22 @@ export async function findOfferedCourseIds(courseIds: string[]): Promise<Set<str
 		.from(courseOfferings)
 		.where(inArray(courseOfferings.courseId, uniqueIds));
 	return new Set(rows.map((row) => row.courseId));
+}
+
+/** 교수별로 담당한 적 있는 강의 코드 목록. (강의평 필터에서 교수 -> 강의 좁히기에 사용) */
+export async function findCourseIdsByProfessor(): Promise<Record<string, string[]>> {
+	const rows = await getDatabase()
+		.selectDistinct({
+			professorId: courseOfferingProfessors.professorId,
+			courseId: courseOfferings.courseId
+		})
+		.from(courseOfferingProfessors)
+		.innerJoin(courseOfferings, eq(courseOfferings.id, courseOfferingProfessors.offeringId));
+
+	const courseIdsByProfessor: Record<string, string[]> = {};
+	for (const { professorId, courseId } of rows)
+		(courseIdsByProfessor[professorId] ??= []).push(courseId);
+	return courseIdsByProfessor;
 }
 
 export async function findGraduationPolicy(

@@ -43,16 +43,17 @@ export async function fillReviews(reviews: ReviewEntity[]): Promise<Review[]> {
 }
 
 export async function getReviewFilterOptions() {
-	const [courses, professors] = await Promise.all([
+	const [courses, professors, courseIdsByProfessor] = await Promise.all([
 		CourseService.findInstructionalCourses(),
-		ProfessorService.findProfessors()
+		ProfessorService.findProfessors(),
+		AcademicRepository.findCourseIdsByProfessor()
 	]);
-	return { courses, professors };
+	return { courses, professors, courseIdsByProfessor };
 }
 
 export async function getReviewFormOptions(user: User) {
 	const [reviewableOfferings, reviewedOfferingIds] = await Promise.all([
-		AcademicRepository.findAllOfferings(),
+		AcademicRepository.findAllReviewableOfferings(),
 		ReviewRepository.findReviewedOfferingIds(user.id)
 	]);
 
@@ -91,16 +92,7 @@ export async function getReviewDetail(reviewId: ReviewId, user: User) {
 }
 
 export async function getReviewEditData(reviewId: ReviewId, user: User) {
-	const [formOptions, detail] = await Promise.all([
-		getReviewFormOptions(user),
-		getReviewDetail(reviewId, user)
-	]);
-
-	return {
-		...formOptions,
-		review: detail.review,
-		permissions: detail.permissions
-	};
+	return await getReviewDetail(reviewId, user);
 }
 
 export async function createReview(reviewCreate: ReviewCreate, user: User) {

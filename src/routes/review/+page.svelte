@@ -34,10 +34,17 @@
 
 	const courses = $derived<Course[]>(data.courses);
 	const professors = $derived<Professor[]>(data.professors);
+	const courseIdsByProfessor = $derived<Record<string, string[]>>(data.courseIdsByProfessor);
 </script>
 
 <ReviewHeader pageType="list" {canCreateReview} />
 
-<ReviewFilter {courses} {professors} bind:selectedCourse bind:selectedProfessor />
+<ReviewFilter
+	{courses}
+	{professors}
+	{courseIdsByProfessor}
+	bind:selectedCourse
+	bind:selectedProfessor
+/>
 
 <ReviewList {reviewPage} />

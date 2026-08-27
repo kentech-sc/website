@@ -9,7 +9,6 @@ import { hasCapability } from '$lib/shared/permission.js';
 
 export async function getPage(year: number, term: number, user: User) {
 	const [
-		offerings,
 		historicalOfferings,
 		timetables,
 		profile,
@@ -17,7 +16,6 @@ export async function getPage(year: number, term: number, user: User) {
 		completionViews,
 		competition
 	] = await Promise.all([
-		AcademicRepository.findOfferings(year, term),
 		AcademicRepository.findOfferingsIncludingArchived(year, term),
 		TimetableRepository.findTimetables(user.id, year, term),
 		AcademicRepository.findAcademicProfile(user.id),
@@ -25,6 +23,7 @@ export async function getPage(year: number, term: number, user: User) {
 		AcademicRepository.findCompletionViews(user.id, year, term),
 		TimetableRepository.findConfirmedCompetition(user.id, year, term)
 	]);
+	const offerings = historicalOfferings.filter((offering) => offering.archivedAt === null);
 	const policy = profile
 		? await AcademicRepository.findGraduationPolicy(profile.admissionYear)
 		: null;
