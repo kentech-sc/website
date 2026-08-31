@@ -23,7 +23,7 @@
 
 	<div class="split">
 		<HomeCalendar />
-		<HomeDining />
+		<HomeDining menus={data.dining} />
 	</div>
 
 	<div id="grid-container">

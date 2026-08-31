@@ -1,3 +1,4 @@
+import * as DiningUsecase from './dining.usecase.js';
 import { attachPetitionNames, findPetitionUserMap } from './petition.usecase.js';
 import { fillReviews } from './review.usecase.js';
 
@@ -7,12 +8,15 @@ import * as ReviewService from '$lib/services/review.service.js';
 import * as UserService from '$lib/services/user.service.js';
 
 export async function getHomeData() {
-	const [reviewsResult, freePostsResult, noticePostsResult, petitionsResult] = await Promise.all([
-		ReviewService.getReviewPage(5),
-		PostService.getPostPageByBoardId('free', 5),
-		PostService.getPostPageByBoardId('notice', 5),
-		PetitionService.getPetitionPage(5)
-	]);
+	const [reviewsResult, freePostsResult, noticePostsResult, petitionsResult, dining] =
+		await Promise.all([
+			ReviewService.getReviewPage(5),
+			PostService.getPostPageByBoardId('free', 5),
+			PostService.getPostPageByBoardId('notice', 5),
+			PetitionService.getPetitionPage(5),
+			// 학교 포털을 부르는 외부 호출이라 실패해도 홈은 떠야 한다.
+			DiningUsecase.getDiningMenusOrNull()
+		]);
 
 	const [postUserMap, petitionUserMap, reviews] = await Promise.all([
 		UserService.findUserMapByIds([
@@ -31,6 +35,7 @@ export async function getHomeData() {
 		freePosts,
 		noticePosts,
 		reviews,
-		petitions
+		petitions,
+		dining
 	};
 }
