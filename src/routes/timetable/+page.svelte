@@ -21,6 +21,7 @@
 	const hiddenSelectedOfferings = $derived(timetable.hiddenSelectedOfferings);
 	const busy = $derived(timetable.busy);
 	const progress = $derived(timetable.progress);
+	const conflictCount = $derived(timetable.conflicts.length);
 
 	$effect(timetable.ensureValidSelection);
 </script>
@@ -51,6 +52,7 @@
 			totalCredits={timetable.totalCredits}
 			totalHours={timetable.totalHours}
 			archivedCourseCount={archivedOfferings.length}
+			{conflictCount}
 			savingImage={timetable.savingImage}
 			bind:editingName={timetable.editingName}
 			renameError={timetable.renameError}

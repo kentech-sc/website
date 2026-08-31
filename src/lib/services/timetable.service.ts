@@ -7,6 +7,33 @@ import { AppError } from '$lib/server/errors.js';
 import { getCourseSequenceProgress, hasMeetingConflict } from '$lib/shared/degree.js';
 import { APP_ERROR } from '$lib/shared/rule.js';
 
+export interface TimetableConflict {
+	firstOfferingId: string;
+	secondOfferingId: string;
+}
+
+export function findTimetableConflicts(
+	offerings: Array<{
+		id: string;
+		meetings: Array<{ weekday: number; startsAt: number; endsAt: number }>;
+	}>
+): TimetableConflict[] {
+	const conflicts: TimetableConflict[] = [];
+	for (let firstIndex = 0; firstIndex < offerings.length; firstIndex += 1) {
+		for (let secondIndex = firstIndex + 1; secondIndex < offerings.length; secondIndex += 1) {
+			const first = offerings[firstIndex];
+			const second = offerings[secondIndex];
+			if (
+				first.meetings.some((left) =>
+					second.meetings.some((right) => hasMeetingConflict(left, right))
+				)
+			)
+				conflicts.push({ firstOfferingId: first.id, secondOfferingId: second.id });
+		}
+	}
+	return conflicts;
+}
+
 async function owned(id: string, user: User): Promise<Timetable> {
 	const timetable = await TimetableRepository.findTimetable(id, user.id);
 	if (!timetable) throw new AppError(APP_ERROR.NOT_FOUND, '시간표를 찾을 수 없습니다.');
@@ -133,6 +160,29 @@ export async function confirm(id: string, user: User) {
 	const timetable = await owned(id, user);
 	if (timetable.offerings.some((offering) => offering.archivedAt !== null))
 		throw new AppError(APP_ERROR.CONFLICT, '폐강된 강의를 시간표에서 제거한 뒤 확정해 주세요.');
+	if (
+		timetable.offerings.some(
+			(offering) => offering.year !== timetable.year || offering.term !== timetable.term
+		)
+	)
+		throw new AppError(APP_ERROR.CONFLICT, '다른 학기의 강의가 포함되어 있습니다.');
+	const duplicateCourse = timetable.offerings.find((offering, index, offerings) =>
+		offerings.slice(index + 1).some((candidate) => candidate.courseId === offering.courseId)
+	);
+	if (duplicateCourse)
+		throw new AppError(
+			APP_ERROR.CONFLICT,
+			`${duplicateCourse.courseName}의 여러 분반이 함께 들어 있습니다.`
+		);
+	const [conflict] = findTimetableConflicts(timetable.offerings);
+	if (conflict) {
+		const first = timetable.offerings.find(({ id }) => id === conflict.firstOfferingId)!;
+		const second = timetable.offerings.find(({ id }) => id === conflict.secondOfferingId)!;
+		throw new AppError(
+			APP_ERROR.CONFLICT,
+			`${first.courseName}과 ${second.courseName}의 수업 시간이 겹칩니다.`
+		);
+	}
 	await validateEspSequence(
 		timetable.offerings
 			.filter((offering) => offering.category === 'ESP')
@@ -140,6 +190,7 @@ export async function confirm(id: string, user: User) {
 		user
 	);
 	await TimetableRepository.clearConfirmed(user.id, timetable.year, timetable.term);
+	await TimetableRepository.clearChangeReasons(timetable.id);
 	return await TimetableRepository.updateTimetable(id, user.id, { isConfirmed: true });
 }
 
@@ -147,6 +198,11 @@ export async function unconfirm(id: string, user: User) {
 	const timetable = await owned(id, user);
 	if (!timetable.isConfirmed) return timetable;
 	return await TimetableRepository.updateTimetable(id, user.id, { isConfirmed: false });
+}
+
+export async function acknowledgeChanges(id: string, user: User) {
+	await owned(id, user);
+	await TimetableRepository.clearAcknowledgedChangeReasons(id);
 }
 
 export async function rename(id: string, name: string, user: User) {

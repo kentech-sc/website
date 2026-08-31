@@ -12,6 +12,8 @@
 	import type { PageData } from '../$types.js';
 	import type { SubmitFunction } from '@sveltejs/kit';
 
+	import { enhance } from '$app/forms';
+
 	type Offering = PageData['offerings'][number];
 	type Meeting = Offering['meetings'][number];
 
@@ -60,6 +62,28 @@
 		replaceEnhance: SubmitFunction;
 		removeOfferingEnhance: SubmitFunction;
 	} = $props();
+
+	const conflicts = $derived(selected ? (data.timetableConflicts[selected.id] ?? []) : []);
+	const conflictingOfferingIds = $derived(
+		new Set(
+			conflicts.flatMap(({ firstOfferingId, secondOfferingId }) => [
+				firstOfferingId,
+				secondOfferingId
+			])
+		)
+	);
+	const changedOfferings = $derived(
+		selected?.offerings.filter((offering) => selected.changeReasons[offering.id]) ?? []
+	);
+	const acknowledgedChangedOfferings = $derived(
+		changedOfferings.filter(
+			(offering) =>
+				selected?.changeReasons[offering.id] === 'schedule_changed' ||
+				selected?.changeReasons[offering.id] === 'details_changed'
+		)
+	);
+	const offeringName = (offeringId: string) =>
+		selected?.offerings.find(({ id }) => id === offeringId)?.courseName ?? '강의';
 </script>
 
 <div class="planner-workspace" class:search-open={searchFilter !== null}>
@@ -105,6 +129,44 @@
 				</div>
 			{/if}
 
+			{#if selected && acknowledgedChangedOfferings.length}
+				<div class="change-notice" role="status">
+					<AlertTriangle size="0.9rem" aria-hidden="true" />
+					<div>
+						<strong>시간표 변경을 확인해 주세요.</strong>
+						<ul>
+							{#each acknowledgedChangedOfferings as offering (offering.id)}
+								<li>{offering.courseName} 강의 정보가 변경되었습니다.</li>
+							{/each}
+						</ul>
+					</div>
+					<form method="POST" action="?/acknowledgeChanges" use:enhance={pendingEnhance}>
+						<input type="hidden" name="timetableId" value={selected.id} />
+						<button class="ui-button is-compact change-acknowledge" disabled={busy}
+							>변경 확인</button
+						>
+					</form>
+				</div>
+			{/if}
+
+			{#if selected && conflicts.length}
+				<div class="conflict-notice" role="alert">
+					<AlertTriangle size="0.9rem" aria-hidden="true" />
+					<div>
+						<strong>강의 시간이 겹칩니다.</strong>
+						<ul>
+							{#each conflicts as conflict (`${conflict.firstOfferingId}-${conflict.secondOfferingId}`)}
+								<li>
+									{offeringName(conflict.firstOfferingId)} · {offeringName(
+										conflict.secondOfferingId
+									)}
+								</li>
+							{/each}
+						</ul>
+					</div>
+				</div>
+			{/if}
+
 			<TimetableGrid
 				{selected}
 				{displayOfferings}
@@ -112,6 +174,8 @@
 				{savingImage}
 				{busy}
 				{searchFilter}
+				changeReasons={selected?.changeReasons ?? {}}
+				{conflictingOfferingIds}
 				{weekdays}
 				onPickSlot={openSlotPicker}
 				onPickReplacement={openReplacementPicker}
@@ -180,6 +244,8 @@
 		padding: 0.4rem 0.6rem;
 	}
 	.cancelled-notice,
+	.change-notice,
+	.conflict-notice,
 	.schedule-onboarding {
 		display: flex;
 		align-items: center;
@@ -197,6 +263,48 @@
 		display: flex;
 		flex-wrap: wrap;
 		gap: 0.2rem 0.4rem;
+	}
+	.change-notice {
+		align-items: flex-start;
+		gap: 0.5rem;
+		border-bottom: var(--divider-border-width) solid
+			color-mix(in srgb, #a66a00 25%, var(--gray-border));
+		background: color-mix(in srgb, #f4b942 12%, var(--white));
+		padding: 0.5rem 0.6rem;
+		color: color-mix(in srgb, #754a00 82%, var(--text));
+		font-size: 0.68rem;
+	}
+	.change-notice > div {
+		flex: 1;
+	}
+	.change-notice ul {
+		margin: 0.2rem 0 0;
+		padding-left: 1rem;
+	}
+	.change-acknowledge {
+		border-color: color-mix(in srgb, #a66a00 38%, var(--gray-border));
+		background: color-mix(in srgb, #f4b942 16%, var(--white));
+		color: color-mix(in srgb, #754a00 88%, var(--text));
+		font-weight: 700;
+	}
+	.change-acknowledge:hover:not(:disabled),
+	.change-acknowledge:focus-visible {
+		border-color: color-mix(in srgb, #a66a00 58%, var(--gray-border));
+		background: color-mix(in srgb, #f4b942 25%, var(--white));
+	}
+	.conflict-notice {
+		align-items: flex-start;
+		gap: 0.5rem;
+		border-bottom: var(--divider-border-width) solid
+			color-mix(in srgb, var(--error-text) 30%, var(--gray-border));
+		background: var(--error-bg);
+		padding: 0.5rem 0.6rem;
+		color: var(--error-text);
+		font-size: 0.68rem;
+	}
+	.conflict-notice ul {
+		margin: 0.2rem 0 0;
+		padding-left: 1rem;
 	}
 	.schedule-onboarding {
 		gap: 0.6rem;

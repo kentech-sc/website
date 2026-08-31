@@ -71,7 +71,9 @@
 						: '학교에서 내려받은 .xlsx 파일을 그대로 사용할 수 있습니다.'}</small
 				>
 			</span>
-			<span class="choose-button"><Upload size="0.9rem" />파일 선택</span>
+			<span class="ui-button is-secondary is-compact choose-button"
+				><Upload size="0.9rem" />파일 선택</span
+			>
 			<input
 				type="file"
 				name="workbook"
@@ -123,7 +125,7 @@
 			</ul>
 		</details>
 
-		<button class="submit-button" disabled={!fileName}
+		<button class="ui-button is-primary is-compact submit-button" disabled={!fileName}
 			><Upload size="0.95rem" />이 학기의 강의 데이터 반영</button
 		>
 	</form>
@@ -202,7 +204,9 @@
 			</label>
 			<div class="special-submit">
 				<p>이수 학기와 성적은 학생이 이수 내역에 추가할 때 입력합니다.</p>
-				<button><BookPlus size="0.95rem" />공통 강의 등록</button>
+				<button class="ui-button is-secondary is-compact"
+					><BookPlus size="0.95rem" />공통 강의 등록</button
+				>
 			</div>
 		</form>
 	</section>
@@ -216,7 +220,14 @@
 					{form.importedCount}개 개설 강의를 반영했습니다.</strong
 				>
 				<div>
-					{#if form.skippedClosedCount}<span>폐강 제외 {form.skippedClosedCount}</span
+					{#if form.newOfferingCount}<span>신규 분반 {form.newOfferingCount}</span>{/if}
+					{#if form.scheduleChanged}<span>시간 변경 {form.scheduleChanged}</span>{/if}
+					{#if form.detailsChanged}<span>정보 변경 {form.detailsChanged}</span>{/if}
+					{#if form.cancelled}<span>폐강 반영 {form.cancelled}</span>{/if}
+					{#if form.unconfirmedTimetableCount}<span>확정 취소 {form.unconfirmedTimetableCount}</span
+						>{/if}
+					{#if form.skippedClosedCount && form.skippedClosedCount !== form.cancelled}<span
+							>파일 내 폐강 행 {form.skippedClosedCount}</span
 						>{/if}{#if form.passCreditCount}<span>P 과목 {form.passCreditCount}</span
 						>{/if}{#if form.multipleProfessorCount}<span
 							>복수 교수 {form.multipleProfessorCount}</span
@@ -335,12 +346,7 @@
 		padding-top: 0.75rem;
 	}
 	.special-submit button {
-		display: flex;
-		align-items: center;
-		gap: 0.3rem;
-		border-color: var(--secondary);
-		background: var(--secondary);
-		color: white;
+		flex-shrink: 0;
 	}
 	.file-drop {
 		display: grid;
@@ -391,13 +397,7 @@
 		align-items: center;
 	}
 	.choose-button {
-		gap: 0.25rem;
-		border: 1px solid var(--gray-border);
-		border-radius: 0.4rem;
-		background: white;
-		padding: 0.35rem 0.55rem;
-		font-weight: 600;
-		font-size: 0.7rem;
+		white-space: nowrap;
 	}
 	.period-section {
 		border-top: 1px solid var(--gray-border);
@@ -452,11 +452,6 @@
 	}
 	.submit-button {
 		align-self: flex-end;
-		gap: 0.3rem;
-		border-color: var(--secondary);
-		background: var(--secondary);
-		padding: 0.45rem 0.75rem;
-		color: white;
 	}
 	.result-card {
 		gap: 0.65rem;

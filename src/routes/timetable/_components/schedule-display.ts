@@ -22,6 +22,13 @@ export const formatScheduleTime = (minutes: number) =>
 		.toString()
 		.padStart(2, '0')}:${(minutes % 60).toString().padStart(2, '0')}`;
 
+export const formatRoomName = (value: string) => {
+	const room = value.trim();
+	if (!room.startsWith('행정강의동')) return room;
+	const separatorIndex = room.lastIndexOf('_');
+	return separatorIndex >= 0 ? room.slice(separatorIndex + 1).trim() : room;
+};
+
 export const formatOfferingSchedule = (
 	offering: Offering,
 	weekdays = ['월', '화', '수', '목', '금']
@@ -29,6 +36,6 @@ export const formatOfferingSchedule = (
 	offering.meetings
 		.map(
 			(meeting) =>
-				`${weekdays[meeting.weekday - 1] ?? meeting.weekday} ${formatScheduleTime(meeting.startsAt)}–${formatScheduleTime(meeting.endsAt)}${meeting.room ? ` · ${meeting.room}` : ''}`
+				`${weekdays[meeting.weekday - 1] ?? meeting.weekday} ${formatScheduleTime(meeting.startsAt)}–${formatScheduleTime(meeting.endsAt)}${meeting.room ? ` · ${formatRoomName(meeting.room)}` : ''}`
 		)
 		.join(' / ');
