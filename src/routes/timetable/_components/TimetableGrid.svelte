@@ -3,7 +3,7 @@
 	import X from '@lucide/svelte/icons/x';
 
 	import { COURSE_SLOTS, getFreeTimeRanges } from './course-search.js';
-	import { courseColor, formatScheduleTime } from './schedule-display.js';
+	import { courseColor, formatRoomName, formatScheduleTime } from './schedule-display.js';
 
 	import type { CourseSearchFilter, TimeBlock } from './course-search.js';
 	import type { PageData } from '../$types.js';
@@ -21,6 +21,8 @@
 		savingImage,
 		busy,
 		searchFilter,
+		changeReasons,
+		conflictingOfferingIds,
 		weekdays,
 		onPickSlot,
 		onPickReplacement,
@@ -32,6 +34,8 @@
 		savingImage: boolean;
 		busy: boolean;
 		searchFilter: CourseSearchFilter | null;
+		changeReasons: Record<string, string | undefined>;
+		conflictingOfferingIds: Set<string>;
 		weekdays: string[];
 		onPickSlot: (weekday: number, block: TimeBlock) => void;
 		onPickReplacement: (offeringId: string, meeting: Meeting) => void;
@@ -40,7 +44,7 @@
 
 	const gridStep = 1.35;
 	const gridPadding = 0.65;
-	const scheduleGuides = [9, 11, 12, 14, 16, 18, 20].map((hour) => hour * 60);
+	const scheduleGuides = [9, 11, 12, 14, 16, 18, 20, 21].map((hour) => hour * 60);
 	const selectedMeetings = $derived(displayOfferings.flatMap((offering) => offering.meetings));
 	const rangeMeetings = $derived(
 		selected ? allOfferings.flatMap((offering) => offering.meetings) : selectedMeetings
@@ -53,13 +57,15 @@
 				)
 			: 9 * 60
 	);
+	const selectedEndMinute = $derived(
+		selectedMeetings.length
+			? Math.ceil(Math.max(...selectedMeetings.map((meeting) => meeting.endsAt)) / 30) * 30
+			: 21 * 60
+	);
 	const endMinute = $derived(
 		savingImage && selectedMeetings.length
-			? Math.max(
-					startMinute + 60,
-					Math.ceil(Math.max(...selectedMeetings.map((meeting) => meeting.endsAt)) / 30) * 30
-				)
-			: 20 * 60
+			? Math.max(startMinute + 60, selectedEndMinute)
+			: Math.max(21 * 60, selectedEndMinute)
 	);
 	const timeLabels = $derived(
 		Array.from(
@@ -104,7 +110,7 @@
 
 		{#each weekdays as weekday, day (weekday)}
 			<div class="day-lane" style={`height: ${gridHeight}rem`}>
-				{#each scheduleGuides as minute (minute)}
+				{#each scheduleGuides.filter((minute) => minute <= endMinute) as minute (minute)}
 					<span class="schedule-guide" style={guideStyle(minute)} aria-hidden="true"></span>
 				{/each}
 				<!-- 수요일은 정규 강의가 열리지 않아 블록 버튼을 두지 않는다. -->
@@ -131,6 +137,8 @@
 					<article
 						class="course-block"
 						class:is-cancelled={offering.archivedAt !== null}
+						class:has-change={changeReasons[offering.id] !== undefined}
+						class:has-conflict={conflictingOfferingIds.has(offering.id)}
 						style={meetingStyle(offering.category, meeting.startsAt, meeting.endsAt)}
 					>
 						<button
@@ -145,11 +153,17 @@
 							title={selected ? `${offering.courseName} 교체하기` : offering.courseName}
 						>
 							{#if offering.archivedAt !== null}<span class="cancelled-badge">폐강</span>{/if}
+							{#if offering.archivedAt === null && conflictingOfferingIds.has(offering.id)}
+								<span class="change-badge is-conflict">시간 겹침</span>
+							{:else if changeReasons[offering.id] === 'schedule_changed' || changeReasons[offering.id] === 'details_changed'}
+								<span class="change-badge">정보 변경</span>
+							{/if}
 							<strong>{offering.courseName}</strong>
 							<small class="course-professor">
 								{offering.professors.map((professor) => professor.name).join(', ') || '교수 미정'}
 							</small>
-							{#if meeting.room}<small class="course-room">{meeting.room}</small>{/if}
+							{#if meeting.room}<small class="course-room">{formatRoomName(meeting.room)}</small
+								>{/if}
 							<small class="course-time">
 								{formatScheduleTime(meeting.startsAt)}–{formatScheduleTime(meeting.endsAt)}
 							</small>

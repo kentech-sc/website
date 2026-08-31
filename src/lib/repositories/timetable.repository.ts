@@ -1,8 +1,12 @@
-import { and, asc, countDistinct, eq, inArray, isNull, max, sql } from 'drizzle-orm';
+import { and, asc, countDistinct, eq, inArray, isNull, max, or, sql } from 'drizzle-orm';
 
 import * as AcademicRepository from './academic.repository.js';
 
-import type { Timetable, TimetableCreate } from '$lib/types/timetable.type.js';
+import type {
+	Timetable,
+	TimetableCreate,
+	TimetableItemChangeReason
+} from '$lib/types/timetable.type.js';
 import type { UserId } from '$lib/types/user.type.js';
 
 import { courseOfferings, timetableItems, timetables } from '$lib/server/database/schema.js';
@@ -34,7 +38,12 @@ export async function findTimetables(
 		offerings: items
 			.filter((item) => item.timetableId === row.id)
 			.map((item) => offeringMap.get(item.offeringId))
-			.filter((offering) => offering !== undefined)
+			.filter((offering) => offering !== undefined),
+		changeReasons: Object.fromEntries(
+			items
+				.filter((item) => item.timetableId === row.id && item.changeReason !== null)
+				.map((item) => [item.offeringId, item.changeReason as TimetableItemChangeReason])
+		)
 	}));
 }
 
@@ -198,7 +207,80 @@ export async function copyItems(fromId: string, toId: string) {
 	if (items.length)
 		await getDatabase()
 			.insert(timetableItems)
-			.values(items.map(({ offeringId }) => ({ timetableId: toId, offeringId })));
+			.values(
+				items.map(({ offeringId, changeReason }) => ({
+					timetableId: toId,
+					offeringId,
+					changeReason
+				}))
+			);
+}
+
+export async function markOfferingChanges(
+	changes: Map<string, TimetableItemChangeReason>
+): Promise<void> {
+	for (const reason of ['details_changed', 'schedule_changed', 'cancelled'] as const) {
+		const offeringIds = [...changes]
+			.filter(([, value]) => value === reason)
+			.map(([offeringId]) => offeringId);
+		if (!offeringIds.length) continue;
+		await getDatabase()
+			.update(timetableItems)
+			.set({ changeReason: reason })
+			.where(
+				and(
+					inArray(timetableItems.offeringId, offeringIds),
+					reason === 'details_changed'
+						? or(
+								isNull(timetableItems.changeReason),
+								eq(timetableItems.changeReason, 'details_changed')
+							)
+						: undefined
+				)
+			);
+	}
+}
+
+export async function unconfirmTimetablesContainingOfferings(
+	offeringIds: string[]
+): Promise<number> {
+	const uniqueIds = [...new Set(offeringIds)];
+	if (!uniqueIds.length) return 0;
+	const affected = await getDatabase().execute(sql`
+		update ${timetables} as timetable
+		set is_confirmed = false, updated_at = now()
+		where timetable.is_confirmed = true
+			and exists (
+				select 1
+				from ${timetableItems} as item
+				where item.timetable_id = timetable.id
+					and item.offering_id in (${sql.join(
+						uniqueIds.map((id) => sql`${id}::uuid`),
+						sql`, `
+					)})
+			)
+		returning timetable.id
+	`);
+	return affected.rowCount ?? 0;
+}
+
+export async function clearChangeReasons(timetableId: string): Promise<void> {
+	await getDatabase()
+		.update(timetableItems)
+		.set({ changeReason: null })
+		.where(eq(timetableItems.timetableId, timetableId));
+}
+
+export async function clearAcknowledgedChangeReasons(timetableId: string): Promise<void> {
+	await getDatabase()
+		.update(timetableItems)
+		.set({ changeReason: null })
+		.where(
+			and(
+				eq(timetableItems.timetableId, timetableId),
+				inArray(timetableItems.changeReason, ['schedule_changed', 'details_changed'])
+			)
+		);
 }
 
 export async function deleteTimetable(id: string, userId: UserId): Promise<boolean> {

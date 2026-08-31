@@ -89,6 +89,12 @@ button.grid-slot:disabled {
 	background: color-mix(in srgb, var(--error-bg) 65%, var(--white));
 	color: var(--gray-text);
 }
+.course-block.has-change {
+	box-shadow: inset 0 0 0 var(--control-border-width) color-mix(in srgb, #a66a00 55%, transparent);
+}
+.course-block.has-conflict {
+	box-shadow: inset 0 0 0 var(--control-border-width) var(--error-text);
+}
 .cancelled-badge {
 	align-self: flex-start;
 	border-radius: 999px;
@@ -98,6 +104,20 @@ button.grid-slot:disabled {
 	font-weight: 750;
 	font-size: 0.5rem;
 	line-height: 1.35;
+}
+.change-badge {
+	align-self: flex-start;
+	border-radius: 999px;
+	background: color-mix(in srgb, #f4b942 28%, var(--white));
+	padding: 0.1rem 0.3rem;
+	color: color-mix(in srgb, #754a00 88%, var(--text));
+	font-weight: 750;
+	font-size: 0.5rem;
+	line-height: 1.35;
+}
+.change-badge.is-conflict {
+	background: var(--error-text);
+	color: var(--white);
 }
 .course-block-copy {
 	display: flex;
@@ -148,10 +168,9 @@ button.grid-slot:disabled {
 }
 .course-block strong,
 .course-block small {
-	overflow: hidden;
 	line-height: 1.3;
-	text-overflow: ellipsis;
-	white-space: nowrap;
+	white-space: normal;
+	overflow-wrap: anywhere;
 }
 .course-block strong {
 	font-weight: 700;
@@ -170,6 +189,7 @@ button.grid-slot:disabled {
 }
 .course-time {
 	font-variant-numeric: tabular-nums;
+	white-space: nowrap;
 }
 @media (max-width: 760px) {
 	.corner,

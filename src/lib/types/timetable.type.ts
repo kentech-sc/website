@@ -1,5 +1,7 @@
-import type { Offering, TimetableId } from './academic.type.js';
+import type { Offering, OfferingId, TimetableId } from './academic.type.js';
 import type { UserId } from './user.type.js';
+
+export type TimetableItemChangeReason = 'schedule_changed' | 'cancelled' | 'details_changed';
 
 export interface Timetable {
 	id: TimetableId;
@@ -12,6 +14,7 @@ export interface Timetable {
 	createdAt: string;
 	updatedAt: string;
 	offerings: Offering[];
+	changeReasons: Partial<Record<OfferingId, TimetableItemChangeReason>>;
 }
 
 export interface TimetableCreate {

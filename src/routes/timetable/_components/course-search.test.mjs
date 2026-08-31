@@ -46,8 +46,14 @@ test('정규 시간대와 점심시간을 추가 버튼 블록으로 정의한�
 		{ startsAt: 12 * 60, endsAt: 14 * 60 },
 		{ startsAt: 14 * 60, endsAt: 16 * 60 },
 		{ startsAt: 16 * 60, endsAt: 18 * 60 },
-		{ startsAt: 18 * 60, endsAt: 20 * 60 }
+		{ startsAt: 18 * 60, endsAt: 20 * 60 },
+		{ startsAt: 20 * 60, endsAt: 21 * 60 }
 	]);
+});
+
+test('오후 9시에 끝나는 강의를 마지막 추가 블록에서 찾는다', () => {
+	const meetings = [meeting(MON, 19 * 60, 21 * 60)];
+	assert.equal(matchesCourseSearchFilter(meetings, slot(MON, 20 * 60)), true);
 });
 
 test('블록과 정확히 맞는 강의를 찾는다', () => {

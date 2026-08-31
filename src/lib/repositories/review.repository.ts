@@ -1,4 +1,4 @@
-import { and, desc, eq, exists, ilike, or, sql } from 'drizzle-orm';
+import { and, desc, eq, exists, ilike, inArray, or, sql } from 'drizzle-orm';
 
 import { asEntity, firstOrNull } from './repository.utils.js';
 
@@ -118,6 +118,18 @@ export async function findReviewedOfferingIds(userId: UserId): Promise<Set<Offer
 		.from(reviews)
 		.where(eq(reviews.userId, userId));
 	return new Set(rows.map((row) => row.offeringId));
+}
+
+export async function findOfferingIdsWithReviews(
+	offeringIds: OfferingId[]
+): Promise<Set<OfferingId>> {
+	const uniqueIds = [...new Set(offeringIds)];
+	if (!uniqueIds.length) return new Set();
+	const rows = await getDatabase()
+		.selectDistinct({ offeringId: reviews.offeringId })
+		.from(reviews)
+		.where(inArray(reviews.offeringId, uniqueIds));
+	return new Set(rows.map(({ offeringId }) => offeringId));
 }
 
 export async function findRecentReviews(

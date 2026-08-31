@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { parseCourseOfferingWorkbook } from './course-offering-import.ts';
+import { compareOfferingImport, parseCourseOfferingWorkbook } from './course-offering-import.ts';
 
 function row(values) {
 	const result = Array(34).fill(null);
@@ -37,7 +37,7 @@ test('KENTECH course workbook rows are normalized for offering import', () => {
 				8: '김현주',
 				9: 38,
 				14: '개설',
-				19: 'A-205 / A-205',
+				19: '행정강의동(A Zone)_A-205 / 행정강의동(A Zone)_A-205',
 				20: '월요일 08:30~10:30 / 목요일 08:30~10:30',
 				21: 4
 			}),
@@ -64,8 +64,8 @@ test('KENTECH course workbook rows are normalized for offering import', () => {
 	assert.equal(result.passCreditCount, 1);
 	assert.equal(result.multipleProfessorCount, 1);
 	assert.deepEqual(result.offerings[0].meetings, [
-		{ weekday: 1, startsAt: 510, endsAt: 630, room: 'A-205' },
-		{ weekday: 4, startsAt: 510, endsAt: 630, room: 'A-205' }
+		{ weekday: 1, startsAt: 510, endsAt: 630, room: '행정강의동(A Zone)_A-205' },
+		{ weekday: 4, startsAt: 510, endsAt: 630, room: '행정강의동(A Zone)_A-205' }
 	]);
 	assert.equal(result.offerings[0].subcategory, 'math');
 	assert.equal(result.offerings[0].academicCareer, 'undergraduate');
@@ -74,6 +74,43 @@ test('KENTECH course workbook rows are normalized for offering import', () => {
 	assert.equal(result.offerings[1].creditType, 'pass');
 	assert.equal(result.offerings[1].credits, 0);
 	assert.equal(result.offerings[1].subtitle, 'Foundation');
+});
+
+test('강의실 표기를 엑셀 원본 그대로 보존한다', () => {
+	const result = parseCourseOfferingWorkbook(
+		[
+			row({
+				2: '교과목코드',
+				3: '교과목명(영문)',
+				4: '교과목명(국문)',
+				5: '부제목',
+				6: '분반',
+				7: '영역구분',
+				8: '대표교수명',
+				9: '수강제한인원',
+				14: '개설구분',
+				18: '폐강일자',
+				19: '강의실',
+				20: '시간표',
+				21: '학점'
+			}),
+			row({
+				2: 'EL1001',
+				4: '강의실 표기 시험',
+				6: '01',
+				7: 'EL',
+				19: '행정강의동(B,C Zone)_C-304 / RC교육생활관_124',
+				20: '월요일 09:00~11:00 / 목요일 09:00~11:00',
+				21: 4
+			})
+		],
+		2026,
+		2
+	);
+	assert.deepEqual(
+		result.offerings[0].meetings.map(({ room }) => room),
+		['행정강의동(B,C Zone)_C-304', 'RC교육생활관_124']
+	);
 });
 
 test('graduate workbook rows are detected and normalized into the common offering shape', () => {
@@ -145,4 +182,101 @@ test('graduate workbook rows are detected and normalized into the common offerin
 			{ weekday: 4, startsAt: 810, endsAt: 900, room: null }
 		]
 	});
+});
+
+function offering(overrides = {}) {
+	return {
+		id: 'offering-1',
+		courseId: 'EF1001',
+		courseName: '공학 미적분학 I',
+		subtitle: null,
+		category: 'EF',
+		subcategory: 'math',
+		level: 1,
+		gradExcluded: false,
+		professors: [{ id: 'professor-1', name: '김교수' }],
+		year: 2026,
+		term: 2,
+		academicCareer: 'undergraduate',
+		section: '01',
+		credits: 4,
+		creditType: 'numeric',
+		capacity: 30,
+		archivedAt: null,
+		meetings: [
+			{
+				id: 'meeting-1',
+				offeringId: 'offering-1',
+				weekday: 1,
+				startsAt: 540,
+				endsAt: 660,
+				room: 'A-205'
+			}
+		],
+		...overrides
+	};
+}
+
+function incoming(overrides = {}) {
+	return {
+		courseId: 'EF1001',
+		courseName: '공학 미적분학 I',
+		subtitle: null,
+		category: 'EF',
+		subcategory: 'math',
+		level: 1,
+		gradExcluded: false,
+		professorNames: ['김교수'],
+		year: 2026,
+		term: 2,
+		academicCareer: 'undergraduate',
+		section: '01',
+		credits: 4,
+		creditType: 'numeric',
+		capacity: 30,
+		meetings: [{ weekday: 1, startsAt: 540, endsAt: 660, room: 'A-205' }],
+		...overrides
+	};
+}
+
+test('offering comparison is idempotent and ignores professor order', () => {
+	const current = offering({
+		professors: [
+			{ id: '1', name: '김교수' },
+			{ id: '2', name: '이교수' }
+		]
+	});
+	const next = incoming({ professorNames: ['이교수', '김교수', '김교수'] });
+	assert.deepEqual(compareOfferingImport(current, next), {
+		reason: null,
+		professorsChanged: false
+	});
+});
+
+test('offering comparison separates schedule and detail changes', () => {
+	assert.deepEqual(
+		compareOfferingImport(
+			offering(),
+			incoming({
+				professorNames: ['이교수'],
+				meetings: [{ weekday: 2, startsAt: 840, endsAt: 960, room: 'A-205' }]
+			})
+		),
+		{ reason: 'schedule_changed', professorsChanged: true }
+	);
+	assert.deepEqual(compareOfferingImport(offering(), incoming({ professorNames: ['이교수'] })), {
+		reason: 'details_changed',
+		professorsChanged: true
+	});
+	assert.equal(
+		compareOfferingImport(
+			offering(),
+			incoming({ meetings: [{ weekday: 1, startsAt: 540, endsAt: 660, room: 'C-303' }] })
+		).reason,
+		'details_changed'
+	);
+	assert.equal(
+		compareOfferingImport(offering({ archivedAt: '2026-08-30T00:00:00.000Z' }), incoming()).reason,
+		'schedule_changed'
+	);
 });

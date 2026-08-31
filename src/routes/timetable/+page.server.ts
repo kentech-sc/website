@@ -62,6 +62,10 @@ export const actions = {
 		const data = await request.formData();
 		await TimetableUsecase.unconfirm(String(data.get('timetableId')), locals.user);
 	}),
+	acknowledgeChanges: withActionErrorHandling(async ({ request, locals }) => {
+		const data = await request.formData();
+		await TimetableUsecase.acknowledgeChanges(String(data.get('timetableId')), locals.user);
+	}),
 	rename: withActionErrorHandling(async ({ request, locals }) => {
 		const data = await request.formData();
 		await TimetableUsecase.rename(

@@ -63,6 +63,9 @@ export class TimetablePageState {
 		if (this.selected) return this.data.timetableProgress[this.selected.id];
 		return this.data.degreeProgress;
 	}
+	get conflicts() {
+		return this.selected ? (this.data.timetableConflicts[this.selected.id] ?? []) : [];
+	}
 	get totalCredits() {
 		return this.actualSelected
 			? this.data.actualSchedule.completions
