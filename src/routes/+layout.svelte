@@ -4,7 +4,8 @@
 
 	import Footer from './_components/Footer.svelte';
 	import NavBar from './_components/NavBar.svelte';
-	import Slideshow from './_components/Slideshow.svelte';
+	// 메인 화면 개편으로 잠시 내려둔 슬라이드쇼. 아래 렌더 블록과 함께 되살리면 된다.
+	// import Slideshow from './_components/Slideshow.svelte';
 
 	import type { FlashMessage } from '$lib/types/general.type.js';
 
@@ -88,9 +89,11 @@
 <NavBar />
 {@render Flash()}
 
+<!-- 메인 화면 개편으로 배너가 대체. 되살릴 수 있게 컴포넌트는 남겨둔다.
 {#if page.route.id === '/'}
 	<Slideshow />
 {/if}
+-->
 
 <div class="layout-shell container">
 	<main class="container-col">
