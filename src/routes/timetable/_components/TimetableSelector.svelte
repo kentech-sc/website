@@ -2,6 +2,7 @@
 	import ArrowRight from '@lucide/svelte/icons/arrow-right';
 	import CheckCircle from '@lucide/svelte/icons/circle-check-big';
 	import Plus from '@lucide/svelte/icons/plus';
+	import AlertTriangle from '@lucide/svelte/icons/triangle-alert';
 
 	import type { PageData } from '../$types.js';
 	import type { SubmitFunction } from '@sveltejs/kit';
@@ -63,6 +64,11 @@
 				{#if timetable.isConfirmed}
 					<span class="confirmed-marker" aria-label="확정된 시간표">
 						<CheckCircle size="0.9rem" aria-hidden="true" />
+					</span>
+				{/if}
+				{#if Object.keys(timetable.changeReasons).length}
+					<span class="review-marker" aria-label="변경 확인 필요" title="변경 확인 필요">
+						<AlertTriangle size="0.85rem" aria-hidden="true" />
 					</span>
 				{/if}
 			</button>
@@ -143,6 +149,10 @@
 	.timetable-tab.is-actual,
 	.confirmed-marker {
 		color: var(--success-text);
+	}
+	.review-marker {
+		display: flex;
+		color: var(--warning-text, #946200);
 	}
 	.create-timetable {
 		flex: 0 0 auto;

@@ -1,0 +1,2 @@
+ALTER TABLE "academic"."timetable_items" ADD COLUMN "change_reason" text;--> statement-breakpoint
+ALTER TABLE "academic"."timetable_items" ADD CONSTRAINT "timetable_items_change_reason_check" CHECK ("academic"."timetable_items"."change_reason" is null or "academic"."timetable_items"."change_reason" in ('schedule_changed', 'cancelled', 'details_changed'));

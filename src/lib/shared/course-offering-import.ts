@@ -1,8 +1,10 @@
 import type {
 	AcademicCareer,
+	Offering,
 	OfferingImportInput,
 	OfferingWorkbookParseResult
 } from '$lib/types/academic.type.js';
+import type { TimetableItemChangeReason } from '$lib/types/timetable.type.js';
 
 type CellValue = string | number | boolean | Date | null;
 type SheetData = CellValue[][];
@@ -80,6 +82,64 @@ const EF_SUBCATEGORY: Record<string, string> = Object.fromEntries([
 	...['EF1002', 'EF1006', 'EF1007', 'EF2002', 'EF2005', 'EF2034'].map((id) => [id, 'chemistry']),
 	...['EF1003', 'EF2003', 'EF2006', 'EF2035', 'EF2039'].map((id) => [id, 'data_literacy'])
 ]);
+
+export interface OfferingImportChange {
+	reason: TimetableItemChangeReason | null;
+	professorsChanged: boolean;
+}
+
+function normalizedText(value: string | null | undefined): string {
+	return value?.trim().replace(/\s+/g, ' ') ?? '';
+}
+
+function sortedSignature(values: string[]): string {
+	return [...new Set(values.map(normalizedText).filter(Boolean))].sort().join('\u0000');
+}
+
+function meetingTimeSignature(
+	meetings: Array<{ weekday: number; startsAt: number; endsAt: number }>
+): string {
+	return meetings
+		.map(({ weekday, startsAt, endsAt }) => `${weekday}:${startsAt}:${endsAt}`)
+		.sort()
+		.join('|');
+}
+
+function meetingRoomSignature(
+	meetings: Array<{ weekday: number; startsAt: number; endsAt: number; room: string | null }>
+): string {
+	return meetings
+		.map(
+			({ weekday, startsAt, endsAt, room }) =>
+				`${weekday}:${startsAt}:${endsAt}:${normalizedText(room)}`
+		)
+		.sort()
+		.join('|');
+}
+
+/** 같은 개설 강좌의 현재 DB 값과 새 엑셀 값을 비교한다. */
+export function compareOfferingImport(
+	existing: Offering,
+	incoming: OfferingImportInput
+): OfferingImportChange {
+	const existingProfessorNames = existing.professors.map(({ name }) => name);
+	const professorsChanged =
+		sortedSignature(existingProfessorNames) !== sortedSignature(incoming.professorNames);
+	if (existing.archivedAt !== null) return { reason: 'schedule_changed', professorsChanged };
+	if (meetingTimeSignature(existing.meetings) !== meetingTimeSignature(incoming.meetings))
+		return { reason: 'schedule_changed', professorsChanged };
+
+	const detailsChanged =
+		meetingRoomSignature(existing.meetings) !== meetingRoomSignature(incoming.meetings) ||
+		professorsChanged ||
+		normalizedText(existing.courseName) !== normalizedText(incoming.courseName) ||
+		normalizedText(existing.subtitle) !== normalizedText(incoming.subtitle) ||
+		normalizedText(existing.category) !== normalizedText(incoming.category) ||
+		normalizedText(existing.subcategory) !== normalizedText(incoming.subcategory) ||
+		existing.level !== incoming.level ||
+		existing.gradExcluded !== incoming.gradExcluded;
+	return { reason: detailsChanged ? 'details_changed' : null, professorsChanged };
+}
 
 function text(value: CellValue | undefined): string {
 	return value === null || value === undefined ? '' : String(value).trim();

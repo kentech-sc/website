@@ -29,7 +29,8 @@ export const COURSE_SLOTS: readonly TimeBlock[] = [
 	{ startsAt: 12 * 60, endsAt: 14 * 60 },
 	{ startsAt: 14 * 60, endsAt: 16 * 60 },
 	{ startsAt: 16 * 60, endsAt: 18 * 60 },
-	{ startsAt: 18 * 60, endsAt: 20 * 60 }
+	{ startsAt: 18 * 60, endsAt: 20 * 60 },
+	{ startsAt: 20 * 60, endsAt: 21 * 60 }
 ];
 
 export function overlapsTimeRange(

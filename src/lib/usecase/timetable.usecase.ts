@@ -58,6 +58,14 @@ export async function getPage(year: number, term: number, user: User) {
 			completedCourseIds.has(offering.courseId) ? [[offering.id, '이수 완료']] : []
 		)
 	);
+	const timetableConflicts = Object.fromEntries(
+		timetables.map((timetable) => [
+			timetable.id,
+			TimetableService.findTimetableConflicts(
+				timetable.offerings.filter((offering) => offering.archivedAt === null)
+			)
+		])
+	);
 	const baseDegreeProgress = policy
 		? calculateDegreeProgress(completedDegreeCourses, policy.rules, {
 				ESP: profile?.espWaivedCourseIds ?? []
@@ -120,6 +128,7 @@ export async function getPage(year: number, term: number, user: User) {
 		competition,
 		offeringRestrictions,
 		offeringNotices,
+		timetableConflicts,
 		canManageCatalog: hasCapability(user, 'course.manage')
 	};
 }
@@ -141,6 +150,8 @@ export const confirm = (id: string, user: User) =>
 	transaction(() => TimetableService.confirm(id, user));
 export const unconfirm = (id: string, user: User) =>
 	transaction(() => TimetableService.unconfirm(id, user));
+export const acknowledgeChanges = (id: string, user: User) =>
+	transaction(() => TimetableService.acknowledgeChanges(id, user));
 export const rename = (id: string, name: string, user: User) =>
 	TimetableService.rename(id, name, user);
 export const remove = (id: string, user: User) =>

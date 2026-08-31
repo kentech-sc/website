@@ -19,6 +19,7 @@
 		totalCredits,
 		totalHours,
 		archivedCourseCount,
+		conflictCount,
 		savingImage,
 		editingName = $bindable(false),
 		renameError,
@@ -34,6 +35,7 @@
 		totalCredits: number;
 		totalHours: number;
 		archivedCourseCount: number;
+		conflictCount: number;
 		savingImage: boolean;
 		editingName?: boolean;
 		renameError: string;
@@ -97,8 +99,13 @@
 					class="ui-button is-compact"
 					class:is-primary={!selected.isConfirmed}
 					class:is-danger={selected.isConfirmed}
-					disabled={!selected.isConfirmed && (!courseCount || archivedCourseCount > 0)}
-					title={archivedCourseCount ? '폐강된 강의를 제거한 뒤 확정할 수 있습니다.' : undefined}
+					disabled={!selected.isConfirmed &&
+						(!courseCount || archivedCourseCount > 0 || conflictCount > 0)}
+					title={archivedCourseCount
+						? '폐강된 강의를 제거한 뒤 확정할 수 있습니다.'
+						: conflictCount
+							? '겹치는 강의를 조정한 뒤 확정할 수 있습니다.'
+							: undefined}
 				>
 					{#if selected.isConfirmed}<X size="0.9rem" />확정 취소{:else}<Check
 							size="0.9rem"

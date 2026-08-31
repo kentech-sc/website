@@ -434,11 +434,16 @@ export const timetableItems = academicSchema.table(
 			.references(() => courseOfferings.id),
 		createdAt: isoTimestamp('created_at')
 			.default(sql`now()`)
-			.notNull()
+			.notNull(),
+		changeReason: text('change_reason')
 	},
 	(table) => [
 		primaryKey({ columns: [table.timetableId, table.offeringId] }),
-		index('timetable_items_offering_idx').on(table.offeringId, table.timetableId)
+		index('timetable_items_offering_idx').on(table.offeringId, table.timetableId),
+		check(
+			'timetable_items_change_reason_check',
+			sql`${table.changeReason} is null or ${table.changeReason} in ('schedule_changed', 'cancelled', 'details_changed')`
+		)
 	]
 );
 
