@@ -181,7 +181,13 @@ button.grid-slot:disabled {
 	font-size: clamp(0.5rem, 0.68vw, 0.6rem);
 }
 .course-professor {
+	display: block;
+	width: 100%;
+	min-width: 0;
+	overflow: hidden;
 	color: color-mix(in srgb, var(--text) 74%, var(--gray-text));
+	text-overflow: ellipsis;
+	white-space: nowrap;
 }
 .course-room,
 .course-time {
