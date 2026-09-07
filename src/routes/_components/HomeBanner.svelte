@@ -4,7 +4,6 @@
 	let { banner }: { banner: Banner | null } = $props();
 </script>
 
-<!-- 배너가 걸려 있지 않으면 자리를 차지하지 않는다. -->
 {#if banner}
 	<section class="banner module is-flush">
 		{#if banner.linkUrl}
@@ -15,6 +14,15 @@
 		{:else}
 			<img src={banner.imagePath} alt={banner.imageAlt} />
 		{/if}
+	</section>
+{:else}
+	<!--
+		배너를 올리기 전까지 자리를 확인하기 위한 임시 표시.
+		실제 운영에서는 배너가 없으면 아무것도 그리지 않아야 하므로 이 블록은 지운다.
+	-->
+	<section class="banner placeholder module is-flush container-col">
+		<span class="placeholder-label">배너</span>
+		<p>등록된 배너가 없습니다</p>
 	</section>
 {/if}
 
@@ -45,5 +53,25 @@
 
 	img {
 		object-fit: cover;
+	}
+
+	// 임시 자리표시자. 실제 배너를 올리면 위 블록과 함께 지운다.
+	.placeholder {
+		justify-content: center;
+		gap: 0.3rem;
+		border-color: var(--tertiary);
+		background: linear-gradient(100deg, var(--tertiary), var(--secondary));
+		color: var(--tertiary-text);
+	}
+
+	.placeholder-label {
+		opacity: 0.75;
+		font-size: 0.75rem;
+		letter-spacing: 0.1em;
+	}
+
+	.placeholder p {
+		margin: 0;
+		font-size: 1.1rem;
 	}
 </style>

@@ -37,23 +37,27 @@ export async function sendPushNotification(titleInput: string, bodyInput: string
 }
 
 /** 관리 화면에서 지금 걸린 배너를 보여주기 위한 조회. */
-export async function getManagedBanner(user: User) {
-	if (!hasCapability(user, 'banner.manage')) return null;
+export async function getManagedBanners(user: User) {
+	if (!hasCapability(user, 'banner.manage')) return [];
 
 	// 마이그레이션이 배포보다 늦으면 테이블이 없어 조회가 실패한다. 그래도 프로필은 떠야 한다.
 	try {
-		return await BannerService.findBanner();
+		return await BannerService.findBanners(user);
 	} catch {
-		return null;
+		return [];
 	}
 }
 
-export async function setBanner(fileId: string, linkUrl: string | null, user: User) {
-	return await BannerService.replaceBanner(fileId, linkUrl, user);
+export async function addBanner(fileId: string, linkUrl: string | null, user: User) {
+	return await BannerService.addBanner(fileId, linkUrl, user);
 }
 
-export async function removeBanner(user: User) {
-	return await BannerService.deleteBanner(user);
+export async function activateBanner(bannerId: string, user: User) {
+	return await BannerService.activateBanner(bannerId, user);
+}
+
+export async function removeBanner(bannerId: string, user: User) {
+	return await BannerService.deleteBanner(bannerId, user);
 }
 
 export async function getUserAdminOptions(user: User) {

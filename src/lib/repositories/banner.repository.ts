@@ -1,46 +1,55 @@
 import { desc, eq } from 'drizzle-orm';
 
-import type { Banner } from '$lib/types/banner.type.js';
+import type { BannerRow } from '$lib/types/banner.type.js';
 
 import { banners, fileMetas } from '$lib/server/database/schema.js';
 import { getDatabase } from '$lib/server/db.js';
-import { FileStorage } from '$lib/server/storage.js';
 
-/** 지금 걸려 있는 배너. 없으면 null. */
-export async function findBanner(): Promise<Banner | null> {
-	const rows = await getDatabase()
+/**
+ * 공개 URL 변환은 저장소를 다루는 service 에서 한다. (file-meta.service 와 같은 방식)
+ */
+function selectBanners() {
+	return getDatabase()
 		.select({
 			id: banners.id,
 			fileId: banners.fileId,
 			linkUrl: banners.linkUrl,
+			isActive: banners.isActive,
 			fileName: fileMetas.name,
 			fileKey: fileMetas.key
 		})
 		.from(banners)
-		.innerJoin(fileMetas, eq(fileMetas.id, banners.fileId))
-		.orderBy(desc(banners.createdAt))
-		.limit(1);
-
-	const row = rows[0];
-	if (!row) return null;
-
-	return {
-		id: row.id,
-		fileId: row.fileId,
-		linkUrl: row.linkUrl,
-		imageAlt: row.fileName,
-		imagePath: FileStorage.getUrl(row.fileKey)
-	};
+		.innerJoin(fileMetas, eq(fileMetas.id, banners.fileId));
 }
 
-/** 배너는 한 번에 하나만 건다. 새로 올리면 기존 것을 지우고 대체한다. */
-export async function replaceBanner(fileId: string, linkUrl: string | null): Promise<void> {
+/** 지금 메인에 걸려 있는 배너. 없으면 null. */
+export async function findActiveBanner(): Promise<BannerRow | null> {
+	const rows = await selectBanners().where(eq(banners.isActive, true)).limit(1);
+	return rows[0] ?? null;
+}
+
+/** 보관함 전체. 최근에 올린 것부터. */
+export async function findBanners(): Promise<BannerRow[]> {
+	return await selectBanners().orderBy(desc(banners.createdAt));
+}
+
+/** 올리면서 바로 건다. */
+export async function addBanner(fileId: string, linkUrl: string | null): Promise<void> {
 	await getDatabase().transaction(async (tx) => {
-		await tx.delete(banners);
-		await tx.insert(banners).values({ fileId, linkUrl });
+		await tx.update(banners).set({ isActive: false }).where(eq(banners.isActive, true));
+		await tx.insert(banners).values({ fileId, linkUrl, isActive: true });
 	});
 }
 
-export async function deleteBanner(): Promise<void> {
-	await getDatabase().delete(banners);
+/** 보관함에 있는 다른 배너로 갈아 건다. 활성은 항상 하나뿐이다. */
+export async function activateBanner(bannerId: string): Promise<void> {
+	await getDatabase().transaction(async (tx) => {
+		await tx.update(banners).set({ isActive: false }).where(eq(banners.isActive, true));
+		await tx.update(banners).set({ isActive: true }).where(eq(banners.id, bannerId));
+	});
+}
+
+/** 보관함에서 지운다. 파일은 참조가 끊긴 뒤 정리 cron 이 지운다. */
+export async function deleteBanner(bannerId: string): Promise<void> {
+	await getDatabase().delete(banners).where(eq(banners.id, bannerId));
 }

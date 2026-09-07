@@ -51,10 +51,9 @@
 		width: 100%;
 	}
 
-	// 목록안은 1:1, 격자안은 7열을 담아야 해서 2:1. 달력안을 바꿀 때 함께 교체한다.
+	// 달력이 학식보다 넓게 자리를 갖는다.
 	.split {
-		grid-template-columns: repeat(2, minmax(0, 1fr));
-		// grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+		grid-template-columns: minmax(0, 7fr) minmax(0, 3fr);
 	}
 
 	#grid-container {

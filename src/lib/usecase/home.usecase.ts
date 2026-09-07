@@ -15,7 +15,7 @@ import * as UserService from '$lib/services/user.service.js';
  */
 async function findBannerOrNull() {
 	try {
-		return await BannerService.findBanner();
+		return await BannerService.findActiveBanner();
 	} catch {
 		return null;
 	}

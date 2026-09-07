@@ -79,19 +79,27 @@
 </script>
 
 <section class="dining module">
-	<h2>학식</h2>
+	<h2>
+		학식
+		{#if menus}
+			<span class="date-nav">
+				<button
+					type="button"
+					aria-label="이전 날짜"
+					disabled={loading}
+					onclick={() => moveDate(-1)}
+				>
+					<ChevronLeft size="1rem" />
+				</button>
+				<span class="date">{dateLabel}</span>
+				<button type="button" aria-label="다음 날짜" disabled={loading} onclick={() => moveDate(1)}>
+					<ChevronRight size="1rem" />
+				</button>
+			</span>
+		{/if}
+	</h2>
 
 	{#if menus}
-		<div class="date-nav container">
-			<button type="button" aria-label="이전 날짜" disabled={loading} onclick={() => moveDate(-1)}>
-				<ChevronLeft size="1.1rem" />
-			</button>
-			<span class="date">{dateLabel}</span>
-			<button type="button" aria-label="다음 날짜" disabled={loading} onclick={() => moveDate(1)}>
-				<ChevronRight size="1.1rem" />
-			</button>
-		</div>
-
 		<div class="slot-tabs" role="tablist" aria-label="식사 시간">
 			{#each slots as slot (slot.id)}
 				<button
@@ -147,34 +155,43 @@
 		flex-direction: column;
 	}
 
+	// 학사일정 카드와 머리글·이동 버튼 모양을 맞춘다.
 	h2 {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
 		margin-bottom: 0.6rem;
 		font-size: 1.2rem;
 	}
 
 	.date-nav {
-		justify-content: center;
-		gap: 1rem;
+		display: flex;
+		align-items: center;
+		gap: 0.3rem;
 
 		button {
 			display: flex;
 			align-items: center;
-			padding: 0.2rem 0.5rem;
+			padding: 0.1rem 0.3rem;
 		}
 	}
 
 	.date {
-		font-size: 0.95rem;
+		min-width: 5.5rem;
+		font-size: 0.8rem;
+		text-align: center;
 	}
 
 	.slot-tabs {
 		display: grid;
 		grid-template-columns: repeat(3, minmax(0, 1fr));
-		margin-top: 0.6rem;
 
 		button {
 			border-radius: 0;
-			font-size: 0.9rem;
+			// 학사일정의 요일 줄과 높이·글자를 맞춘다. (버튼 테두리만큼 여백을 덜 준다)
+			padding: 0.15rem 0;
+			font-weight: bold;
+			font-size: 0.7rem;
 
 			&:first-child {
 				border-start-start-radius: 0.4rem;

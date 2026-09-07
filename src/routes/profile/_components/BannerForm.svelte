@@ -1,4 +1,5 @@
 <script lang="ts">
+	import Check from '@lucide/svelte/icons/check';
 	import ImageIcon from '@lucide/svelte/icons/image';
 	import Trash2 from '@lucide/svelte/icons/trash-2';
 	import Upload from '@lucide/svelte/icons/upload';
@@ -10,7 +11,7 @@
 	import InlineActionForm from '$components/InlineActionForm.svelte';
 	import { uploadFiles } from '$lib/client/file-upload.js';
 
-	let { banner }: { banner: Banner | null } = $props();
+	let { banners }: { banners: Banner[] } = $props();
 
 	let fileInput = $state<HTMLInputElement | null>(null);
 	let uploadedFileId = $state('');
@@ -50,8 +51,8 @@
 </script>
 
 <CommonForm
-	actionName="setBanner"
-	formName="setBanner"
+	actionName="addBanner"
+	formName="addBanner"
 	policy="reload"
 	afterSuccess={handleSuccess}
 >
@@ -61,24 +62,31 @@
 			<span>메인 배너</span>
 		</h4>
 
-		{#if banner}
-			<div class="current">
-				<img src={banner.imagePath} alt={banner.imageAlt} />
-				<div class="current-meta">
-					<span class="ellipsis">{banner.imageAlt}</span>
-					{#if banner.linkUrl}
-						<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- 관리자가 입력한 외부 주소 -->
-						<a href={banner.linkUrl} target="_blank" rel="noreferrer noopener" class="ellipsis">
-							{banner.linkUrl}
-						</a>
-					{:else}
-						<span class="muted">링크 없음</span>
-					{/if}
-				</div>
-			</div>
+		{#if banners.length}
+			<ul class="banner-list">
+				{#each banners as banner (banner.id)}
+					<li class="banner-item" class:active={banner.isActive}>
+						<img src={banner.imagePath} alt={banner.imageAlt} />
+						<div class="banner-meta">
+							<span class="ellipsis">
+								{#if banner.isActive}<em>사용 중</em>{/if}
+								{banner.imageAlt}
+							</span>
+							{#if banner.linkUrl}
+								<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- 관리자가 입력한 외부 주소 -->
+								<a href={banner.linkUrl} target="_blank" rel="noreferrer noopener" class="ellipsis">
+									{banner.linkUrl}
+								</a>
+							{:else}
+								<span class="hint">링크 없음</span>
+							{/if}
+						</div>
+					</li>
+				{/each}
+			</ul>
 		{:else}
 			<div class="info">
-				<p>지금 걸려 있는 배너가 없습니다.</p>
+				<p>보관함이 비어 있습니다. 이미지를 올리면 바로 메인에 걸립니다.</p>
 			</div>
 		{/if}
 
@@ -106,32 +114,41 @@
 		{/if}
 
 		<CommonLabel labelFor="banner-link" labelString="링크 (선택)">
-			<input
-				type="url"
-				name="link-url"
-				id="banner-link"
-				placeholder="https://"
-				value={banner?.linkUrl ?? ''}
-			/>
+			<input type="url" name="link-url" id="banner-link" placeholder="https://" />
 		</CommonLabel>
 
 		<input type="hidden" name="file-id" value={uploadedFileId} />
 
 		<button type="submit" class="warn-btn" disabled={!uploadedFileId || uploading}>
 			<Upload size="0.8rem" />
-			<span>배너 걸기</span>
+			<span>올리고 바로 걸기</span>
 		</button>
 	</div>
 </CommonForm>
 
-{#if banner}
-	<div class="remove">
-		<InlineActionForm actionName="removeBanner" buttonClass="error-btn">
+{#each banners as banner (banner.id)}
+	<div class="banner-actions">
+		<span class="ellipsis">{banner.imageAlt}</span>
+		{#if !banner.isActive}
+			<InlineActionForm
+				actionName="activateBanner"
+				buttonClass="success-btn"
+				hiddenFields={[{ name: 'banner-id', value: banner.id }]}
+			>
+				<Check size="0.8rem" />
+				<span>이걸로 걸기</span>
+			</InlineActionForm>
+		{/if}
+		<InlineActionForm
+			actionName="removeBanner"
+			buttonClass="error-btn"
+			hiddenFields={[{ name: 'banner-id', value: banner.id }]}
+		>
 			<Trash2 size="0.8rem" />
-			<span>배너 내리기</span>
+			<span>삭제</span>
 		</InlineActionForm>
 	</div>
-{/if}
+{/each}
 
 <style lang="scss">
 	h4 {
@@ -140,15 +157,23 @@
 		font-size: 1rem;
 	}
 
-	.current {
+	.banner-list {
+		display: flex;
+		flex-direction: column;
+		gap: 0.3rem;
+		margin: 0.6rem 0 0;
+		padding: 0;
+		width: 100%;
+		list-style: none;
+	}
+
+	.banner-item {
 		display: flex;
 		align-items: center;
 		gap: 0.6rem;
-		margin-top: 0.6rem;
 		border: var(--control-border-width) solid var(--gray-border);
 		border-radius: 0.4rem;
 		padding: 0.4rem;
-		width: 100%;
 
 		img {
 			flex-shrink: 0;
@@ -159,12 +184,24 @@
 		}
 	}
 
-	.current-meta {
+	.banner-item.active {
+		border-color: var(--secondary);
+		background-color: var(--secondary-bg);
+	}
+
+	.banner-meta {
 		display: flex;
 		flex: 1;
 		flex-direction: column;
 		min-width: 0;
 		font-size: 0.75rem;
+
+		em {
+			margin-right: 0.3rem;
+			color: var(--secondary);
+			font-style: normal;
+			font-weight: bold;
+		}
 	}
 
 	.info {
@@ -174,8 +211,7 @@
 		font-size: 0.7rem;
 	}
 
-	.hint,
-	.muted {
+	.hint {
 		width: 100%;
 		color: var(--secondary-text);
 		font-size: 0.7rem;
@@ -192,9 +228,19 @@
 		margin-left: auto;
 	}
 
-	.remove {
+	// InlineActionForm 은 자체 form 을 만들어 위 폼 안에 넣을 수 없다.
+	.banner-actions {
 		display: flex;
-		justify-content: flex-end;
+		align-items: center;
+		gap: 0.4rem;
+		margin-top: 0.3rem;
 		width: 100%;
+		font-size: 0.7rem;
+
+		& > span {
+			flex: 1;
+			min-width: 0;
+			color: var(--secondary-text);
+		}
 	}
 </style>

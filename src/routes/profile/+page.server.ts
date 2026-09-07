@@ -9,23 +9,31 @@ export const load: PageServerLoad = async ({ locals }) => {
 	return {
 		permissions: ProfileUsecase.getProfilePermissions(locals.user),
 		userAdminOptions: await ProfileUsecase.getUserAdminOptions(locals.user),
-		banner: await ProfileUsecase.getManagedBanner(locals.user)
+		banners: await ProfileUsecase.getManagedBanners(locals.user)
 	};
 };
 
 export const actions = {
 	// 배너 이미지 업로드는 에디터와 같은 presign -> 업로드 -> complete 흐름을 쓴다.
 	...editorActions,
-	setBanner: withActionErrorHandling(async ({ request, locals }) => {
+	addBanner: withActionErrorHandling(async ({ request, locals }) => {
 		const formData = await request.formData();
 		const fileId = (formData.get('file-id') ?? '').toString();
 		const linkUrl = (formData.get('link-url') ?? '').toString();
-		await ProfileUsecase.setBanner(fileId, linkUrl, locals.user);
+		await ProfileUsecase.addBanner(fileId, linkUrl, locals.user);
 		return { fileId };
 	}),
-	removeBanner: withActionErrorHandling(async ({ locals }) => {
-		await ProfileUsecase.removeBanner(locals.user);
-		return { removed: true };
+	activateBanner: withActionErrorHandling(async ({ request, locals }) => {
+		const formData = await request.formData();
+		const bannerId = (formData.get('banner-id') ?? '').toString();
+		await ProfileUsecase.activateBanner(bannerId, locals.user);
+		return { bannerId };
+	}),
+	removeBanner: withActionErrorHandling(async ({ request, locals }) => {
+		const formData = await request.formData();
+		const bannerId = (formData.get('banner-id') ?? '').toString();
+		await ProfileUsecase.removeBanner(bannerId, locals.user);
+		return { bannerId };
 	}),
 	changeNickname: withActionErrorHandling(async ({ request, locals }) => {
 		const formData = await request.formData();

@@ -72,7 +72,7 @@
 					<ChangeGroupForm users={userAdminOptions} />
 				{/if}
 				{#if permissions.canManageBanner}
-					<BannerForm banner={page.data.banner} />
+					<BannerForm banners={page.data.banners} />
 				{/if}
 			</div>
 		{/if}

@@ -489,7 +489,7 @@ export const fileMetas = appSchema.table('file_metas', {
 });
 
 /**
- * 메인 화면 배너. 한 번에 하나만 걸리며, 새로 올리면 기존 것을 대체한다.
+ * 메인 화면 배너 보관함. 여러 개를 올려두고 그중 하나만 활성으로 건다.
  * (파일 정리 cron 이 참조 없는 파일을 지우므로 file_metas 를 여기서 붙잡아 둔다)
  */
 export const banners = appSchema.table('banners', {
@@ -498,6 +498,7 @@ export const banners = appSchema.table('banners', {
 		.notNull()
 		.references(() => fileMetas.id),
 	linkUrl: text('link_url'),
+	isActive: boolean('is_active').notNull().default(false),
 	...timestamps
 });
 

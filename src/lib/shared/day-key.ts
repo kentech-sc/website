@@ -51,6 +51,15 @@ export function toMonthKey(dayKey: string): string {
 	return dayKey.slice(0, 7);
 }
 
+/**
+ * 그 달의 몇 번째 주인지. 달의 첫 주가 며칠뿐이어도 1주차로 센다.
+ * (예: 2026-09-01 이 화요일이라 9/7 은 2주차)
+ */
+export function getWeekOfMonth(dayKey: string): number {
+	const firstWeekday = (getWeekdayIndex(`${toMonthKey(dayKey)}-01`) + 6) % 7;
+	return Math.floor((getDayOfMonth(dayKey) - 1 + firstWeekday) / 7) + 1;
+}
+
 /** 기준일이 속한 달의 1일. 월 단위로 이동할 때의 기준점이 된다. */
 export function toMonthStart(dayKey: string): string {
 	return `${toMonthKey(dayKey)}-01`;
