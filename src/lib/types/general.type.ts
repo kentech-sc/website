@@ -20,6 +20,7 @@ export type Capability =
 	| 'course.manage'
 	| 'professor.manage'
 	| 'user.manage'
+	| 'push.send'
 	| 'system.cleanup';
 
 export type AppErrorCode =

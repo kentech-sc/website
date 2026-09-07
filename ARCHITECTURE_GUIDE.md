@@ -185,6 +185,7 @@
 - `course.manage`
 - `professor.manage`
 - `user.manage`
+- `push.send`
 - `system.cleanup`
 
 ## 8. 권한 처리 규칙

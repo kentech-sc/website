@@ -2,7 +2,18 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import { isApCreditCode } from './academic-credit.js';
-import { isSameCourseName, parsePortalCompletionText } from './portal-completion-import.ts';
+import {
+	buildKisCompletionBookmarkletHref,
+	isSameCourseName,
+	parsePortalCompletionText
+} from './portal-completion-import.ts';
+
+test('북마클릿은 api 아래의 최신 추출 endpoint를 불러온다', () => {
+	const href = buildKisCompletionBookmarkletHref('https://student.example');
+
+	assert.match(href, /https:\/\/student\.example\/api\/academic\/bookmarklet/);
+	assert.doesNotMatch(href, /example\/portal-completion-bookmarklet\.js/);
+});
 
 test('parses portal rows and preserves failed and withdrawn grades', () => {
 	const result = parsePortalCompletionText(

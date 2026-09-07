@@ -15,6 +15,13 @@ export interface PushSubscriptionCreate {
 	expirationTime: number | null;
 	keys: PushSubscriptionKeys;
 	userAgent: string;
+	diningPreferences: DiningNotificationPreferences;
+}
+
+export interface DiningNotificationPreferences {
+	breakfast: boolean;
+	lunch: boolean;
+	dinner: boolean;
 }
 
 export interface PushSubscriptionEntity extends PushSubscriptionCreate {

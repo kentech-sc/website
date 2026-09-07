@@ -8,6 +8,7 @@
 	import DeleteUserForm from './_components/DeleteUserForm.svelte';
 	import Profile from './_components/Profile.svelte';
 	import PushNotificationForm from './_components/PushNotificationForm.svelte';
+	import SendPushForm from './_components/SendPushForm.svelte';
 	import InstallAppPrompt from '../profile/_components/InstallAppPrompt.svelte';
 
 	import { page } from '$app/state';
@@ -59,11 +60,16 @@
 			<DeleteUserForm />
 		</div>
 
-		{#if permissions.canManageUsers}
+		{#if permissions.canSendPush || permissions.canManageUsers}
 			<div class="module container-col">
 				<h3>관리자 기능</h3>
-				<BlockForm users={userAdminOptions} />
-				<ChangeGroupForm users={userAdminOptions} />
+				{#if permissions.canSendPush}
+					<SendPushForm />
+				{/if}
+				{#if permissions.canManageUsers}
+					<BlockForm users={userAdminOptions} />
+					<ChangeGroupForm users={userAdminOptions} />
+				{/if}
 			</div>
 		{/if}
 

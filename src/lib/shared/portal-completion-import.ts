@@ -248,7 +248,7 @@ export const KIS_COMPLETION_EXTRACTOR = String.raw`(async function () {
   });
 })();`;
 
-const BOOKMARKLET_SCRIPT_PATH = '/portal-completion-bookmarklet.js';
+const BOOKMARKLET_SCRIPT_PATH = '/api/academic/bookmarklet';
 
 /**
  * javascript: URL 자체 길이 제한(구형 브라우저 기준 ~2083자)을 피하려고,

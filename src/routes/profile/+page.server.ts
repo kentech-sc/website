@@ -47,5 +47,12 @@ export const actions = {
 		const hours = Number(formData.get('hours') ?? 24);
 		const deletedCnt = await ProfileUsecase.cleanup(hours, locals.user);
 		return { deletedCnt };
+	}),
+	sendPush: withActionErrorHandling(async ({ request, locals }) => {
+		const formData = await request.formData();
+		const title = (formData.get('title') ?? '').toString();
+		const body = (formData.get('body') ?? '').toString();
+		const result = await ProfileUsecase.sendPushNotification(title, body, locals.user);
+		return { pushResult: result };
 	})
 };

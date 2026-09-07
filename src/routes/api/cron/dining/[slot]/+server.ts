@@ -29,7 +29,9 @@ export const GET = async ({ params, request }) => {
 			});
 		}
 
-		const result = await Push.sendPushToAllSubscribers(diningPush.payload);
+		const result = await Push.sendPushToAllSubscribers(diningPush.payload, {
+			diningSlot: diningPush.slot
+		});
 
 		return json({
 			ok: true,

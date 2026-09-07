@@ -130,86 +130,93 @@
 		>
 	</form>
 
-	<section class="module special-card">
-		<div class="special-header">
-			<span><BookPlus size="1.15rem" /></span>
-			<div>
-				<h2>특수 강의 등록</h2>
-				<p>개설 강좌가 없는 학점 인정용 강의를 공통 목록에 등록합니다.</p>
+	<!-- TODO: 특수 강의 등록 정책을 정리할 때 다시 활성화한다. -->
+	{#if false}
+		<section class="module special-card">
+			<div class="special-header">
+				<span><BookPlus size="1.15rem" /></span>
+				<div>
+					<h2>특수 강의 등록</h2>
+					<p>개설 강좌가 없는 학점 인정용 강의를 공통 목록에 등록합니다.</p>
+				</div>
 			</div>
-		</div>
-		<form method="POST" action="?/createSpecialCourse" class="special-form">
-			<label>
-				<span>강의 코드</span>
-				<input name="courseId" maxlength="20" placeholder="예: SP1001" required />
-			</label>
-			<label class="course-name-field">
-				<span>강의명</span>
-				<input name="courseName" maxlength="200" placeholder="공식 강의명" required />
-			</label>
-			<label>
-				<span>학점 방식</span>
-				<select name="creditType" bind:value={specialCreditType} onchange={updateSpecialCreditType}>
-					<option value="numeric">학점</option>
-					<option value="pass">P</option>
-				</select>
-			</label>
-			<label>
-				<span>학점</span>
-				<input
-					type="number"
-					name="credits"
-					min="0"
-					max="99"
-					step="0.5"
-					bind:value={specialCredits}
-					disabled={specialCreditType === 'pass'}
-					required
-				/>
-			</label>
-			<label>
-				<span>졸업요건 영역</span>
-				<select name="category" bind:value={specialCategory} required>
-					<option value="">영역 선택</option>
-					{#each categoryOptions as [value, label] (value)}
-						<option {value}>{label} ({value})</option>
-					{/each}
-				</select>
-			</label>
-			<label>
-				<span>EF 세부 분야 <small>(선택)</small></span>
-				<select name="subcategory" disabled={specialCategory !== 'EF'}>
-					<option value="">해당 없음</option>
-					<option value="math">수학</option>
-					<option value="physics">물리</option>
-					<option value="chemistry">화학</option>
-					<option value="data_literacy">데이터 리터러시</option>
-					<option value="ap">AP 인정</option>
-				</select>
-			</label>
-			<label>
-				<span>레벨 <small>(선택)</small></span>
-				<input
-					type="number"
-					name="level"
-					min="1"
-					max="9"
-					placeholder="예: 4"
-					disabled={specialCategory !== 'EL'}
-				/>
-			</label>
-			<label class="exclude-field">
-				<input type="checkbox" name="gradExcluded" />
-				<span>졸업학점 계산에서 제외</span>
-			</label>
-			<div class="special-submit">
-				<p>이수 학기와 성적은 학생이 이수 내역에 추가할 때 입력합니다.</p>
-				<button class="ui-button is-secondary is-compact"
-					><BookPlus size="0.95rem" />공통 강의 등록</button
-				>
-			</div>
-		</form>
-	</section>
+			<form method="POST" action="?/createSpecialCourse" class="special-form">
+				<label>
+					<span>강의 코드</span>
+					<input name="courseId" maxlength="20" placeholder="예: SP1001" required />
+				</label>
+				<label class="course-name-field">
+					<span>강의명</span>
+					<input name="courseName" maxlength="200" placeholder="공식 강의명" required />
+				</label>
+				<label>
+					<span>학점 방식</span>
+					<select
+						name="creditType"
+						bind:value={specialCreditType}
+						onchange={updateSpecialCreditType}
+					>
+						<option value="numeric">학점</option>
+						<option value="pass">P</option>
+					</select>
+				</label>
+				<label>
+					<span>학점</span>
+					<input
+						type="number"
+						name="credits"
+						min="0"
+						max="99"
+						step="0.5"
+						bind:value={specialCredits}
+						disabled={specialCreditType === 'pass'}
+						required
+					/>
+				</label>
+				<label>
+					<span>졸업요건 영역</span>
+					<select name="category" bind:value={specialCategory} required>
+						<option value="">영역 선택</option>
+						{#each categoryOptions as [value, label] (value)}
+							<option {value}>{label} ({value})</option>
+						{/each}
+					</select>
+				</label>
+				<label>
+					<span>EF 세부 분야 <small>(선택)</small></span>
+					<select name="subcategory" disabled={specialCategory !== 'EF'}>
+						<option value="">해당 없음</option>
+						<option value="math">수학</option>
+						<option value="physics">물리</option>
+						<option value="chemistry">화학</option>
+						<option value="data_literacy">데이터 리터러시</option>
+						<option value="ap">AP 인정</option>
+					</select>
+				</label>
+				<label>
+					<span>레벨 <small>(선택)</small></span>
+					<input
+						type="number"
+						name="level"
+						min="1"
+						max="9"
+						placeholder="예: 4"
+						disabled={specialCategory !== 'EL'}
+					/>
+				</label>
+				<label class="exclude-field">
+					<input type="checkbox" name="gradExcluded" />
+					<span>졸업학점 계산에서 제외</span>
+				</label>
+				<div class="special-submit">
+					<p>이수 학기와 성적은 학생이 이수 내역에 추가할 때 입력합니다.</p>
+					<button class="ui-button is-secondary is-compact"
+						><BookPlus size="0.95rem" />공통 강의 등록</button
+					>
+				</div>
+			</form>
+		</section>
+	{/if}
 
 	{#if form?.importedCount}
 		<div class="result-card" aria-live="polite">

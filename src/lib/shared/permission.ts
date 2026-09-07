@@ -22,6 +22,7 @@ const ROLE_CAPABILITIES: Record<UserGroupType, Capability[]> = {
 		'comment.write',
 		'comment.moderate',
 		'review.write',
+		'push.send',
 		'petition.write',
 		'petition.sign'
 	],
@@ -42,7 +43,8 @@ const ROLE_CAPABILITIES: Record<UserGroupType, Capability[]> = {
 		'petition.respond',
 		'course.manage',
 		'professor.manage',
-		'user.manage'
+		'user.manage',
+		'push.send'
 	],
 	[UserGroup.Dev]: [
 		'board.free.write',
@@ -60,6 +62,7 @@ const ROLE_CAPABILITIES: Record<UserGroupType, Capability[]> = {
 		'course.manage',
 		'professor.manage',
 		'user.manage',
+		'push.send',
 		'system.cleanup'
 	]
 };
