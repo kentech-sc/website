@@ -26,27 +26,27 @@ function toLines(value: string | undefined): string[] {
 
 /**
  * 중식은 A/B 코너로 나뉘는 날이 있다. 코너 표시가 없으면 구분 없는 한 덩어리로 둔다.
- * 코너가 있으면 양쪽에 함께 오르는 메뉴를 공통으로 묶어 중복 표시를 피한다.
+ *
+ * 코너를 나누는 계산은 dining.service 에 있던 parseABCorner 구현을 그대로 옮겼다.
+ * 반환만 문자열 대신 구획 목록으로 바꿔 화면에서 코너별로 그릴 수 있게 했다.
  */
 function toSections(lines: string[]): DiningMeal['sections'] {
-	const cornerA = lines.indexOf('A코너');
-	const cornerB = lines.indexOf('B코너');
-	if (cornerA === -1 || cornerB === -1 || cornerB < cornerA) {
+	if (!lines.includes('A코너')) {
 		return lines.length ? [{ label: null, items: lines }] : [];
 	}
 
-	const itemsA = lines.slice(cornerA + 1, cornerB);
-	const itemsB = lines.slice(cornerB + 1);
-	const inB = new Set(itemsB);
-	const shared = itemsA.filter((item) => inB.has(item));
-	const sharedSet = new Set(shared);
+	const dishes = [...lines];
+	const cornerA = new Set(dishes.splice(0, dishes.indexOf('B코너')).slice(1));
+	const cornerB = new Set(dishes.splice(dishes.indexOf('B코너'), dishes.length).slice(1));
+
+	const onlyA = [...cornerA].filter((item) => !cornerB.has(item)); // a에만 있는 것
+	const onlyB = [...cornerB].filter((item) => !cornerA.has(item)); // b에만 있는 것
+	const overlap = [...cornerA].filter((item) => cornerB.has(item)); // 겹치는 것
 
 	const sections: DiningMeal['sections'] = [];
-	const onlyA = itemsA.filter((item) => !sharedSet.has(item));
-	const onlyB = itemsB.filter((item) => !sharedSet.has(item));
 	if (onlyA.length) sections.push({ label: 'A코너', items: onlyA });
 	if (onlyB.length) sections.push({ label: 'B코너', items: onlyB });
-	if (shared.length) sections.push({ label: '공통', items: shared });
+	if (overlap.length) sections.push({ label: '공통', items: overlap });
 	return sections;
 }
 
