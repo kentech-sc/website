@@ -2,6 +2,7 @@ import type { DiningMeal, DiningMenus, DiningSlot } from '$lib/types/dining.type
 import type { PushNotificationPayload } from '$lib/types/push-subscription.type.js';
 
 import * as DiningService from '$lib/services/dining.service.js';
+import { getKstDayKey, toCompactDayKey } from '$lib/shared/day-key.js';
 import { formatMeal, getMeal, isEmptyMeal } from '$lib/shared/dining-menu.js';
 
 interface DiningPush {
@@ -56,8 +57,9 @@ export async function getDiningPush(
 	};
 }
 
+/** 학식 API 는 'YYYYMMDD' 형식을 쓴다. KST 계산은 공용 유틸에 맡긴다. */
 export function getKstDateString(now: Date = new Date()): string {
-	return new Date(now.getTime() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10).replace(/-/g, '');
+	return toCompactDayKey(getKstDayKey(now));
 }
 
 function countItems(meal: DiningMeal): number {

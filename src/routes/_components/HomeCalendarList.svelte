@@ -1,73 +1,89 @@
 <script lang="ts">
+	import type { AcademicSchedule } from '$lib/types/academic-calendar.type.js';
+
+	import { entriesOn, isSpan } from '$lib/shared/academic-calendar.js';
 	import {
-		entriesOn,
-		getMonthDays,
-		isSpan,
-		sampleSchedule,
-		toDayKey
-	} from './home-schedule-sample.js';
+		getDayOfMonth,
+		getMonthDayKeys,
+		getMonthOfDay,
+		getWeekdayIndex
+	} from '$lib/shared/day-key.js';
 
-	// 달력 안 비교용 목록안. 목록은 한 달치를 보여준다. 데이터는 아직 임시 상수를 쓴다.
+	let { schedule }: { schedule: AcademicSchedule | null } = $props();
+
 	const weekdayNames = ['일', '월', '화', '수', '목', '금', '토'];
-	const today = new Date();
-	const todayKey = toDayKey(today);
-	const days = getMonthDays(today);
-	const windowStart = toDayKey(days[0]);
-	const windowEnd = toDayKey(days[days.length - 1]);
 
-	function toRangeLabel(day: string): string {
-		const [, month, date] = day.split('-');
-		return `${Number(month)}/${Number(date)}`;
+	function toShortLabel(dayKey: string): string {
+		return `${getMonthOfDay(dayKey)}/${getDayOfMonth(dayKey)}`;
 	}
 
+	// 오늘은 서버(KST)가 정해 내려준다. 여기서 new Date() 를 쓰면
+	// 서버(UTC)와 브라우저(KST)가 서로 다른 날짜를 그린다.
+	const monthDays = $derived(schedule ? getMonthDayKeys(schedule.today) : []);
+
 	// 기간 일정은 날짜마다 반복되면 목록을 뒤덮으므로 위에 기간 한 줄로 모은다.
-	const spanning = sampleSchedule
-		.filter((entry) => isSpan(entry) && entry.startDay <= windowEnd && entry.endDay >= windowStart)
-		.map((entry) => ({
-			subject: entry.subject,
-			range: `${toRangeLabel(entry.startDay)} ~ ${toRangeLabel(entry.endDay)}`
-		}));
+	// 실제 학사일정의 절반 이상이 기간 일정이라 이 분리가 목록안의 핵심이다.
+	const spanning = $derived(
+		schedule
+			? schedule.entries
+					.filter(
+						(entry) =>
+							isSpan(entry) &&
+							entry.startDay <= monthDays[monthDays.length - 1] &&
+							entry.endDay >= monthDays[0]
+					)
+					.map((entry) => ({
+						subject: entry.subject,
+						range: `${toShortLabel(entry.startDay)} ~ ${toShortLabel(entry.endDay)}`,
+						isOngoing: entry.startDay <= schedule.today && schedule.today <= entry.endDay
+					}))
+			: []
+	);
 
 	// 날짜별 목록에는 하루짜리 일정만 남긴다.
 	const dayList = $derived(
-		days
-			.map((date) => {
-				const key = toDayKey(date);
-				return {
-					key,
-					label: `${date.getMonth() + 1}/${date.getDate()}`,
-					weekday: weekdayNames[date.getDay()],
-					isToday: key === todayKey,
-					entries: entriesOn(sampleSchedule, key).filter((entry) => !isSpan(entry))
-				};
-			})
-			.filter((day) => day.entries.length > 0)
+		schedule
+			? monthDays
+					.map((dayKey) => ({
+						dayKey,
+						label: toShortLabel(dayKey),
+						weekday: weekdayNames[getWeekdayIndex(dayKey)],
+						isToday: dayKey === schedule.today,
+						isPast: dayKey < schedule.today,
+						entries: entriesOn(schedule.entries, dayKey).filter((entry) => !isSpan(entry))
+					}))
+					.filter((day) => day.entries.length > 0)
+			: []
 	);
 </script>
 
 <section class="calendar module">
-	<h2>학사일정<small>{today.getMonth() + 1}월</small></h2>
+	<h2>학사일정<small>{schedule ? `${getMonthOfDay(schedule.today)}월` : ''}</small></h2>
 
-	{#each spanning as entry (entry.subject)}
-		<p class="span-note ellipsis" title={entry.subject}>
-			<span class="span-range">{entry.range}</span>{entry.subject}
-		</p>
-	{/each}
-
-	<ul class="day-list">
-		{#each dayList as day (day.key)}
-			<li class="day" class:today={day.isToday}>
-				<span class="day-label">{day.label}<small>{day.weekday}</small></span>
-				<span class="entries">
-					{#each day.entries as entry (entry.subject)}
-						<span class="entry">{entry.subject}</span>
-					{/each}
-				</span>
-			</li>
-		{:else}
-			<li class="empty">이번 달 등록된 일정이 없습니다.</li>
+	{#if !schedule}
+		<p class="notice">학사일정을 불러오지 못했습니다.</p>
+	{:else}
+		{#each spanning as entry, index (index)}
+			<p class="span-note ellipsis" class:ongoing={entry.isOngoing} title={entry.subject}>
+				<span class="span-range">{entry.range}</span>{entry.subject}
+			</p>
 		{/each}
-	</ul>
+
+		<ul class="day-list">
+			{#each dayList as day (day.dayKey)}
+				<li class="day" class:today={day.isToday} class:past={day.isPast}>
+					<span class="day-label">{day.label}<small>{day.weekday}</small></span>
+					<span class="entries">
+						{#each day.entries as entry, index (index)}
+							<span class="entry">{entry.subject}</span>
+						{/each}
+					</span>
+				</li>
+			{:else}
+				<li class="empty">이번 달 등록된 일정이 없습니다.</li>
+			{/each}
+		</ul>
+	{/if}
 </section>
 
 <style lang="scss">
@@ -97,6 +113,11 @@
 		font-size: 0.8rem;
 	}
 
+	// 오늘이 기간 안에 든 일정만 강조한다.
+	.span-note.ongoing {
+		background-color: var(--secondary-bg);
+	}
+
 	.span-range {
 		display: inline-block;
 		margin-right: 0.5rem;
@@ -121,6 +142,10 @@
 		&:not(:last-child) {
 			border-bottom: var(--control-border-width) solid var(--gray-border);
 		}
+	}
+
+	.day.past {
+		opacity: 0.5;
 	}
 
 	.day.today .day-label {
@@ -153,7 +178,8 @@
 		font-size: 0.85rem;
 	}
 
-	.empty {
+	.empty,
+	.notice {
 		flex: 1;
 		padding-top: 1rem;
 		color: var(--secondary-text);

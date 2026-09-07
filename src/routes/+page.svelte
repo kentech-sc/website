@@ -2,8 +2,8 @@
 	import GridSection from './_components/GridSection.svelte';
 	import HomeBanner from './_components/HomeBanner.svelte';
 	// 달력 두 안을 비교하는 중. 쓰지 않는 쪽을 주석 처리한다. (.split 비율도 함께 바꿀 것)
-	import HomeCalendar from './_components/HomeCalendarGrid.svelte';
-	// import HomeCalendar from './_components/HomeCalendarList.svelte';
+	// import HomeCalendar from './_components/HomeCalendarGrid.svelte';
+	import HomeCalendar from './_components/HomeCalendarList.svelte';
 	import HomeDining from './_components/HomeDining.svelte';
 
 	import type { Petition } from '$lib/types/petition.type.js';
@@ -22,7 +22,7 @@
 	<HomeBanner />
 
 	<div class="split">
-		<HomeCalendar />
+		<HomeCalendar schedule={data.schedule} />
 		<HomeDining menus={data.dining} />
 	</div>
 
@@ -53,8 +53,8 @@
 
 	// 목록안은 1:1, 격자안은 7열을 담아야 해서 2:1. 달력안을 바꿀 때 함께 교체한다.
 	.split {
-		grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
-		// grid-template-columns: repeat(2, minmax(0, 1fr));
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		// grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
 	}
 
 	#grid-container {

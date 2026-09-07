@@ -12,7 +12,7 @@
 		"preview": "vite preview",
 		"generate:pwa-assets": "pwa-assets-generator",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-		"test": "node --test src/lib/shared/degree.test.mjs src/lib/shared/gpa.test.mjs src/lib/shared/course-offering-import.test.mjs src/lib/shared/portal-completion-import.test.mjs src/lib/shared/dining-menu.test.mjs src/routes/timetable/_components/course-search.test.mjs src/routes/timetable/_components/schedule-display.test.mjs",
+		"test": "node --test src/lib/shared/degree.test.mjs src/lib/shared/gpa.test.mjs src/lib/shared/course-offering-import.test.mjs src/lib/shared/portal-completion-import.test.mjs src/lib/shared/dining-menu.test.mjs src/lib/shared/academic-calendar.test.mjs src/routes/timetable/_components/course-search.test.mjs src/routes/timetable/_components/schedule-display.test.mjs",
 		"db:generate": "drizzle-kit generate",
 		"db:migrate": "drizzle-kit migrate",
 		"db:studio": "drizzle-kit studio",
