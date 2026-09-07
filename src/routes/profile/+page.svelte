@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 
+	import BannerForm from './_components/BannerForm.svelte';
 	import BlockForm from './_components/BlockForm.svelte';
 	import ChangeGroupForm from './_components/ChangeGroupForm.svelte';
 	import ChangeNicknameForm from './_components/ChangeNicknameForm.svelte';
@@ -60,7 +61,7 @@
 			<DeleteUserForm />
 		</div>
 
-		{#if permissions.canSendPush || permissions.canManageUsers}
+		{#if permissions.canSendPush || permissions.canManageUsers || permissions.canManageBanner}
 			<div class="module container-col">
 				<h3>관리자 기능</h3>
 				{#if permissions.canSendPush}
@@ -69,6 +70,9 @@
 				{#if permissions.canManageUsers}
 					<BlockForm users={userAdminOptions} />
 					<ChangeGroupForm users={userAdminOptions} />
+				{/if}
+				{#if permissions.canManageBanner}
+					<BannerForm banner={page.data.banner} />
 				{/if}
 			</div>
 		{/if}

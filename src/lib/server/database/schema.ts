@@ -488,6 +488,19 @@ export const fileMetas = appSchema.table('file_metas', {
 	...timestamps
 });
 
+/**
+ * 메인 화면 배너. 한 번에 하나만 걸리며, 새로 올리면 기존 것을 대체한다.
+ * (파일 정리 cron 이 참조 없는 파일을 지우므로 file_metas 를 여기서 붙잡아 둔다)
+ */
+export const banners = appSchema.table('banners', {
+	id: uuid().defaultRandom().primaryKey(),
+	fileId: uuid('file_id')
+		.notNull()
+		.references(() => fileMetas.id),
+	linkUrl: text('link_url'),
+	...timestamps
+});
+
 export const postFiles = communitySchema.table(
 	'post_files',
 	{
@@ -650,6 +663,7 @@ export const activityLogs = appSchema.table('activity_logs', {
 	petitionSignatures,
 	reviews,
 	fileMetas,
+	banners,
 	postFiles,
 	petitionFiles,
 	pointAccounts,

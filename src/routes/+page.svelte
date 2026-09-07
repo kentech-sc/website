@@ -19,7 +19,7 @@
 </script>
 
 <div id="home">
-	<HomeBanner />
+	<HomeBanner banner={data.banner} />
 
 	<div class="split">
 		<HomeCalendar schedule={data.schedule} />

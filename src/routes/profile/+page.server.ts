@@ -1,17 +1,32 @@
 import type { UserGroup } from '$lib/types/user.type.js';
 import type { PageServerLoad } from './$types.js';
 
+import { editorActions } from '$lib/server/editor.js';
 import { withActionErrorHandling } from '$lib/server/errors.js';
 import * as ProfileUsecase from '$lib/usecase/profile.usecase.js';
 
 export const load: PageServerLoad = async ({ locals }) => {
 	return {
 		permissions: ProfileUsecase.getProfilePermissions(locals.user),
-		userAdminOptions: await ProfileUsecase.getUserAdminOptions(locals.user)
+		userAdminOptions: await ProfileUsecase.getUserAdminOptions(locals.user),
+		banner: await ProfileUsecase.getManagedBanner(locals.user)
 	};
 };
 
 export const actions = {
+	// 배너 이미지 업로드는 에디터와 같은 presign -> 업로드 -> complete 흐름을 쓴다.
+	...editorActions,
+	setBanner: withActionErrorHandling(async ({ request, locals }) => {
+		const formData = await request.formData();
+		const fileId = (formData.get('file-id') ?? '').toString();
+		const linkUrl = (formData.get('link-url') ?? '').toString();
+		await ProfileUsecase.setBanner(fileId, linkUrl, locals.user);
+		return { fileId };
+	}),
+	removeBanner: withActionErrorHandling(async ({ locals }) => {
+		await ProfileUsecase.removeBanner(locals.user);
+		return { removed: true };
+	}),
 	changeNickname: withActionErrorHandling(async ({ request, locals }) => {
 		const formData = await request.formData();
 		const nickname = (formData.get('nickname') ?? '').toString();
