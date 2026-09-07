@@ -1,10 +1,18 @@
 <script lang="ts">
+	import ChevronLeft from '@lucide/svelte/icons/chevron-left';
+	import ChevronRight from '@lucide/svelte/icons/chevron-right';
+
+	import { CalendarNav } from './home-calendar-nav.svelte.js';
+
 	import type { AcademicSchedule } from '$lib/types/academic-calendar.type.js';
 
 	import { entriesOn } from '$lib/shared/academic-calendar.js';
-	import { getDayOfMonth, getTwoWeekDayKeys } from '$lib/shared/day-key.js';
+	import { addDays, getDayOfMonth, getMonthOfDay, getTwoWeekDayKeys } from '$lib/shared/day-key.js';
 
-	let { schedule }: { schedule: AcademicSchedule | null } = $props();
+	let { schedule: initialSchedule }: { schedule: AcademicSchedule | null } = $props();
+
+	const nav = new CalendarNav(() => initialSchedule);
+	const schedule = $derived(nav.schedule);
 
 	const weekdays = ['월', '화', '수', '목', '금', '토', '일'];
 
@@ -12,7 +20,7 @@
 	// 서버(UTC)와 브라우저(KST)가 서로 다른 날짜를 그린다.
 	const days = $derived(
 		schedule
-			? getTwoWeekDayKeys(schedule.today).map((dayKey) => ({
+			? getTwoWeekDayKeys(schedule.anchor).map((dayKey) => ({
 					dayKey,
 					day: getDayOfMonth(dayKey),
 					isToday: dayKey === schedule.today,
@@ -23,9 +31,34 @@
 </script>
 
 <section class="calendar module">
-	<h2>학사일정<small>2주</small></h2>
+	<h2>
+		학사일정
+		{#if schedule}
+			<span class="range-nav">
+				<button
+					type="button"
+					aria-label="이전 2주"
+					disabled={nav.loading}
+					onclick={() => nav.moveTo(addDays(schedule.anchor, -14))}
+				>
+					<ChevronLeft size="1rem" />
+				</button>
+				<span class="range">{getMonthOfDay(days[0].dayKey)}월 {days[0].day}일부터</span>
+				<button
+					type="button"
+					aria-label="다음 2주"
+					disabled={nav.loading}
+					onclick={() => nav.moveTo(addDays(schedule.anchor, 14))}
+				>
+					<ChevronRight size="1rem" />
+				</button>
+			</span>
+		{/if}
+	</h2>
 
-	{#if schedule}
+	{#if nav.errorMessage}
+		<p class="notice">{nav.errorMessage}</p>
+	{:else if schedule}
 		<div class="weekday-row">
 			{#each weekdays as weekday (weekday)}
 				<span class="weekday">{weekday}</span>
@@ -56,14 +89,27 @@
 	h2 {
 		display: flex;
 		justify-content: space-between;
-		align-items: flex-end;
+		align-items: center;
 		margin-bottom: 0.6rem;
 		font-size: 1.2rem;
+	}
 
-		small {
-			color: var(--secondary-text);
-			font-size: 0.7rem;
+	.range-nav {
+		display: flex;
+		align-items: center;
+		gap: 0.3rem;
+
+		button {
+			display: flex;
+			align-items: center;
+			padding: 0.1rem 0.3rem;
 		}
+	}
+
+	.range {
+		min-width: 5.5rem;
+		font-size: 0.8rem;
+		text-align: center;
 	}
 
 	.weekday-row,

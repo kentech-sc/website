@@ -11,12 +11,14 @@ import {
 } from './academic-calendar.ts';
 import {
 	addDays,
+	addMonths,
 	getKstDayKey,
 	getMonthDayKeys,
 	getTwoWeekDayKeys,
 	getWeekdayIndex,
 	toCompactDayKey,
-	toMonthKey
+	toMonthKey,
+	toMonthStart
 } from './day-key.ts';
 
 test('포털 응답을 일정 목록으로 정규화한다', () => {
@@ -126,4 +128,18 @@ test('KST 기준 날짜를 뽑는다', () => {
 
 test('학식 API 용 압축 형식으로 바꾼다', () => {
 	assert.equal(toCompactDayKey('2026-09-07'), '20260907');
+});
+
+test('달을 옮길 때 해가 넘어가도 맞게 계산한다', () => {
+	assert.equal(addMonths('2026-09-07', 1), '2026-10-01');
+	assert.equal(addMonths('2026-12-15', 1), '2027-01-01');
+	assert.equal(addMonths('2026-01-15', -1), '2025-12-01');
+	assert.equal(addMonths('2026-09-07', 12), '2027-09-01');
+	assert.equal(addMonths('2026-09-07', -12), '2025-09-01');
+});
+
+test('달 이동은 항상 1일로 맞춰 말일 차이를 피한다', () => {
+	// 1/31 에서 한 달 뒤를 그대로 더하면 2/31 이 되어 3월로 튄다.
+	assert.equal(addMonths('2026-01-31', 1), '2026-02-01');
+	assert.equal(toMonthStart('2026-09-07'), '2026-09-01');
 });

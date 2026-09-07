@@ -51,6 +51,20 @@ export function toMonthKey(dayKey: string): string {
 	return dayKey.slice(0, 7);
 }
 
+/** 기준일이 속한 달의 1일. 월 단위로 이동할 때의 기준점이 된다. */
+export function toMonthStart(dayKey: string): string {
+	return `${toMonthKey(dayKey)}-01`;
+}
+
+/** 달을 옮긴다. 항상 1일로 맞춰 말일 차이(1/31 -> 2/31)를 피한다. */
+export function addMonths(dayKey: string, months: number): string {
+	const year = Number(dayKey.slice(0, 4));
+	const month = Number(dayKey.slice(5, 7)) - 1 + months;
+	const shiftedYear = year + Math.floor(month / 12);
+	const shiftedMonth = ((month % 12) + 12) % 12;
+	return `${shiftedYear}-${`${shiftedMonth + 1}`.padStart(2, '0')}-01`;
+}
+
 /** 기준일이 속한 주의 월요일부터 14일. */
 export function getTwoWeekDayKeys(todayKey: string): string[] {
 	const weekday = getWeekdayIndex(todayKey);

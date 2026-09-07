@@ -32,14 +32,15 @@ async function getMonthEntries(monthKey: string): Promise<ScheduleEntry[]> {
  * 화면(2주 격자 / 한 달 목록)이 필요로 하는 달을 모두 가져와 합친다.
  * 2주 창이 달을 넘어가면 두 달이 필요하다.
  */
-export async function getSchedule(todayKey: string = getKstDayKey()): Promise<AcademicSchedule> {
-	const neededDays = [...getMonthDayKeys(todayKey), ...getTwoWeekDayKeys(todayKey)];
+export async function getSchedule(anchorKey: string = getKstDayKey()): Promise<AcademicSchedule> {
+	const neededDays = [...getMonthDayKeys(anchorKey), ...getTwoWeekDayKeys(anchorKey)];
 	const monthKeys = [...new Set(neededDays.map(toMonthKey))];
 
 	const monthResults = await Promise.all(monthKeys.map(getMonthEntries));
 	const entries = sortEntries(dedupeEntries(monthResults.flat()));
 
-	return { today: todayKey, entries };
+	// 오늘은 어느 달을 보고 있든 실제 오늘이어야 한다. (강조 표시용)
+	return { today: getKstDayKey(), anchor: anchorKey, entries };
 }
 
 /**
@@ -47,10 +48,10 @@ export async function getSchedule(todayKey: string = getKstDayKey()): Promise<Ac
  * 학교 포털이 느리거나 응답하지 않을 때 메인 전체가 함께 멈추지 않도록 한다.
  */
 export async function getScheduleOrNull(
-	todayKey: string = getKstDayKey()
+	anchorKey: string = getKstDayKey()
 ): Promise<AcademicSchedule | null> {
 	try {
-		return await getSchedule(todayKey);
+		return await getSchedule(anchorKey);
 	} catch {
 		return null;
 	}
