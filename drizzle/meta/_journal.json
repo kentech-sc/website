@@ -120,6 +120,13 @@
 			"when": 1788800762922,
 			"tag": "0015_sloppy_kingpin",
 			"breakpoints": true
+		},
+		{
+			"idx": 16,
+			"version": "7",
+			"when": 1788804791097,
+			"tag": "0016_slim_komodo",
+			"breakpoints": true
 		}
 	]
 }
