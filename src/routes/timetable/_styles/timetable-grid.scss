@@ -180,14 +180,15 @@ button.grid-slot:disabled {
 .course-block small {
 	font-size: clamp(0.5rem, 0.68vw, 0.6rem);
 }
-.course-professor {
+.course-block .course-professor {
 	display: block;
-	width: 100%;
 	min-width: 0;
+	max-width: 100%;
 	overflow: hidden;
 	color: color-mix(in srgb, var(--text) 74%, var(--gray-text));
 	text-overflow: ellipsis;
 	white-space: nowrap;
+	overflow-wrap: normal;
 }
 .course-room,
 .course-time {

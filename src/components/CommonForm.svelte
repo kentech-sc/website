@@ -152,6 +152,13 @@
 		cursor: wait;
 	}
 
+	.common-form[data-loading='true'] .common-form-content :global(button.action-btn) {
+		--ui-button-bg: var(--secondary-strong-hover);
+		--ui-button-border: var(--secondary-strong-hover);
+		--ui-button-color: var(--white);
+		opacity: 1;
+	}
+
 	.error-message {
 		justify-content: left;
 	}

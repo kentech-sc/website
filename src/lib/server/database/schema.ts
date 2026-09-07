@@ -602,6 +602,9 @@ export const pushSubscriptions = appSchema.table(
 		p256dh: text().notNull(),
 		auth: text().notNull(),
 		userAgent: text('user_agent').notNull().default(''),
+		diningBreakfast: boolean('dining_breakfast').notNull().default(true),
+		diningLunch: boolean('dining_lunch').notNull().default(true),
+		diningDinner: boolean('dining_dinner').notNull().default(true),
 		...timestamps
 	},
 	(table) => [

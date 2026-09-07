@@ -1,7 +1,9 @@
 import { and, eq } from 'drizzle-orm';
 import webpush from 'web-push';
 
+import type { DiningSlot } from '$lib/types/dining.type.js';
 import type {
+	DiningNotificationPreferences,
 	PushNotificationPayload,
 	PushSubscriptionEntity,
 	PushSubscriptionInput
@@ -26,6 +28,11 @@ function toPushSubscription(row: typeof pushSubscriptions.$inferSelect): PushSub
 			auth: row.auth
 		},
 		userAgent: row.userAgent,
+		diningPreferences: {
+			breakfast: row.diningBreakfast,
+			lunch: row.diningLunch,
+			dinner: row.diningDinner
+		},
 		createdAt: row.createdAt,
 		updatedAt: row.updatedAt
 	};
@@ -145,8 +152,42 @@ export async function findUserPushSubscriptions(userId: string): Promise<PushSub
 	return rows.map(toPushSubscription);
 }
 
+export async function updateDiningNotificationPreferences(
+	userId: string,
+	endpoint: string,
+	preferences: DiningNotificationPreferences
+): Promise<PushSubscriptionEntity | null> {
+	const [row] = await getDatabase()
+		.update(pushSubscriptions)
+		.set({
+			diningBreakfast: preferences.breakfast,
+			diningLunch: preferences.lunch,
+			diningDinner: preferences.dinner,
+			updatedAt: new Date().toISOString()
+		})
+		.where(and(eq(pushSubscriptions.userId, userId), eq(pushSubscriptions.endpoint, endpoint)))
+		.returning();
+	return row ? toPushSubscription(row) : null;
+}
+
 export async function findAllPushSubscriptions(): Promise<PushSubscriptionEntity[]> {
 	const rows = await getDatabase().select().from(pushSubscriptions);
+	return rows.map(toPushSubscription);
+}
+
+export async function findDiningPushSubscriptions(
+	slot: DiningSlot
+): Promise<PushSubscriptionEntity[]> {
+	const preferenceColumn =
+		slot === 'breakfast'
+			? pushSubscriptions.diningBreakfast
+			: slot === 'lunch'
+				? pushSubscriptions.diningLunch
+				: pushSubscriptions.diningDinner;
+	const rows = await getDatabase()
+		.select()
+		.from(pushSubscriptions)
+		.where(eq(preferenceColumn, true));
 	return rows.map(toPushSubscription);
 }
 
@@ -179,11 +220,19 @@ export async function sendPushToUser(
 }
 
 export async function sendPushToAllSubscribers(
-	payload: PushNotificationPayload
-): Promise<{ totalCount: number; sentCount: number; staleCount: number; failedCount: number }> {
+	payload: PushNotificationPayload,
+	options: { diningSlot?: DiningSlot } = {}
+): Promise<{
+	totalCount: number;
+	sentCount: number;
+	staleCount: number;
+	failedCount: number;
+}> {
 	configureWebPush();
 
-	const subscriptions = await findAllPushSubscriptions();
+	const subscriptions = options.diningSlot
+		? await findDiningPushSubscriptions(options.diningSlot)
+		: await findAllPushSubscriptions();
 	let sentCount = 0;
 	let staleCount = 0;
 	let failedCount = 0;

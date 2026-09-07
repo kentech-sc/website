@@ -16,14 +16,34 @@ export const POST = async ({ request, locals, url }) => {
 	}
 
 	try {
+		const input = (await request.json().catch(() => null)) as {
+			title?: unknown;
+			body?: unknown;
+		} | null;
+		const title = input === null ? 'KENTECH' : input.title;
+		const body = input === null ? '테스트 알림입니다.' : input.body;
+
+		if (typeof title !== 'string' || typeof body !== 'string') {
+			return json({ message: '제목과 내용을 모두 입력해 주세요.' }, { status: 400 });
+		}
+
+		const normalizedTitle = title.trim();
+		const normalizedBody = body.trim();
+		if (!normalizedTitle || !normalizedBody) {
+			return json({ message: '제목과 내용을 모두 입력해 주세요.' }, { status: 400 });
+		}
+		if (normalizedTitle.length > 80 || normalizedBody.length > 500) {
+			return json({ message: '제목은 80자, 내용은 500자 이내로 입력해 주세요.' }, { status: 400 });
+		}
+
 		const subscriptions = await Push.findUserPushSubscriptions(locals.user.id);
 		if (subscriptions.length === 0) {
 			return json({ message: '이 계정에 등록된 푸시 구독이 없습니다.' }, { status: 400 });
 		}
 
 		const result = await Push.sendPushToUser(locals.user.id, {
-			title: 'KENTECH',
-			body: '테스트 알림입니다.',
+			title: normalizedTitle,
+			body: normalizedBody,
 			url: '/profile'
 		});
 

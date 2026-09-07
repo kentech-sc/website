@@ -2,15 +2,36 @@ import type { User, UserGroup, UserId } from '$lib/types/user.type.js';
 
 import * as AcademicRepository from '$lib/repositories/academic.repository.js';
 import { transaction } from '$lib/server/db.js';
+import { AppError } from '$lib/server/errors.js';
+import * as Push from '$lib/server/push.js';
 import * as FileMetaService from '$lib/services/file-meta.service.js';
 import * as UserService from '$lib/services/user.service.js';
 import { hasCapability } from '$lib/shared/permission.js';
+import { APP_ERROR } from '$lib/shared/rule.js';
 
 export function getProfilePermissions(user: User) {
 	return {
 		canManageUsers: hasCapability(user, 'user.manage'),
+		canSendPush: hasCapability(user, 'push.send'),
 		canCleanup: hasCapability(user, 'system.cleanup')
 	};
+}
+
+export async function sendPushNotification(titleInput: string, bodyInput: string, user: User) {
+	if (!hasCapability(user, 'push.send')) {
+		throw new AppError(APP_ERROR.FORBIDDEN, '푸시 알림을 발송할 권한이 없습니다.');
+	}
+
+	const title = titleInput.trim();
+	const body = bodyInput.trim();
+	if (!title || !body) {
+		throw new AppError(APP_ERROR.BAD_REQUEST, '제목과 내용을 모두 입력해 주세요.');
+	}
+	if (title.length > 80 || body.length > 500) {
+		throw new AppError(APP_ERROR.BAD_REQUEST, '제목은 80자, 내용은 500자 이내로 입력해 주세요.');
+	}
+
+	return await Push.sendPushToAllSubscribers({ title, body, url: '/' });
 }
 
 export async function getUserAdminOptions(user: User) {
