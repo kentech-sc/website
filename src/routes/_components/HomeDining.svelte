@@ -227,13 +227,36 @@
 	ul {
 		display: grid;
 		grid-template-columns: repeat(2, minmax(0, 1fr));
-		gap: 0 0.5rem;
+		gap: 0 0.6rem;
 		margin: 0;
-		padding-left: 1rem;
+		// 기본 마커는 칸 바깥에 그려져 좁아지면 옆 칸 글자와 겹친다.
+		// 불릿을 ::before 로 칸 안에 두고 목록 자체의 들여쓰기는 없앤다.
+		padding-left: 0;
+		list-style: none;
 	}
 
 	li {
-		font-size: 0.85rem;
+		position: relative;
+		// 불릿 자리를 글자 영역에서 미리 빼둬야 불릿에 닿기 전에 줄이 바뀐다.
+		padding-left: 0.7rem;
+		// 카드 폭이 애매할 때 메뉴 이름이 넘쳐 배치가 깨져서 한 단계 줄였다.
+		font-size: 0.8rem;
+		// 한국어는 단어 단위로 끊고, 한 낱말이 칸보다 길 때만 강제로 자른다.
+		word-break: keep-all;
+		overflow-wrap: anywhere;
+
+		// 글자로 찍으면 글꼴에 따라 굵기와 높이가 달라진다.
+		// 원을 직접 그리면 크기와 세로 위치를 정확히 맞출 수 있다.
+		&::before {
+			position: absolute;
+			top: 0.55em;
+			left: 0.1rem;
+			border-radius: 50%;
+			background-color: currentcolor;
+			width: 0.26rem;
+			height: 0.26rem;
+			content: '';
+		}
 	}
 
 	.notice {

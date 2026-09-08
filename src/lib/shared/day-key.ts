@@ -52,11 +52,11 @@ export function toMonthKey(dayKey: string): string {
 }
 
 /**
- * 그 달의 몇 번째 주인지. 달의 첫 주가 며칠뿐이어도 1주차로 센다.
- * (예: 2026-09-01 이 화요일이라 9/7 은 2주차)
+ * 그 달의 몇 번째 주인지. 주는 일요일에 시작하고, 달의 첫 주가 며칠뿐이어도 1주차로 센다.
+ * (예: 2026-09-01 이 화요일이라 9/6(일)부터 2주차)
  */
 export function getWeekOfMonth(dayKey: string): number {
-	const firstWeekday = (getWeekdayIndex(`${toMonthKey(dayKey)}-01`) + 6) % 7;
+	const firstWeekday = getWeekdayIndex(`${toMonthKey(dayKey)}-01`);
 	return Math.floor((getDayOfMonth(dayKey) - 1 + firstWeekday) / 7) + 1;
 }
 
@@ -74,11 +74,10 @@ export function addMonths(dayKey: string, months: number): string {
 	return `${shiftedYear}-${`${shiftedMonth + 1}`.padStart(2, '0')}-01`;
 }
 
-/** 기준일이 속한 주의 월요일부터 14일. */
+/** 기준일이 속한 주의 일요일부터 14일. */
 export function getTwoWeekDayKeys(todayKey: string): string[] {
-	const weekday = getWeekdayIndex(todayKey);
-	const monday = addDays(todayKey, -((weekday + 6) % 7));
-	return Array.from({ length: 14 }, (_, offset) => addDays(monday, offset));
+	const sunday = addDays(todayKey, -getWeekdayIndex(todayKey));
+	return Array.from({ length: 14 }, (_, offset) => addDays(sunday, offset));
 }
 
 /** 기준일이 속한 달의 1일부터 말일까지. */

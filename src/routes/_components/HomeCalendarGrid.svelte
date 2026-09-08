@@ -20,7 +20,8 @@
 	const nav = new CalendarNav(() => initialSchedule);
 	const schedule = $derived(nav.schedule);
 
-	const weekdays = ['월', '화', '수', '목', '금', '토', '일'];
+	// 주는 일요일에 시작한다. getTwoWeekDayKeys 가 같은 기준으로 날짜를 뽑는다.
+	const weekdays = ['일', '월', '화', '수', '목', '금', '토'];
 
 	interface Segment {
 		subject: string;

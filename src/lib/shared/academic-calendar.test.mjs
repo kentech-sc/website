@@ -88,15 +88,16 @@ test('시작일 순으로 정렬한다', () => {
 	assert.equal(sorted[0].subject, '먼저');
 });
 
-test('2주 창은 그 주 월요일에서 시작해 14일이다', () => {
-	// 2026-09-07 은 월요일
-	const fromMonday = getTwoWeekDayKeys('2026-09-07');
-	assert.equal(fromMonday.length, 14);
-	assert.equal(fromMonday[0], '2026-09-07');
-	assert.equal(fromMonday[13], '2026-09-20');
+test('2주 창은 그 주 일요일에서 시작해 14일이다', () => {
+	// 2026-09-06 은 일요일
+	const fromSunday = getTwoWeekDayKeys('2026-09-06');
+	assert.equal(fromSunday.length, 14);
+	assert.equal(fromSunday[0], '2026-09-06');
+	assert.equal(fromSunday[13], '2026-09-19');
 
-	// 일요일에는 그 주 월요일까지 거슬러 올라간다
-	assert.equal(getTwoWeekDayKeys('2026-09-13')[0], '2026-09-07');
+	// 주 중간에서는 그 주 일요일까지 거슬러 올라간다
+	assert.equal(getTwoWeekDayKeys('2026-09-07')[0], '2026-09-06');
+	assert.equal(getTwoWeekDayKeys('2026-09-12')[0], '2026-09-06');
 });
 
 test('달 경계를 넘는 2주 창은 두 달에 걸친다', () => {
