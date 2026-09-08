@@ -44,6 +44,17 @@
 		width: 100%;
 	}
 
+	// 배너는 navbar 에 맞닿아야 위쪽 직각 마감이 이어져 보인다.
+	// main 의 margin-top 1rem + padding-top 1rem 을 상쇄한다.
+	#home > :global(.banner) {
+		margin-top: -2rem;
+
+		@include media.mobile {
+			// 모바일은 main 의 margin-top 이 0 이라 padding 만 상쇄하면 된다.
+			margin-top: -1rem;
+		}
+	}
+
 	.split,
 	#grid-container {
 		display: grid;

@@ -126,6 +126,9 @@
 	@use 'media';
 
 	header {
+		// 예전에는 메인에서만 fixed 로 두고 슬라이드쇼를 그 아래 깔았다.
+		// 슬라이드쇼를 내린 뒤로는 자리를 차지하지 않아 배너가 가려지므로 모든 화면에서 sticky 로 둔다.
+		position: sticky;
 		top: 0;
 		justify-content: space-between;
 
@@ -142,13 +145,6 @@
 
 		@include media.pc {
 			padding: 0.6rem 10vw;
-			&.isMain {
-				position: fixed;
-			}
-		}
-
-		&:not(.isMain) {
-			position: sticky;
 		}
 
 		.nav-left {

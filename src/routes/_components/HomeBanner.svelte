@@ -31,6 +31,9 @@
 
 	.banner {
 		border-color: var(--gray-border);
+		// navbar 바로 아래에 붙는 자리라 위쪽은 각지게 마감한다.
+		border-start-start-radius: 0;
+		border-start-end-radius: 0;
 		background-color: var(--gray-bg);
 		// IAB 표준 배너는 Billboard(970x250, 3.9:1)와 Leaderboard(728x90, 8.1:1) 사이에 놓인다.
 		// 홍보 이미지가 담기면서도 아래 달력/학식을 밀어내지 않도록 그 중간인 6:1 로 잡았다.
