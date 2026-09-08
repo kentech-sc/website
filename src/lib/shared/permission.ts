@@ -44,7 +44,8 @@ const ROLE_CAPABILITIES: Record<UserGroupType, Capability[]> = {
 		'course.manage',
 		'professor.manage',
 		'user.manage',
-		'push.send'
+		'push.send',
+		'banner.manage'
 	],
 	[UserGroup.Dev]: [
 		'board.free.write',
@@ -63,6 +64,7 @@ const ROLE_CAPABILITIES: Record<UserGroupType, Capability[]> = {
 		'professor.manage',
 		'user.manage',
 		'push.send',
+		'banner.manage',
 		'system.cleanup'
 	]
 };

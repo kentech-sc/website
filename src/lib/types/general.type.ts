@@ -21,6 +21,7 @@ export type Capability =
 	| 'professor.manage'
 	| 'user.manage'
 	| 'push.send'
+	| 'banner.manage'
 	| 'system.cleanup';
 
 export type AppErrorCode =

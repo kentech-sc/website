@@ -7,6 +7,7 @@ import type { PetitionId } from '$lib/types/petition.type.js';
 import type { PostId } from '$lib/types/post.type.js';
 
 import {
+	banners,
 	fileMetas,
 	petitionFiles,
 	petitions,
@@ -143,7 +144,9 @@ export async function findOrphanedFiles(cutoffTime: string): Promise<FileMetaEnt
 				notExists(getDatabase().select().from(postFiles).where(eq(postFiles.fileId, fileMetas.id))),
 				notExists(
 					getDatabase().select().from(petitionFiles).where(eq(petitionFiles.fileId, fileMetas.id))
-				)
+				),
+				// 배너 이미지는 게시글에 붙지 않아 여기서 빼지 않으면 하루 뒤 지워진다.
+				notExists(getDatabase().select().from(banners).where(eq(banners.fileId, fileMetas.id)))
 			)
 		);
 	return rows.map((row) => withArticleIds(row, []));
