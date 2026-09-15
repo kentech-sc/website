@@ -1,4 +1,4 @@
-import { desc, eq } from 'drizzle-orm';
+import { asc, eq, sql } from 'drizzle-orm';
 
 import type { BannerRow } from '$lib/types/banner.type.js';
 
@@ -15,6 +15,7 @@ function selectBanners() {
 			fileId: banners.fileId,
 			linkUrl: banners.linkUrl,
 			isActive: banners.isActive,
+			position: banners.position,
 			fileName: fileMetas.name,
 			fileKey: fileMetas.key
 		})
@@ -22,30 +23,57 @@ function selectBanners() {
 		.innerJoin(fileMetas, eq(fileMetas.id, banners.fileId));
 }
 
-/** 지금 메인에 걸려 있는 배너. 없으면 null. */
-export async function findActiveBanner(): Promise<BannerRow | null> {
-	const rows = await selectBanners().where(eq(banners.isActive, true)).limit(1);
-	return rows[0] ?? null;
+// 순서가 같으면 먼저 올린 것이 앞선다. 관리 화면과 메인 슬라이드가 같은 순서를 쓴다.
+const slideOrder = [asc(banners.position), asc(banners.createdAt)];
+
+/** 메인 슬라이드에 나오는 배너. 슬라이드 순서대로. */
+export async function findActiveBanners(): Promise<BannerRow[]> {
+	return await selectBanners()
+		.where(eq(banners.isActive, true))
+		.orderBy(...slideOrder);
 }
 
-/** 보관함 전체. 최근에 올린 것부터. */
+/** 보관함 전체. 슬라이드 순서대로. */
 export async function findBanners(): Promise<BannerRow[]> {
-	return await selectBanners().orderBy(desc(banners.createdAt));
+	return await selectBanners().orderBy(...slideOrder);
 }
 
-/** 올리면서 바로 건다. */
+/** 올리면서 바로 켜고, 슬라이드 맨 뒤에 붙인다. */
 export async function addBanner(fileId: string, linkUrl: string | null): Promise<void> {
-	await getDatabase().transaction(async (tx) => {
-		await tx.update(banners).set({ isActive: false }).where(eq(banners.isActive, true));
-		await tx.insert(banners).values({ fileId, linkUrl, isActive: true });
-	});
+	await getDatabase()
+		.insert(banners)
+		.values({
+			fileId,
+			linkUrl,
+			isActive: true,
+			position: sql`(select coalesce(max(${banners.position}) + 1, 0) from ${banners})`
+		});
 }
 
-/** 보관함에 있는 다른 배너로 갈아 건다. 활성은 항상 하나뿐이다. */
-export async function activateBanner(bannerId: string): Promise<void> {
+/** 슬라이드에 넣거나 뺀다. 순서는 그대로 둔다. */
+export async function setBannerActive(bannerId: string, isActive: boolean): Promise<void> {
+	await getDatabase().update(banners).set({ isActive }).where(eq(banners.id, bannerId));
+}
+
+/**
+ * 관리 화면에서 정한 순서대로 0 부터 다시 매긴다.
+ * 그 사이 누가 새로 올린 배너처럼 목록에 없는 것은 기존 순서를 지킨 채 뒤로 보낸다.
+ */
+export async function reorderBanners(bannerIds: string[]): Promise<void> {
 	await getDatabase().transaction(async (tx) => {
-		await tx.update(banners).set({ isActive: false }).where(eq(banners.isActive, true));
-		await tx.update(banners).set({ isActive: true }).where(eq(banners.id, bannerId));
+		const existing = await tx
+			.select({ id: banners.id })
+			.from(banners)
+			.orderBy(...slideOrder);
+
+		const existingIds = new Set(existing.map((row) => row.id));
+		const requested = bannerIds.filter((id) => existingIds.has(id));
+		const requestedIds = new Set(requested);
+		const rest = existing.map((row) => row.id).filter((id) => !requestedIds.has(id));
+
+		for (const [position, id] of [...requested, ...rest].entries()) {
+			await tx.update(banners).set({ position }).where(eq(banners.id, id));
+		}
 	});
 }
 

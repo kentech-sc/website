@@ -36,7 +36,7 @@ export async function sendPushNotification(titleInput: string, bodyInput: string
 	return await Push.sendPushToAllSubscribers({ title, body, url: '/' });
 }
 
-/** 관리 화면에서 지금 걸린 배너를 보여주기 위한 조회. */
+/** 관리 화면에서 보관함 전체를 보여주기 위한 조회. */
 export async function getManagedBanners(user: User) {
 	if (!hasCapability(user, 'banner.manage')) return [];
 
@@ -52,8 +52,12 @@ export async function addBanner(fileId: string, linkUrl: string | null, user: Us
 	return await BannerService.addBanner(fileId, linkUrl, user);
 }
 
-export async function activateBanner(bannerId: string, user: User) {
-	return await BannerService.activateBanner(bannerId, user);
+export async function setBannerActive(bannerId: string, isActive: boolean, user: User) {
+	return await BannerService.setBannerActive(bannerId, isActive, user);
+}
+
+export async function reorderBanners(bannerIds: string[], user: User) {
+	return await BannerService.reorderBanners(bannerIds, user);
 }
 
 export async function removeBanner(bannerId: string, user: User) {

@@ -4,8 +4,10 @@ export interface BannerRow {
 	fileId: string;
 	/** 배너를 눌렀을 때 이동할 주소. 없으면 링크 없는 이미지로 보여준다. */
 	linkUrl: string | null;
-	/** 메인에 걸려 있는 배너인지. 보관함에서 항상 하나만 true 다. */
+	/** 메인 슬라이드에 나오는지. 여러 개가 동시에 켜질 수 있다. */
 	isActive: boolean;
+	/** 슬라이드 순서. 작을수록 먼저 나온다. */
+	position: number;
 	fileName: string;
 	fileKey: string;
 }
@@ -16,6 +18,7 @@ export interface Banner {
 	fileId: string;
 	linkUrl: string | null;
 	isActive: boolean;
+	position: number;
 	imagePath: string;
 	imageAlt: string;
 }

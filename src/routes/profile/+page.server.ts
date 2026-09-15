@@ -23,11 +23,19 @@ export const actions = {
 		await ProfileUsecase.addBanner(fileId, linkUrl, locals.user);
 		return { fileId };
 	}),
-	activateBanner: withActionErrorHandling(async ({ request, locals }) => {
+	setBannerActive: withActionErrorHandling(async ({ request, locals }) => {
 		const formData = await request.formData();
 		const bannerId = (formData.get('banner-id') ?? '').toString();
-		await ProfileUsecase.activateBanner(bannerId, locals.user);
+		const isActive = formData.get('is-active') === 'true';
+		await ProfileUsecase.setBannerActive(bannerId, isActive, locals.user);
 		return { bannerId };
+	}),
+	reorderBanners: withActionErrorHandling(async ({ request, locals }) => {
+		const formData = await request.formData();
+		// 순서대로 나열한 배너 id. 쉼표로 이어 보낸다.
+		const bannerIds = (formData.get('banner-ids') ?? '').toString().split(',').filter(Boolean);
+		await ProfileUsecase.reorderBanners(bannerIds, locals.user);
+		return { bannerIds };
 	}),
 	removeBanner: withActionErrorHandling(async ({ request, locals }) => {
 		const formData = await request.formData();

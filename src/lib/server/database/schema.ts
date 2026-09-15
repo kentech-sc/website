@@ -525,7 +525,10 @@ export const banners = appSchema.table('banners', {
 		.notNull()
 		.references(() => fileMetas.id),
 	linkUrl: text('link_url'),
+	/** 슬라이드에 나오는지. 여러 개가 동시에 켜질 수 있다. */
 	isActive: boolean('is_active').notNull().default(false),
+	/** 슬라이드 순서. 작을수록 먼저 나온다. */
+	position: integer().notNull().default(0),
 	...timestamps
 });
 

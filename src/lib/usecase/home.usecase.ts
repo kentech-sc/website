@@ -11,16 +11,16 @@ import * as ReviewService from '$lib/services/review.service.js';
  * 배너를 못 읽어도 홈은 떠야 한다.
  * (마이그레이션이 배포보다 늦으면 테이블이 없어 조회가 실패한다)
  */
-async function findBannerOrNull() {
+async function findBannersOrEmpty() {
 	try {
-		return await BannerService.findActiveBanner();
+		return await BannerService.findActiveBanners();
 	} catch {
-		return null;
+		return [];
 	}
 }
 
 export async function getHomeData() {
-	const [reviews, feedback, noticePosts, petitions, dining, schedule, banner] = await Promise.all([
+	const [reviews, feedback, noticePosts, petitions, dining, schedule, banners] = await Promise.all([
 		ReviewService.getReviewPreviews(),
 		FeedbackService.getFeedbackPreviews(),
 		PostService.getPostPreviewsByBoardId('notice'),
@@ -28,7 +28,7 @@ export async function getHomeData() {
 		// 학교 포털을 부르는 외부 호출이라 실패해도 홈은 떠야 한다.
 		DiningUsecase.getDiningMenusOrNull(),
 		AcademicCalendarUsecase.getScheduleOrNull(),
-		findBannerOrNull()
+		findBannersOrEmpty()
 	]);
 
 	return {
@@ -38,6 +38,6 @@ export async function getHomeData() {
 		petitions,
 		dining,
 		schedule,
-		banner
+		banners
 	};
 }
