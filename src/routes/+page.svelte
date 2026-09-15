@@ -6,16 +6,16 @@
 	// import HomeCalendar from './_components/HomeCalendarList.svelte';
 	import HomeDining from './_components/HomeDining.svelte';
 
-	import type { Petition } from '$lib/types/petition.type.js';
-	import type { Post } from '$lib/types/post.type.js';
-	import type { Review } from '$lib/types/review.type.js';
+	import type { PostPreview } from '$lib/types/post.type.js';
+	import type { ReviewPreview } from '$lib/types/review.type.js';
+	import type { SubmissionPreview } from '$lib/types/submission.type.js';
 
 	let { data } = $props();
 
-	const reviews = $derived<Review[]>(data.reviews);
-	const freePosts = $derived<Post[]>(data.freePosts);
-	const noticePosts = $derived<Post[]>(data.noticePosts);
-	const petitions = $derived<Petition[]>(data.petitions);
+	const reviews = $derived<ReviewPreview[]>(data.reviews);
+	const noticePosts = $derived<PostPreview[]>(data.noticePosts);
+	const petitions = $derived<SubmissionPreview[]>(data.petitions);
+	const feedback = $derived<SubmissionPreview[]>(data.feedback);
 </script>
 
 <div id="home">
@@ -27,10 +27,10 @@
 	</div>
 
 	<div id="grid-container">
-		<GridSection title="공지사항" items={noticePosts.slice(0, 5)} link="board/notice" />
-		<GridSection title="청원" items={petitions.slice(0, 5)} link="petition" />
-		<GridSection title="자유게시판" items={freePosts.slice(0, 5)} link="board/free" />
-		<GridSection title="강의평가" items={reviews.slice(0, 5)} link="review" />
+		<GridSection title="공지사항" items={noticePosts} link="board/notice" />
+		<GridSection title="청원" items={petitions} link="channel/petition" />
+		<GridSection title="문의·건의" items={feedback} link="channel/feedback" />
+		<GridSection title="강의평가" items={reviews} link="academic/review" />
 	</div>
 </div>
 

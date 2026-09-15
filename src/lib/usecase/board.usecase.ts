@@ -17,7 +17,9 @@ import type {
 } from '$lib/types/post.type.js';
 import type { DisplayType, User } from '$lib/types/user.type.js';
 
+import * as PostRule from '$lib/rules/post.rule.js';
 import { transaction } from '$lib/server/db.js';
+import { AppError } from '$lib/server/errors.js';
 import * as ActivityLogService from '$lib/services/activity-log.service.js';
 import * as CommentService from '$lib/services/comment.service.js';
 import * as FileMetaService from '$lib/services/file-meta.service.js';
@@ -26,6 +28,7 @@ import * as PostService from '$lib/services/post.service.js';
 import * as ThrottleService from '$lib/services/throttle.service.js';
 import * as UserService from '$lib/services/user.service.js';
 import { hasCapability } from '$lib/shared/permission.js';
+import { APP_ERROR } from '$lib/shared/rule.js';
 
 async function getPostLogSnapshot(post: PostEntity) {
 	const files = await FileMetaService.getFileMetasByArticleId(post.id);
@@ -48,10 +51,7 @@ export async function getBoardPage(boardId: BoardId, page: number, user: User) {
 		noIdxForAnon: true
 	});
 
-	const canCreatePost =
-		(boardId === 'free' && hasCapability(user, 'board.free.write')) ||
-		(boardId === 'notice' && hasCapability(user, 'board.notice.write')) ||
-		(boardId === 'bylaw' && hasCapability(user, 'board.bylaw.write'));
+	const canCreatePost = PostRule.canCreatePost(boardId, user).ok;
 
 	return {
 		postPage: { ...postResult, items: posts } as Page<Post>,
@@ -61,6 +61,7 @@ export async function getBoardPage(boardId: BoardId, page: number, user: User) {
 }
 
 export async function getPostDetailByPostId(
+	boardId: BoardId,
 	postId: PostId,
 	user: User,
 	options?: { incrementView?: boolean }
@@ -72,10 +73,12 @@ export async function getPostDetailByPostId(
 	commentPermissions: CommentPermissionMap;
 	canCreateComment: boolean;
 }> {
+	const existingPost = await PostService.getPostById(postId);
+	if (existingPost.boardId !== boardId) {
+		throw new AppError(APP_ERROR.NOT_FOUND, '존재하지 않는 게시글입니다.');
+	}
 	const postRaw =
-		options?.incrementView === true
-			? await PostService.viewPostById(postId)
-			: await PostService.getPostById(postId);
+		options?.incrementView === true ? await PostService.viewPostById(postId) : existingPost;
 	const [commentsAsc, files] = await Promise.all([
 		CommentService.getCommentsByPostId(postId),
 		FileMetaService.getFileMetasByArticleId(postId)

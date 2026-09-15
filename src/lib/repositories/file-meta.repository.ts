@@ -3,16 +3,16 @@ import { and, eq, inArray, lt, notExists } from 'drizzle-orm';
 import { asEntity } from './repository.utils.js';
 
 import type { FileId, FileMetaCreate, FileMetaEntity } from '$lib/types/file-meta.type.js';
-import type { PetitionId } from '$lib/types/petition.type.js';
 import type { PostId } from '$lib/types/post.type.js';
+import type { SubmissionId } from '$lib/types/submission.type.js';
 
 import {
 	banners,
 	fileMetas,
-	petitionFiles,
-	petitions,
 	postFiles,
-	posts
+	posts,
+	submissionFiles,
+	submissions
 } from '$lib/server/database/schema.js';
 import { getDatabase } from '$lib/server/db.js';
 
@@ -37,9 +37,9 @@ export async function findFileMetasByFileIds(
 }
 
 export async function findFileMetasByArticleId(
-	articleId: PostId | PetitionId
+	articleId: PostId | SubmissionId
 ): Promise<FileMetaEntity[]> {
-	const [postRows, petitionRows] = await Promise.all([
+	const [postRows, submissionRows] = await Promise.all([
 		getDatabase()
 			.select({ file: fileMetas })
 			.from(postFiles)
@@ -47,30 +47,30 @@ export async function findFileMetasByArticleId(
 			.where(eq(postFiles.postId, articleId)),
 		getDatabase()
 			.select({ file: fileMetas })
-			.from(petitionFiles)
-			.innerJoin(fileMetas, eq(petitionFiles.fileId, fileMetas.id))
-			.where(eq(petitionFiles.petitionId, articleId))
+			.from(submissionFiles)
+			.innerJoin(fileMetas, eq(submissionFiles.fileId, fileMetas.id))
+			.where(eq(submissionFiles.submissionId, articleId))
 	]);
-	return [...postRows, ...petitionRows].map(({ file }) => withArticleIds(file, [articleId]));
+	return [...postRows, ...submissionRows].map(({ file }) => withArticleIds(file, [articleId]));
 }
 
 export async function findFilePresenceEntriesByArticleIds(
-	articleIds: Array<PostId | PetitionId>
+	articleIds: Array<PostId | SubmissionId>
 ): Promise<Array<Pick<FileMetaEntity, 'articleIds' | 'mime'>>> {
 	if (articleIds.length === 0) return [];
-	const [postRows, petitionRows] = await Promise.all([
+	const [postRows, submissionRows] = await Promise.all([
 		getDatabase()
 			.select({ articleId: postFiles.postId, mime: fileMetas.mime })
 			.from(postFiles)
 			.innerJoin(fileMetas, eq(postFiles.fileId, fileMetas.id))
 			.where(inArray(postFiles.postId, articleIds)),
 		getDatabase()
-			.select({ articleId: petitionFiles.petitionId, mime: fileMetas.mime })
-			.from(petitionFiles)
-			.innerJoin(fileMetas, eq(petitionFiles.fileId, fileMetas.id))
-			.where(inArray(petitionFiles.petitionId, articleIds))
+			.select({ articleId: submissionFiles.submissionId, mime: fileMetas.mime })
+			.from(submissionFiles)
+			.innerJoin(fileMetas, eq(submissionFiles.fileId, fileMetas.id))
+			.where(inArray(submissionFiles.submissionId, articleIds))
 	]);
-	return [...postRows, ...petitionRows].map(({ articleId, mime }) => ({
+	return [...postRows, ...submissionRows].map(({ articleId, mime }) => ({
 		articleIds: [articleId],
 		mime
 	}));
@@ -87,7 +87,7 @@ export async function deleteFileMetasByFileIds(fileIds: FileId[]): Promise<boole
 
 export async function addArticleIdToFiles(
 	fileIds: FileId[],
-	articleId: PostId | PetitionId
+	articleId: PostId | SubmissionId
 ): Promise<boolean> {
 	if (fileIds.length === 0) return false;
 	const [post] = await getDatabase()
@@ -104,34 +104,34 @@ export async function addArticleIdToFiles(
 		return rows.length > 0;
 	}
 
-	const [petition] = await getDatabase()
-		.select({ id: petitions.id })
-		.from(petitions)
-		.where(eq(petitions.id, articleId))
+	const [submission] = await getDatabase()
+		.select({ id: submissions.id })
+		.from(submissions)
+		.where(eq(submissions.id, articleId))
 		.limit(1);
-	if (!petition) return false;
+	if (!submission) return false;
 	const rows = await getDatabase()
-		.insert(petitionFiles)
-		.values(fileIds.map((fileId) => ({ petitionId: articleId, fileId })))
+		.insert(submissionFiles)
+		.values(fileIds.map((fileId) => ({ submissionId: articleId, fileId })))
 		.onConflictDoNothing()
 		.returning();
 	return rows.length > 0;
 }
 
 export async function removeArticleIdFromAllFiles(
-	articleId: PostId | PetitionId
+	articleId: PostId | SubmissionId
 ): Promise<boolean> {
-	const [postRows, petitionRows] = await Promise.all([
+	const [postRows, submissionRows] = await Promise.all([
 		getDatabase()
 			.delete(postFiles)
 			.where(eq(postFiles.postId, articleId))
 			.returning({ fileId: postFiles.fileId }),
 		getDatabase()
-			.delete(petitionFiles)
-			.where(eq(petitionFiles.petitionId, articleId))
-			.returning({ fileId: petitionFiles.fileId })
+			.delete(submissionFiles)
+			.where(eq(submissionFiles.submissionId, articleId))
+			.returning({ fileId: submissionFiles.fileId })
 	]);
-	return postRows.length + petitionRows.length > 0;
+	return postRows.length + submissionRows.length > 0;
 }
 
 export async function findOrphanedFiles(cutoffTime: string): Promise<FileMetaEntity[]> {
@@ -143,7 +143,10 @@ export async function findOrphanedFiles(cutoffTime: string): Promise<FileMetaEnt
 				lt(fileMetas.createdAt, cutoffTime),
 				notExists(getDatabase().select().from(postFiles).where(eq(postFiles.fileId, fileMetas.id))),
 				notExists(
-					getDatabase().select().from(petitionFiles).where(eq(petitionFiles.fileId, fileMetas.id))
+					getDatabase()
+						.select()
+						.from(submissionFiles)
+						.where(eq(submissionFiles.fileId, fileMetas.id))
 				),
 				// 배너 이미지는 게시글에 붙지 않아 여기서 빼지 않으면 하루 뒤 지워진다.
 				notExists(getDatabase().select().from(banners).where(eq(banners.fileId, fileMetas.id)))

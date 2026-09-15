@@ -11,7 +11,10 @@ const ROLE_CAPABILITIES: Record<UserGroupType, Capability[]> = {
 		'comment.write',
 		'review.write',
 		'petition.write',
-		'petition.sign'
+		'petition.sign',
+		'feedback.write',
+		'feedback.support',
+		'audit.write'
 	],
 	[UserGroup.Moderator]: [
 		'board.free.write',
@@ -24,7 +27,10 @@ const ROLE_CAPABILITIES: Record<UserGroupType, Capability[]> = {
 		'review.write',
 		'push.send',
 		'petition.write',
-		'petition.sign'
+		'petition.sign',
+		'feedback.write',
+		'feedback.support',
+		'audit.write'
 	],
 	[UserGroup.Manager]: [
 		'board.free.write',
@@ -41,6 +47,12 @@ const ROLE_CAPABILITIES: Record<UserGroupType, Capability[]> = {
 		'petition.delete.any',
 		'petition.manage',
 		'petition.respond',
+		'feedback.write',
+		'feedback.support',
+		'feedback.delete.any',
+		'feedback.manage',
+		'feedback.respond',
+		'audit.write',
 		'course.manage',
 		'professor.manage',
 		'user.manage',
@@ -60,12 +72,31 @@ const ROLE_CAPABILITIES: Record<UserGroupType, Capability[]> = {
 		'petition.write',
 		'petition.sign',
 		'petition.delete.any',
+		'feedback.write',
+		'feedback.support',
+		'feedback.delete.any',
+		'feedback.manage',
+		'feedback.respond',
+		'audit.write',
 		'course.manage',
 		'professor.manage',
 		'user.manage',
 		'push.send',
 		'banner.manage',
 		'system.cleanup'
+	],
+	[UserGroup.Auditor]: [
+		'board.free.write',
+		'post.like',
+		'comment.write',
+		'review.write',
+		'petition.write',
+		'petition.sign',
+		'feedback.write',
+		'feedback.support',
+		'audit.write',
+		'audit.read',
+		'audit.manage'
 	]
 };
 

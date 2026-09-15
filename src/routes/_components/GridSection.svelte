@@ -1,48 +1,52 @@
 <script lang="ts">
-	import type { Petition } from '$lib/types/petition.type.js';
-	import type { Post } from '$lib/types/post.type.js';
-	import type { Review } from '$lib/types/review.type.js';
+	import type { PostPreview } from '$lib/types/post.type.js';
+	import type { ReviewPreview } from '$lib/types/review.type.js';
+	import type { SubmissionPreview } from '$lib/types/submission.type.js';
 
 	import { resolve } from '$app/paths';
+	import { getSubmissionStatusLabel } from '$lib/shared/submission.js';
 	import { parseDate } from '$lib/shared/utils.js';
-	import { translatedStatus, colorStatus } from '$lib/shared/view.js';
+	import { colorStatus } from '$lib/shared/view.js';
 
-	type GridLink = 'board/free' | 'board/notice' | 'petition' | 'review';
+	type GridLink = 'board/notice' | 'channel/petition' | 'channel/feedback' | 'academic/review';
+	type GridItem = ReviewPreview | PostPreview | SubmissionPreview;
 
-	let {
-		title,
-		items,
-		link
-	}: { title: string; items: Review[] | Post[] | Petition[]; link: GridLink } = $props();
+	let { title, items, link }: { title: string; items: GridItem[]; link: GridLink } = $props();
 </script>
 
 {#snippet Header()}
-	{@const sectionHref =
-		link === 'petition'
-			? resolve('/petition')
-			: link === 'review'
-				? resolve('/review')
-				: resolve('/board/[boardId=board]', {
-						boardId: link === 'board/notice' ? 'notice' : 'free'
-					})}
+	{@const sectionHref = link.startsWith('channel/')
+		? link === 'channel/petition'
+			? resolve('/channel/petition')
+			: resolve('/channel/feedback')
+		: link === 'academic/review'
+			? resolve('/academic/review')
+			: resolve('/board/[boardId=board]', { boardId: 'notice' })}
 	<h2>{title}<a href={sectionHref}>더보기</a></h2>
 {/snippet}
 
-{#snippet Item(item: Review | Post | Petition)}
+{#snippet Item(item: GridItem)}
 	{@const itemHref =
 		'boardId' in item
 			? resolve('/board/[boardId=board]/[postId]', {
 					boardId: item.boardId,
 					postId: item.id.toString()
 				})
-			: 'status' in item
-				? resolve('/petition/[petitionId]', { petitionId: item.id.toString() })
-				: resolve('/review/[reviewId]', { reviewId: item.id.toString() })}
+			: 'kind' in item
+				? item.kind === 'petition'
+					? resolve('/channel/petition/[submissionId]', { submissionId: item.id.toString() })
+					: resolve('/channel/feedback/[submissionId]', { submissionId: item.id.toString() })
+				: resolve('/academic/review/[reviewId]', { reviewId: item.id.toString() })}
 	<a href={itemHref} class="container grid-item">
 		<span>
-			{#if title === '청원'}
-				<span class={(item as Petition).status} style:color={colorStatus[(item as Petition).status]}
-					>[{translatedStatus[(item as Petition).status]}]</span
+			{#if 'kind' in item}
+				<span
+					class={(item as SubmissionPreview).status}
+					style:color={colorStatus[(item as SubmissionPreview).status]}
+					>[{getSubmissionStatusLabel(
+						(item as SubmissionPreview).kind,
+						(item as SubmissionPreview).status
+					)}]</span
 				>
 			{/if}
 			{item.title}

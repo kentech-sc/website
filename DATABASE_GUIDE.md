@@ -13,8 +13,11 @@
 
 ## 스키마
 
-- `app`: 애플리케이션 데이터
+- `app`: 사용자, 파일, 운영 데이터
 - `private`: 외부 인증 식별자처럼 브라우저에 노출하면 안 되는 데이터
+- `community`: 게시판, 공개 소통 글, 감사원 비공개 제보
+- `academic`: 강의, 시간표, 졸업 데이터
+- `points`: 포인트 원장과 집계 데이터
 
 `app.users.id`는 모든 도메인 관계의 기준인 내부 UUID다.
 `private.user_identities`는 `(issuer, subject)`를 내부 사용자 UUID에 연결한다. 이메일은
@@ -22,10 +25,14 @@
 
 좋아요, 청원 서명, 파일 연결 같은 다대다 관계는 다음 연결 테이블로 정규화한다.
 
-- `app.post_likes`
-- `app.petition_signatures`
-- `app.post_files`
-- `app.petition_files`
+- `community.post_likes`
+- `community.submission_supports`
+- `community.post_files`
+- `community.submission_files`
+
+청원·문의·건의는 `community.submissions`를 함께 사용하고 `kind`로 구분한다. 감사원 제보는
+공개 소통 글과 분리한 `community.audit_reports`에 제목·내용·처리 상태만 저장하며 작성자
+식별자는 저장하지 않는다.
 
 모든 테이블에는 RLS가 켜져 있지만 현재 정책은 의도적으로 없다. 애플리케이션은
 브라우저에서 Data API에 직접 접근하지 않고 SvelteKit 서버에서 권한을 검사한다. 런타임

@@ -1,0 +1,37 @@
+import { fail, redirect } from '@sveltejs/kit';
+
+import editorActions, { normalizeEditorContent } from '$lib/server/editor.js';
+import { withActionErrorHandling } from '$lib/server/errors.js';
+import { BoardId } from '$lib/types/board.type.js';
+import { DisplayType } from '$lib/types/user.type.js';
+import * as BoardUsecase from '$lib/usecase/board.usecase.js';
+
+export const load = () => {};
+
+export const actions = {
+	createPost: withActionErrorHandling(async ({ request, locals }) => {
+		const formData = await request.formData();
+		const title = (formData.get('title') ?? '').toString();
+		const content = (formData.get('content') ?? '').toString();
+		const displayTypeRaw = (formData.get('displayType') ?? '').toString();
+
+		if (!Object.values(DisplayType).includes(displayTypeRaw as DisplayType)) {
+			return fail(400, { message: '표시 방식이 올바르지 않습니다.' });
+		}
+		if (!title || !content) return fail(400, { message: '제목과 내용은 필수입니다.' });
+
+		const fileIds = formData.getAll('fileIds').map((fileId) => fileId.toString());
+		const normalizedEditor = await normalizeEditorContent(content, fileIds);
+		const post = await BoardUsecase.createPost(
+			BoardId.Bylaw,
+			title,
+			normalizedEditor.content,
+			locals.user,
+			displayTypeRaw as DisplayType,
+			normalizedEditor.fileIds
+		);
+
+		throw redirect(302, '/bylaw/' + post.id);
+	}),
+	...editorActions
+};

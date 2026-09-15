@@ -3,7 +3,13 @@ import { and, desc, eq, ilike, inArray, or, sql } from 'drizzle-orm';
 import { asEntity, firstOrNull } from './repository.utils.js';
 
 import type { BoardId } from '$lib/types/board.type.js';
-import type { PostCreate, PostEntity, PostId, PostUpdate } from '$lib/types/post.type.js';
+import type {
+	PostCreate,
+	PostEntity,
+	PostId,
+	PostPreview,
+	PostUpdate
+} from '$lib/types/post.type.js';
 import type { UserId } from '$lib/types/user.type.js';
 
 import { postLikes, posts } from '$lib/server/database/schema.js';
@@ -78,6 +84,24 @@ export async function findRecentPostsByBoardId(
 		.offset(skip)
 		.limit(limit);
 	return await hydratePosts(rows);
+}
+
+export async function findRecentPostPreviewsByBoardId(
+	boardId: BoardId,
+	limit: number
+): Promise<PostPreview[]> {
+	const rows = await getDatabase()
+		.select({
+			id: posts.id,
+			title: posts.title,
+			createdAt: posts.createdAt
+		})
+		.from(posts)
+		.where(eq(posts.boardId, boardId))
+		.orderBy(desc(posts.createdAt))
+		.limit(limit);
+
+	return rows.map((row) => ({ ...row, boardId }));
 }
 
 export async function updatePostById(

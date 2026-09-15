@@ -1,7 +1,13 @@
 import type { CourseId } from '$lib/types/course.type.js';
 import type { Page } from '$lib/types/general.type.js';
 import type { ProfessorId } from '$lib/types/professor.type.js';
-import type { ReviewCreate, ReviewEntity, ReviewId, ReviewUpdate } from '$lib/types/review.type.js';
+import type {
+	ReviewCreate,
+	ReviewEntity,
+	ReviewId,
+	ReviewPreview,
+	ReviewUpdate
+} from '$lib/types/review.type.js';
 import type { User } from '$lib/types/user.type.js';
 
 import * as AcademicRepository from '$lib/repositories/academic.repository.js';
@@ -48,6 +54,10 @@ export async function getReviewPage(
 		ReviewRepository.countReviews(professorId, courseId)
 	]);
 	return createPage<ReviewEntity>(result, totalCount, limit, skip);
+}
+
+export async function getReviewPreviews(limit = 5): Promise<ReviewPreview[]> {
+	return await ReviewRepository.findRecentReviewPreviews(limit);
 }
 
 export async function editReviewById(

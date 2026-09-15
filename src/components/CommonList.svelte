@@ -1,40 +1,47 @@
 <script lang="ts">
 	import type { FilePresence, Page } from '$lib/types/general.type.js';
-	import type { Petition } from '$lib/types/petition.type';
 	import type { Post } from '$lib/types/post.type.js';
 	import type { Review } from '$lib/types/review.type';
+	import type { Submission } from '$lib/types/submission.type.js';
 
 	import { resolve } from '$app/paths';
 	import CommonListPaginationBtn from '$components/CommonListPaginationBtn.svelte';
 	import FileAttachmentIcons from '$components/FileAttachmentIcons.svelte';
+	import { boardPostPath } from '$lib/shared/paths.js';
+	import {
+		getSubmissionStatusLabel,
+		SUBMISSION_CATEGORY_LABELS,
+		SUBMISSION_KIND_LABELS
+	} from '$lib/shared/submission.js';
 	import { parseRelativeDate } from '$lib/shared/utils.js';
-	import { colorStatus, translatedStatus, translatedTerm } from '$lib/shared/view';
+	import { colorStatus, translatedTerm } from '$lib/shared/view';
+	import { SubmissionKind } from '$lib/types/submission.type.js';
 
 	let {
 		page,
 		filePresence
 	}: {
-		page: Page<Post | Petition | Review>;
+		page: Page<Post | Submission | Review>;
 		filePresence: FilePresence;
 	} = $props();
 </script>
 
-{#snippet ListItem(item: Post | Petition | Review)}
+{#snippet ListItem(item: Post | Submission | Review)}
 	{@const itemHref =
 		'boardId' in item
-			? resolve('/board/[boardId=board]/[postId]', {
-					boardId: item.boardId,
-					postId: item.id.toString()
-				})
+			? boardPostPath(item.boardId, item.id.toString())
 			: 'status' in item
-				? resolve('/petition/[petitionId]', { petitionId: item.id.toString() })
-				: resolve('/review/[reviewId]', { reviewId: item.id.toString() })}
+				? item.kind === SubmissionKind.Petition
+					? resolve('/channel/petition/[submissionId]', { submissionId: item.id.toString() })
+					: resolve('/channel/feedback/[submissionId]', { submissionId: item.id.toString() })
+				: resolve('/academic/review/[reviewId]', { reviewId: item.id.toString() })}
 	<a href={itemHref} class="list-item">
 		<div class="row1">
 			{#if 'status' in item}
 				<span class="petition-status" style:color={colorStatus[item.status]}
-					>[{translatedStatus[item.status]}]</span
+					>[{getSubmissionStatusLabel(item.kind, item.status)}]</span
 				>
+				<span class="submission-kind">[{SUBMISSION_KIND_LABELS[item.kind]}]</span>
 			{/if}
 			<span class="title">{item.title}</span>
 			<FileAttachmentIcons
@@ -47,8 +54,15 @@
 			<span>
 				{#if 'likedBy' in item}
 					{item.displayName} | 조회 {item.viewCnt} | 좋아요 {item.likedBy.length}
-				{:else if 'signedBy' in item}
-					{item.petitionerName} | 조회 {item.viewCnt} | 동의 {item.signedBy.length}
+				{:else if 'supporterIds' in item}
+					{item.authorName} | 조회 {item.viewCnt} | {item.kind === SubmissionKind.Inquiry
+						? '궁금해요'
+						: item.kind === SubmissionKind.Suggestion
+							? '공감'
+							: '동의'}
+					{item.supporterIds.length}
+					{#if item.category}
+						| {SUBMISSION_CATEGORY_LABELS[item.category]}{/if}
 				{:else if 'score' in item}
 					{item.professors.length
 						? `${item.professors.map((professor) => professor.name).join(', ')} 교수`
@@ -68,7 +82,7 @@
 	.list-item {
 		display: flex;
 		flex-direction: column;
-		border-bottom: solid var(--gray-border) 0.05rem;
+		border-bottom: solid var(--gray-border) 0.1rem;
 		padding: 0.6rem 0.8rem;
 		width: 100%;
 		color: black;
@@ -112,5 +126,11 @@
 	.petition-status {
 		margin-right: 0.2rem;
 		font-weight: 600;
+	}
+	.submission-kind {
+		margin-right: 0.2rem;
+		color: var(--secondary);
+		font-weight: 600;
+		font-size: 0.8rem;
 	}
 </style>

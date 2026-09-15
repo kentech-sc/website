@@ -13,7 +13,7 @@ Sentry.init({
 	enabled: sentryEnabled,
 	dsn: sentryEnabled ? sentryDsn : undefined,
 	environment: sentryEnabled ? sentryEnvironment : undefined,
-	tracesSampleRate: 1.0,
+	tracesSampleRate: 0.1,
 
 	// Enable logs to be sent to Sentry
 	enableLogs: true

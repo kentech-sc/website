@@ -1,0 +1,52 @@
+<script lang="ts">
+	import { SvelteURLSearchParams } from 'svelte/reactivity';
+
+	import ReviewFilter from './_components/ReviewFilter.svelte';
+	import ReviewHeader from './_components/ReviewHeader.svelte';
+	import ReviewList from './_components/ReviewList.svelte';
+
+	import type { Course } from '$lib/types/course.type.js';
+	import type { Professor } from '$lib/types/professor.type.js';
+
+	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
+	import { page } from '$app/state';
+
+	let { data } = $props();
+	const reviewPage = $derived(data.reviewPage);
+	const canCreateReview = $derived<boolean>(data.canCreateReview);
+	let selectedCourse = $derived<string>(data.courseId ?? '');
+	let selectedProfessor = $derived<string>(data.professorId ?? '');
+
+	$effect(() => {
+		const params = new SvelteURLSearchParams(page.url.searchParams);
+
+		params.set('course', selectedCourse);
+		params.set('professor', selectedProfessor);
+
+		const currentPath = `${page.url.pathname}${page.url.search}`;
+		const nextPath = params.toString()
+			? resolve(`/academic/review?${params}`)
+			: resolve('/academic/review');
+
+		if (nextPath !== currentPath) {
+			goto(nextPath);
+		}
+	});
+
+	const courses = $derived<Course[]>(data.courses);
+	const professors = $derived<Professor[]>(data.professors);
+	const courseIdsByProfessor = $derived<Record<string, string[]>>(data.courseIdsByProfessor);
+</script>
+
+<ReviewHeader pageType="list" {canCreateReview} />
+
+<ReviewFilter
+	{courses}
+	{professors}
+	{courseIdsByProfessor}
+	bind:selectedCourse
+	bind:selectedProfessor
+/>
+
+<ReviewList {reviewPage} />

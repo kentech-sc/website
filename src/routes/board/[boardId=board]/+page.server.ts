@@ -1,17 +1,16 @@
 import { AppError, withLoadErrorHandling } from '$lib/server/errors.js';
+import { isBoardId } from '$lib/shared/board.js';
 import { APP_ERROR } from '$lib/shared/rule.js';
-import { BoardId, type BoardId as BoardIdType } from '$lib/types/board.type.js';
 import * as BoardUsecase from '$lib/usecase/board.usecase.js';
 
 export const load = withLoadErrorHandling(async ({ url, params, locals }) => {
 	const boardIdRaw = params.boardId;
-	if (!Object.values(BoardId).includes(boardIdRaw as BoardIdType)) {
+	if (!isBoardId(boardIdRaw)) {
 		throw new AppError(APP_ERROR.BAD_REQUEST, '유효하지 않은 게시판입니다.');
 	}
 
-	const boardId = boardIdRaw as BoardIdType;
 	const page = Math.max(1, Number(url.searchParams.get('page') ?? '1') || 1);
-	const postResult = await BoardUsecase.getBoardPage(boardId, page, locals.user);
+	const postResult = await BoardUsecase.getBoardPage(boardIdRaw, page, locals.user);
 
 	return postResult;
 });

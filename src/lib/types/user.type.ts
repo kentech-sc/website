@@ -3,7 +3,8 @@ export const UserGroup = {
 	User: 'user',
 	Dev: 'dev',
 	Moderator: 'moderator',
-	Manager: 'manager'
+	Manager: 'manager',
+	Auditor: 'auditor'
 } as const;
 
 export type UserGroup = (typeof UserGroup)[keyof typeof UserGroup];

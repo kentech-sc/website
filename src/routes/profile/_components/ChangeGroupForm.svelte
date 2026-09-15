@@ -43,6 +43,7 @@
 				<option value="user">user</option>
 				<option value="moderator">moderator</option>
 				<option value="manager">manager</option>
+				<option value="auditor">auditor</option>
 			</select>
 		</CommonLabel>
 

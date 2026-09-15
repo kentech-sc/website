@@ -1,83 +1,27 @@
-import type { ActivityLogCreate } from '$lib/types/activity-log.type.js';
 import type { FileId } from '$lib/types/file-meta.type.js';
 import type { FilePresence } from '$lib/types/general.type.js';
 import type { Page } from '$lib/types/general.type.js';
-import type { PetitionId } from '$lib/types/petition.type.js';
-import type { Petition, PetitionEntity } from '$lib/types/petition.type.js';
+import type { Submission, SubmissionId } from '$lib/types/submission.type.js';
 
 import { transaction } from '$lib/server/db.js';
-import * as ActivityLogService from '$lib/services/activity-log.service.js';
 import * as FileMetaService from '$lib/services/file-meta.service.js';
 import * as PetitionService from '$lib/services/petition.service.js';
 import * as PointService from '$lib/services/point.service.js';
 import * as ThrottleService from '$lib/services/throttle.service.js';
-import * as UserService from '$lib/services/user.service.js';
 import { hasCapability } from '$lib/shared/permission.js';
-import { createDisplayName } from '$lib/shared/utils.js';
-import { DisplayType, type User, type UserId } from '$lib/types/user.type.js';
-
-function collectPetitionUserIds(
-	petitions: PetitionEntity[],
-	extraUserIds: UserId[] = []
-): Array<UserId> {
-	return [
-		...petitions.map((petition) => petition.petitionerId),
-		...petitions
-			.filter((petition) => petition.responderId !== null)
-			.map((petition) => petition.responderId as UserId),
-		...extraUserIds
-	];
-}
-
-export async function findPetitionUserMap(
-	petitions: PetitionEntity[],
-	extraUserIds: UserId[] = []
-): Promise<Map<string, User>> {
-	return await UserService.findUserMapByIds(collectPetitionUserIds(petitions, extraUserIds));
-}
-
-export function attachPetitionNames(
-	petitions: PetitionEntity[],
-	userIdToUser: Map<string, User>
-): Petition[] {
-	return petitions.map((petition) => {
-		const petitioner = userIdToUser.get(petition.petitionerId.toString());
-		const responder =
-			petition.responderId === null ? undefined : userIdToUser.get(petition.responderId.toString());
-
-		return {
-			...petition,
-			petitionerName: petitioner ? createDisplayName(petitioner, DisplayType.RealName) : null,
-			responderName: responder ? createDisplayName(responder, DisplayType.RealName) : null
-		};
-	});
-}
-
-function getSignerNames(petition: PetitionEntity, userIdToUser: Map<string, User>): string[] {
-	return petition.signedBy
-		.map((userId) => {
-			const user = userIdToUser.get(userId.toString());
-			return user ? createDisplayName(user, DisplayType.RealName) : null;
-		})
-		.filter((name): name is string => name !== null);
-}
-
-async function getPetitionLogSnapshot(petition: PetitionEntity) {
-	const files = await FileMetaService.getFileMetasByArticleId(petition.id);
-	return {
-		...petition,
-		fileIds: files.map((file) => file.id)
-	};
-}
-
-function toPetitionResponseSnapshot(petition: PetitionEntity) {
-	return {
-		responderId: petition.responderId,
-		response: petition.response,
-		answeredAt: petition.answeredAt,
-		status: petition.status
-	};
-}
+import { SubmissionKind } from '$lib/types/submission.type.js';
+import { DisplayType, type User } from '$lib/types/user.type.js';
+import {
+	attachSubmissionNames,
+	findSubmissionUserMap,
+	getSubmissionLogSnapshot,
+	getSupporterNames,
+	recordResponseCreate,
+	recordResponseDelete,
+	recordResponseEdit,
+	recordSubmissionCreate,
+	recordSubmissionDelete
+} from '$lib/usecase/submission.usecase.js';
 
 export async function getPetitionPage(page: number, user: User) {
 	const limit = 10;
@@ -85,20 +29,20 @@ export async function getPetitionPage(page: number, user: User) {
 
 	const petitionPage = await PetitionService.getPetitionPage(limit, skip);
 	const [userIdToUser, filePresence] = await Promise.all([
-		findPetitionUserMap(petitionPage.items),
+		findSubmissionUserMap(petitionPage.items),
 		FileMetaService.getFilePresenceByArticleIds(petitionPage.items.map((petition) => petition.id))
 	]);
-	petitionPage.items = attachPetitionNames(petitionPage.items, userIdToUser);
+	petitionPage.items = attachSubmissionNames(petitionPage.items, userIdToUser);
 
 	return {
-		petitionPage: petitionPage as Page<Petition>,
+		petitionPage: petitionPage as Page<Submission>,
 		filePresence: filePresence as FilePresence,
 		canCreatePetition: hasCapability(user, 'petition.write')
 	};
 }
 
 export async function getPetitionDetail(
-	petitionId: PetitionId,
+	petitionId: SubmissionId,
 	user: User,
 	options?: { incrementView?: boolean }
 ) {
@@ -107,15 +51,15 @@ export async function getPetitionDetail(
 			? await PetitionService.viewPetitionById(petitionId)
 			: await PetitionService.getPetitionById(petitionId);
 	const [userIdToUser, files] = await Promise.all([
-		findPetitionUserMap([petitionRaw], petitionRaw.signedBy),
+		findSubmissionUserMap([petitionRaw], petitionRaw.supporterIds),
 		FileMetaService.getFileMetasByArticleId(petitionId)
 	]);
-	const [petition] = attachPetitionNames([petitionRaw], userIdToUser);
-	const signerNames = getSignerNames(petitionRaw, userIdToUser);
+	const [petition] = attachSubmissionNames([petitionRaw], userIdToUser);
+	const supporterNames = getSupporterNames(petitionRaw, userIdToUser);
 
 	return {
 		petition,
-		signerNames,
+		supporterNames,
 		files,
 		permissions: PetitionService.getPetitionPermissions(petition, user)
 	};
@@ -131,125 +75,82 @@ export async function createPetition(
 		await ThrottleService.reserve(petitioner.id, 'article');
 		const petition = await PetitionService.createPetition(
 			{
+				kind: SubmissionKind.Petition,
+				category: null,
+				displayType: DisplayType.RealName,
 				title,
 				content,
-				petitionerId: petitioner.id
+				authorId: petitioner.id
 			},
 			petitioner
 		);
 		await FileMetaService.linkArticleToFiles(fileIds, petition.id);
-		const petitionSnapshot = await getPetitionLogSnapshot(petition);
-		const activityLog: ActivityLogCreate = {
-			actorId: petitioner.id,
-			action: 'create',
-			targetType: 'petition',
-			targetId: petition.id,
-			cause: 'direct',
-			beforeSnapshot: null,
-			afterSnapshot: petitionSnapshot
-		};
-		await ActivityLogService.create(activityLog);
+		await recordSubmissionCreate(petitioner.id, petition);
 		await PointService.awardPetitionCreate(petitioner.id, petition.id);
 		return petition;
 	});
 }
 
-export async function deletePetitionById(petitionId: PetitionId, user: User) {
+export async function deletePetitionById(petitionId: SubmissionId, user: User) {
 	return await transaction(async () => {
 		const beforePetition = await PetitionService.getPetitionById(petitionId);
-		const petitionSnapshot = await getPetitionLogSnapshot(beforePetition);
+		const petitionSnapshot = await getSubmissionLogSnapshot(beforePetition);
 		const petition = await PetitionService.deletePetitionById(petitionId, user);
 		await FileMetaService.unlinkArticleFromAllFiles(petitionId);
-		const activityLog: ActivityLogCreate = {
-			actorId: user.id,
-			action: 'delete',
-			targetType: 'petition',
-			targetId: petition.id,
-
-			cause: 'direct',
-			beforeSnapshot: petitionSnapshot,
-			afterSnapshot: null
-		};
-		await ActivityLogService.create(activityLog);
+		await recordSubmissionDelete(user.id, petition.id, petitionSnapshot);
 	});
 }
 
-export async function signPetition(petitionId: PetitionId, user: User) {
+export async function signPetition(petitionId: SubmissionId, user: User) {
 	return await transaction(async () => {
 		const petition = await PetitionService.signPetitionById(petitionId, user);
-		await PointService.applyPetitionSignDelta(petition.petitionerId, petitionId, user.id, 2);
+		await PointService.applyPetitionSignDelta(petition.authorId, petitionId, user.id, 2);
 		return petition;
 	});
 }
 
-export async function unsignPetition(petitionId: PetitionId, user: User) {
+export async function unsignPetition(petitionId: SubmissionId, user: User) {
 	return await transaction(async () => {
 		const petition = await PetitionService.unsignPetitionById(petitionId, user);
-		await PointService.applyPetitionSignDelta(petition.petitionerId, petitionId, user.id, -2);
+		await PointService.applyPetitionSignDelta(petition.authorId, petitionId, user.id, -2);
 		return petition;
 	});
 }
 
-export async function reviewPetition(petitionId: PetitionId, user: User) {
+export async function reviewPetition(petitionId: SubmissionId, user: User) {
 	return await PetitionService.reviewPetitionById(petitionId, user);
 }
 
-export async function unreviewPetition(petitionId: PetitionId, user: User) {
+export async function unreviewPetition(petitionId: SubmissionId, user: User) {
 	return await PetitionService.unreviewPetitionById(petitionId, user);
 }
 
-export async function respondToPetition(petitionId: PetitionId, user: User, response: string) {
+export async function respondToPetition(submissionId: SubmissionId, user: User, response: string) {
 	return await transaction(async () => {
-		const petition = await PetitionService.responseToPetitionById(petitionId, user, response);
-		const activityLog: ActivityLogCreate = {
-			actorId: user.id,
-			action: 'create',
-			targetType: 'petition-response',
-			targetId: petition.id,
-
-			cause: 'direct',
-			beforeSnapshot: null,
-			afterSnapshot: toPetitionResponseSnapshot(petition)
-		};
-		await ActivityLogService.create(activityLog);
+		const petition = await PetitionService.responseToPetitionById(submissionId, user, response);
+		await recordResponseCreate(user.id, petition);
 		return petition;
 	});
 }
 
-export async function editPetitionResponse(petitionId: PetitionId, user: User, response: string) {
+export async function editPetitionResponse(
+	submissionId: SubmissionId,
+	user: User,
+	response: string
+) {
 	return await transaction(async () => {
-		const beforePetition = await PetitionService.getPetitionById(petitionId);
-		const petition = await PetitionService.reviseResponseById(petitionId, user, response);
-		const activityLog: ActivityLogCreate = {
-			actorId: user.id,
-			action: 'edit',
-			targetType: 'petition-response',
-			targetId: petition.id,
-
-			cause: 'direct',
-			beforeSnapshot: toPetitionResponseSnapshot(beforePetition),
-			afterSnapshot: toPetitionResponseSnapshot(petition)
-		};
-		await ActivityLogService.create(activityLog);
+		const beforePetition = await PetitionService.getPetitionById(submissionId);
+		const petition = await PetitionService.reviseResponseById(submissionId, user, response);
+		await recordResponseEdit(user.id, beforePetition, petition);
 		return petition;
 	});
 }
 
-export async function deletePetitionResponse(petitionId: PetitionId, user: User) {
+export async function deletePetitionResponse(submissionId: SubmissionId, user: User) {
 	return await transaction(async () => {
-		const beforePetition = await PetitionService.getPetitionById(petitionId);
-		const petition = await PetitionService.deleteResponseById(petitionId, user);
-		const activityLog: ActivityLogCreate = {
-			actorId: user.id,
-			action: 'delete',
-			targetType: 'petition-response',
-			targetId: petitionId,
-
-			cause: 'direct',
-			beforeSnapshot: toPetitionResponseSnapshot(beforePetition),
-			afterSnapshot: null
-		};
-		await ActivityLogService.create(activityLog);
+		const beforePetition = await PetitionService.getPetitionById(submissionId);
+		const petition = await PetitionService.deleteResponseById(submissionId, user);
+		await recordResponseDelete(user.id, beforePetition);
 		return petition;
 	});
 }

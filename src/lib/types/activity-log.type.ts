@@ -1,23 +1,30 @@
 import type { CommentEntity } from './comment.type.js';
 import type { FileId } from './file-meta.type.js';
-import type { PetitionEntity } from './petition.type.js';
 import type { PostEntity } from './post.type.js';
 import type { ReviewEntity } from './review.type.js';
+import type { SubmissionEntity } from './submission.type.js';
 import type { UserId } from './user.type.js';
 
-type ActivityTarget = 'post' | 'comment' | 'review' | 'petition' | 'petition-response';
+type ActivityTarget =
+	| 'post'
+	| 'comment'
+	| 'review'
+	| 'petition'
+	| 'petition-response'
+	| 'submission'
+	| 'submission-response';
 type ActivityCause = 'direct' | 'post-delete-cascade';
 
 interface PostLogSnapshot extends PostEntity {
 	fileIds: FileId[];
 }
 
-interface PetitionLogSnapshot extends PetitionEntity {
+interface SubmissionLogSnapshot extends SubmissionEntity {
 	fileIds: FileId[];
 }
 
-type PetitionResponseSnapshot = Pick<
-	PetitionEntity,
+type SubmissionResponseSnapshot = Pick<
+	SubmissionEntity,
 	'responderId' | 'response' | 'answeredAt' | 'status'
 >;
 
@@ -56,12 +63,17 @@ export type ActivityLogCreate =
 	| CreateActivityLog<'review', ReviewEntity>
 	| EditActivityLog<'review', ReviewEntity>
 	| DeleteActivityLog<'review', ReviewEntity>
-	| CreateActivityLog<'petition', PetitionLogSnapshot>
-	| EditActivityLog<'petition', PetitionLogSnapshot>
-	| DeleteActivityLog<'petition', PetitionLogSnapshot>
-	| CreateActivityLog<'petition-response', PetitionResponseSnapshot>
-	| EditActivityLog<'petition-response', PetitionResponseSnapshot>
-	| DeleteActivityLog<'petition-response', PetitionResponseSnapshot>;
+	| CreateActivityLog<'petition', SubmissionLogSnapshot>
+	| EditActivityLog<'petition', SubmissionLogSnapshot>
+	| DeleteActivityLog<'petition', SubmissionLogSnapshot>
+	| CreateActivityLog<'petition-response', SubmissionResponseSnapshot>
+	| EditActivityLog<'petition-response', SubmissionResponseSnapshot>
+	| DeleteActivityLog<'petition-response', SubmissionResponseSnapshot>
+	| CreateActivityLog<'submission', SubmissionLogSnapshot>
+	| DeleteActivityLog<'submission', SubmissionLogSnapshot>
+	| CreateActivityLog<'submission-response', SubmissionResponseSnapshot>
+	| EditActivityLog<'submission-response', SubmissionResponseSnapshot>
+	| DeleteActivityLog<'submission-response', SubmissionResponseSnapshot>;
 
 export type ActivityLogEntity = ActivityLogCreate & {
 	id: number;

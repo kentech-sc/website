@@ -6,21 +6,26 @@
 	import Message from '@lucide/svelte/icons/message-circle';
 	import PenTool from '@lucide/svelte/icons/pen-tool';
 
-	import type { Petition } from '$lib/types/petition.type';
 	import type { Post } from '$lib/types/post.type';
 	import type { Review } from '$lib/types/review.type';
+	import type { Submission } from '$lib/types/submission.type.js';
 	import type { Snippet } from 'svelte';
 
+	import {
+		getSubmissionStatusLabel,
+		SUBMISSION_CATEGORY_LABELS,
+		SUBMISSION_KIND_LABELS
+	} from '$lib/shared/submission.js';
 	import { parseDate } from '$lib/shared/utils.js';
-	import { colorStatus, translatedStatus, translatedTerm } from '$lib/shared/view';
+	import { colorStatus, translatedTerm } from '$lib/shared/view';
 
 	const {
 		type,
 		item,
 		children
 	}: {
-		type: 'post' | 'petition' | 'review';
-		item: Post | Petition | Review;
+		type: 'post' | 'submission' | 'review';
+		item: Post | Submission | Review;
 		children: Snippet;
 	} = $props();
 </script>
@@ -29,10 +34,11 @@
 	<h2 class="title">
 		{#if type === 'review'}
 			[{(item as Review).courseId}] {(item as Review).courseName}
-		{:else if type === 'petition'}
-			<span class="petition-status" style:color={colorStatus[(item as Petition).status]}>
-				[{translatedStatus[(item as Petition).status]}]
+		{:else if type === 'submission'}
+			<span class="petition-status" style:color={colorStatus[(item as Submission).status]}>
+				[{getSubmissionStatusLabel((item as Submission).kind, (item as Submission).status)}]
 			</span>
+			<span class="submission-kind">[{SUBMISSION_KIND_LABELS[(item as Submission).kind]}]</span>
 			{item.title}
 		{:else}
 			{item.title}
@@ -44,8 +50,8 @@
 	<p class="author">
 		{#if type === 'post'}
 			{(item as Post).displayName}
-		{:else if type === 'petition'}
-			{(item as Petition).petitionerName}
+		{:else if type === 'submission'}
+			{(item as Submission).authorName}
 		{:else}
 			{(item as Review).professors.length
 				? `${(item as Review).professors.map((professor) => professor.name).join(', ')} 교수`
@@ -61,12 +67,15 @@
 			<span><Eye size="0.8rem" color="var(--gray-text)" />{(item as Post).viewCnt}</span>
 			<span><Message size="0.8rem" color="var(--gray-text)" />{(item as Post).commentCnt}</span>
 			<span><Heart size="0.8rem" color="var(--gray-text)" />{(item as Post).likedBy.length}</span>
-		{:else if type === 'petition'}
-			<span><Eye size="0.8rem" color="var(--gray-text)" />{(item as Petition).viewCnt}</span>
+		{:else if type === 'submission'}
+			<span><Eye size="0.8rem" color="var(--gray-text)" />{(item as Submission).viewCnt}</span>
 			<span
-				><PenTool size="0.8rem" color="var(--gray-text)" />{(item as Petition).signedBy
+				><PenTool size="0.8rem" color="var(--gray-text)" />{(item as Submission).supporterIds
 					.length}</span
 			>
+			{#if (item as Submission).category}
+				<span>{SUBMISSION_CATEGORY_LABELS[(item as Submission).category!]}</span>
+			{/if}
 		{:else}
 			<span>
 				<Calendar size="0.8rem" color="var(--gray-text)" />
@@ -113,5 +122,10 @@
 	}
 	.petition-status {
 		margin-right: 0.2rem;
+	}
+
+	.submission-kind {
+		margin-right: 0.2rem;
+		color: var(--secondary);
 	}
 </style>

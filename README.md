@@ -9,15 +9,18 @@ KENTECH 학생회 웹사이트 저장소입니다. 내부 개발자 기준으로
 - 게시판
   - `/board/free`
   - `/board/notice`
-  - `/board/bylaw`
-- 청원
-  - `/petition`
-  - `/petition/[petitionId]`
-- 강의평가
-  - `/review`
-  - `/review/[reviewId]`
-- 강의/교수 관리
-  - `/course/new`
+- 회칙·세칙
+  - `/bylaw`
+- 소통창구
+  - `/channel/petition`
+  - `/channel/feedback`
+  - `/channel/audit`
+- 학업
+  - `/academic/credits`
+  - `/academic/timetable`
+  - `/academic/review`
+  - `/academic/review/[reviewId]`
+  - `/academic/courses` (관리자)
 - 검색
   - `/search`
 - 프로필 및 운영 관리
@@ -25,15 +28,16 @@ KENTECH 학생회 웹사이트 저장소입니다. 내부 개발자 기준으로
 - 로그인
   - `/signin`
 
-홈 화면(`/`)에서는 공지, 청원, 자유게시판, 강의평가 목록 일부를 모아 보여줍니다.
+홈 화면(`/`)에서는 공지, 청원, 문의·건의, 강의평가 목록 일부를 모아 보여줍니다.
 
 ## 최근 서버 동작 기준
 
 - 작성 도배 방지
-  - 게시글/강의평가/청원 작성은 `article` 버킷으로 묶여 10초 쿨다운을 공유합니다.
+  - 게시글/강의평가/청원/문의·건의/감사원 제보 작성은 `article` 버킷으로 묶여 15초 쿨다운을 공유합니다.
   - 댓글 작성은 `comment` 버킷으로 3초 쿨다운을 사용합니다.
 - 콘텐츠 활동 로그
-  - `post`, `comment`, `review`, `petition`, `petition-response`의 성공한 `create/edit/delete`만 기록합니다.
+  - 게시글, 댓글, 강의평가와 공개 소통 글의 성공한 생성·수정·삭제만 기록합니다.
+  - 감사원 제보는 작성자와 제보를 연결하는 로그를 남기지 않습니다.
   - 로그는 append-only 테이블인 `activity_logs`에 저장합니다.
 - 사용자 포인트
   - 게시글 작성 `+5` 하루 1회
@@ -159,11 +163,13 @@ Google 로그인을 사용하되 `@kentech.ac.kr` Workspace 계정만 허용합�
 - `guest`
   - 비로그인 사용자입니다.
 - `user`
-  - 자유게시판 작성, 댓글 작성, 게시글 좋아요, 청원 작성/서명, 강의평가 작성이 가능합니다.
+  - 자유게시판 작성, 댓글 작성, 게시글 좋아요, 청원 작성/서명, 문의·건의, 익명 제보, 강의평가 작성이 가능합니다.
 - `moderator`
   - 게시글/댓글 관리, 공지/회칙 게시판 작성, 전체 푸시 발송 권한이 추가됩니다.
 - `manager`
   - 강의평가 관리, 청원 관리/응답, 강의/교수 관리, 사용자 관리 권한이 추가됩니다.
+- `auditor`
+  - 일반 사용자 기능과 감사원 비공개 제보의 열람·상태 관리 권한을 가집니다.
 - `dev`
   - 개발 운영용 권한 그룹으로, 게시판/댓글 관리와 강의/교수/사용자 관리, orphan 파일 정리 권한을 가집니다.
 
@@ -171,9 +177,10 @@ Google 로그인을 사용하되 `@kentech.ac.kr` Workspace 계정만 허용합�
 
 코드 기준으로 아래 경로는 비로그인 사용자가 접근하면 `/signin`으로 리다이렉트됩니다.
 
-- `/petition`
-- `/course`
-- `/review`
+- `/channel/petition`
+- `/channel/feedback/new`
+- `/channel/audit`
+- `/academic`
 - `/profile`
 - `/board/free/new`, `/board/notice/new`, `/board/bylaw/new`
 - `/board/free/[postId]/edit`, `/board/notice/[postId]/edit`, `/board/bylaw/[postId]/edit`
@@ -182,7 +189,7 @@ Google 로그인을 사용하되 `@kentech.ac.kr` Workspace 계정만 허용합�
 
 ## 콘텐츠 및 파일 처리
 
-- 게시글과 청원 작성 폼은 공용 에디터를 사용합니다.
+- 게시글과 청원·문의·건의 작성 폼은 공용 에디터를 사용합니다.
 - 에디터 파일은 presigned URL을 이용해 브라우저에서 S3-compatible storage로 직접 전송됩니다.
 - 파일 하나는 최대 20MB, 한 번의 선택은 최적화 후 합계 50MB까지 허용합니다.
 - 큰 본문 이미지는 브라우저에서 최대 2560px WebP로 조건부 최적화합니다.
@@ -191,7 +198,7 @@ Google 로그인을 사용하되 `@kentech.ac.kr` Workspace 계정만 허용합�
 - 업로드된 파일은 `file meta`로 관리되며, 본문 이미지와 첨부 파일이 최종 저장 전에 정규화됩니다.
 - 본문 이미지에는 `data-file-id`가 연결되고, 저장 시 실제 접근 가능한 경로로 치환됩니다.
 - 이미지 외 첨부 파일과 본문 이미지 사용 파일을 합쳐 article과 연결합니다.
-- 파일 연결은 `post_files`, `petition_files` 관계 테이블에 저장합니다.
+- 파일 연결은 `post_files`, `submission_files` 관계 테이블에 저장합니다.
 - 24시간 이상 article과 연결되지 않은 완료 파일은 매일 Vercel Cron으로 정리합니다.
 - 완료되지 않은 `_pending/` 객체는 object storage lifecycle 규칙으로 정리합니다.
 - 현재 스토리지 카테고리는 이미지와 문서 파일 업로드를 기준으로 구성되어 있습니다.
@@ -202,6 +209,8 @@ Google 로그인을 사용하되 `@kentech.ac.kr` Workspace 계정만 허용합�
   - 사용자별 글·댓글 작성 및 업로드 준비 요청의 쿨다운 상태를 저장합니다.
 - `activity_logs`
   - 콘텐츠 생성/수정/삭제 감사 로그를 저장합니다.
+- `audit_reports`
+  - 감사원에만 공개되는 제보의 제목·내용·처리 상태만 저장하며 작성자 식별자는 저장하지 않습니다.
 - `point_states`
   - 사용자별 일일 포인트 적립 한도 상태를 저장합니다.
 

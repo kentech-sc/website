@@ -1,6 +1,6 @@
-import type { PetitionEntity } from './petition.type.js';
 import type { PostEntity } from './post.type.js';
 import type { ReviewEntity } from './review.type.js';
+import type { SubmissionEntity } from './submission.type.js';
 
 export type Capability =
 	| 'board.free.write'
@@ -17,6 +17,14 @@ export type Capability =
 	| 'petition.delete.any'
 	| 'petition.manage'
 	| 'petition.respond'
+	| 'feedback.write'
+	| 'feedback.support'
+	| 'feedback.delete.any'
+	| 'feedback.manage'
+	| 'feedback.respond'
+	| 'audit.write'
+	| 'audit.read'
+	| 'audit.manage'
 	| 'course.manage'
 	| 'professor.manage'
 	| 'user.manage'
@@ -99,4 +107,4 @@ export interface Page<T> {
 
 export type FilePresence = Record<string, { hasImage: boolean; hasFile: boolean }>;
 
-export type SearchEntity = PostEntity | ReviewEntity | PetitionEntity;
+export type SearchEntity = PostEntity | ReviewEntity | SubmissionEntity;

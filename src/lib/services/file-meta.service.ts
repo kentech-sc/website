@@ -5,8 +5,8 @@ import type {
 	FileMetaEntity
 } from '$lib/types/file-meta.type.js';
 import type { FilePresence } from '$lib/types/general.type.js';
-import type { PetitionId } from '$lib/types/petition.type.js';
 import type { PostId } from '$lib/types/post.type.js';
+import type { SubmissionId } from '$lib/types/submission.type.js';
 import type { User } from '$lib/types/user.type.js';
 
 import * as FileMetaRepository from '$lib/repositories/file-meta.repository.js';
@@ -27,13 +27,15 @@ export async function findFileMetasByIds(fileIds: FileId[]): Promise<Array<FileM
 	return fileMetas.map((fileMeta) => (fileMeta ? toFileMeta(fileMeta) : null));
 }
 
-export async function getFileMetasByArticleId(articleId: PostId | PetitionId): Promise<FileMeta[]> {
+export async function getFileMetasByArticleId(
+	articleId: PostId | SubmissionId
+): Promise<FileMeta[]> {
 	const fileMetas = await FileMetaRepository.findFileMetasByArticleId(articleId);
 	return fileMetas.map((fileMeta) => toFileMeta(fileMeta));
 }
 
 export async function getFilePresenceByArticleIds(
-	articleIds: Array<PostId | PetitionId>
+	articleIds: Array<PostId | SubmissionId>
 ): Promise<FilePresence> {
 	const uniqueArticleIds = Array.from(new Set(articleIds.map((articleId) => articleId.toString())));
 	if (uniqueArticleIds.length === 0) return {};
@@ -81,13 +83,15 @@ export async function completeUpload(token: string): Promise<FileMeta> {
 
 export async function linkArticleToFiles(
 	fileIds: FileId[],
-	articleId: PostId | PetitionId
+	articleId: PostId | SubmissionId
 ): Promise<boolean> {
 	await FileMetaRepository.removeArticleIdFromAllFiles(articleId);
 	return await FileMetaRepository.addArticleIdToFiles(fileIds, articleId);
 }
 
-export async function unlinkArticleFromAllFiles(articleId: PostId | PetitionId): Promise<boolean> {
+export async function unlinkArticleFromAllFiles(
+	articleId: PostId | SubmissionId
+): Promise<boolean> {
 	return await FileMetaRepository.removeArticleIdFromAllFiles(articleId);
 }
 

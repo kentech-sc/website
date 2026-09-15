@@ -90,13 +90,13 @@ const authorizationHandle: Handle = async ({ event, resolve }) => {
 	}
 
 	if (
-		event.url.pathname.startsWith('/petition') ||
+		event.url.pathname.startsWith('/channel/petition') ||
+		event.url.pathname === '/channel/feedback/new' ||
+		event.url.pathname.startsWith('/channel/audit') ||
 		event.url.pathname.startsWith('/academic') ||
-		event.url.pathname.startsWith('/course') ||
-		event.url.pathname.startsWith('/review') ||
-		event.url.pathname.startsWith('/timetable') ||
 		event.url.pathname.startsWith('/profile') ||
-		/^\/board\/(?:free|notice|bylaw)\/(?:new|[^/]+\/edit)\/?$/.test(event.url.pathname)
+		/^\/board\/(?:free|notice)\/(?:new|[^/]+\/edit)\/?$/.test(event.url.pathname) ||
+		/^\/bylaw\/(?:new|[^/]+\/edit)\/?$/.test(event.url.pathname)
 	) {
 		throw redirect(303, '/signin');
 	}

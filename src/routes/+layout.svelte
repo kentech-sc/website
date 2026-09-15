@@ -12,6 +12,7 @@
 	import { browser } from '$app/environment';
 	import { page } from '$app/state';
 	import { navigating } from '$app/state';
+	import { BOARD_DEFINITIONS, isBoardId } from '$lib/shared/board.js';
 	import { popClientFlash } from '$lib/shared/flash.js';
 
 	import '$style/main.scss';
@@ -23,15 +24,20 @@
 	let pageTitle = $derived(titleForPath(page.url.pathname));
 
 	function titleForPath(pathname: string): string {
+		const boardId = pathname.split('/')[2];
+		if (pathname.startsWith('/board/') && isBoardId(boardId)) {
+			return `${BOARD_DEFINITIONS[boardId].title} | 켄텍 총학생회`;
+		}
+
 		const sections: Array<[string, string]> = [
-			['/course/import', '강의 데이터'],
-			['/board/notice', '공지사항'],
-			['/board/free', '자유게시판'],
-			['/board/bylaw', '회칙·세칙'],
-			['/review', '강의평가'],
-			['/academic', '이수·졸업'],
-			['/timetable', '시간표'],
-			['/petition', '청원'],
+			['/academic/credits', '학점·졸업'],
+			['/academic/timetable', '시간표'],
+			['/academic/review', '강의평가'],
+			['/academic/courses', '강의 관리'],
+			['/channel/petition', '청원'],
+			['/channel/feedback', '문의·건의'],
+			['/channel/audit', '감사원 익명 제보'],
+			['/bylaw', '회칙·세칙'],
 			['/profile', '내 정보'],
 			['/search', '검색'],
 			['/signin', '로그인'],

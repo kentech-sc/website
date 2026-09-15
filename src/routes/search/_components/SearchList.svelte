@@ -1,11 +1,13 @@
 <script lang="ts">
 	import type { Page, SearchEntity } from '$lib/types/general.type.js';
-	import type { PetitionEntity } from '$lib/types/petition.type.js';
 	import type { PostEntity } from '$lib/types/post.type.js';
 	import type { ReviewEntity } from '$lib/types/review.type.js';
+	import type { SubmissionEntity } from '$lib/types/submission.type.js';
 
 	import { resolve } from '$app/paths';
 	import CommonListPaginationBtn from '$components/CommonListPaginationBtn.svelte';
+	import { boardPostPath } from '$lib/shared/paths.js';
+	import { SUBMISSION_KIND_LABELS } from '$lib/shared/submission.js';
 	import { getPlainTextFromHtml } from '$lib/shared/utils.js';
 
 	let {
@@ -15,29 +17,31 @@
 	} = $props();
 </script>
 
-{#snippet ListItem(item: PostEntity | PetitionEntity | ReviewEntity)}
+{#snippet ListItem(item: PostEntity | SubmissionEntity | ReviewEntity)}
 	{#if 'boardId' in item}
-		<a
-			class="list-item"
-			href={resolve('/board/[boardId=board]/[postId]', {
-				boardId: item.boardId,
-				postId: item.id.toString()
-			})}
-		>
+		<a class="list-item" href={boardPostPath(item.boardId, item.id.toString())}>
 			<h3 class="ellipsis"><span class="board-tag">게시글</span>{item.title}</h3>
 			<p class="ellipsis">{getPlainTextFromHtml(item.content)}</p>
 		</a>
 	{:else if 'offeringId' in item}
-		<a class="list-item" href={resolve('/review/[reviewId]', { reviewId: item.id.toString() })}>
+		<a
+			class="list-item"
+			href={resolve('/academic/review/[reviewId]', { reviewId: item.id.toString() })}
+		>
 			<h3 class="ellipsis"><span class="review-tag">강의평가</span> {item.title}</h3>
 			<p class="ellipsis">{getPlainTextFromHtml(item.comment)}</p>
 		</a>
 	{:else}
 		<a
 			class="list-item"
-			href={resolve('/petition/[petitionId]', { petitionId: item.id.toString() })}
+			href={item.kind === 'petition'
+				? resolve('/channel/petition/[submissionId]', { submissionId: item.id.toString() })
+				: resolve('/channel/feedback/[submissionId]', { submissionId: item.id.toString() })}
 		>
-			<h3 class="ellipsis"><span class="petition-tag">청원</span> {item.title}</h3>
+			<h3 class="ellipsis">
+				<span class="petition-tag">{SUBMISSION_KIND_LABELS[item.kind]}</span>
+				{item.title}
+			</h3>
 			<p class="ellipsis">{getPlainTextFromHtml(item.content)}</p>
 		</a>
 	{/if}

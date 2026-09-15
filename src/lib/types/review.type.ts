@@ -26,6 +26,8 @@ export interface ReviewEntity extends ReviewCreate {
 	updatedAt: string;
 }
 
+export type ReviewPreview = Pick<ReviewEntity, 'id' | 'title' | 'createdAt'>;
+
 export interface Review extends ReviewEntity {
 	courseId: CourseId;
 	year: number;

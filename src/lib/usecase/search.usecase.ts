@@ -1,6 +1,7 @@
 import type { Page } from '$lib/types/general.type.js';
 import type { SearchEntity } from '$lib/types/general.type.js';
 
+import * as FeedbackService from '$lib/services/feedback.service.js';
 import * as PetitionService from '$lib/services/petition.service.js';
 import * as PostService from '$lib/services/post.service.js';
 import * as ReviewService from '$lib/services/review.service.js';
@@ -22,20 +23,31 @@ export async function search(
 	if (!normalizedQuery) return createPage<SearchEntity>([], 0, limit, skip);
 
 	const candidateLimit = skip + limit + 1;
-	const [postResults, reviewResults, petitionResults, postCount, reviewCount, petitionCount] =
-		await Promise.all([
-			PostService.searchPostsByQuery(normalizedQuery, candidateLimit, 0),
-			ReviewService.searchReviewsByQuery(normalizedQuery, candidateLimit, 0),
-			PetitionService.searchPetitionsByQuery(normalizedQuery, candidateLimit, 0),
-			PostService.countPostsByQuery(normalizedQuery),
-			ReviewService.countReviewsByQuery(normalizedQuery),
-			PetitionService.countPetitionsByQuery(normalizedQuery)
-		]);
+	const [
+		postResults,
+		reviewResults,
+		petitionResults,
+		feedbackResults,
+		postCount,
+		reviewCount,
+		petitionCount,
+		feedbackCount
+	] = await Promise.all([
+		PostService.searchPostsByQuery(normalizedQuery, candidateLimit, 0),
+		ReviewService.searchReviewsByQuery(normalizedQuery, candidateLimit, 0),
+		PetitionService.searchPetitionsByQuery(normalizedQuery, candidateLimit, 0),
+		FeedbackService.searchFeedbackByQuery(normalizedQuery, candidateLimit, 0),
+		PostService.countPostsByQuery(normalizedQuery),
+		ReviewService.countReviewsByQuery(normalizedQuery),
+		PetitionService.countPetitionsByQuery(normalizedQuery),
+		FeedbackService.countFeedbackByQuery(normalizedQuery)
+	]);
 
 	const mergedResults: Array<SearchEntity & { searchScore?: number }> = [
 		...postResults,
 		...reviewResults,
-		...petitionResults
+		...petitionResults,
+		...feedbackResults
 	];
 
 	mergedResults.sort((a, b) => {
@@ -46,7 +58,7 @@ export async function search(
 	});
 
 	const items = mergedResults.slice(skip, skip + limit).map(omitSearchScore);
-	const totalCount = postCount + reviewCount + petitionCount;
+	const totalCount = postCount + reviewCount + petitionCount + feedbackCount;
 
 	return createPage<SearchEntity>(items, totalCount, limit, skip);
 }

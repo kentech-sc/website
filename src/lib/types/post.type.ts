@@ -20,6 +20,8 @@ export interface PostEntity extends PostCreate {
 	likedBy: UserId[];
 }
 
+export type PostPreview = Pick<PostEntity, 'id' | 'boardId' | 'title' | 'createdAt'>;
+
 export type Post = PostEntity & { displayName: string | null };
 
 export interface PostPermissions {

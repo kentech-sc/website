@@ -2,8 +2,8 @@ import { fail, redirect } from '@sveltejs/kit';
 
 import editorActions, { normalizeEditorContent } from '$lib/server/editor.js';
 import { AppError, withActionErrorHandling } from '$lib/server/errors.js';
+import { isBoardId } from '$lib/shared/board.js';
 import { APP_ERROR } from '$lib/shared/rule.js';
-import { BoardId, type BoardId as BoardIdType } from '$lib/types/board.type.js';
 import { DisplayType } from '$lib/types/user.type.js';
 import * as BoardUsecase from '$lib/usecase/board.usecase.js';
 
@@ -12,7 +12,7 @@ export const load = () => {};
 export const actions = {
 	createPost: withActionErrorHandling(async ({ request, locals, params }) => {
 		const boardIdRaw = params.boardId;
-		if (!Object.values(BoardId).includes(boardIdRaw as BoardIdType)) {
+		if (!isBoardId(boardIdRaw)) {
 			throw new AppError(APP_ERROR.BAD_REQUEST, '유효하지 않은 게시판입니다.');
 		}
 
@@ -32,7 +32,7 @@ export const actions = {
 		const fileIds = formData.getAll('fileIds').map((fileId) => fileId.toString());
 		const normalizedEditor = await normalizeEditorContent(content, fileIds);
 		const post = await BoardUsecase.createPost(
-			boardIdRaw as BoardIdType,
+			boardIdRaw,
 			title,
 			normalizedEditor.content,
 			locals.user,

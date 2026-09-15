@@ -1,6 +1,6 @@
-import type { PetitionStatus } from '$lib/types/petition.type.js';
+import type { SubmissionStatus } from '$lib/types/submission.type.js';
 
-export const translatedStatus: Record<PetitionStatus, string> = {
+export const translatedStatus: Record<SubmissionStatus, string> = {
 	ongoing: '진행 중',
 	pending: '검토 대기',
 	reviewing: '검토 중',
@@ -8,7 +8,7 @@ export const translatedStatus: Record<PetitionStatus, string> = {
 	expired: '기간 만료'
 };
 
-export const colorStatus: Record<PetitionStatus, string> = {
+export const colorStatus: Record<SubmissionStatus, string> = {
 	ongoing: 'blue',
 	pending: 'orange',
 	reviewing: 'red',

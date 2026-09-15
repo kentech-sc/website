@@ -1,5 +1,6 @@
 import { fail, redirect } from '@sveltejs/kit';
 
+import type { BoardId } from '$lib/types/board.type.js';
 import type { CommentId } from '$lib/types/comment.type.js';
 import type { PostId } from '$lib/types/post.type.js';
 
@@ -14,9 +15,14 @@ export const load = withLoadErrorHandling(async ({ params, request, locals }) =>
 
 	const shouldIncrementView =
 		new URL(request.url).searchParams.get('x-sveltekit-invalidated') !== '11';
-	const detail = await BoardUsecase.getPostDetailByPostId(postId, locals.user, {
-		incrementView: shouldIncrementView
-	});
+	const detail = await BoardUsecase.getPostDetailByPostId(
+		params.boardId as BoardId,
+		postId,
+		locals.user,
+		{
+			incrementView: shouldIncrementView
+		}
+	);
 
 	return {
 		post: detail.post,

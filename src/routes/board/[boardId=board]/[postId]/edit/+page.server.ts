@@ -1,5 +1,6 @@
 import { fail, redirect } from '@sveltejs/kit';
 
+import type { BoardId } from '$lib/types/board.type.js';
 import type { PostId } from '$lib/types/post.type.js';
 
 import editorActions, { normalizeEditorContent } from '$lib/server/editor.js';
@@ -12,7 +13,11 @@ export const load = withLoadErrorHandling(async ({ params, locals }) => {
 	if (!postIdRaw) throw new Error('게시글 ID가 필요합니다.');
 	const postId: PostId = postIdRaw;
 
-	const detail = await BoardUsecase.getPostDetailByPostId(postId, locals.user);
+	const detail = await BoardUsecase.getPostDetailByPostId(
+		params.boardId as BoardId,
+		postId,
+		locals.user
+	);
 
 	return { post: detail.post, files: detail.files, permissions: detail.postPermissions };
 });

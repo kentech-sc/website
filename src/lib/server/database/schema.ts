@@ -56,7 +56,7 @@ export const users = appSchema.table(
 		unique('users_nickname_unique').on(table.nickname),
 		check(
 			'users_group_check',
-			sql`${table.group} in ('guest', 'user', 'moderator', 'manager', 'dev')`
+			sql`${table.group} in ('guest', 'user', 'moderator', 'manager', 'auditor', 'dev')`
 		)
 	]
 );
@@ -260,15 +260,18 @@ export const comments = communitySchema.table(
 	]
 );
 
-export const petitions = communitySchema.table(
-	'petitions',
+export const submissions = communitySchema.table(
+	'submissions',
 	{
 		id: uuid().defaultRandom().primaryKey(),
+		kind: text().notNull().default('petition'),
+		category: text(),
+		displayType: text('display_type').notNull().default('realName'),
 		title: text().notNull(),
 		content: text().notNull(),
 		status: text().notNull().default('ongoing'),
 		viewCnt: integer('view_count').notNull().default(0),
-		petitionerId: uuid('petitioner_id')
+		authorId: uuid('author_id')
 			.notNull()
 			.references(() => users.id),
 		responderId: uuid('responder_id').references(() => users.id),
@@ -277,21 +280,45 @@ export const petitions = communitySchema.table(
 		...timestamps
 	},
 	(table) => [
-		index('petitions_created_idx').on(table.createdAt),
+		index('submissions_kind_created_idx').on(table.kind, table.createdAt),
+		check('submissions_kind_check', sql`${table.kind} in ('petition', 'inquiry', 'suggestion')`),
 		check(
-			'petitions_status_check',
+			'submissions_category_check',
+			sql`(${table.kind} = 'petition' and ${table.category} is null) or (${table.kind} in ('inquiry', 'suggestion') and ${table.category} is not null and ${table.category} in ('executive', 'education', 'clubs', 'audit', 'election', 'website', 'other'))`
+		),
+		check(
+			'submissions_display_type_check',
+			sql`${table.displayType} in ('realName', 'nickname', 'anonymous') and (${table.kind} <> 'petition' or ${table.displayType} = 'realName')`
+		),
+		check(
+			'submissions_status_check',
 			sql`${table.status} in ('ongoing', 'pending', 'reviewing', 'answered', 'expired')`
 		),
-		check('petitions_view_count_check', sql`${table.viewCnt} >= 0`)
+		check('submissions_view_count_check', sql`${table.viewCnt} >= 0`)
 	]
 );
 
-export const petitionSignatures = communitySchema.table(
-	'petition_signatures',
+export const auditReports = communitySchema.table(
+	'audit_reports',
 	{
-		petitionId: uuid('petition_id')
+		id: uuid().defaultRandom().primaryKey(),
+		title: text().notNull(),
+		content: text().notNull(),
+		status: text().notNull().default('received'),
+		...timestamps
+	},
+	(table) => [
+		index('audit_reports_status_created_idx').on(table.status, table.createdAt),
+		check('audit_reports_status_check', sql`${table.status} in ('received', 'reviewing', 'closed')`)
+	]
+);
+
+export const submissionSupports = communitySchema.table(
+	'submission_supports',
+	{
+		submissionId: uuid('submission_id')
 			.notNull()
-			.references(() => petitions.id, { onDelete: 'cascade' }),
+			.references(() => submissions.id, { onDelete: 'cascade' }),
 		userId: uuid('user_id')
 			.notNull()
 			.references(() => users.id),
@@ -299,7 +326,7 @@ export const petitionSignatures = communitySchema.table(
 			.default(sql`now()`)
 			.notNull()
 	},
-	(table) => [primaryKey({ columns: [table.petitionId, table.userId] })]
+	(table) => [primaryKey({ columns: [table.submissionId, table.userId] })]
 );
 
 export const studentAcademicProfiles = academicSchema.table(
@@ -515,17 +542,17 @@ export const postFiles = communitySchema.table(
 	(table) => [primaryKey({ columns: [table.postId, table.fileId] })]
 );
 
-export const petitionFiles = communitySchema.table(
-	'petition_files',
+export const submissionFiles = communitySchema.table(
+	'submission_files',
 	{
-		petitionId: uuid('petition_id')
+		submissionId: uuid('submission_id')
 			.notNull()
-			.references(() => petitions.id, { onDelete: 'cascade' }),
+			.references(() => submissions.id, { onDelete: 'cascade' }),
 		fileId: uuid('file_id')
 			.notNull()
 			.references(() => fileMetas.id, { onDelete: 'cascade' })
 	},
-	(table) => [primaryKey({ columns: [table.petitionId, table.fileId] })]
+	(table) => [primaryKey({ columns: [table.submissionId, table.fileId] })]
 );
 
 export const pointAccounts = pointsSchema.table(
@@ -660,13 +687,14 @@ export const activityLogs = appSchema.table('activity_logs', {
 	posts,
 	postLikes,
 	comments,
-	petitions,
-	petitionSignatures,
+	submissions,
+	submissionSupports,
+	auditReports,
 	reviews,
 	fileMetas,
 	banners,
 	postFiles,
-	petitionFiles,
+	submissionFiles,
 	pointAccounts,
 	pointLedgerEntries,
 	pointDailyEventCounts,
