@@ -115,9 +115,9 @@
 			<span class="range-nav">
 				<button
 					type="button"
-					aria-label="이전 2주"
+					aria-label="이전 주"
 					disabled={nav.loading}
-					onclick={() => nav.moveTo(addDays(schedule.anchor, -14))}
+					onclick={() => nav.moveTo(addDays(schedule.anchor, -7))}
 				>
 					<ChevronLeft size="1rem" />
 				</button>
@@ -126,9 +126,9 @@
 				</span>
 				<button
 					type="button"
-					aria-label="다음 2주"
+					aria-label="다음 주"
 					disabled={nav.loading}
-					onclick={() => nav.moveTo(addDays(schedule.anchor, 14))}
+					onclick={() => nav.moveTo(addDays(schedule.anchor, 7))}
 				>
 					<ChevronRight size="1rem" />
 				</button>
@@ -182,6 +182,8 @@
 	.calendar {
 		display: flex;
 		flex-direction: column;
+		// 일정이 적은 주에도 달력이 납작해지지 않도록 하한을 둔다.
+		min-height: 15rem;
 	}
 
 	h2 {
@@ -247,7 +249,6 @@
 		grid-template-columns: repeat(7, minmax(0, 1fr));
 		row-gap: 0.15rem;
 		flex: 1;
-		padding-bottom: 0.25rem;
 
 		&:not(:last-child) {
 			border-bottom: var(--control-border-width) solid var(--gray-border);
@@ -286,7 +287,10 @@
 		// 줄 높이만큼만 차지하게 해 막대가 칸 높이로 늘어나지 않도록 한다.
 		align-self: start;
 		z-index: 1;
-		margin: 0 0.15rem;
+		// 세로 구분선은 칸 안쪽 오른쪽 끝에 그려진다. 좌우 여백을 같게 주면
+		// 오른쪽만 선 두께만큼 먹혀 왼쪽이 더 넓어 보인다. 그만큼 더해 맞췈다.
+		margin-right: calc(0.15rem + var(--control-border-width));
+		margin-left: 0.15rem;
 		border-radius: 0.2rem;
 		background-color: var(--secondary);
 		padding: 0.05rem 0.3rem;

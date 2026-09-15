@@ -193,6 +193,12 @@
 			font-weight: bold;
 			font-size: 0.7rem;
 
+			// 버튼마다 테두리가 있어 맞닿는 자리가 두 겹으로 보인다.
+			// 테두리 두께만큼 당겨 한 줄로 겹친다.
+			&:not(:first-child) {
+				margin-left: calc(-1 * var(--control-border-width));
+			}
+
 			&:first-child {
 				border-start-start-radius: 0.4rem;
 				border-end-start-radius: 0.4rem;
@@ -204,6 +210,9 @@
 			}
 
 			&.selected {
+				// 겹친 자리에서 선택된 쪽 테두리가 위로 오도록 한다.
+				position: relative;
+				z-index: 1;
 				border-color: var(--secondary);
 				background-color: var(--secondary);
 				color: var(--tertiary-text);
@@ -215,7 +224,6 @@
 		flex: 1;
 		margin-top: 0.6rem;
 		// 끼니마다 항목 수가 달라 카드 높이가 출렁이지 않도록 하한을 둔다.
-		min-height: 10rem;
 	}
 
 	h3 {
