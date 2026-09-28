@@ -1,6 +1,8 @@
 import type { User } from '$lib/types/user.type.js';
 
-import * as AcademicRepository from '$lib/repositories/academic.repository.js';
+import * as AcademicProfileRepository from '$lib/repositories/academic-profile.repository.js';
+import * as CourseRecordRepository from '$lib/repositories/course-record.repository.js';
+import * as OfferingRepository from '$lib/repositories/offering.repository.js';
 import * as TimetableRepository from '$lib/repositories/timetable.repository.js';
 import { transaction } from '$lib/server/db.js';
 import * as TimetableService from '$lib/services/timetable.service.js';
@@ -13,19 +15,19 @@ export async function getPage(year: number, term: number, user: User) {
 		timetables,
 		profile,
 		completedDegreeCourses,
-		completionViews,
+		courseRecordViews,
 		competition
 	] = await Promise.all([
-		AcademicRepository.findOfferingsIncludingArchived(year, term),
+		OfferingRepository.findOfferingsIncludingArchived(year, term),
 		TimetableRepository.findTimetables(user.id, year, term),
-		AcademicRepository.findAcademicProfile(user.id),
-		AcademicRepository.findCompletedDegreeCourses(user.id),
-		AcademicRepository.findCompletionViews(user.id, year, term),
+		AcademicProfileRepository.findAcademicProfile(user.id),
+		CourseRecordRepository.findCompletedDegreeCourses(user.id),
+		CourseRecordRepository.findCourseRecordViews(user.id, year, term),
 		TimetableRepository.findConfirmedCompetition(user.id, year, term)
 	]);
 	const offerings = historicalOfferings.filter((offering) => offering.archivedAt === null);
 	const policy = profile
-		? await AcademicRepository.findGraduationPolicy(profile.admissionYear)
+		? await AcademicProfileRepository.findGraduationPolicy(profile.admissionYear)
 		: null;
 	const completedCourseIds = new Set(
 		completedDegreeCourses
@@ -86,7 +88,7 @@ export async function getPage(year: number, term: number, user: User) {
 									subcategory: offering.subcategory,
 									level: offering.level,
 									credits: offering.credits,
-									gradExcluded: offering.gradExcluded,
+									excludedFromGraduation: offering.excludedFromGraduation,
 									academicCareer: offering.academicCareer
 								}))
 						],
@@ -103,25 +105,25 @@ export async function getPage(year: number, term: number, user: User) {
 			offering
 		]);
 	const actualOfferingMap = new Map<string, (typeof historicalOfferings)[number]>();
-	const unscheduledCompletions: typeof completionViews = [];
-	for (const completion of completionViews) {
-		const exactOffering = completion.offering;
-		const candidates = offeringsByCourse.get(completion.courseCode) ?? [];
+	const unscheduledRecords: typeof courseRecordViews = [];
+	for (const record of courseRecordViews) {
+		const exactOffering = record.offering;
+		const candidates = offeringsByCourse.get(record.courseCode) ?? [];
 		const resolvedOffering = exactOffering ?? (candidates.length === 1 ? candidates[0] : null);
 		const appearsOnWeekdayGrid = resolvedOffering?.meetings.some(
 			(meeting) => meeting.weekday >= 1 && meeting.weekday <= 5
 		);
 		if (resolvedOffering && appearsOnWeekdayGrid)
 			actualOfferingMap.set(resolvedOffering.id, resolvedOffering);
-		else unscheduledCompletions.push(completion);
+		else unscheduledRecords.push(record);
 	}
 	return {
 		offerings,
 		timetables,
 		actualSchedule: {
-			completions: completionViews,
+			records: courseRecordViews,
 			offerings: [...actualOfferingMap.values()],
-			unscheduledCompletions
+			unscheduledRecords
 		},
 		degreeProgress: baseDegreeProgress,
 		timetableProgress,

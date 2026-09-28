@@ -14,15 +14,16 @@ function toBanner(row: BannerRow): Banner {
 		fileId: row.fileId,
 		linkUrl: row.linkUrl,
 		isActive: row.isActive,
+		position: row.position,
 		imageAlt: row.fileName,
 		imagePath: FileStorage.getUrl(row.fileKey)
 	};
 }
 
-/** 메인에 걸려 있는 배너. */
-export async function findActiveBanner(): Promise<Banner | null> {
-	const row = await BannerRepository.findActiveBanner();
-	return row ? toBanner(row) : null;
+/** 메인 슬라이드에 나오는 배너. 슬라이드 순서대로. */
+export async function findActiveBanners(): Promise<Banner[]> {
+	const rows = await BannerRepository.findActiveBanners();
+	return rows.map(toBanner);
 }
 
 /** 관리 화면에서 보여줄 보관함 전체. */
@@ -42,9 +43,27 @@ export async function addBanner(fileId: string, linkUrl: string | null, user: Us
 	await BannerRepository.addBanner(fileId, normalizeLinkUrl(linkUrl));
 }
 
-export async function activateBanner(bannerId: string, user: User): Promise<void> {
+export async function setBannerActive(
+	bannerId: string,
+	isActive: boolean,
+	user: User
+): Promise<void> {
 	assertRule(BannerRule.canManageBanner(user));
-	await BannerRepository.activateBanner(bannerId);
+	await BannerRepository.setBannerActive(bannerId, isActive);
+}
+
+export async function reorderBanners(bannerIds: string[], user: User): Promise<void> {
+	assertRule(BannerRule.canManageBanner(user));
+
+	if (!bannerIds.length) {
+		throw new AppError(APP_ERROR.BAD_REQUEST, '저장할 순서가 없습니다.');
+	}
+
+	if (new Set(bannerIds).size !== bannerIds.length) {
+		throw new AppError(APP_ERROR.BAD_REQUEST, '같은 배너가 순서에 두 번 들어 있습니다.');
+	}
+
+	await BannerRepository.reorderBanners(bannerIds);
 }
 
 export async function deleteBanner(bannerId: string, user: User): Promise<void> {

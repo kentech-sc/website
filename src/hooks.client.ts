@@ -1,4 +1,3 @@
-import { handleErrorWithSentry, replayIntegration } from '@sentry/sveltekit';
 import * as Sentry from '@sentry/sveltekit';
 
 import { dev } from '$app/environment';
@@ -12,21 +11,10 @@ Sentry.init({
 	dsn: sentryEnabled ? env.PUBLIC_SENTRY_DSN : undefined,
 	environment: sentryEnabled ? env.PUBLIC_SENTRY_ENVIRONMENT : undefined,
 
-	tracesSampleRate: 1.0,
+	tracesSampleRate: 0.1,
 
 	// Enable logs to be sent to Sentry
 	enableLogs: true,
-
-	// This sets the sample rate to be 10%. You may want this to be 100% while
-	// in development and sample at a lower rate in production
-	replaysSessionSampleRate: 0.1,
-
-	// If the entire session is not sampled, use the below sample rate to sample
-	// sessions when an error occurs.
-	replaysOnErrorSampleRate: 1.0,
-
-	// If you don't want to use Session Replay, just remove the line below:
-	integrations: [replayIntegration()],
 
 	// Enable sending user PII (Personally Identifiable Information)
 	// https://docs.sentry.io/platforms/javascript/guides/sveltekit/configuration/options/#sendDefaultPii
@@ -34,4 +22,4 @@ Sentry.init({
 });
 
 // If you have a custom error handler, pass it to `handleErrorWithSentry`
-export const handleError = handleErrorWithSentry();
+export const handleError = Sentry.handleErrorWithSentry();

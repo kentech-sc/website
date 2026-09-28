@@ -1,5 +1,5 @@
 import type { PostId } from './post.type.js';
-import type { UserId, DisplayType } from './user.type.js';
+import type { UserId, AuthorNameMode } from './user.type.js';
 
 export type CommentId = string;
 
@@ -7,7 +7,7 @@ export interface CommentCreate {
 	postId: PostId;
 	content: string;
 	userId: UserId;
-	displayType: DisplayType;
+	authorNameMode: AuthorNameMode;
 }
 
 export interface CommentEntity extends CommentCreate {

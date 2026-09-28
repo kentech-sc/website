@@ -13,5 +13,5 @@ export interface CatalogCourseCreate extends CourseEntity {
 	category: string | null;
 	subcategory: string | null;
 	level: number | null;
-	gradExcluded: boolean;
+	excludedFromGraduation: boolean;
 }

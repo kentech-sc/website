@@ -2,7 +2,7 @@
 	import Trash2 from '@lucide/svelte/icons/trash-2';
 	import UserRoundX from '@lucide/svelte/icons/user-round-x';
 
-	import CommonForm from '$components/CommonForm.svelte';
+	import ActionForm from '$components/ActionForm.svelte';
 
 	let submitBtn: HTMLButtonElement;
 	let loading = $state(false);
@@ -21,14 +21,14 @@
 	}
 </script>
 
-<CommonForm
+<ActionForm
 	actionName="deleteUser"
 	formName="deleteUser"
 	policy="reload"
 	afterSuccess={handleSuccess}
 	bind:loading
 >
-	<div class="container-col">
+	<div class="settings-form">
 		<h4>
 			<UserRoundX size="0.8rem" />
 			<span>계정 탈퇴</span>
@@ -43,20 +43,17 @@
 			</ul>
 		</div>
 
-		<button type="button" class="error-btn" onclick={handleSubmit} disabled={loading}>
+		<button type="button" class="ui-button is-danger" onclick={handleSubmit} disabled={loading}>
 			<Trash2 size="0.8rem" />
 			<span>탈퇴하기</span>
 		</button>
 	</div>
 	<button hidden type="submit" bind:this={submitBtn} disabled={loading}>submit</button>
-</CommonForm>
+</ActionForm>
 
 <style lang="scss">
 	h4 {
-		width: 100%;
 		color: var(--error);
-		font-weight: 500;
-		font-size: 1rem;
 	}
 
 	.error {
@@ -80,10 +77,5 @@
 		li + li {
 			margin-top: 0.4rem;
 		}
-	}
-
-	button {
-		margin-top: 0.6rem;
-		margin-left: auto;
 	}
 </style>

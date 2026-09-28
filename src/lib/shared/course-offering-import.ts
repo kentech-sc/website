@@ -97,21 +97,21 @@ function sortedSignature(values: string[]): string {
 }
 
 function meetingTimeSignature(
-	meetings: Array<{ weekday: number; startsAt: number; endsAt: number }>
+	meetings: Array<{ weekday: number; startMinute: number; endMinute: number }>
 ): string {
 	return meetings
-		.map(({ weekday, startsAt, endsAt }) => `${weekday}:${startsAt}:${endsAt}`)
+		.map(({ weekday, startMinute, endMinute }) => `${weekday}:${startMinute}:${endMinute}`)
 		.sort()
 		.join('|');
 }
 
 function meetingRoomSignature(
-	meetings: Array<{ weekday: number; startsAt: number; endsAt: number; room: string | null }>
+	meetings: Array<{ weekday: number; startMinute: number; endMinute: number; room: string | null }>
 ): string {
 	return meetings
 		.map(
-			({ weekday, startsAt, endsAt, room }) =>
-				`${weekday}:${startsAt}:${endsAt}:${normalizedText(room)}`
+			({ weekday, startMinute, endMinute, room }) =>
+				`${weekday}:${startMinute}:${endMinute}:${normalizedText(room)}`
 		)
 		.sort()
 		.join('|');
@@ -137,7 +137,7 @@ export function compareOfferingImport(
 		normalizedText(existing.category) !== normalizedText(incoming.category) ||
 		normalizedText(existing.subcategory) !== normalizedText(incoming.subcategory) ||
 		existing.level !== incoming.level ||
-		existing.gradExcluded !== incoming.gradExcluded;
+		existing.excludedFromGraduation !== incoming.excludedFromGraduation;
 	return { reason: detailsChanged ? 'details_changed' : null, professorsChanged };
 }
 
@@ -216,7 +216,8 @@ function inferMetadata(courseId: string, category: string | null) {
 		category,
 		subcategory: EF_SUBCATEGORY[courseId] ?? null,
 		level: inferLevel(courseId),
-		gradExcluded: courseId.startsWith('GR') || ['RC1011', 'RC1012', 'RC1013'].includes(courseId)
+		excludedFromGraduation:
+			courseId.startsWith('GR') || ['RC1011', 'RC1012', 'RC1013'].includes(courseId)
 	};
 }
 
@@ -231,8 +232,8 @@ function parseMeetings(timeValue: string, roomValue: string, rowNumber: number) 
 		if (!match) throw new Error(`${rowNumber}행 시간표 형식을 읽을 수 없습니다: ${part}`);
 		return {
 			weekday: WEEKDAY[match[1]],
-			startsAt: minutes(match[2]),
-			endsAt: minutes(match[3]),
+			startMinute: minutes(match[2]),
+			endMinute: minutes(match[3]),
 			room: rooms[index] ?? rooms.at(-1) ?? null
 		};
 	});
@@ -296,7 +297,7 @@ export function parseCourseOfferingWorkbook(
 			!offering.courseName ||
 			!Number.isFinite(offering.credits) ||
 			offering.credits < 0 ||
-			offering.meetings.some((meeting) => meeting.startsAt >= meeting.endsAt)
+			offering.meetings.some((meeting) => meeting.startMinute >= meeting.endMinute)
 		)
 			throw new Error(`${index + 1}행의 필수 값을 확인해주세요.`);
 		offerings.push(offering);

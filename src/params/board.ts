@@ -1,7 +1,8 @@
+import type { BoardId } from '$lib/types/board.type.js';
 import type { ParamMatcher } from '@sveltejs/kit';
 
-import { BoardId } from '$lib/types/board.type.js';
+import { BoardId as Board } from '$lib/types/board.type.js';
 
 export const match = ((param: string): param is BoardId => {
-	return param === BoardId.Free || param === BoardId.Notice || param === BoardId.Bylaw;
+	return param === Board.Notice || param === Board.Free;
 }) satisfies ParamMatcher;

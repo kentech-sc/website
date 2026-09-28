@@ -1,0 +1,54 @@
+import { fail, redirect } from '@sveltejs/kit';
+
+import type { BoardId } from '$lib/types/board.type.js';
+import type { PostId } from '$lib/types/post.type.js';
+
+import editorActions, { normalizeEditorContent } from '$lib/server/editor.js';
+import { withActionErrorHandling, withLoadErrorHandling } from '$lib/server/errors.js';
+import { AuthorNameMode } from '$lib/types/user.type.js';
+import * as BoardUsecase from '$lib/usecase/board.usecase.js';
+
+export const load = withLoadErrorHandling(async ({ params, locals }) => {
+	const postIdRaw = params.postId;
+	if (!postIdRaw) throw new Error('게시글 ID가 필요합니다.');
+	const postId: PostId = postIdRaw;
+
+	const detail = await BoardUsecase.getPostDetailByPostId(
+		params.boardId as BoardId,
+		postId,
+		locals.user
+	);
+
+	return { post: detail.post, files: detail.files, permissions: detail.postPermissions };
+});
+
+export const actions = {
+	editPost: withActionErrorHandling(async ({ request, locals, params }) => {
+		const postIdRaw = params.postId;
+		if (!postIdRaw) return fail(400, { message: '게시글 ID가 필요합니다.' });
+		const postId: PostId = postIdRaw;
+
+		const formData = await request.formData();
+		const title = (formData.get('title') ?? '').toString();
+		const content = (formData.get('content') ?? '').toString();
+		const authorNameModeRaw = (formData.get('authorNameMode') ?? '').toString();
+		const fileIds = formData.getAll('fileIds').map((fileId) => fileId.toString());
+
+		if (!Object.values(AuthorNameMode).includes(authorNameModeRaw as AuthorNameMode)) {
+			return fail(400, { message: '표시 방식이 올바르지 않습니다.' });
+		}
+		if (!title || !content) return fail(400, { message: '제목과 내용은 필수입니다.' });
+
+		const normalizedEditor = await normalizeEditorContent(content, fileIds);
+		const post = await BoardUsecase.editPost(
+			postId,
+			title,
+			normalizedEditor.content,
+			locals.user,
+			authorNameModeRaw as AuthorNameMode,
+			normalizedEditor.fileIds
+		);
+		throw redirect(302, '/boards/' + params.boardId + '/' + post.id);
+	}),
+	...editorActions
+};

@@ -62,7 +62,7 @@
 		margin-bottom: 0.4rem;
 		border-bottom: 0.1rem solid var(--gray-border);
 		font-weight: 600;
-		font-size: 1rem;
+		font-size: 0.9rem;
 	}
 
 	.file-item {
@@ -75,7 +75,7 @@
 		}
 
 		p {
-			font-size: 0.8rem;
+			font-size: 0.7rem;
 		}
 	}
 </style>

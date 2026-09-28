@@ -3,17 +3,20 @@
 ## 1. 레이어 역할
 
 - `src/lib/types`
-  - standalone `type`, `interface`, type alias를 둔다.
-  - 타입 소유권이 애매하면 `general.type.ts`에 둔다.
+  - 여러 기능에서 공유하는 도메인 계약을 둔다.
+  - 타입 소유권이 애매하면 먼저 사용하는 기능 가까이에 둘 수 있는지 확인한다.
   - `src/app.d.ts`만 SvelteKit 전역 타입 예외로 둔다.
+- `src/lib/client`
+  - 브라우저 API, 업로드, 편집기, 푸시 구독 통신을 둔다. UI 상태·표현은 컴포넌트가 소유한다.
 - `src/lib/shared`
   - client/server 공용 순수 코드를 둔다.
   - 예: `permission.ts`, `rule.ts`, `utils.ts`, `view.ts`, `paginate.ts`, `flash.ts`
 - `src/lib/server`
   - 서버 전용 인프라를 둔다.
-  - 예: `errors.ts`, `db.ts`, `database/schema.ts`, `storage.ts`, `flash.ts`
+  - 예: `errors.ts`, `db.ts`, `database/*.schema.ts`, `storage.ts`, `flash.ts`
 - `src/lib/repositories`
   - DB CRUD / query만 둔다.
+  - 파일은 `offering`, `course-record`, `academic-profile`처럼 실제 데이터 책임으로 나눈다.
 - `src/lib/rules`
   - 도메인 규칙 함수만 둔다.
 - `src/lib/services`
@@ -23,9 +26,9 @@
 
 ## 2. 의존 방향
 
-- client -> shared, types
+- client -> client, shared, types
 - server entry -> usecase, shared, types, server
-- usecase -> service, shared, types
+- usecase -> service, repositories, shared, types, server
 - service -> rules, repositories, shared, types, server
 - repositories -> server/database, shared, types
 - rules -> shared, types
@@ -34,7 +37,7 @@
 
 1. client
 
-- `shared`, `types`만 import한다.
+- 브라우저 전용 `client`, `shared`, `types`를 import한다.
 - `usecase`, `service`, `rules`, `repositories`, `server`는 import하지 않는다.
 
 2. server entry
@@ -50,8 +53,8 @@
 
 3. usecase
 
-- `service`, `shared`, `types`만 import한다.
-- `repositories`를 직접 import하지 않는다.
+- `service`, `repositories`, `shared`, `types`, 서버 인프라를 import한다.
+- 권한·도메인 규칙이 필요한 작업은 service를 사용한다. 단순 조회와 여러 도메인의 트랜잭션 조합은 repository를 직접 사용할 수 있다. 규칙을 우회하지 않는다.
 
 4. service
 
@@ -80,9 +83,9 @@
 
 ### 타입 위치
 
-- standalone `type`, `interface`, type alias는 `src/lib/types`에만 둔다.
-- 특정 도메인에 속하는 타입은 해당 도메인 type 파일에 둔다.
-- 공용인데 소유권이 애매하면 `general.type.ts`에 둔다.
+- 여러 기능에서 공유하는 타입은 `src/lib/types`의 해당 도메인 파일에 둔다.
+- 한 모듈에서만 쓰는 props, 옵션, 내부 결과 타입은 사용하는 파일 가까이에 둔다.
+- 이름이 모호하다는 이유로 `general.type.ts`에 모으지 않는다. 실제 공유 개념만 이동한다.
 - model은 대응 `...Entity` 타입을 generic으로 사용한다.
 
 ### collection 이름
@@ -109,7 +112,7 @@
 - `types`, `shared`, `repositories`, `services`, `usecase`, `server entry` 경계 밖으로 raw `Date` 인스턴스를 내보내지 않는다.
 - 예: `createdAt`, `updatedAt`, `deletedAt`, `answeredAt` 같은 값은 타입과 반환값에서 ISO string으로 둔다.
 - 실제 `Date` 객체는 DB query, 비교, 계산처럼 필요한 내부 구현에서만 잠깐 사용하고, 반환 직전에 다시 ISO string으로 변환한다.
-- Drizzle timestamp column은 `mode: 'string'`을 사용해 경계에서 ISO string 계약을 유지한다.
+- Drizzle timestamp column은 `schema-core.ts`의 `isoTimestamp` custom type을 사용한다. DB에서 읽은 값을 ISO string으로 정규화해 경계의 계약을 유지한다.
 
 ### ID 값
 
@@ -157,7 +160,7 @@
 
 ## 7. 권한 모델
 
-- `UserGroup`은 `guest`, `user`, `moderator`, `manager`, `dev`를 둔다.
+- `UserGroup`은 `guest`, `user`, `moderator`, `manager`, `dev`, `auditor`를 둔다.
 - 권한 모델은 `RBAC + capability + resource rule`로 둔다.
 - RBAC:
   - 사용자에게 역할을 부여한다.
@@ -213,7 +216,7 @@
 
 - load 에러는 `+error.svelte`에서 처리한다.
 - action 에러는 현재 화면의 폼에 남긴다.
-- `CommonForm.svelte`는 action 결과를 공통 정책으로 먼저 처리한다.
+- `ActionForm.svelte`는 action 결과를 공통 정책으로 먼저 처리한다.
 - status가 필요하지 않은 폼은 message만 표시한다.
 
 ### status 기본 정책
@@ -252,7 +255,7 @@
 - flash 메시지는 client에서 새로 하드코딩하지 않는다.
 - action / load가 내려준 에러 메시지를 우선 사용한다.
 - status는 이동, 재조회, 현재 화면 유지 여부를 판단하는 용도로만 사용한다.
-- `CommonForm`은 `policy` preset으로 공통 상태 정책을 처리한다.
+- `ActionForm`은 `policy` preset으로 공통 상태 정책을 처리한다.
 - 공통 message 추출은 `shared/action-result.ts`에서 처리한다.
 - `policy="reload"`는 성공, `404`, `409`에서 `invalidateAll()`을 수행한다.
 - `policy={{ kind: 'detail', notFoundRedirectTo }}`는 성공/`409`에서 `invalidateAll()`, `404`에서 flash 후 이동을 수행한다.
@@ -266,10 +269,10 @@
 
 ## 13. 최종 요약
 
-1. client는 `shared`, `types`만 본다.
+1. client는 브라우저 전용 `client`, `shared`, `types`를 본다.
 2. server entry는 `usecase`, `shared`, `types`, `server`만 본다.
 3. 일반 코드에서는 `this`를 자제하고, `.svelte` 로컬 함수는 arrow, module top-level 함수는 `function` 선언을 사용한다.
-4. collection은 복수형, map은 `[key]To[value]`, 상수는 `SCREAMING_SNAKE_CASE`, 날짜 값은 ISO string, UUID 값은 string을 사용한다.
+4. collection은 복수형, map은 `itemsByKey` 또는 `[key]To[value]`, 상수는 `SCREAMING_SNAKE_CASE`, 날짜 값은 ISO string, UUID 값은 string을 사용한다.
 5. repository 메서드는 `create/find/get/update/delete` 반환 계약을 유지한다.
 6. usecase는 service를 조합하고 transaction을 연다.
 7. service는 단일 도메인 작업과 `AppError`를 책임진다.
@@ -277,3 +280,50 @@
 9. repositories는 DB만 다룬다.
 10. 권한은 `RBAC + capability + resource rule`로 처리한다.
 11. 에러 UX는 `AppError -> server entry -> form/page -> flash` 흐름으로 처리한다.
+
+## 14. 화면 조립 규칙
+
+- `+page.svelte`는 데이터 연결과 기능 모듈 배치만 맡긴다.
+- 라우트 전용 컴포넌트는 해당 라우트의 `_components`에 둔다.
+- 여러 도메인이 같은 의미와 동작으로 쓰는 UI만 `src/components`로 올린다.
+- 한 화면 안에서만 반복되는 마크업은 snippet으로 표현한다.
+- 독립된 상태, 폼 action, 디자인 영역을 가지면 Svelte 컴포넌트로 분리한다.
+- 공통 컴포넌트는 도메인 객체 전체보다 필요한 값과 snippet을 받는다.
+- 자식 컴포넌트에 `PageData` 전체를 넘기지 않고 필요한 필드만 props로 전달한다.
+
+### 파일 크기 점검 기준
+
+- Svelte 파일이 250줄을 넘으면 상태, 기능 영역, 스타일 책임을 다시 확인한다.
+- 350줄을 넘는 파일은 분리하지 않을 이유가 명확해야 한다.
+- 서버 모듈이 400줄을 넘으면 조회·변경 또는 하위 도메인 기준으로 나눈다.
+- 줄 수를 맞추려고 의미 없는 wrapper를 만들지 않는다. 독립적으로 찾고 바꿀 수 있는 책임을 기준으로 나눈다.
+
+### 이름과 경로
+
+- 라우트는 복수 리소스 이름을 사용한다. 예: `/boards`, `/academic/reviews`.
+- 새 경로가 기존 주소를 보존할 필요가 없으면 호환용 redirect를 추가하지 않는다.
+- UI 문구, action, usecase, service가 같은 행위를 가리킬 때 같은 핵심 동사를 쓴다.
+- `Common`, `Data`, `Info`, `Manager`처럼 범위가 넓은 이름은 실제 책임을 드러내는 이름으로 바꾼다.
+
+### HTML 조립과 간격
+
+- 헤더가 있는 일반 페이지는 `section.page`의 첫 자식으로 페이지 헤더를 두고 목록·필터·폼·상세 모듈을 형제로 배치한다.
+- 페이지 모듈 간 간격은 `.page`의 gap으로만 관리한다. 헤더 하단 margin이나 목록 상단 margin으로 중복 계산하지 않는다.
+- 목록은 `section.module.is-flush.content-list > ul > li`로 렌더링한다. 페이지 이동은 별도의 footer에 둔다. 페이지가 나뉘는 목록은 `PaginatedList`를 사용한다.
+- 목록 링크는 `header`에 제목·분류, `footer`에 부가 정보를 둔다. 상세 글은 `article.module`이 헤더와 본문을 직접 소유한다.
+- 홈의 대시보드, 로그인, 프로필의 분할 레이아웃은 일반 목록 페이지에 억지로 맞추지 않는다. 시간표도 페이지 바깥 틀만 공유하고 내부 조작 영역은 유지한다.
+
+### 폼과 디자인 책임
+
+- `ActionForm`은 POST/enhance, 결과 정책, 로딩과 fieldset 비활성화를 담당한다. DOM은 `form > fieldset`이며 오류 메시지는 form 다음에 표시한다.
+- `InlineActionForm`은 숨김 필드, 실행 버튼, 선택적 확인 동작을 조립한다. 버튼 모양은 `buttonClass`로 공통 디자인을 선택한다.
+- 폼 컴포넌트는 모든 사용처에 전체 너비를 강제하거나 버튼 색·투명도를 덮어쓰지 않는다. 바깥 배치는 사용하는 영역, 버튼 외형은 `components.scss`가 소유한다.
+- 문의·건의 작성 폼의 유형과 담당 분야는 같은 행에 배치하며, 이 배치는 `SubmissionForm`이 소유한다.
+- `BannerManager`는 순서 변경 상태·저장을, `BannerListItem`은 항목 표시와 활성화·삭제 UI를 소유한다. `TimetableName`은 이름 표시·편집을, `TimetableToolbar`는 도구 모음 배치를 소유한다.
+- CSS 최소화·버튼 조합·반응형 문법은 [STYLE_GUIDE.md](./STYLE_GUIDE.md)를 따른다.
+
+### 익명 제보 연결
+
+- 익명 제보는 `src/lib/shared/navigation.ts`의 외부 Google Form 링크로 제공한다. 내부 접수·조회·처리 라우트와 전용 service/repository는 사용하지 않는다.
+- `SiteHeader`는 외부 링크에 아이콘과 접근 가능한 외부 사이트 안내를 표시한다.
+- 기존 제보 테이블은 데이터 보존을 위해 남아 있다. 내부 기능 제거만으로 테이블 삭제 마이그레이션을 만들지 않는다.

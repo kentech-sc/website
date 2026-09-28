@@ -1,5 +1,5 @@
 import type { BoardId } from './board.type.js';
-import type { UserId, DisplayType } from './user.type.js';
+import type { UserId, AuthorNameMode } from './user.type.js';
 
 export type PostId = string;
 
@@ -8,17 +8,19 @@ export interface PostCreate {
 	title: string;
 	content: string;
 	userId: UserId;
-	displayType: DisplayType;
+	authorNameMode: AuthorNameMode;
 }
 
 export interface PostEntity extends PostCreate {
 	id: PostId;
 	createdAt: string;
 
-	viewCnt: number;
-	commentCnt: number;
+	viewCount: number;
+	commentCount: number;
 	likedBy: UserId[];
 }
+
+export type PostPreview = Pick<PostEntity, 'id' | 'boardId' | 'title' | 'createdAt'>;
 
 export type Post = PostEntity & { displayName: string | null };
 
@@ -30,5 +32,5 @@ export interface PostPermissions {
 }
 
 export type PostUpdate = Partial<
-	Pick<PostEntity, 'title' | 'content' | 'viewCnt' | 'commentCnt' | 'displayType'>
+	Pick<PostEntity, 'title' | 'content' | 'viewCount' | 'commentCount' | 'authorNameMode'>
 >;

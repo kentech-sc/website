@@ -1,5 +1,5 @@
-import type { PetitionId } from './petition.type';
 import type { PostId } from './post.type';
+import type { SubmissionId } from './submission.type';
 
 export type FileId = string;
 export type FileKey = string;
@@ -14,7 +14,7 @@ export interface FileMetaCreate {
 
 export interface FileMetaEntity extends FileMetaCreate {
 	id: FileId;
-	articleIds: Array<PostId | PetitionId>;
+	articleIds: Array<PostId | SubmissionId>;
 	createdAt: string;
 }
 

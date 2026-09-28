@@ -1,0 +1,49 @@
+import type { Offering } from '$lib/types/academic.type.js';
+
+const CATEGORY_COLORS: Record<string, string> = {
+	EL: '#315f9e',
+	EF: '#247f9f',
+	VC: '#5b7f8d',
+	MN: '#735f99',
+	HASS: '#8b6b83',
+	ESP: '#a45d7d',
+	IR: '#b86446',
+	CAPS: '#a44c3c',
+	EN: '#6653a3',
+	FR: '#647078',
+	RC: '#39786f'
+};
+
+export const courseColor = (category: string | null) =>
+	CATEGORY_COLORS[category ?? ''] ?? '#526777';
+
+export const formatScheduleTime = (minutes: number) =>
+	`${Math.floor(minutes / 60)
+		.toString()
+		.padStart(2, '0')}:${(minutes % 60).toString().padStart(2, '0')}`;
+
+export const formatRoomName = (value: string) => {
+	const room = value.trim();
+	if (!room.startsWith('행정강의동')) return room;
+	const separatorIndex = room.lastIndexOf('_');
+	return separatorIndex >= 0 ? room.slice(separatorIndex + 1).trim() : room;
+};
+
+export const formatOfferingSchedule = (
+	offering: Offering,
+	weekdays = ['월', '화', '수', '목', '금']
+) =>
+	offering.meetings
+		.map(
+			(meeting) =>
+				`${weekdays[meeting.weekday - 1] ?? meeting.weekday} ${formatScheduleTime(meeting.startMinute)}–${formatScheduleTime(meeting.endMinute)}${meeting.room ? ` · ${formatRoomName(meeting.room)}` : ''}`
+		)
+		.join(' / ');
+
+/** Grid dimensions are in rem; time values are minutes since midnight. */
+export function schedulePosition(minute: number, gridStartMinute: number) {
+	return 0.65 + ((minute - gridStartMinute) / 30) * 1.35;
+}
+export function scheduleHeight(startMinute: number, endMinute: number) {
+	return ((endMinute - startMinute) / 30) * 1.35;
+}

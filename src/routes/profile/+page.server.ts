@@ -1,39 +1,19 @@
-import type { UserGroup } from '$lib/types/user.type.js';
 import type { PageServerLoad } from './$types.js';
 
-import { editorActions } from '$lib/server/editor.js';
 import { withActionErrorHandling } from '$lib/server/errors.js';
 import * as ProfileUsecase from '$lib/usecase/profile.usecase.js';
 
-export const load: PageServerLoad = async ({ locals }) => {
-	return {
-		permissions: ProfileUsecase.getProfilePermissions(locals.user),
-		userAdminOptions: await ProfileUsecase.getUserAdminOptions(locals.user),
-		banners: await ProfileUsecase.getManagedBanners(locals.user)
-	};
-};
+export const load: PageServerLoad = async () => ({});
 
 export const actions = {
-	// 배너 이미지 업로드는 에디터와 같은 presign -> 업로드 -> complete 흐름을 쓴다.
-	...editorActions,
-	addBanner: withActionErrorHandling(async ({ request, locals }) => {
+	changeResidence: withActionErrorHandling(async ({ request, locals }) => {
 		const formData = await request.formData();
-		const fileId = (formData.get('file-id') ?? '').toString();
-		const linkUrl = (formData.get('link-url') ?? '').toString();
-		await ProfileUsecase.addBanner(fileId, linkUrl, locals.user);
-		return { fileId };
-	}),
-	activateBanner: withActionErrorHandling(async ({ request, locals }) => {
-		const formData = await request.formData();
-		const bannerId = (formData.get('banner-id') ?? '').toString();
-		await ProfileUsecase.activateBanner(bannerId, locals.user);
-		return { bannerId };
-	}),
-	removeBanner: withActionErrorHandling(async ({ request, locals }) => {
-		const formData = await request.formData();
-		const bannerId = (formData.get('banner-id') ?? '').toString();
-		await ProfileUsecase.removeBanner(bannerId, locals.user);
-		return { bannerId };
+		await ProfileUsecase.changeResidence(
+			(formData.get('gender') ?? '').toString(),
+			(formData.get('house') ?? '').toString(),
+			locals.user
+		);
+		return { saved: true };
 	}),
 	changeNickname: withActionErrorHandling(async ({ request, locals }) => {
 		const formData = await request.formData();
@@ -41,41 +21,8 @@ export const actions = {
 		await ProfileUsecase.changeNickname(locals.user.id, nickname, locals.user);
 		return { nickname };
 	}),
-	changeGroup: withActionErrorHandling(async ({ request, locals }) => {
-		const formData = await request.formData();
-		const userId = (formData.get('user-id') ?? '').toString();
-		const group = (formData.get('group') ?? '').toString();
-		await ProfileUsecase.changeGroupById(userId, group as UserGroup, locals.user);
-		return { userId, group };
-	}),
-	blockUser: withActionErrorHandling(async ({ request, locals }) => {
-		const formData = await request.formData();
-		const userId = (formData.get('user-id') ?? '').toString();
-		const duration = Number(formData.get('duration')) * 60 * 1000;
-		await ProfileUsecase.blockUserById(userId, locals.user, duration);
-		return { userId };
-	}),
-	unblockUser: withActionErrorHandling(async ({ request, locals }) => {
-		const formData = await request.formData();
-		const userId = (formData.get('user-id') ?? '').toString();
-		await ProfileUsecase.unblockUserById(userId, locals.user);
-		return { userId };
-	}),
 	deleteUser: withActionErrorHandling(async ({ locals }) => {
 		await ProfileUsecase.deleteUser(locals.user);
 		return { userId: locals.user.id };
-	}),
-	cleanup: withActionErrorHandling(async ({ request, locals }) => {
-		const formData = await request.formData();
-		const hours = Number(formData.get('hours') ?? 24);
-		const deletedCnt = await ProfileUsecase.cleanup(hours, locals.user);
-		return { deletedCnt };
-	}),
-	sendPush: withActionErrorHandling(async ({ request, locals }) => {
-		const formData = await request.formData();
-		const title = (formData.get('title') ?? '').toString();
-		const body = (formData.get('body') ?? '').toString();
-		const result = await ProfileUsecase.sendPushNotification(title, body, locals.user);
-		return { pushResult: result };
 	})
 };

@@ -3,21 +3,24 @@ export const UserGroup = {
 	User: 'user',
 	Dev: 'dev',
 	Moderator: 'moderator',
-	Manager: 'manager'
+	Manager: 'manager',
+	Auditor: 'auditor'
 } as const;
 
 export type UserGroup = (typeof UserGroup)[keyof typeof UserGroup];
 
-export const DisplayType = {
+export const AuthorNameMode = {
 	Email: 'email',
 	RealName: 'realName',
 	Nickname: 'nickname',
 	Anonymous: 'anonymous'
 } as const;
 
-export type DisplayType = (typeof DisplayType)[keyof typeof DisplayType];
+export type AuthorNameMode = (typeof AuthorNameMode)[keyof typeof AuthorNameMode];
 
 export type UserId = string;
+export type UserGender = 'male' | 'female';
+export type UserHouse = 'tesla' | 'edison';
 
 export interface Profile {
 	issuer: string;
@@ -36,6 +39,8 @@ export interface UserCreate {
 
 export interface UserEntity extends UserCreate {
 	id: UserId;
+	gender: UserGender | null;
+	house: UserHouse | null;
 	createdAt: string;
 	updatedAt: string;
 
@@ -57,5 +62,8 @@ export interface IdentityCreate {
 }
 
 export type UserUpdate = Partial<
-	Pick<UserEntity, 'email' | 'realName' | 'nickname' | 'group' | 'deletedAt' | 'blockedUntil'>
+	Pick<
+		UserEntity,
+		'email' | 'realName' | 'nickname' | 'group' | 'deletedAt' | 'blockedUntil' | 'gender' | 'house'
+	>
 >;

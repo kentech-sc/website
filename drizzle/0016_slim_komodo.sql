@@ -1,4 +1,4 @@
-CREATE TABLE "app"."banners" (
+CREATE TABLE IF NOT EXISTS "app"."banners" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"file_id" uuid NOT NULL,
 	"link_url" text,
@@ -8,4 +8,17 @@ CREATE TABLE "app"."banners" (
 );
 --> statement-breakpoint
 ALTER TABLE "app"."banners" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
-ALTER TABLE "app"."banners" ADD CONSTRAINT "banners_file_id_file_metas_id_fk" FOREIGN KEY ("file_id") REFERENCES "app"."file_metas"("id") ON DELETE no action ON UPDATE no action;
+DO $$
+BEGIN
+	IF NOT EXISTS (
+		SELECT 1
+		FROM pg_constraint
+		WHERE conname = 'banners_file_id_file_metas_id_fk'
+			AND conrelid = 'app.banners'::regclass
+	) THEN
+		ALTER TABLE "app"."banners"
+			ADD CONSTRAINT "banners_file_id_file_metas_id_fk"
+			FOREIGN KEY ("file_id") REFERENCES "app"."file_metas"("id")
+			ON DELETE no action ON UPDATE no action;
+	END IF;
+END $$;

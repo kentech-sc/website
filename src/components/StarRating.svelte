@@ -83,9 +83,11 @@
 			cursor: pointer;
 			width: 1.6rem;
 			height: 1.6rem;
-
 			&:hover {
 				transform: scale(1.15);
+				@media (prefers-reduced-motion: reduce) {
+					transform: none;
+				}
 			}
 		}
 	}
@@ -126,6 +128,6 @@
 	.score-text {
 		margin-left: 0.4rem;
 		color: var(--gray);
-		font-size: 0.8rem;
+		font-size: 0.7rem;
 	}
 </style>

@@ -7,7 +7,12 @@ import { UserGroup, type UserGroup as UserGroupType } from '$lib/types/user.type
 
 const validNicknameRegex = /^[가-힣a-zA-Z0-9 ]+$/;
 const continuousSpaceRegex = /\s{2,}/;
-const allowedGroups: UserGroupType[] = [UserGroup.User, UserGroup.Moderator, UserGroup.Manager];
+const allowedGroups: UserGroupType[] = [
+	UserGroup.User,
+	UserGroup.Moderator,
+	UserGroup.Manager,
+	UserGroup.Auditor
+];
 const protectedGroups: UserGroupType[] = [UserGroup.Manager, UserGroup.Dev];
 
 export function canSignup(existingUser: User | null): RuleResult {
@@ -60,7 +65,7 @@ export function canChangeGroup(
 	if (!allowedGroups.includes(newGroup)) {
 		return ruleFail(
 			APP_ERROR.BAD_REQUEST,
-			'그룹은 user, moderator, manager 중 하나로만 변경할 수 있습니다.'
+			'그룹은 user, moderator, manager, auditor 중 하나로만 변경할 수 있습니다.'
 		);
 	}
 

@@ -1,6 +1,12 @@
 import type { BoardId } from '$lib/types/board.type.js';
 import type { Page } from '$lib/types/general.type.js';
-import type { PostCreate, PostEntity, PostId, PostUpdate } from '$lib/types/post.type.js';
+import type {
+	PostCreate,
+	PostEntity,
+	PostId,
+	PostPreview,
+	PostUpdate
+} from '$lib/types/post.type.js';
 import type { User } from '$lib/types/user.type.js';
 
 import * as PostRepository from '$lib/repositories/post.repository.js';
@@ -38,6 +44,13 @@ export async function getPostPageByBoardId(
 		PostRepository.countPostsByBoardId(boardId)
 	]);
 	return createPage<PostEntity>(result, totalCount, limit, skip);
+}
+
+export async function getPostPreviewsByBoardId(
+	boardId: BoardId,
+	limit = 5
+): Promise<PostPreview[]> {
+	return await PostRepository.findRecentPostPreviewsByBoardId(boardId, limit);
 }
 
 export async function createPostByBoardId(postCreate: PostCreate, user: User): Promise<PostEntity> {

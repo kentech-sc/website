@@ -1,7 +1,7 @@
 import type { AcademicSchedule } from '$lib/types/academic-calendar.type.js';
 
 /**
- * 달력 두 안(격자/목록)이 공유하는 이동 상태.
+ * 학사일정 달력의 이동 상태.
  * 서버가 내려준 일정을 기본으로 쓰고, 사용자가 기준일을 옮기면 그 결과로 덮는다.
  */
 export class CalendarNav {

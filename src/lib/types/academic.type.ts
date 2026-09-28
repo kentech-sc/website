@@ -4,7 +4,7 @@ import type { UserId } from './user.type.js';
 
 export type OfferingId = string;
 export type TimetableId = string;
-export type CompletionStatus = 'passed' | 'failed' | 'withdrawn';
+export type CourseRecordStatus = 'passed' | 'failed' | 'withdrawn';
 export type OfferingCreditType = 'numeric' | 'pass';
 export type AcademicCareer = 'undergraduate' | 'graduate';
 
@@ -12,8 +12,8 @@ export interface Meeting {
 	id: string;
 	offeringId: OfferingId;
 	weekday: number;
-	startsAt: number;
-	endsAt: number;
+	startMinute: number;
+	endMinute: number;
 	room: string | null;
 }
 
@@ -25,7 +25,7 @@ export interface Offering {
 	category: string | null;
 	subcategory: string | null;
 	level: number | null;
-	gradExcluded: boolean;
+	excludedFromGraduation: boolean;
 	professors: Professor[];
 	year: number;
 	term: number;
@@ -50,7 +50,7 @@ export interface OfferingImportInput {
 	category: string | null;
 	subcategory: string | null;
 	level: number | null;
-	gradExcluded: boolean;
+	excludedFromGraduation: boolean;
 	professorNames: string[];
 	year: number;
 	term: number;
@@ -59,7 +59,7 @@ export interface OfferingImportInput {
 	credits: number;
 	creditType: OfferingCreditType;
 	capacity: number | null;
-	meetings: Array<{ weekday: number; startsAt: number; endsAt: number; room: string | null }>;
+	meetings: Array<{ weekday: number; startMinute: number; endMinute: number; room: string | null }>;
 }
 
 export interface OfferingWorkbookParseResult {
@@ -70,7 +70,7 @@ export interface OfferingWorkbookParseResult {
 	multipleProfessorCount: number;
 }
 
-export interface CourseCompletion {
+export interface CourseRecord {
 	id: string;
 	userId: UserId;
 	courseId: CourseId | null;
@@ -79,11 +79,11 @@ export interface CourseCompletion {
 	term: number;
 	credits: number;
 	grade: string | null;
-	status: CompletionStatus;
+	status: CourseRecordStatus;
 	source: 'manual' | 'portal' | 'admin';
 }
 
-export interface CourseCompletionView extends CourseCompletion {
+export interface CourseRecordView extends CourseRecord {
 	courseCode: string;
 	courseName: string;
 	offering: Offering | null;

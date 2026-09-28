@@ -1,4 +1,4 @@
-import type { DisplayType, User } from '$lib/types/user.type.js';
+import type { AuthorNameMode, User } from '$lib/types/user.type.js';
 
 export function getPlainTextFromHtml(html: string): string {
 	return html
@@ -13,7 +13,7 @@ export function getPlainTextFromHtml(html: string): string {
 		.trim();
 }
 
-export function parseDate(
+export function formatDate(
 	date: Date | string,
 	type: 'date' | 'datetime' | 'time' | 'datetime-iso' | 'date-iso' = 'datetime'
 ): string {
@@ -36,7 +36,7 @@ export function parseDate(
 	return '';
 }
 
-export function parseRelativeDate(date: Date | string): string {
+export function formatRelativeDate(date: Date | string): string {
 	const value = typeof date === 'string' ? new Date(date) : date;
 	const now = new Date();
 	const diffMs = now.getTime() - value.getTime();
@@ -59,12 +59,12 @@ const ANONYMOUS_NAME = '익명의 켄텍인';
 
 export function createDisplayName(
 	user: User,
-	displayType: DisplayType,
+	authorNameMode: AuthorNameMode,
 	userIdToIdx?: Map<string, number>
 ): string {
 	if (user.deletedAt) return '탈퇴한 사용자';
 
-	switch (displayType) {
+	switch (authorNameMode) {
 		case 'anonymous': {
 			if (!userIdToIdx) return ANONYMOUS_NAME;
 			const anonIdx = userIdToIdx.get(user.id);

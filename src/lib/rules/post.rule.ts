@@ -3,13 +3,12 @@ import type { RuleResult } from '$lib/types/general.type.js';
 import type { PostEntity } from '$lib/types/post.type.js';
 import type { User } from '$lib/types/user.type.js';
 
+import { BOARD_DEFINITIONS } from '$lib/shared/board.js';
 import { hasCapability, isOwner } from '$lib/shared/permission.js';
 import { APP_ERROR, ok, ruleFail } from '$lib/shared/rule.js';
 
 export function canCreatePost(boardId: BoardId, user: User): RuleResult {
-	if (boardId === 'free' && hasCapability(user, 'board.free.write')) return ok();
-	if (boardId === 'notice' && hasCapability(user, 'board.notice.write')) return ok();
-	if (boardId === 'bylaw' && hasCapability(user, 'board.bylaw.write')) return ok();
+	if (hasCapability(user, BOARD_DEFINITIONS[boardId].writeCapability)) return ok();
 
 	return ruleFail(APP_ERROR.FORBIDDEN, '게시글을 작성할 권한이 없습니다.');
 }

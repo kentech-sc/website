@@ -1,11 +1,13 @@
 <script lang="ts">
 	import type { Page, SearchEntity } from '$lib/types/general.type.js';
-	import type { PetitionEntity } from '$lib/types/petition.type.js';
 	import type { PostEntity } from '$lib/types/post.type.js';
 	import type { ReviewEntity } from '$lib/types/review.type.js';
+	import type { SubmissionEntity } from '$lib/types/submission.type.js';
 
 	import { resolve } from '$app/paths';
-	import CommonListPaginationBtn from '$components/CommonListPaginationBtn.svelte';
+	import PaginatedList from '$components/PaginatedList.svelte';
+	import { boardPostPath } from '$lib/shared/paths.js';
+	import { SUBMISSION_KIND_LABELS } from '$lib/shared/submission.js';
 	import { getPlainTextFromHtml } from '$lib/shared/utils.js';
 
 	let {
@@ -15,100 +17,36 @@
 	} = $props();
 </script>
 
-{#snippet ListItem(item: PostEntity | PetitionEntity | ReviewEntity)}
-	{#if 'boardId' in item}
-		<a
-			class="list-item"
-			href={resolve('/board/[boardId=board]/[postId]', {
-				boardId: item.boardId,
-				postId: item.id.toString()
-			})}
-		>
-			<h3 class="ellipsis"><span class="board-tag">게시글</span>{item.title}</h3>
-			<p class="ellipsis">{getPlainTextFromHtml(item.content)}</p>
-		</a>
-	{:else if 'offeringId' in item}
-		<a class="list-item" href={resolve('/review/[reviewId]', { reviewId: item.id.toString() })}>
-			<h3 class="ellipsis"><span class="review-tag">강의평가</span> {item.title}</h3>
-			<p class="ellipsis">{getPlainTextFromHtml(item.comment)}</p>
-		</a>
-	{:else}
-		<a
-			class="list-item"
-			href={resolve('/petition/[petitionId]', { petitionId: item.id.toString() })}
-		>
-			<h3 class="ellipsis"><span class="petition-tag">청원</span> {item.title}</h3>
-			<p class="ellipsis">{getPlainTextFromHtml(item.content)}</p>
-		</a>
-	{/if}
+{#snippet ListItem(item: PostEntity | SubmissionEntity | ReviewEntity)}
+	{@const href =
+		'boardId' in item
+			? boardPostPath(item.boardId, item.id.toString())
+			: 'offeringId' in item
+				? resolve('/academic/reviews/[reviewId]', { reviewId: item.id.toString() })
+				: item.kind === 'petition'
+					? resolve('/channel/petitions/[submissionId]', { submissionId: item.id.toString() })
+					: resolve('/channel/feedback/[submissionId]', { submissionId: item.id.toString() })}
+	{@const kind =
+		'boardId' in item
+			? '게시글'
+			: 'offeringId' in item
+				? '강의평가'
+				: SUBMISSION_KIND_LABELS[item.kind]}
+	{@const summary = getPlainTextFromHtml('offeringId' in item ? item.comment : item.content)}
+	<a class="content-list-item" {href}>
+		<header><strong><span>{kind}</span>{item.title}</strong></header>
+		<footer><span>{summary}</span></footer>
+	</a>
 {/snippet}
 
-<section class="module container-col">
-	{#if searchPage.items.length === 0}
-		<p>검색 결과가 없습니다.</p>
-	{:else}
-		{#each searchPage.items as item (item.id)}
-			{@render ListItem(item)}
-		{/each}
+<PaginatedList page={searchPage} emptyMessage="검색 결과가 없습니다.">
+	{#snippet item(value)}{@render ListItem(value)}{/snippet}
+</PaginatedList>
 
-		<CommonListPaginationBtn
-			currentPage={searchPage.currentPage}
-			totalPages={searchPage.totalPages}
-		/>
-	{/if}
-</section>
-
-<style lang="scss">
-	section {
-		margin-top: 1rem;
-		padding: 0;
-		overflow: hidden;
-
-		& > p {
-			padding: 0.8rem 1rem;
-			width: 100%;
-		}
-	}
-
-	.list-item {
-		justify-content: flex-start;
-		border-bottom: solid 0.1rem var(--gray-border);
-		padding: 0.8rem 0.8rem;
-		width: 100%;
-		color: var(--black);
-		text-decoration: none;
-
-		&:hover {
-			background-color: var(--gray-bg);
-		}
-
-		h3 {
-			margin-bottom: 0.4rem;
-			font-weight: 600;
-			font-size: 1rem;
-		}
-
-		span {
-			margin-right: 0.4rem;
-			border-radius: 0.4rem;
-			padding: 0.2rem 0.4rem;
-		}
-
-		.board-tag {
-			background-color: var(--success-bg);
-		}
-
-		.petition-tag {
-			background-color: var(--info-bg);
-		}
-
-		.review-tag {
-			background-color: var(--warn-bg);
-		}
-
-		p {
-			padding: 0 0.2rem;
-			font-size: 0.8rem;
-		}
+<style>
+	strong > span {
+		margin-right: 0.4rem;
+		color: var(--secondary);
+		font-size: 0.7rem;
 	}
 </style>

@@ -5,7 +5,13 @@ import { asEntity, firstOrNull } from './repository.utils.js';
 import type { OfferingId } from '$lib/types/academic.type.js';
 import type { CourseId } from '$lib/types/course.type.js';
 import type { ProfessorId } from '$lib/types/professor.type.js';
-import type { ReviewCreate, ReviewEntity, ReviewId, ReviewUpdate } from '$lib/types/review.type.js';
+import type {
+	ReviewCreate,
+	ReviewEntity,
+	ReviewId,
+	ReviewPreview,
+	ReviewUpdate
+} from '$lib/types/review.type.js';
 import type { UserId } from '$lib/types/user.type.js';
 
 import { courseOfferingProfessors, courseOfferings, reviews } from '$lib/server/database/schema.js';
@@ -147,6 +153,14 @@ export async function findRecentReviews(
 		.offset(skip)
 		.limit(limit);
 	return rows.map(({ review }) => toReview(review));
+}
+
+export async function findRecentReviewPreviews(limit: number): Promise<ReviewPreview[]> {
+	return await getDatabase()
+		.select({ id: reviews.id, title: reviews.title, createdAt: reviews.createdAt })
+		.from(reviews)
+		.orderBy(desc(reviews.createdAt))
+		.limit(limit);
 }
 
 export async function updateReviewById(

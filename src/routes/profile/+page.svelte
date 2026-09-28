@@ -1,26 +1,21 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 
-	import BannerForm from './_components/BannerForm.svelte';
-	import BlockForm from './_components/BlockForm.svelte';
-	import ChangeGroupForm from './_components/ChangeGroupForm.svelte';
 	import ChangeNicknameForm from './_components/ChangeNicknameForm.svelte';
-	import CleanupForm from './_components/CleanupForm.svelte';
 	import DeleteUserForm from './_components/DeleteUserForm.svelte';
 	import Profile from './_components/Profile.svelte';
 	import PushNotificationForm from './_components/PushNotificationForm.svelte';
-	import SendPushForm from './_components/SendPushForm.svelte';
+	import ResidenceForm from './_components/ResidenceForm.svelte';
 	import InstallAppPrompt from '../profile/_components/InstallAppPrompt.svelte';
 
 	import { page } from '$app/state';
+	import PanelHeader from '$components/PanelHeader.svelte';
 
 	type NavigatorWithStandalone = Navigator & {
 		standalone?: boolean;
 	};
 
 	const user = $derived(page.data.user);
-	const permissions = $derived(page.data.permissions);
-	const userAdminOptions = $derived(page.data.userAdminOptions);
 	let runningAsInstalledApp = $state(false);
 
 	function updateDisplayMode() {
@@ -49,41 +44,17 @@
 		<Profile {user} />
 	</div>
 
-	<div class="container-col">
-		<div class="module container-col">
-			<h3>사용자 기능</h3>
-			{#if runningAsInstalledApp}
-				<PushNotificationForm />
-			{:else}
-				<InstallAppPrompt />
-			{/if}
-			<ChangeNicknameForm />
-			<DeleteUserForm />
-		</div>
-
-		{#if permissions.canSendPush || permissions.canManageUsers || permissions.canManageBanner}
-			<div class="module container-col">
-				<h3>관리자 기능</h3>
-				{#if permissions.canSendPush}
-					<SendPushForm />
-				{/if}
-				{#if permissions.canManageUsers}
-					<BlockForm users={userAdminOptions} />
-					<ChangeGroupForm users={userAdminOptions} />
-				{/if}
-				{#if permissions.canManageBanner}
-					<BannerForm banners={page.data.banners} />
-				{/if}
-			</div>
+	<section class="module">
+		<PanelHeader title="계정 설정" />
+		{#if runningAsInstalledApp}
+			<PushNotificationForm />
+		{:else}
+			<InstallAppPrompt />
 		{/if}
-
-		{#if permissions.canCleanup}
-			<div class="module container-col">
-				<h3>개발자 기능</h3>
-				<CleanupForm />
-			</div>
-		{/if}
-	</div>
+		<ChangeNicknameForm />
+		<ResidenceForm />
+		<DeleteUserForm />
+	</section>
 </section>
 
 <style lang="scss">
@@ -94,25 +65,10 @@
 		grid-template-columns: minmax(0, 1fr);
 		align-items: flex-start;
 		gap: 1rem;
-		width: stretch;
+		width: 100%;
 
 		@include media.pc {
 			grid-template-columns: minmax(0, 0.8fr) minmax(0, 1fr);
 		}
-
-		& > div:last-child {
-			gap: 1rem;
-		}
-	}
-
-	.module {
-		gap: 0.6rem;
-	}
-
-	h3 {
-		border-bottom: 0.1rem solid var(--gray-border);
-		width: 100%;
-		font-weight: 600;
-		font-size: 1.1rem;
 	}
 </style>

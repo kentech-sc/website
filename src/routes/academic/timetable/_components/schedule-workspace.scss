@@ -1,0 +1,67 @@
+.planner-workspace {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	align-items: start;
+	gap: 0.8rem;
+}
+.planner-workspace.search-open {
+	grid-template-columns: minmax(0, 1fr) minmax(19rem, 25rem);
+}
+.planner-main {
+	display: grid;
+	gap: 0.8rem;
+	min-width: 0;
+}
+.schedule-toolbar {
+	display: flex;
+	justify-content: flex-end;
+	border-bottom: var(--divider-border-width) solid var(--gray-border);
+	background: var(--white);
+	padding: 0.4rem 0.6rem;
+}
+.schedule-onboarding {
+	display: flex;
+	align-items: center;
+	gap: 0.6rem;
+	border-bottom: var(--divider-border-width) solid var(--gray-border);
+	background: color-mix(in srgb, var(--secondary) 5%, var(--white));
+	padding: 0.6rem 0.8rem;
+}
+.onboarding-icon {
+	flex: 0 0 auto;
+	width: 1.8rem;
+	height: 1.8rem;
+}
+.schedule-onboarding > span:nth-child(2) {
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	min-width: 0;
+}
+.schedule-onboarding strong {
+	font-size: 0.7rem;
+}
+.schedule-onboarding small {
+	color: var(--gray-text);
+	font-size: 0.7rem;
+}
+.schedule-onboarding .schedule-search-action {
+	flex: 0 0 auto;
+	margin-left: auto;
+}
+@media (width <= 1100px) {
+	.planner-workspace.search-open {
+		grid-template-columns: minmax(0, 1fr) minmax(18rem, 21rem);
+	}
+}
+@media (width <= 900px) {
+	.planner-workspace.search-open {
+		grid-template-columns: minmax(0, 1fr);
+	}
+}
+@media (width <= 760px) {
+	.schedule-onboarding {
+		flex-wrap: wrap;
+		align-items: flex-start;
+	}
+}

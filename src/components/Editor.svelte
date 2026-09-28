@@ -1,36 +1,23 @@
 <script lang="ts">
 	import '$style/nmu.scss';
 
-	import Bold from '@lucide/svelte/icons/bold';
-	import Code from '@lucide/svelte/icons/code';
-	import Code2 from '@lucide/svelte/icons/code-2';
-	import Italic from '@lucide/svelte/icons/italic';
-	import List from '@lucide/svelte/icons/list';
-	import ListOrdered from '@lucide/svelte/icons/list-ordered';
-	import Quote from '@lucide/svelte/icons/message-square-quote';
-	import Minus from '@lucide/svelte/icons/minus';
-	import Strikethrough from '@lucide/svelte/icons/strikethrough';
-	import UnderlineIcon from '@lucide/svelte/icons/underline';
-	import Upload from '@lucide/svelte/icons/upload';
 	import { Editor } from '@tiptap/core';
-	import { Color } from '@tiptap/extension-color';
-	import TextAlign from '@tiptap/extension-text-align';
-	import { TextStyle, FontSize } from '@tiptap/extension-text-style';
-	import StarterKit from '@tiptap/starter-kit';
 	import { onDestroy, onMount } from 'svelte';
-	import { SvelteSet } from 'svelte/reactivity';
 
-	import { CustomImage } from './CustomImage.js';
+	import EditorToolbar from './EditorToolbar.svelte';
 
 	import type { FileMeta, FileId } from '$lib/types/file-meta.type';
 	import type { SelectionHint } from '$lib/types/general.type.js';
 
+	import { createContentEditor, insertUploadedImages } from '$lib/client/content-editor.js';
 	import { uploadFiles } from '$lib/client/file-upload.js';
 	const IMAGE_INSERTION_FAILURE_MESSAGE = '이미지 업로드는 완료됐지만 본문 삽입에 실패했습니다.';
 	const PASTE_IMAGE_BLOCK_MESSAGE = '이미지는 업로드 버튼으로만 추가할 수 있습니다.';
 
 	let element = $state<HTMLElement>();
-	let real_editor = $state.raw<Editor | undefined>();
+	let editorInstance = $state.raw<Editor | undefined>();
+	let active = $state<Record<string, boolean>>({});
+	let canToggleCode = $state(true);
 	let headingLevel = $state('');
 	let fontSize = $state('16px');
 	let textColor = $state('#000000');
@@ -38,7 +25,6 @@
 	let uploading = $state(false);
 	let editorNotice = $state<string | null>(null);
 	let noticeTimer: ReturnType<typeof setTimeout> | undefined;
-	let fileUploadInput = $state<HTMLInputElement>();
 	let pendingImageInsertSelection = $state<SelectionHint | null>(null);
 
 	let {
@@ -56,7 +42,7 @@
 	} = $props();
 
 	$effect(() => {
-		real_editor?.setEditable(!disabled);
+		editorInstance?.setEditable(!disabled);
 	});
 
 	function showEditorNotice(message: string) {
@@ -69,8 +55,8 @@
 	}
 
 	function capturePendingImageInsertSelection() {
-		if (real_editor?.isFocused) {
-			const selection = real_editor.state.selection;
+		if (editorInstance?.isFocused) {
+			const selection = editorInstance.state.selection;
 			pendingImageInsertSelection = { from: selection.from, to: selection.to };
 		} else {
 			pendingImageInsertSelection = null;
@@ -87,73 +73,12 @@
 		event.preventDefault();
 	}
 
-	function prepareFileUpload() {
+	function prepareFileUpload(fileInput: HTMLInputElement) {
 		if (disabled || uploading) return;
 
 		capturePendingImageInsertSelection();
-
-		if (fileUploadInput) {
-			fileUploadInput.value = '';
-			fileUploadInput.click();
-		}
-	}
-
-	function createImageAttrs(fileMeta: FileMeta) {
-		return {
-			src: fileMeta.path,
-			alt: fileMeta.name,
-			fileId: fileMeta.id.toString()
-		};
-	}
-
-	function insertUploadedImages(
-		editor: Editor,
-		fileMetas: FileMeta[],
-		selectionHint: SelectionHint | null,
-		preferEndInsertion = false
-	): boolean {
-		if (fileMetas.length === 0) return true;
-
-		const imageContents = fileMetas.map((fileMeta) => ({
-			type: 'image',
-			attrs: createImageAttrs(fileMeta)
-		}));
-
-		if (
-			selectionHint &&
-			editor.chain().focus().setTextSelection(selectionHint).insertContent(imageContents).run()
-		) {
-			return true;
-		}
-
-		if (!preferEndInsertion && editor.chain().focus().insertContent(imageContents).run()) {
-			return true;
-		}
-
-		if (editor.chain().focus('end').insertContent(imageContents).run()) {
-			return true;
-		}
-
-		const imageType = editor.state.schema.nodes.image;
-		if (!imageType) return false;
-
-		try {
-			let insertPosition = editor.state.doc.content.size;
-			let transaction = editor.state.tr;
-
-			for (const fileMeta of fileMetas) {
-				const imageNode = imageType.create(createImageAttrs(fileMeta));
-				transaction = transaction.insert(insertPosition, imageNode);
-				insertPosition += imageNode.nodeSize;
-			}
-
-			editor.view.dispatch(transaction.scrollIntoView());
-			editor.commands.focus('end');
-			return true;
-		} catch (error) {
-			console.error('Image insert failed:', error);
-			return false;
-		}
+		fileInput.value = '';
+		fileInput.click();
 	}
 
 	// 파일 업로드 함수
@@ -196,13 +121,13 @@
 				return;
 			}
 
-			if (!real_editor) {
+			if (!editorInstance) {
 				showEditorNotice(IMAGE_INSERTION_FAILURE_MESSAGE);
 				return;
 			}
 
 			const inserted = insertUploadedImages(
-				real_editor,
+				editorInstance,
 				uploadedImageMetas,
 				selectionHint,
 				preferEndInsertion
@@ -219,292 +144,47 @@
 		}
 	}
 	onMount(() => {
-		const instance = new Editor({
-			element: element,
-			extensions: [
-				Color.configure({ types: ['textStyle'] }),
-				TextStyle.configure({}),
-				TextAlign.configure({
-					types: ['heading', 'paragraph'],
-					alignments: ['left', 'center', 'right', 'justify']
-				}),
-				FontSize.configure({
-					types: ['textStyle']
-				}),
-				CustomImage.configure({
-					resize: {
-						enabled: true,
-						directions: ['top', 'bottom', 'left', 'right'], // can be any direction or diagonal combination
-						minWidth: 50,
-						minHeight: 50,
-						alwaysPreserveAspectRatio: true
-					}
-				}),
-				StarterKit
-			],
-			editorProps: {
-				handlePaste: (_view, event) => {
-					const clipboardItems = Array.from(event.clipboardData?.items ?? []);
-					const hasPastedImageFile = clipboardItems.some((item) => item.type.startsWith('image/'));
-					const pastedHtml = event.clipboardData?.getData('text/html') ?? '';
-
-					if (!hasPastedImageFile && !pastedHtml) return false;
-
-					const parsedHtml = pastedHtml
-						? new DOMParser().parseFromString(pastedHtml, 'text/html')
-						: null;
-					const pastedImages = Array.from(parsedHtml?.querySelectorAll('img') ?? []);
-					const hasBlockedHtmlImage = pastedImages.some(
-						(imageElement) => !imageElement.getAttribute('data-file-id')
-					);
-
-					if (!hasPastedImageFile && !hasBlockedHtmlImage) return false;
-
-					event.preventDefault();
-					alert(PASTE_IMAGE_BLOCK_MESSAGE);
-					return true;
-				}
-			},
-			content: initialHtml,
-			onTransaction: () => {
-				// force re-render so `editor.isActive` works as expected
-				real_editor = instance;
-
-				// Update HTML content
-				if (instance) {
-					onChangeHtml(instance.getHTML());
-
-					// 현재 에디터에 있는 이미지 ID들 추출
-					const currentUsedIds = new SvelteSet<string>();
-
-					// TipTap 내부 API를 사용하여 CustomImage의 fileId 속성 추출
-					instance.state.doc.descendants((node) => {
-						if (node.type.name === 'image') {
-							const fileId = node.attrs.fileId;
-							if (fileId) {
-								currentUsedIds.add(fileId);
-							}
-						}
-					});
-
-					// imageIds 업데이트: 현재 사용된 이미지 ID들
-					onChangeImageIds(Array.from(currentUsedIds));
-				}
-
-				// Update select values based on current cursor position
-				if (instance) {
-					// Update heading level
-					let currentHeading = '';
-					for (let level = 1; level <= 6; level++) {
-						if (instance.isActive('heading', { level })) {
-							currentHeading = level.toString();
-							break;
-						}
-					}
-					headingLevel = currentHeading;
-
-					// Update font size
-					const textStyleAttrs = instance.getAttributes('textStyle');
-					fontSize = textStyleAttrs.fontSize || '16px';
-
-					// Update text color
-					textColor = textStyleAttrs.color || '#000000';
-
-					// Update text align
-					if (instance.isActive({ textAlign: 'center' })) {
-						textAlign = 'center';
-					} else if (instance.isActive({ textAlign: 'right' })) {
-						textAlign = 'right';
-					} else if (instance.isActive({ textAlign: 'justify' })) {
-						textAlign = 'justify';
-					} else {
-						textAlign = 'left';
-					}
-				}
+		if (!element) return;
+		editorInstance = createContentEditor({
+			element,
+			initialHtml,
+			disabled,
+			onChangeHtml,
+			onChangeImageIds,
+			onBlockedImagePaste: () => alert(PASTE_IMAGE_BLOCK_MESSAGE),
+			onToolbarChange: (state) => {
+				active = state.active;
+				canToggleCode = state.canToggleCode;
+				headingLevel = state.headingLevel;
+				fontSize = state.fontSize;
+				textColor = state.textColor;
+				textAlign = state.textAlign;
 			}
 		});
-		instance.setEditable(!disabled);
-		real_editor = instance;
 	});
 
 	onDestroy(() => {
 		if (noticeTimer) clearTimeout(noticeTimer);
-		real_editor?.destroy();
+		editorInstance?.destroy();
 	});
 </script>
 
 <section>
-	{#if real_editor}
-		{@const editor = real_editor}
-		<div class="control-group">
-			<div class="button-group">
-				<select
-					bind:value={headingLevel}
-					onchange={(e) => {
-						const target = e.target as HTMLSelectElement;
-						const level = parseInt(target.value) as 1 | 2 | 3 | 4 | 5 | 6;
-						editor.chain().focus().toggleHeading({ level }).run();
-					}}
-				>
-					<option value="">본문</option>
-					<option value="1">제목 1</option>
-					<option value="2">제목 2</option>
-					<option value="3">제목 3</option>
-					<option value="4">제목 4</option>
-					<option value="5">제목 5</option>
-					<option value="6">제목 6</option>
-				</select>
-				<button
-					type="button"
-					onclick={() => editor.chain().focus().toggleBold().run()}
-					class={editor.isActive('bold') ? 'is-active' : ''}
-				>
-					<Bold size="0.8rem" />
-				</button>
-				<button
-					type="button"
-					onclick={() => editor.chain().focus().toggleItalic().run()}
-					class={editor.isActive('italic') ? 'is-active' : ''}
-				>
-					<Italic size="0.8rem" />
-				</button>
-				<button
-					type="button"
-					onclick={() => editor.chain().focus().toggleStrike().run()}
-					class={editor.isActive('strike') ? 'is-active' : ''}
-				>
-					<Strikethrough size="0.8rem" />
-				</button>
-				<button
-					type="button"
-					onclick={() => editor.chain().focus().toggleUnderline().run()}
-					class={editor.isActive('underline') ? 'is-active' : ''}
-				>
-					<UnderlineIcon size="0.8rem" />
-				</button>
-				<select
-					bind:value={fontSize}
-					onchange={(e) =>
-						editor
-							.chain()
-							.focus()
-							.setFontSize((e.target as HTMLSelectElement)?.value || '16px')
-							.run()}
-				>
-					<option value="12px">12px</option>
-					<option value="14px">14px</option>
-					<option value="16px">16px</option>
-					<option value="18px">18px</option>
-					<option value="20px">20px</option>
-					<option value="24px">24px</option>
-					<option value="32px">32px</option>
-				</select>
-				<input
-					type="color"
-					bind:value={textColor}
-					onchange={(e) => {
-						const target = e.target as HTMLInputElement;
-						if (target?.value) {
-							editor.chain().focus().setColor(target.value).run();
-						}
-					}}
-					title="글자 색상 선택"
-				/>
-				<select
-					bind:value={textAlign}
-					onchange={(e) => {
-						const target = e.target as HTMLSelectElement;
-						editor
-							.chain()
-							.focus()
-							.setTextAlign(target.value as string)
-							.run();
-					}}
-				>
-					<option value="left">왼쪽 정렬</option>
-					<option value="center">가운데 정렬</option>
-					<option value="right">오른쪽 정렬</option>
-					<option value="justify">양쪽 정렬</option>
-				</select>
-				<button
-					type="button"
-					onclick={() => editor.chain().focus().toggleBulletList().run()}
-					class={editor.isActive('bulletList') ? 'is-active' : ''}
-				>
-					<List size="0.8rem" />
-				</button>
-				<button
-					type="button"
-					onclick={() => editor.chain().focus().toggleOrderedList().run()}
-					class={editor.isActive('orderedList') ? 'is-active' : ''}
-				>
-					<ListOrdered size="0.8rem" />
-				</button>
-				<!-- <button
-				type="button"
-				onclick={() => editor.chain().focus().setTextAlign('left').run()}
-				class={editor.isActive({ textAlign: 'left' }) ? 'is-active' : ''}
-			>
-				<AlignLeft size="1rem" />
-			</button>
-			<button
-				type="button"
-				onclick={() => editor.chain().focus().setTextAlign('center').run()}
-				class={editor.isActive({ textAlign: 'center' }) ? 'is-active' : ''}
-			>
-				<AlignCenter size="1rem" />
-			</button>
-			<button
-				type="button"
-				onclick={() => editor.chain().focus().setTextAlign('right').run()}
-				class={editor.isActive({ textAlign: 'right' }) ? 'is-active' : ''}
-			>
-				<AlignRight size="1rem" />
-			</button> -->
-				<button
-					type="button"
-					onclick={() => editor.chain().focus().toggleCode().run()}
-					disabled={!editor.can().chain().focus().toggleCode().run()}
-					class={editor.isActive('code') ? 'is-active' : ''}
-				>
-					<Code size="0.8rem" />
-				</button>
-				<button
-					type="button"
-					onclick={() => editor.chain().focus().toggleCodeBlock().run()}
-					class={editor.isActive('codeBlock') ? 'is-active' : ''}
-				>
-					<Code2 size="0.8rem" />
-				</button>
-				<button
-					type="button"
-					onclick={() => editor.chain().focus().toggleBlockquote().run()}
-					class={editor.isActive('blockquote') ? 'is-active' : ''}
-				>
-					<Quote size="0.8rem" />
-				</button>
-				<button type="button" onclick={() => editor.chain().focus().setHorizontalRule().run()}>
-					<Minus size="0.8rem" />
-				</button>
-				<input
-					type="file"
-					multiple
-					accept=".jpg,.jpeg,.png,.apng,.webp,.pdf,.docx,.xlsx"
-					bind:this={fileUploadInput}
-					disabled={disabled || uploading}
-					onchange={handleFileUpload}
-					style="display: none"
-				/>
-				<button
-					type="button"
-					disabled={disabled || uploading}
-					onmousedown={handleUploadButtonMouseDown}
-					onclick={prepareFileUpload}
-				>
-					<Upload size="0.8rem" />
-				</button>
-			</div>
-		</div>
+	{#if editorInstance}
+		<EditorToolbar
+			editor={editorInstance}
+			{active}
+			{canToggleCode}
+			bind:headingLevel
+			bind:fontSize
+			bind:textColor
+			bind:textAlign
+			{disabled}
+			{uploading}
+			onUploadMouseDown={handleUploadButtonMouseDown}
+			onUpload={prepareFileUpload}
+			onFileChange={handleFileUpload}
+		/>
 	{/if}
 
 	{#if editorNotice}
@@ -535,79 +215,9 @@
 		outline: none;
 	}
 
-	.control-group {
-		box-shadow: 0 0.2rem 0.4rem var(--shadow-color);
-		border: 0.1rem solid var(--gray-border);
-		border-radius: 0.4rem 0.4rem 0 0;
-		background: var(--gray-bg);
-		padding: 0.25rem;
-	}
-
 	.editor-notice {
 		margin: 0 0 0.4rem;
 		color: var(--error-text);
 		font-size: 0.7rem;
-	}
-
-	.button-group {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.2rem;
-		max-width: 100%;
-		height: auto;
-	}
-
-	button {
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		transition: all 0.2s;
-		cursor: pointer;
-		border: 0.05rem solid var(--gray-border);
-		border-radius: 0.2rem;
-		background: var(--white);
-		color: var(--text);
-
-		&:hover {
-			background: var(--gray-hover);
-		}
-
-		&:disabled {
-			opacity: 0.5;
-			cursor: wait;
-		}
-
-		&.is-active {
-			background: var(--gray-bg);
-		}
-	}
-
-	select {
-		transition: all 0.2s;
-		cursor: pointer;
-		border: 0.05rem solid var(--gray-border);
-		border-radius: 0.2rem;
-		background: var(--white);
-		padding: 0;
-		height: auto;
-		color: var(--text);
-		font-size: 0.7rem;
-
-		&:hover {
-			border-color: var(--gray-hover);
-		}
-	}
-
-	input[type='color'] {
-		cursor: pointer;
-		border: 0.05rem solid var(--gray-border);
-		border-radius: 0.2rem;
-		padding: 0 0.25rem;
-		width: 2rem;
-		height: auto;
-
-		&:hover {
-			border-color: var(--gray-hover);
-		}
 	}
 </style>

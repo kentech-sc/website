@@ -115,9 +115,9 @@
 			<span class="range-nav">
 				<button
 					type="button"
-					aria-label="이전 2주"
+					aria-label="이전 주"
 					disabled={nav.loading}
-					onclick={() => nav.moveTo(addDays(schedule.anchor, -14))}
+					onclick={() => nav.moveTo(addDays(schedule.anchor, -7))}
 				>
 					<ChevronLeft size="1rem" />
 				</button>
@@ -126,9 +126,9 @@
 				</span>
 				<button
 					type="button"
-					aria-label="다음 2주"
+					aria-label="다음 주"
 					disabled={nav.loading}
-					onclick={() => nav.moveTo(addDays(schedule.anchor, 14))}
+					onclick={() => nav.moveTo(addDays(schedule.anchor, 7))}
 				>
 					<ChevronRight size="1rem" />
 				</button>
@@ -179,145 +179,5 @@
 </section>
 
 <style lang="scss">
-	.calendar {
-		display: flex;
-		flex-direction: column;
-	}
-
-	h2 {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		margin-bottom: 0.6rem;
-		font-size: 1.2rem;
-	}
-
-	.range-nav {
-		display: flex;
-		align-items: center;
-		gap: 0.3rem;
-
-		button {
-			display: flex;
-			align-items: center;
-			padding: 0.1rem 0.3rem;
-		}
-	}
-
-	.range {
-		min-width: 5.5rem;
-		font-size: 0.8rem;
-		text-align: center;
-	}
-
-	// 칸 사이 여백 없이 테두리를 공유한다. 바깥 테두리는 여기서 한 번만 그린다.
-	.grid {
-		display: flex;
-		flex: 1;
-		flex-direction: column;
-		border: var(--control-border-width) solid var(--gray-border);
-		border-radius: 0.3rem;
-		overflow: hidden;
-	}
-
-	.weekday-row {
-		display: grid;
-		grid-template-columns: repeat(7, minmax(0, 1fr));
-		border-bottom: var(--control-border-width) solid var(--gray-border);
-		background-color: var(--gray-bg);
-	}
-
-	.weekday {
-		padding: 0.2rem 0;
-		color: var(--secondary-text);
-		font-weight: bold;
-		font-size: 0.7rem;
-		text-align: center;
-	}
-
-	/**
-	 * 한 주가 하나의 격자다. 1행은 날짜 숫자, 2행부터 일정 막대가 들어가는 줄(lane).
-	 * 배경 칸(.cell)이 모든 행을 가로질러 세로 구분선을 만든다.
-	 */
-	.week {
-		display: grid;
-		grid-template-rows: auto repeat(var(--lane-count), auto) 1fr;
-		// 마지막 1fr 은 남는 높이를 흡수하는 빈 줄이다.
-		// 이게 없으면 카드가 학식 높이에 맞춰 늘어날 때 격자 아래가 통째로 빈다.
-		grid-template-columns: repeat(7, minmax(0, 1fr));
-		row-gap: 0.15rem;
-		flex: 1;
-		padding-bottom: 0.25rem;
-
-		&:not(:last-child) {
-			border-bottom: var(--control-border-width) solid var(--gray-border);
-		}
-	}
-
-	.cell {
-		grid-row: 1 / -1;
-		border-right: var(--control-border-width) solid var(--gray-border);
-		min-height: 2.5rem;
-
-		// 마지막 칸의 세로선은 바깥 테두리와 겹친다.
-		&:nth-child(7) {
-			border-right: none;
-		}
-	}
-
-	.cell.today {
-		background-color: var(--secondary-bg);
-	}
-
-	.day-number {
-		grid-row: 1;
-		padding: 0.2rem 0.3rem;
-		font-size: 0.7rem;
-		text-align: center;
-	}
-
-	.day-number.today {
-		color: var(--secondary);
-		font-weight: bold;
-	}
-
-	// 기간 일정은 걸친 날짜를 가로질러 하나의 막대로 이어진다.
-	.bar {
-		// 줄 높이만큼만 차지하게 해 막대가 칸 높이로 늘어나지 않도록 한다.
-		align-self: start;
-		z-index: 1;
-		margin: 0 0.15rem;
-		border-radius: 0.2rem;
-		background-color: var(--secondary);
-		padding: 0.05rem 0.3rem;
-		overflow: hidden;
-		color: var(--tertiary-text);
-		font-weight: bold;
-		font-size: 0.65rem;
-		line-height: 1.4;
-		text-align: center;
-		text-overflow: ellipsis;
-		white-space: nowrap;
-	}
-
-	// 주 경계를 넘어 이어지는 쪽은 모서리를 각지게 해 계속됨을 보인다.
-	.bar.continues-before {
-		margin-left: 0;
-		border-start-start-radius: 0;
-		border-end-start-radius: 0;
-	}
-
-	.bar.continues-after {
-		margin-right: 0;
-		border-start-end-radius: 0;
-		border-end-end-radius: 0;
-	}
-
-	.notice {
-		flex: 1;
-		padding-top: 2rem;
-		color: var(--secondary-text);
-		font-size: 0.9rem;
-		text-align: center;
-	}
+	@use './home-calendar-grid.scss';
 </style>

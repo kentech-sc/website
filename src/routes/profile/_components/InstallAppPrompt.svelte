@@ -70,7 +70,7 @@
 	});
 </script>
 
-<section class="container-col">
+<section class="container-col settings-form">
 	<h4>
 		<Download size="0.8rem" />
 		<span>앱 설치</span>
@@ -79,7 +79,7 @@
 		<p>브라우저의 공유 버튼을 누른 뒤 ‘홈 화면에 추가’를 선택해 주세요.</p>
 	{:else if installPrompt}
 		<p>이 사이트를 앱으로 설치하면 홈 화면에서 바로 실행할 수 있습니다.</p>
-		<button type="button" class="action-btn" onclick={promptInstall}>
+		<button type="button" class="ui-button is-primary" onclick={promptInstall}>
 			<Download size="0.8rem" />
 			<span>설치하기</span>
 		</button>
@@ -104,13 +104,13 @@
 		width: 100%;
 		color: var(--secondary);
 		font-weight: 500;
-		font-size: 1rem;
+		font-size: 0.9rem;
 	}
 
 	p {
 		width: 100%;
 		color: var(--gray);
-		font-size: 0.8rem;
+		font-size: 0.7rem;
 	}
 
 	button {

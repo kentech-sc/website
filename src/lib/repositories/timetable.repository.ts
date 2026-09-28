@@ -1,6 +1,6 @@
 import { and, asc, countDistinct, eq, inArray, isNull, max, or, sql } from 'drizzle-orm';
 
-import * as AcademicRepository from './academic.repository.js';
+import * as OfferingRepository from './offering.repository.js';
 
 import type {
 	Timetable,
@@ -30,7 +30,7 @@ export async function findTimetables(
 				.from(timetableItems)
 				.where(inArray(timetableItems.timetableId, ids))
 		: [];
-	const offeringMap = await AcademicRepository.findOfferingMapByIds(
+	const offeringMap = await OfferingRepository.findOfferingMapByIds(
 		items.map((item) => item.offeringId)
 	);
 	return rows.map((row) => ({
@@ -118,7 +118,7 @@ export async function findConfirmedCompetition(userId: UserId, year: number, ter
 		)
 		.groupBy(timetableItems.offeringId);
 	const countMap = new Map(counts.map((row) => [row.offeringId, Number(row.applicants)]));
-	const offeringMap = await AcademicRepository.findOfferingMapByIds(offeringIds);
+	const offeringMap = await OfferingRepository.findOfferingMapByIds(offeringIds);
 	return {
 		confirmed: true,
 		confirmedTimetableName: confirmed.name,

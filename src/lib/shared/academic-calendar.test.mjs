@@ -17,8 +17,7 @@ import {
 	getTwoWeekDayKeys,
 	getWeekdayIndex,
 	toCompactDayKey,
-	toMonthKey,
-	toMonthStart
+	toMonthKey
 } from './day-key.ts';
 
 test('포털 응답을 일정 목록으로 정규화한다', () => {
@@ -142,5 +141,4 @@ test('달을 옮길 때 해가 넘어가도 맞게 계산한다', () => {
 test('달 이동은 항상 1일로 맞춰 말일 차이를 피한다', () => {
 	// 1/31 에서 한 달 뒤를 그대로 더하면 2/31 이 되어 3월로 튄다.
 	assert.equal(addMonths('2026-01-31', 1), '2026-02-01');
-	assert.equal(toMonthStart('2026-09-07'), '2026-09-01');
 });

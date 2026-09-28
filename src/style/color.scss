@@ -1,7 +1,4 @@
 :root {
-	--control-border-width: 0.1rem;
-	--divider-border-width: 0.05rem;
-
 	--white: oklch(1 0 0);
 	--white-hover: oklch(from var(--white) calc(l - 0.1) c h);
 	--text: oklch(0 0 0);
@@ -46,15 +43,12 @@
 	--warn-text: var(--warn);
 	--warn-bg: oklch(from var(--warn) 1 0.04 h);
 	--warn-hover: oklch(from var(--warn-bg) calc(l - 0.05) c h);
-	--warn-strong-hover: oklch(from var(--warn) calc(l - 0.08) c h);
 
 	--success-text: var(--success);
 	--success-bg: oklch(from var(--success) 1 0.04 h);
 	--success-hover: oklch(from var(--success-bg) calc(l - 0.05) c h);
-	--success-strong-hover: oklch(from var(--success) calc(l - 0.08) c h);
 
 	--info-text: var(--info);
 	--info-bg: oklch(from var(--info) 1 0.04 h);
 	--info-hover: oklch(from var(--info-bg) calc(l - 0.05) c h);
-	--info-strong-hover: oklch(from var(--info) calc(l - 0.08) c h);
 }

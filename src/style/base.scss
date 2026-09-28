@@ -1,11 +1,17 @@
 @use 'media';
 
+:root {
+	--control-border-width: 0.1rem;
+	--divider-border-width: 0.05rem;
+}
+
 *,
 *::before,
 *::after {
 	box-sizing: border-box;
 	font-family: 'Pretendard', sans-serif;
 	word-break: keep-all;
+	corner-shape: var(--corner-shape, squircle);
 }
 
 html {
@@ -14,33 +20,22 @@ html {
 	font-size: 20px;
 }
 
-@media (max-width: 1024px) {
+@media (width <= 1024px) {
 	html {
 		font-size: 14px;
 	}
 }
 
-@media (max-width: media.$mobile-max) {
-	html {
-		font-size: 14px;
-	}
-}
-
-@media (min-width: media.$mobile-max) {
+@media (width > media.$mobile-max) {
 	.only-mobile {
 		display: none !important;
 	}
 }
 
-@media (max-width: media.$mobile-max) {
+@media (width <= media.$mobile-max) {
 	.only-pc {
 		display: none !important;
 	}
-}
-
-#nprogress .bar {
-	background: var(--secondary) !important;
-	height: 0.2rem;
 }
 
 .mode-web .only-pwa {
@@ -55,8 +50,8 @@ body {
 	display: flex;
 	flex-direction: column;
 	margin: 0;
-	background-color: var(---base);
-	min-height: 100vh;
+	background-color: var(--white);
+	min-height: 100svh;
 	color: var(--text);
 	line-height: 1.4;
 }
@@ -75,6 +70,10 @@ dd,
 figure,
 blockquote {
 	margin: 0;
+}
+
+p {
+	font-size: 0.9rem;
 }
 
 ul,
@@ -108,8 +107,9 @@ a:hover {
 	text-decoration: underline;
 }
 
-a:focus {
-	outline: none;
+:where(a, button, input, select, textarea, summary):focus-visible {
+	outline: 0.1rem solid var(--secondary);
+	outline-offset: 0.15rem;
 }
 
 s {
@@ -137,15 +137,12 @@ td {
 	background-color: var(--gray-bg);
 }
 
-@mixin btn-style {
+button,
+label.button {
 	border: solid var(--control-border-width) var(--gray-border);
 	border-radius: 0.4rem;
 	background-color: var(--white);
 	padding: 0.2rem 0.8rem;
-	color: var(--text);
-	font-weight: bold;
-	font-size: 0.8rem;
-	word-break: keep-all;
 
 	&:hover:not(:disabled) {
 		cursor: pointer;
@@ -154,9 +151,10 @@ td {
 	}
 }
 
-button,
 label.button {
-	@include btn-style;
+	color: var(--text);
+	font-weight: bold;
+	font-size: 0.7rem;
 }
 
 button:disabled,
@@ -183,10 +181,17 @@ textarea,
 input,
 select {
 	border: var(--control-border-width) solid var(--gray-border);
-	border-radius: 0.4rem;
+	border-radius: 1.4rem;
 	background-color: var(--white);
 	padding: 0.2rem 0.4rem;
-	font-size: 0.8rem;
+	font-size: 0.7rem;
+}
+
+:where(input, select, textarea):focus,
+:where(button, a.ui-button):focus-visible {
+	outline: none;
+	box-shadow: 0 0 0 0.15rem color-mix(in srgb, var(--secondary) 18%, transparent);
+	border-color: var(--secondary);
 }
 
 pre {
@@ -196,11 +201,26 @@ pre {
 }
 
 hr {
-	margin: 0.4rem 0;
+	margin: 0;
 	border: solid var(--control-border-width) var(--gray-border);
 	width: 100%;
 }
 
 .nmu {
 	font-size: 0.9rem;
+}
+
+#nprogress .bar {
+	background: var(--secondary) !important;
+	height: 0.2rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation: none !important;
+		transition: none !important;
+		scroll-behavior: auto !important;
+	}
 }
