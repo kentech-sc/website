@@ -24,6 +24,8 @@ const userSelection = {
 	email: userProfiles.email,
 	realName: userProfiles.realName,
 	nickname: users.nickname,
+	gender: users.gender,
+	house: users.house,
 	group: users.group,
 	blockedUntil: users.blockedUntil,
 	deletedAt: users.deletedAt,
@@ -173,6 +175,8 @@ export async function deleteUserById(userId: UserId): Promise<boolean> {
 		.update(users)
 		.set({
 			nickname: `deleted_${userId}`,
+			gender: null,
+			house: null,
 			deletedAt: sql`now()`,
 			blockedUntil: null,
 			updatedAt: sql`now()`

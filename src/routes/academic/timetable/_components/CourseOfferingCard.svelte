@@ -65,7 +65,7 @@
 	</div>
 	<div class="course-offering-actions">
 		<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- query string is appended to a resolved route -->
-		<a href={`${resolve('/academic/review')}?course=${encodeURIComponent(offering.courseId)}`}
+		<a href={`${resolve('/academic/reviews')}?course=${encodeURIComponent(offering.courseId)}`}
 			>강의평가</a
 		>
 		<form method="POST" action={actionUrl} use:enhance={enhanceAction}>
@@ -168,6 +168,6 @@
 	}
 	.course-offering-actions button {
 		padding: 0.2rem 0.4rem;
-		font-size: 0.6rem;
+		font-size: 0.7rem;
 	}
 </style>

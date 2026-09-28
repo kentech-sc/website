@@ -186,8 +186,8 @@
 									/>{/if}</span
 							>
 							<div class="degree-detail-value">
-								{#if delta > 0}<em>+{delta} {item.unit}</em>{/if}
 								<small>{item.value}/{item.required} {item.unit}</small>
+								{#if delta > 0}<em>+{delta} {item.unit}</em>{/if}
 							</div>
 						</div>
 					{/each}
@@ -200,5 +200,5 @@
 {/if}
 
 <style lang="scss">
-	@use '../_styles/degree-preview.scss';
+	@use './degree-preview.scss';
 </style>

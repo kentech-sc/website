@@ -43,14 +43,7 @@
 		vertical-align: middle;
 		appearance: none;
 		-webkit-appearance: none;
-		-webkit-transition:
-			background-color 0.218s,
-			border-color 0.218s,
-			box-shadow 0.218s;
-		transition:
-			background-color 0.218s,
-			border-color 0.218s,
-			box-shadow 0.218s;
+
 		cursor: pointer;
 		-webkit-box-sizing: border-box;
 		box-sizing: border-box;
@@ -117,8 +110,6 @@
 		bottom: 0;
 		left: 0;
 		opacity: 0;
-		-webkit-transition: opacity 0.218s;
-		transition: opacity 0.218s;
 	}
 
 	.gsi-material-button:disabled {

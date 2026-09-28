@@ -86,7 +86,7 @@
 		padding: 0.5rem 0.2rem;
 		color: var(--gray-text);
 		font-weight: 600;
-		font-size: 0.58rem;
+		font-size: 0.7rem;
 		text-align: center;
 	}
 	article,
@@ -118,7 +118,7 @@
 		padding: 0.05rem 0.28rem;
 		color: var(--white);
 		font-weight: 750;
-		font-size: 0.48rem;
+		font-size: 0.7rem;
 		line-height: 1.35;
 	}
 	.offering-copy {
@@ -136,11 +136,11 @@
 		white-space: nowrap;
 	}
 	article strong {
-		font-size: 0.68rem;
+		font-size: 0.7rem;
 	}
 	article small {
 		color: var(--gray-text);
-		font-size: 0.55rem;
+		font-size: 0.7rem;
 	}
 	article form {
 		position: absolute;

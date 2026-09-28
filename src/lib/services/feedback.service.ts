@@ -14,24 +14,42 @@ import * as FeedbackRule from '$lib/rules/feedback.rule.js';
 import { AppError, assertRule } from '$lib/server/errors.js';
 import { assertUuid } from '$lib/server/id.js';
 import { createPage } from '$lib/shared/paginate.js';
+import { hasCapability } from '$lib/shared/permission.js';
 import { APP_ERROR } from '$lib/shared/rule.js';
-import { FEEDBACK_KINDS } from '$lib/shared/submission.js';
+import { SubmissionKind } from '$lib/types/submission.type.js';
 
 function isFeedback(submission: SubmissionEntity): boolean {
-	return FEEDBACK_KINDS.includes(submission.kind as (typeof FEEDBACK_KINDS)[number]);
+	return submission.kind === SubmissionKind.Feedback;
 }
 
 export function getFeedbackPermissions(submission: SubmissionEntity, user: User) {
 	return {
+		canEdit: FeedbackRule.canEditFeedback(submission, user).ok,
 		canDelete: FeedbackRule.canDeleteFeedback(submission, user).ok,
 		canSupport: FeedbackRule.canSupportFeedback(submission, user).ok,
 		canCancelSupport: FeedbackRule.canCancelFeedbackSupport(submission, user).ok,
-		canReview: FeedbackRule.canReviewFeedback(submission, user).ok,
-		canCancelReview: FeedbackRule.canCancelFeedbackReview(submission, user).ok,
+		canReview: false,
+		canCancelReview: false,
 		canRespond: FeedbackRule.canRespondToFeedback(submission, user).ok,
 		canEditResponse: FeedbackRule.canReviseFeedbackResponse(submission, user).ok,
 		canDeleteResponse: FeedbackRule.canDeleteFeedbackResponse(submission, user).ok
 	};
+}
+
+export async function editFeedbackById(
+	submissionId: SubmissionId,
+	input: Pick<SubmissionEntity, 'category' | 'authorNameMode' | 'title' | 'content'>,
+	user: User
+) {
+	const submission = await getFeedbackById(submissionId);
+	assertRule(FeedbackRule.canEditFeedback(submission, user));
+	const updated = await SubmissionRepository.updateSubmissionWithoutSupportById(
+		submissionId,
+		input
+	);
+	if (!updated)
+		throw new AppError(APP_ERROR.INVALID_STATE, '문의·건의 상태가 변경되어 수정할 수 없습니다.');
+	return updated;
 }
 
 export async function createFeedback(input: SubmissionCreate, user: User) {
@@ -58,7 +76,7 @@ export async function viewFeedbackById(submissionId: SubmissionId): Promise<Subm
 }
 
 export async function getFeedbackPage(limit = 10, skip = 0): Promise<Page<SubmissionEntity>> {
-	const kinds = [...FEEDBACK_KINDS];
+	const kinds = [SubmissionKind.Feedback];
 	const [items, totalCount] = await Promise.all([
 		SubmissionRepository.findRecentSubmissions(kinds, limit, skip),
 		SubmissionRepository.countSubmissions(kinds)
@@ -67,27 +85,30 @@ export async function getFeedbackPage(limit = 10, skip = 0): Promise<Page<Submis
 }
 
 export async function getFeedbackPreviews(limit = 5): Promise<SubmissionPreview[]> {
-	return await SubmissionRepository.findRecentSubmissionPreviews([...FEEDBACK_KINDS], limit);
+	return await SubmissionRepository.findRecentSubmissionPreviews([SubmissionKind.Feedback], limit);
 }
 
 export async function searchFeedbackByQuery(query: string, limit = 10, skip = 0) {
 	return await SubmissionRepository.searchSubmissionsByQuery(
 		query,
-		[...FEEDBACK_KINDS],
+		[SubmissionKind.Feedback],
 		limit,
 		skip
 	);
 }
 
 export async function countFeedbackByQuery(query: string): Promise<number> {
-	return await SubmissionRepository.countSubmissionsByQuery(query, [...FEEDBACK_KINDS]);
+	return await SubmissionRepository.countSubmissionsByQuery(query, [SubmissionKind.Feedback]);
 }
 
 export async function deleteFeedbackById(submissionId: SubmissionId, user: User) {
 	const submission = await getFeedbackById(submissionId);
 	assertRule(FeedbackRule.canDeleteFeedback(submission, user));
-	if (!(await SubmissionRepository.deleteSubmissionById(submissionId))) {
-		throw new AppError(APP_ERROR.NOT_FOUND, '이미 삭제된 문의·건의입니다.');
+	const isDeleted = hasCapability(user, 'feedback.delete.any')
+		? await SubmissionRepository.deleteSubmissionById(submissionId)
+		: await SubmissionRepository.deleteSubmissionWithoutSupportById(submissionId);
+	if (!isDeleted) {
+		throw new AppError(APP_ERROR.INVALID_STATE, '문의·건의 상태가 변경되어 삭제할 수 없습니다.');
 	}
 	return submission;
 }
@@ -113,32 +134,6 @@ export async function cancelFeedbackSupportById(submissionId: SubmissionId, user
 	return updated;
 }
 
-export async function reviewFeedbackById(submissionId: SubmissionId, user: User) {
-	const submission = await getFeedbackById(submissionId);
-	assertRule(FeedbackRule.canReviewFeedback(submission, user));
-	return await requireStatusUpdate(submissionId, 'ongoing', 'reviewing');
-}
-
-export async function cancelFeedbackReviewById(submissionId: SubmissionId, user: User) {
-	const submission = await getFeedbackById(submissionId);
-	assertRule(FeedbackRule.canCancelFeedbackReview(submission, user));
-	return await requireStatusUpdate(submissionId, 'reviewing', 'ongoing');
-}
-
-async function requireStatusUpdate(
-	submissionId: SubmissionId,
-	currentStatus: SubmissionEntity['status'],
-	nextStatus: SubmissionEntity['status']
-) {
-	const updated = await SubmissionResponseRepository.updateSubmissionStatusById(
-		submissionId,
-		currentStatus,
-		nextStatus
-	);
-	if (!updated) throw new AppError(APP_ERROR.INVALID_STATE, '문의·건의 상태가 변경되었습니다.');
-	return updated;
-}
-
 export async function respondToFeedbackById(
 	submissionId: SubmissionId,
 	user: User,
@@ -150,13 +145,14 @@ export async function respondToFeedbackById(
 		submissionId,
 		user.id,
 		response,
-		new Date().toISOString()
+		new Date().toISOString(),
+		['ongoing', 'reviewing']
 	);
 	if (!updated) throw new AppError(APP_ERROR.INVALID_STATE, '상태가 변경되어 답변할 수 없습니다.');
 	return updated;
 }
 
-export async function reviseFeedbackResponseById(
+export async function updateFeedbackResponseById(
 	submissionId: SubmissionId,
 	user: User,
 	response: string
@@ -176,7 +172,10 @@ export async function reviseFeedbackResponseById(
 export async function deleteFeedbackResponseById(submissionId: SubmissionId, user: User) {
 	const submission = await getFeedbackById(submissionId);
 	assertRule(FeedbackRule.canDeleteFeedbackResponse(submission, user));
-	const updated = await SubmissionResponseRepository.deleteSubmissionResponseById(submissionId);
+	const updated = await SubmissionResponseRepository.deleteSubmissionResponseById(
+		submissionId,
+		'ongoing'
+	);
 	if (!updated) throw new AppError(APP_ERROR.INVALID_STATE, '상태가 변경되어 삭제할 수 없습니다.');
 	return updated;
 }

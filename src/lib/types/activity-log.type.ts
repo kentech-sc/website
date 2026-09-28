@@ -70,6 +70,7 @@ export type ActivityLogCreate =
 	| EditActivityLog<'petition-response', SubmissionResponseSnapshot>
 	| DeleteActivityLog<'petition-response', SubmissionResponseSnapshot>
 	| CreateActivityLog<'submission', SubmissionLogSnapshot>
+	| EditActivityLog<'submission', SubmissionLogSnapshot>
 	| DeleteActivityLog<'submission', SubmissionLogSnapshot>
 	| CreateActivityLog<'submission-response', SubmissionResponseSnapshot>
 	| EditActivityLog<'submission-response', SubmissionResponseSnapshot>

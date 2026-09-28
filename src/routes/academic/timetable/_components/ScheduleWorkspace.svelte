@@ -1,10 +1,10 @@
 <script lang="ts">
 	import Plus from '@lucide/svelte/icons/plus';
 	import Search from '@lucide/svelte/icons/search';
-	import AlertTriangle from '@lucide/svelte/icons/triangle-alert';
 
 	import ActualUnscheduledCourses from './ActualUnscheduledCourses.svelte';
 	import CourseSearchPanel from './CourseSearchPanel.svelte';
+	import ScheduleNotices from './ScheduleNotices.svelte';
 	import TimetableGrid from './TimetableGrid.svelte';
 	import UnscheduledCourseLane from './UnscheduledCourseLane.svelte';
 
@@ -12,13 +12,16 @@
 	import type { PageData } from '../$types.js';
 	import type { SubmitFunction } from '@sveltejs/kit';
 
-	import { enhance } from '$app/forms';
-
 	type Offering = PageData['offerings'][number];
 	type Meeting = Offering['meetings'][number];
 
 	let {
-		data,
+		timetableConflicts,
+		offerings,
+		actualSchedule,
+		offeringRestrictions,
+		offeringNotices,
+
 		selected,
 		actualSelected,
 		displayOfferings,
@@ -40,7 +43,11 @@
 		replaceEnhance,
 		removeOfferingEnhance
 	}: {
-		data: PageData;
+		timetableConflicts: PageData['timetableConflicts'];
+		offerings: PageData['offerings'];
+		actualSchedule: PageData['actualSchedule'];
+		offeringRestrictions: PageData['offeringRestrictions'];
+		offeringNotices: PageData['offeringNotices'];
 		selected: PageData['timetables'][number] | null;
 		actualSelected: boolean;
 		displayOfferings: Offering[];
@@ -63,7 +70,7 @@
 		removeOfferingEnhance: SubmitFunction;
 	} = $props();
 
-	const conflicts = $derived(selected ? (data.timetableConflicts[selected.id] ?? []) : []);
+	const conflicts = $derived(selected ? (timetableConflicts[selected.id] ?? []) : []);
 	const conflictingOfferingIds = $derived(
 		new Set(
 			conflicts.flatMap(({ firstOfferingId, secondOfferingId }) => [
@@ -72,18 +79,6 @@
 			])
 		)
 	);
-	const changedOfferings = $derived(
-		selected?.offerings.filter((offering) => selected.changeReasons[offering.id]) ?? []
-	);
-	const acknowledgedChangedOfferings = $derived(
-		changedOfferings.filter(
-			(offering) =>
-				selected?.changeReasons[offering.id] === 'schedule_changed' ||
-				selected?.changeReasons[offering.id] === 'details_changed'
-		)
-	);
-	const offeringName = (offeringId: string) =>
-		selected?.offerings.find(({ id }) => id === offeringId)?.courseName ?? '강의';
 </script>
 
 <div class="planner-workspace" class:search-open={searchFilter !== null}>
@@ -101,7 +96,7 @@
 						<small>선택한 요일과 시간에 맞는 강의만 바로 보여드려요.</small>
 					</span>
 					<button
-						class="ui-button is-secondary is-compact schedule-search-action"
+						class="ui-button is-compact is-secondary schedule-search-action"
 						type="button"
 						data-image-exclude
 						disabled={busy}
@@ -111,7 +106,7 @@
 			{:else if selected && !savingImage}
 				<div class="schedule-toolbar">
 					<button
-						class="ui-button is-secondary is-compact"
+						class="ui-button is-compact is-secondary"
 						type="button"
 						disabled={busy}
 						onclick={openCourseBrowser}><Search size="0.8rem" />전체 강의 검색</button
@@ -119,58 +114,12 @@
 				</div>
 			{/if}
 
-			{#if selected && archivedOfferings.length}
-				<div class="cancelled-notice" role="alert">
-					<AlertTriangle size="0.9rem" aria-hidden="true" />
-					<span
-						><strong>폐강된 강의가 {archivedOfferings.length}개 있습니다.</strong> 시간표에서 제거해야
-						다시 확정할 수 있습니다.</span
-					>
-				</div>
-			{/if}
-
-			{#if selected && acknowledgedChangedOfferings.length}
-				<div class="change-notice" role="status">
-					<AlertTriangle size="0.9rem" aria-hidden="true" />
-					<div>
-						<strong>시간표 변경을 확인해 주세요.</strong>
-						<ul>
-							{#each acknowledgedChangedOfferings as offering (offering.id)}
-								<li>{offering.courseName} 강의 정보가 변경되었습니다.</li>
-							{/each}
-						</ul>
-					</div>
-					<form method="POST" action="?/acknowledgeChanges" use:enhance={pendingEnhance}>
-						<input type="hidden" name="timetableId" value={selected.id} />
-						<button class="ui-button is-compact change-acknowledge" disabled={busy}
-							>변경 확인</button
-						>
-					</form>
-				</div>
-			{/if}
-
-			{#if selected && conflicts.length}
-				<div class="conflict-notice" role="alert">
-					<AlertTriangle size="0.9rem" aria-hidden="true" />
-					<div>
-						<strong>강의 시간이 겹칩니다.</strong>
-						<ul>
-							{#each conflicts as conflict (`${conflict.firstOfferingId}-${conflict.secondOfferingId}`)}
-								<li>
-									{offeringName(conflict.firstOfferingId)} · {offeringName(
-										conflict.secondOfferingId
-									)}
-								</li>
-							{/each}
-						</ul>
-					</div>
-				</div>
-			{/if}
+			<ScheduleNotices {selected} {archivedOfferings} {conflicts} {busy} {pendingEnhance} />
 
 			<TimetableGrid
 				{selected}
 				{displayOfferings}
-				allOfferings={data.offerings}
+				allOfferings={offerings}
 				{savingImage}
 				{busy}
 				{searchFilter}
@@ -195,17 +144,17 @@
 		</section>
 
 		{#if actualSelected}
-			<ActualUnscheduledCourses completions={data.actualSchedule.unscheduledCompletions} />
+			<ActualUnscheduledCourses records={actualSchedule.unscheduledRecords} />
 		{/if}
 	</div>
 
 	{#if selected && searchFilter}
 		{#key searchSession}
 			<CourseSearchPanel
-				offerings={data.offerings}
+				{offerings}
 				timetable={selected}
-				offeringRestrictions={data.offeringRestrictions}
-				offeringNotices={data.offeringNotices}
+				{offeringRestrictions}
+				{offeringNotices}
 				filter={searchFilter}
 				{busy}
 				{pendingEnhance}
@@ -219,135 +168,5 @@
 </div>
 
 <style lang="scss">
-	.planner-workspace {
-		display: grid;
-		grid-template-columns: minmax(0, 1fr);
-		align-items: start;
-		gap: 0.8rem;
-	}
-	.planner-workspace.search-open {
-		grid-template-columns: minmax(0, 1fr) minmax(19rem, 25rem);
-	}
-	.planner-main {
-		display: grid;
-		gap: 0.8rem;
-		min-width: 0;
-	}
-	.schedule-panel {
-		border-radius: 0.8rem;
-	}
-	.schedule-toolbar {
-		display: flex;
-		justify-content: flex-end;
-		border-bottom: var(--divider-border-width) solid var(--gray-border);
-		background: var(--white);
-		padding: 0.4rem 0.6rem;
-	}
-	.cancelled-notice,
-	.change-notice,
-	.conflict-notice,
-	.schedule-onboarding {
-		display: flex;
-		align-items: center;
-	}
-	.cancelled-notice {
-		gap: 0.4rem;
-		border-bottom: var(--divider-border-width) solid
-			color-mix(in srgb, var(--error-text) 25%, var(--gray-border));
-		background: var(--error-bg);
-		padding: 0.4rem 0.6rem;
-		color: var(--error-text);
-		font-size: 0.7rem;
-	}
-	.cancelled-notice span {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.2rem 0.4rem;
-	}
-	.change-notice {
-		align-items: flex-start;
-		gap: 0.5rem;
-		border-bottom: var(--divider-border-width) solid
-			color-mix(in srgb, #a66a00 25%, var(--gray-border));
-		background: color-mix(in srgb, #f4b942 12%, var(--white));
-		padding: 0.5rem 0.6rem;
-		color: color-mix(in srgb, #754a00 82%, var(--text));
-		font-size: 0.68rem;
-	}
-	.change-notice > div {
-		flex: 1;
-	}
-	.change-notice ul {
-		margin: 0.2rem 0 0;
-		padding-left: 1rem;
-	}
-	.change-acknowledge {
-		border-color: color-mix(in srgb, #a66a00 38%, var(--gray-border));
-		background: color-mix(in srgb, #f4b942 16%, var(--white));
-		color: color-mix(in srgb, #754a00 88%, var(--text));
-		font-weight: 700;
-	}
-	.change-acknowledge:hover:not(:disabled),
-	.change-acknowledge:focus-visible {
-		border-color: color-mix(in srgb, #a66a00 58%, var(--gray-border));
-		background: color-mix(in srgb, #f4b942 25%, var(--white));
-	}
-	.conflict-notice {
-		align-items: flex-start;
-		gap: 0.5rem;
-		border-bottom: var(--divider-border-width) solid
-			color-mix(in srgb, var(--error-text) 30%, var(--gray-border));
-		background: var(--error-bg);
-		padding: 0.5rem 0.6rem;
-		color: var(--error-text);
-		font-size: 0.68rem;
-	}
-	.conflict-notice ul {
-		margin: 0.2rem 0 0;
-		padding-left: 1rem;
-	}
-	.schedule-onboarding {
-		gap: 0.6rem;
-		border-bottom: var(--divider-border-width) solid var(--gray-border);
-		background: color-mix(in srgb, var(--secondary) 5%, var(--white));
-		padding: 0.6rem 0.8rem;
-	}
-	.onboarding-icon {
-		flex: 0 0 auto;
-		width: 1.8rem;
-		height: 1.8rem;
-	}
-	.schedule-onboarding > span:nth-child(2) {
-		display: flex;
-		flex: 1;
-		flex-direction: column;
-		min-width: 0;
-	}
-	.schedule-onboarding strong {
-		font-size: 0.7rem;
-	}
-	.schedule-onboarding small {
-		color: var(--gray-text);
-		font-size: 0.6rem;
-	}
-	.schedule-onboarding .schedule-search-action {
-		flex: 0 0 auto;
-		margin-left: auto;
-	}
-	@media (max-width: 1100px) {
-		.planner-workspace.search-open {
-			grid-template-columns: minmax(0, 1fr) minmax(18rem, 21rem);
-		}
-	}
-	@media (max-width: 900px) {
-		.planner-workspace.search-open {
-			grid-template-columns: minmax(0, 1fr);
-		}
-	}
-	@media (max-width: 760px) {
-		.schedule-onboarding {
-			flex-wrap: wrap;
-			align-items: flex-start;
-		}
-	}
+	@use './schedule-workspace.scss';
 </style>

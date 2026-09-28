@@ -32,16 +32,16 @@
 
 		h1 {
 			font-weight: 600;
-			font-size: 0.8rem;
+			font-size: 0.7rem;
 		}
 
 		p {
-			font-size: 0.6rem;
+			font-size: 0.7rem;
 		}
 
 		a {
 			color: var(--white);
-			font-size: 0.6rem;
+			font-size: 0.7rem;
 			text-decoration: underline;
 
 			&:hover {

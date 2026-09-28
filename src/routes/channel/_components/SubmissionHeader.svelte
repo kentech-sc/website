@@ -3,7 +3,7 @@
 	import List from '@lucide/svelte/icons/text';
 
 	import { resolve } from '$app/paths';
-	import CommonHeader from '$components/CommonHeader.svelte';
+	import PageHeader from '$components/PageHeader.svelte';
 
 	let {
 		mode,
@@ -11,7 +11,7 @@
 		canCreate = false
 	}: {
 		mode: 'petition' | 'feedback';
-		pageType: 'list' | 'new' | 'detail';
+		pageType: 'list' | 'new' | 'edit' | 'detail';
 		canCreate?: boolean;
 	} = $props();
 
@@ -22,23 +22,23 @@
 			: '각 조직에 질문을 남기거나 개선 의견을 제안하세요'
 	);
 	const listHref = $derived(
-		mode === 'petition' ? resolve('/channel/petition') : resolve('/channel/feedback')
+		mode === 'petition' ? resolve('/channel/petitions') : resolve('/channel/feedback')
 	);
 	const newHref = $derived(
-		mode === 'petition' ? resolve('/channel/petition/new') : resolve('/channel/feedback/new')
+		mode === 'petition' ? resolve('/channel/petitions/new') : resolve('/channel/feedback/new')
 	);
 </script>
 
-<CommonHeader {title} {description}>
+<PageHeader {title} {description}>
 	{#if pageType === 'list' && canCreate}
-		<a href={newHref} class="link-btn">
+		<a href={newHref} class="ui-button is-primary">
 			<Pen size="0.8rem" />
 			<span>{mode === 'petition' ? '청원하기' : '작성하기'}</span>
 		</a>
 	{:else if pageType !== 'list'}
-		<a href={listHref} class="link-btn">
+		<a href={listHref} class="ui-button is-primary">
 			<List size="0.8rem" />
 			<span>목록</span>
 		</a>
 	{/if}
-</CommonHeader>
+</PageHeader>

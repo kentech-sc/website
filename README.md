@@ -7,24 +7,25 @@ KENTECH 학생회 웹사이트 저장소입니다. 내부 개발자 기준으로
 이 프로젝트는 SvelteKit 기반의 학생회 웹 애플리케이션입니다. 현재 코드 기준으로 아래 기능을 제공합니다.
 
 - 게시판
-  - `/board/free`
-  - `/board/notice`
+  - `/boards/free`
+  - `/boards/notice`
 - 회칙·세칙
-  - `/bylaw`
+  - `/bylaws`
 - 소통창구
-  - `/channel/petition`
+  - `/channel/petitions`
   - `/channel/feedback`
-  - `/channel/audit`
+  - [감사원 익명 제보](https://forms.gle/k68tcwkFzvnb4qM36) (외부 Google Form, 사이트 로그인 불필요)
 - 학업
-  - `/academic/credits`
+  - `/academic/records`
   - `/academic/timetable`
-  - `/academic/review`
-  - `/academic/review/[reviewId]`
-  - `/academic/courses` (관리자)
+  - `/academic/reviews`
+  - `/academic/reviews/[reviewId]`
+  - `/academic/offerings` (관리자)
 - 검색
   - `/search`
 - 프로필 및 운영 관리
   - `/profile`
+  - `/admin`
 - 로그인
   - `/signin`
 
@@ -33,11 +34,10 @@ KENTECH 학생회 웹사이트 저장소입니다. 내부 개발자 기준으로
 ## 최근 서버 동작 기준
 
 - 작성 도배 방지
-  - 게시글/강의평가/청원/문의·건의/감사원 제보 작성은 `article` 버킷으로 묶여 15초 쿨다운을 공유합니다.
+  - 게시글/강의평가/청원/문의·건의 작성은 `article` 버킷으로 묶여 15초 쿨다운을 공유합니다.
   - 댓글 작성은 `comment` 버킷으로 3초 쿨다운을 사용합니다.
 - 콘텐츠 활동 로그
   - 게시글, 댓글, 강의평가와 공개 소통 글의 성공한 생성·수정·삭제만 기록합니다.
-  - 감사원 제보는 작성자와 제보를 연결하는 로그를 남기지 않습니다.
   - 로그는 append-only 테이블인 `activity_logs`에 저장합니다.
 - 사용자 포인트
   - 게시글 작성 `+5` 하루 1회
@@ -163,13 +163,13 @@ Google 로그인을 사용하되 `@kentech.ac.kr` Workspace 계정만 허용합�
 - `guest`
   - 비로그인 사용자입니다.
 - `user`
-  - 자유게시판 작성, 댓글 작성, 게시글 좋아요, 청원 작성/서명, 문의·건의, 익명 제보, 강의평가 작성이 가능합니다.
+  - 자유게시판 작성, 댓글 작성, 게시글 좋아요, 청원 작성/서명, 문의·건의, 강의평가 작성이 가능합니다.
 - `moderator`
   - 게시글/댓글 관리, 공지/회칙 게시판 작성, 전체 푸시 발송 권한이 추가됩니다.
 - `manager`
   - 강의평가 관리, 청원 관리/응답, 강의/교수 관리, 사용자 관리 권한이 추가됩니다.
 - `auditor`
-  - 일반 사용자 기능과 감사원 비공개 제보의 열람·상태 관리 권한을 가집니다.
+  - 사이트에서는 일반 사용자 기능을 사용합니다. 제보 접수·관리는 외부 Google Form에서 진행합니다.
 - `dev`
   - 개발 운영용 권한 그룹으로, 게시판/댓글 관리와 강의/교수/사용자 관리, orphan 파일 정리 권한을 가집니다.
 
@@ -177,13 +177,12 @@ Google 로그인을 사용하되 `@kentech.ac.kr` Workspace 계정만 허용합�
 
 코드 기준으로 아래 경로는 비로그인 사용자가 접근하면 `/signin`으로 리다이렉트됩니다.
 
-- `/channel/petition`
+- `/channel/petitions`
 - `/channel/feedback/new`
-- `/channel/audit`
 - `/academic`
 - `/profile`
-- `/board/free/new`, `/board/notice/new`, `/board/bylaw/new`
-- `/board/free/[postId]/edit`, `/board/notice/[postId]/edit`, `/board/bylaw/[postId]/edit`
+- `/boards/free/new`, `/boards/notice/new`, `/bylaws/new`
+- `/boards/free/[postId]/edit`, `/boards/notice/[postId]/edit`, `/bylaws/[postId]/edit`
 
 목록/상세 조회는 일부 게스트 접근이 가능하지만, 작성·수정·운영 액션은 서버 권한 체크를 통과해야 합니다.
 
@@ -209,7 +208,7 @@ Google 로그인을 사용하되 `@kentech.ac.kr` Workspace 계정만 허용합�
   - 사용자별 글·댓글 작성 및 업로드 준비 요청의 쿨다운 상태를 저장합니다.
 - `activity_logs`
   - 콘텐츠 생성/수정/삭제 감사 로그를 저장합니다.
-- `audit_reports`
+- `audit_reports` (이전 제보 데이터 보존용. 신규 접수·관리는 외부 Google Form 사용)
   - 감사원에만 공개되는 제보의 제목·내용·처리 상태만 저장하며 작성자 식별자는 저장하지 않습니다.
 - `point_states`
   - 사용자별 일일 포인트 적립 한도 상태를 저장합니다.

@@ -100,17 +100,17 @@
 		align-items: center;
 		gap: 0.4rem;
 		margin-left: auto;
-		border-radius: 0.4rem;
+		border-radius: 1.4rem;
 		background: var(--gray-bg);
-		padding: 0.4rem;
+		padding: 0.4rem 0.6rem;
 		color: var(--gray-text);
 	}
 	.competition-sample span {
-		font-size: 0.6rem;
+		font-size: 0.7rem;
 	}
 	.competition-sample strong {
 		color: var(--secondary);
-		font-size: 0.8rem;
+		font-size: 0.7rem;
 		line-height: 1;
 	}
 	.competition-empty {
@@ -137,7 +137,7 @@
 		align-items: center;
 		gap: 0.4rem;
 		border-bottom: var(--divider-border-width) solid var(--gray-border);
-		padding: 0.6rem 0;
+		padding: 0.6rem 0.2rem;
 	}
 	.competition-course,
 	.competition-value {
@@ -149,14 +149,14 @@
 	}
 	.competition-row small {
 		color: var(--gray-text);
-		font-size: 0.6rem;
+		font-size: 0.7rem;
 	}
 	.competition-ratio {
 		color: var(--secondary);
-		font-size: 0.8rem;
+		font-size: 0.7rem;
 		text-align: right;
 	}
-	@media (max-width: 650px) {
+	@media (width <= 650px) {
 		.competition-row {
 			grid-template-columns: 1fr 3rem 3rem 4rem;
 		}

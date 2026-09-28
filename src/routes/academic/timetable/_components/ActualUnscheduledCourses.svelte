@@ -4,13 +4,13 @@
 	import { resolve } from '$app/paths';
 
 	let {
-		completions
+		records
 	}: {
-		completions: PageData['actualSchedule']['unscheduledCompletions'];
+		records: PageData['actualSchedule']['unscheduledRecords'];
 	} = $props();
 </script>
 
-{#if completions.length}
+{#if records.length}
 	<section class="module unscheduled-records">
 		<header>
 			<div>
@@ -21,9 +21,9 @@
 			<a href={resolve('/academic') + '#course-history'}>이수 내역 관리</a>
 		</header>
 		<ul>
-			{#each completions as completion (completion.id)}
+			{#each records as record (record.id)}
 				<li>
-					<span><b>{completion.courseName}</b><small>{completion.courseCode}</small></span>
+					<span><b>{record.courseName}</b><small>{record.courseCode}</small></span>
 					<span>분반 미상</span>
 				</li>
 			{/each}
@@ -50,7 +50,7 @@
 		margin: 0;
 	}
 	.unscheduled-records h3 {
-		font-size: 0.8rem;
+		font-size: 0.7rem;
 	}
 	.unscheduled-records p {
 		margin-top: 0.1rem;
@@ -88,7 +88,7 @@
 	.unscheduled-records small,
 	.unscheduled-records li > span:last-child {
 		color: var(--gray-text);
-		font-size: 0.6rem;
+		font-size: 0.7rem;
 	}
 	.unscheduled-records li > span:last-child {
 		flex: 0 0 auto;

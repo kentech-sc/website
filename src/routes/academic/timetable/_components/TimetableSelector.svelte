@@ -10,14 +10,21 @@
 	import { enhance } from '$app/forms';
 
 	let {
-		data,
+		term,
+		year,
+		actualSchedule,
+		timetables,
+
 		selectedId,
 		actualId,
 		actualSelected,
 		onSelect,
 		pendingEnhance
 	}: {
-		data: PageData;
+		term: PageData['term'];
+		year: PageData['year'];
+		actualSchedule: PageData['actualSchedule'];
+		timetables: PageData['timetables'];
 		selectedId: string | null;
 		actualId: string;
 		actualSelected: boolean;
@@ -25,25 +32,25 @@
 		pendingEnhance: SubmitFunction;
 	} = $props();
 
-	let selectedTerm = $derived(String(data.term));
+	let selectedTerm = $derived(String(term));
 </script>
 
 <div class="module timetable-selector">
 	<form method="GET" class="term-picker">
-		<input name="year" type="number" min="2022" value={data.year} aria-label="연도" />
+		<input name="year" type="number" min="2022" value={year} aria-label="연도" />
 		<select name="term" bind:value={selectedTerm} aria-label="학기">
 			<option value="1">1학기</option>
 			<option value="2">2학기</option>
 			<option value="3">하계</option>
 			<option value="4">동계</option>
 		</select>
-		<button class="term-submit" aria-label="선택한 학기 열기" title="선택한 학기 열기">
+		<button class="ui-button is-primary" aria-label="선택한 학기 열기" title="선택한 학기 열기">
 			<ArrowRight size="0.9rem" />
 		</button>
 	</form>
 
 	<nav class="timetable-tabs" aria-label="시간표 목록">
-		{#if data.actualSchedule.completions.length}
+		{#if actualSchedule.records.length}
 			<button
 				class="timetable-tab is-actual"
 				class:is-active={actualSelected}
@@ -53,7 +60,7 @@
 				<CheckCircle size="0.8rem" /><span>실제 수강</span>
 			</button>
 		{/if}
-		{#each data.timetables as timetable (timetable.id)}
+		{#each timetables as timetable (timetable.id)}
 			<button
 				class="timetable-tab"
 				class:is-active={selectedId === timetable.id}
@@ -74,8 +81,8 @@
 			</button>
 		{/each}
 		<form method="POST" action="?/create" use:enhance={pendingEnhance} class="create-timetable">
-			<input type="hidden" name="year" value={data.year} />
-			<input type="hidden" name="term" value={data.term} />
+			<input type="hidden" name="year" value={year} />
+			<input type="hidden" name="term" value={term} />
 			<button aria-label="시간표 추가" title="시간표 추가"><Plus size="0.9rem" /></button>
 		</form>
 	</nav>
@@ -92,9 +99,7 @@
 	}
 	.timetable-selector {
 		gap: 0.6rem;
-		border-radius: 0.8rem;
-		padding: 0.6rem;
-		min-width: 0;
+		padding: 0.2rem 0.8rem;
 	}
 	.term-picker {
 		flex: 0 0 auto;
@@ -108,25 +113,12 @@
 	.term-picker input,
 	.term-picker select {
 		border-color: transparent;
-		background: var(--white);
-	}
-	.term-submit {
-		display: grid;
-		place-items: center;
-		border-color: var(--secondary);
-		border-radius: 50%;
-		background: var(--secondary);
-		padding: 0;
-		width: 1.9rem;
-		height: 1.9rem;
-		color: var(--white);
-	}
-	.term-submit:hover:not(:disabled) {
-		background: var(--secondary-strong-hover);
+		background: var(--gray-bg);
 	}
 	.timetable-tabs {
 		flex: 1;
 		gap: 0.4rem;
+		padding: 0.4rem;
 		min-width: 0;
 		overflow-x: auto;
 	}
@@ -134,7 +126,7 @@
 	.create-timetable button {
 		gap: 0.4rem;
 		border: var(--control-border-width) solid var(--gray-border);
-		border-radius: 0.4rem;
+		border-radius: 1.4rem;
 		background: var(--white);
 		padding: 0.4rem 0.6rem;
 		color: var(--gray-text);
@@ -167,7 +159,7 @@
 		touch-action: pan-y;
 		color: var(--secondary);
 	}
-	@media (max-width: 760px) {
+	@media (width <= 760px) {
 		.timetable-selector {
 			flex-direction: column;
 			align-items: stretch;

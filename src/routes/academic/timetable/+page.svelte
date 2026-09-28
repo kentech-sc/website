@@ -8,7 +8,7 @@
 	import TimetableSelector from './_components/TimetableSelector.svelte';
 	import TimetableToolbar from './_components/TimetableToolbar.svelte';
 
-	import CommonHeader from '$components/CommonHeader.svelte';
+	import PageHeader from '$components/PageHeader.svelte';
 
 	let { data } = $props();
 	const timetable = new TimetablePageState(() => data);
@@ -26,11 +26,14 @@
 	$effect(timetable.ensureValidSelection);
 </script>
 
-<section class="timetable-page" aria-busy={busy}>
-	<CommonHeader title="시간표" description="여러 시간표를 비교하고 하나를 확정하세요." />
+<section class="page timetable-page" aria-busy={busy}>
+	<PageHeader title="시간표" description="여러 시간표를 비교하고 하나를 확정하세요." />
 
 	<TimetableSelector
-		{data}
+		term={data.term}
+		year={data.year}
+		actualSchedule={data.actualSchedule}
+		timetables={data.timetables}
 		selectedId={timetable.selectedId}
 		actualId={timetable.actualId}
 		{actualSelected}
@@ -43,7 +46,7 @@
 			{actualSelected}
 			{selected}
 			courseCount={actualSelected
-				? data.actualSchedule.completions.length
+				? data.actualSchedule.records.length
 				: activeDisplayOfferings.length}
 			totalCredits={timetable.totalCredits}
 			totalHours={timetable.totalHours}
@@ -60,7 +63,11 @@
 		/>
 
 		<ScheduleWorkspace
-			{data}
+			timetableConflicts={data.timetableConflicts}
+			offerings={data.offerings}
+			actualSchedule={data.actualSchedule}
+			offeringRestrictions={data.offeringRestrictions}
+			offeringNotices={data.offeringNotices}
 			{selected}
 			{actualSelected}
 			{displayOfferings}
@@ -95,5 +102,35 @@
 </section>
 
 <style lang="scss">
-	@use './timetable-page.scss';
+	.timetable-page[aria-busy='true'] {
+		cursor: progress;
+	}
+	:global(.timetable-page[aria-busy='true'] :is(button, input, select)) {
+		opacity: 0.55;
+		cursor: progress;
+		pointer-events: none;
+	}
+
+	.empty-timetable {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.4rem;
+		border: var(--control-border-width) dashed var(--gray-border);
+		border-radius: 0.8rem;
+		padding: 3.2rem 1rem;
+		color: var(--gray-text);
+		text-align: center;
+	}
+	.empty-timetable > div {
+		width: 3rem;
+		height: 3rem;
+	}
+	.empty-timetable h2 {
+		color: var(--text);
+		font-size: 0.9rem;
+	}
+	.empty-timetable p {
+		font-size: 0.7rem;
+	}
 </style>

@@ -1,4 +1,4 @@
-import { and, eq, sql } from 'drizzle-orm';
+import { and, eq, inArray, sql } from 'drizzle-orm';
 
 import type { SubmissionEntity, SubmissionId } from '$lib/types/submission.type.js';
 import type { UserId } from '$lib/types/user.type.js';
@@ -29,7 +29,8 @@ export async function respondToSubmissionById(
 	submissionId: SubmissionId,
 	responderId: UserId,
 	response: string,
-	answeredAt: string
+	answeredAt: string,
+	allowedStatuses: SubmissionEntity['status'][] = ['reviewing']
 ): Promise<SubmissionEntity | null> {
 	const rows = await getDatabase()
 		.update(submissions)
@@ -37,7 +38,7 @@ export async function respondToSubmissionById(
 		.where(
 			and(
 				eq(submissions.id, submissionId),
-				eq(submissions.status, 'reviewing'),
+				inArray(submissions.status, allowedStatuses),
 				sql`${submissions.responderId} is null`
 			)
 		)
@@ -60,14 +61,15 @@ export async function reviseSubmissionResponseById(
 }
 
 export async function deleteSubmissionResponseById(
-	submissionId: SubmissionId
+	submissionId: SubmissionId,
+	nextStatus: SubmissionEntity['status'] = 'reviewing'
 ): Promise<SubmissionEntity | null> {
 	const rows = await getDatabase()
 		.update(submissions)
 		.set({
 			responderId: null,
 			response: null,
-			status: 'reviewing',
+			status: nextStatus,
 			answeredAt: null,
 			updatedAt: sql`now()`
 		})

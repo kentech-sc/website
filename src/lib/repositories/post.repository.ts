@@ -119,7 +119,7 @@ export async function updatePostById(
 export async function incrementPostViewCntById(postId: PostId): Promise<PostEntity | null> {
 	const rows = await getDatabase()
 		.update(posts)
-		.set({ viewCnt: sql`${posts.viewCnt} + 1`, updatedAt: sql`now()` })
+		.set({ viewCount: sql`${posts.viewCount} + 1`, updatedAt: sql`now()` })
 		.where(eq(posts.id, postId))
 		.returning();
 	return firstOrNull(await hydratePosts(rows));
@@ -132,10 +132,10 @@ export async function incrementPostCommentCntById(
 	const rows = await getDatabase()
 		.update(posts)
 		.set({
-			commentCnt: sql`${posts.commentCnt} + ${increment}`,
+			commentCount: sql`${posts.commentCount} + ${increment}`,
 			updatedAt: sql`now()`
 		})
-		.where(and(eq(posts.id, postId), sql`${posts.commentCnt} + ${increment} >= 0`))
+		.where(and(eq(posts.id, postId), sql`${posts.commentCount} + ${increment} >= 0`))
 		.returning();
 	return firstOrNull(await hydratePosts(rows));
 }

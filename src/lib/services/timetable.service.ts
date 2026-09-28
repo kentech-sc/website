@@ -1,7 +1,9 @@
 import type { Timetable } from '$lib/types/timetable.type.js';
 import type { User } from '$lib/types/user.type.js';
 
-import * as AcademicRepository from '$lib/repositories/academic.repository.js';
+import * as AcademicProfileRepository from '$lib/repositories/academic-profile.repository.js';
+import * as CourseRecordRepository from '$lib/repositories/course-record.repository.js';
+import * as OfferingRepository from '$lib/repositories/offering.repository.js';
 import * as TimetableRepository from '$lib/repositories/timetable.repository.js';
 import { AppError } from '$lib/server/errors.js';
 import { getCourseSequenceProgress, hasMeetingConflict } from '$lib/shared/degree.js';
@@ -15,7 +17,7 @@ export interface TimetableConflict {
 export function findTimetableConflicts(
 	offerings: Array<{
 		id: string;
-		meetings: Array<{ weekday: number; startsAt: number; endsAt: number }>;
+		meetings: Array<{ weekday: number; startMinute: number; endMinute: number }>;
 	}>
 ): TimetableConflict[] {
 	const conflicts: TimetableConflict[] = [];
@@ -42,17 +44,17 @@ async function owned(id: string, user: User): Promise<Timetable> {
 
 async function validateEspSequence(courseIds: string[], user: User) {
 	if (!courseIds.length) return;
-	const profile = await AcademicRepository.findAcademicProfile(user.id);
+	const profile = await AcademicProfileRepository.findAcademicProfile(user.id);
 	if (!profile)
 		throw new AppError(
 			APP_ERROR.BAD_REQUEST,
 			'이수·졸업에서 입학연도와 ESP 면제 교과목을 먼저 저장해주세요.'
 		);
-	const policy = await AcademicRepository.findGraduationPolicy(profile.admissionYear);
+	const policy = await AcademicProfileRepository.findGraduationPolicy(profile.admissionYear);
 	const sequence = policy?.rules.courseSequences?.find((item) => item.category === 'ESP');
 	if (!sequence) throw new AppError(APP_ERROR.INTERNAL, 'ESP 이수 순서 정책을 찾을 수 없습니다.');
 	const completedCourses = new Set(
-		(await AcademicRepository.findCompletedDegreeCourses(user.id)).map((course) => course.code)
+		(await CourseRecordRepository.findCompletedDegreeCourses(user.id)).map((course) => course.code)
 	);
 	const progress = getCourseSequenceProgress(
 		sequence,
@@ -88,7 +90,7 @@ export async function create(year: number, term: number, name: string, user: Use
 
 export async function addOffering(id: string, offeringId: string, user: User) {
 	const timetable = await owned(id, user);
-	const offering = await AcademicRepository.findOffering(offeringId);
+	const offering = await OfferingRepository.findOffering(offeringId);
 	if (
 		!offering ||
 		offering.archivedAt !== null ||

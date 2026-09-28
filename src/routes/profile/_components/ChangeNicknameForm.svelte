@@ -2,27 +2,27 @@
 	import Pencil from '@lucide/svelte/icons/pencil';
 	import UserRoundPen from '@lucide/svelte/icons/user-round-pen';
 
-	import CommonForm from '$components/CommonForm.svelte';
-	import CommonLabel from '$components/CommonLabel.svelte';
+	import ActionForm from '$components/ActionForm.svelte';
+	import FormField from '$components/FormField.svelte';
 
 	function handleSuccess() {
 		alert('별명이 변경되었습니다.');
 	}
 </script>
 
-<CommonForm
+<ActionForm
 	actionName="changeNickname"
 	formName="changeNickname"
 	policy="reload"
 	afterSuccess={handleSuccess}
 >
-	<div class="container-col">
+	<div class="settings-form">
 		<h4>
 			<UserRoundPen size="0.8rem" />
 			<span>별명 변경</span>
 		</h4>
 
-		<CommonLabel labelFor="nickname" labelString="새로운 별명">
+		<FormField inputId="nickname" label="새로운 별명">
 			<input
 				type="text"
 				name="nickname"
@@ -31,24 +31,11 @@
 				required
 				minlength="4"
 			/>
-		</CommonLabel>
+		</FormField>
 
-		<button type="submit" class="info-btn">
+		<button type="submit" class="ui-button is-primary">
 			<Pencil size="0.8rem" />
 			<span>변경하기</span>
 		</button>
 	</div>
-</CommonForm>
-
-<style lang="scss">
-	h4 {
-		width: 100%;
-		font-weight: 500;
-		font-size: 1rem;
-	}
-
-	button {
-		margin-top: 0.6rem;
-		margin-left: auto;
-	}
-</style>
+</ActionForm>

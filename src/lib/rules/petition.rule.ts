@@ -14,14 +14,27 @@ export function canCreatePetition(user: User): RuleResult {
 }
 
 export function canDeletePetition(petition: SubmissionEntity, user: User): RuleResult {
-	if (isOwner(user, petition.authorId) || hasCapability(user, 'petition.delete.any')) {
-		return ok();
+	if (hasCapability(user, 'petition.delete.any')) return ok();
+	if (!isOwner(user, petition.authorId)) {
+		return ruleFail(APP_ERROR.FORBIDDEN, '청원을 삭제할 권한이 없습니다.');
 	}
-
-	return ruleFail(APP_ERROR.FORBIDDEN, '청원을 삭제할 권한이 없습니다.');
+	if (petition.status !== SubmissionStatus.Ongoing || petition.supporterIds.length > 0) {
+		return ruleFail(APP_ERROR.INVALID_STATE, '반응이 없는 진행 중 청원만 삭제할 수 있습니다.');
+	}
+	return ok();
 }
 
-export function canSignPetition(petition: SubmissionEntity, user: User): RuleResult {
+export function canEditPetition(petition: SubmissionEntity, user: User): RuleResult {
+	if (!isOwner(user, petition.authorId)) {
+		return ruleFail(APP_ERROR.FORBIDDEN, '본인이 작성한 청원만 수정할 수 있습니다.');
+	}
+	if (petition.status !== SubmissionStatus.Ongoing || petition.supporterIds.length > 0) {
+		return ruleFail(APP_ERROR.INVALID_STATE, '반응이 없는 진행 중 청원만 수정할 수 있습니다.');
+	}
+	return ok();
+}
+
+export function canSupportPetition(petition: SubmissionEntity, user: User): RuleResult {
 	if (!hasCapability(user, 'petition.sign')) {
 		return ruleFail(APP_ERROR.FORBIDDEN, '청원에 서명할 권한이 없습니다.');
 	}
@@ -44,7 +57,7 @@ export function canSignPetition(petition: SubmissionEntity, user: User): RuleRes
 	return ok();
 }
 
-export function canUnsignPetition(petition: SubmissionEntity, user: User): RuleResult {
+export function canCancelPetitionSupport(petition: SubmissionEntity, user: User): RuleResult {
 	if (!hasCapability(user, 'petition.sign')) {
 		return ruleFail(APP_ERROR.FORBIDDEN, '청원 서명을 취소할 권한이 없습니다.');
 	}
@@ -78,7 +91,7 @@ export function canReviewPetition(petition: SubmissionEntity, user: User): RuleR
 	return ok();
 }
 
-export function canUnreviewPetition(petition: SubmissionEntity, user: User): RuleResult {
+export function canCancelPetitionReview(petition: SubmissionEntity, user: User): RuleResult {
 	if (!hasCapability(user, 'petition.manage')) {
 		return ruleFail(APP_ERROR.FORBIDDEN, '청원 검토를 취소할 권한이 없습니다.');
 	}

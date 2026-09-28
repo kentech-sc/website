@@ -1,11 +1,11 @@
 <script lang="ts">
 	import Check from '@lucide/svelte/icons/check';
-	import CheckCircle from '@lucide/svelte/icons/circle-check-big';
 	import Copy from '@lucide/svelte/icons/copy';
 	import ImageDown from '@lucide/svelte/icons/image-down';
-	import Pencil from '@lucide/svelte/icons/pencil';
 	import Trash from '@lucide/svelte/icons/trash-2';
 	import X from '@lucide/svelte/icons/x';
+
+	import TimetableName from './TimetableName.svelte';
 
 	import type { PageData } from '../$types.js';
 	import type { SubmitFunction } from '@sveltejs/kit';
@@ -53,32 +53,14 @@
 
 <section class="module timetable-toolbar" class:is-actual={actualSelected}>
 	<div class="timetable-title">
-		{#if actualSelected}
-			<h2>실제 수강</h2>
-			<span class="status-badge actual-badge"><CheckCircle size="0.8rem" />수강 기록</span>
-		{:else if selected}
-			{#if editingName}
-				<form method="POST" action="?/rename" use:enhance={renameEnhance}>
-					<input type="hidden" name="timetableId" value={selected.id} />
-					<input name="name" value={selected.name} aria-label="시간표 이름" />
-					<button>저장</button>
-					<button type="button" onclick={onCancelRename}>취소</button>
-					{#if renameError}<p class="rename-error" aria-live="polite">{renameError}</p>{/if}
-				</form>
-			{:else}
-				<h2>{selected.name}</h2>
-				<button
-					class="ui-button is-icon edit-name"
-					type="button"
-					onclick={() => (editingName = true)}
-					aria-label="시간표 이름 변경"
-					title="이름 변경"><Pencil size="0.8rem" /></button
-				>
-			{/if}
-			{#if selected.isConfirmed}
-				<span class="status-badge confirmed-badge"><CheckCircle size="0.8rem" />확정</span>
-			{/if}
-		{/if}
+		<TimetableName
+			{actualSelected}
+			{selected}
+			bind:editingName
+			{renameError}
+			{onCancelRename}
+			{renameEnhance}
+		/>
 	</div>
 
 	<div class="timetable-stats">
@@ -141,56 +123,21 @@
 <style lang="scss">
 	.timetable-toolbar,
 	.timetable-title,
-	.timetable-title form,
 	.timetable-stats,
 	.timetable-actions,
 	.timetable-utilities,
-	.timetable-actions button,
-	.confirmed-badge,
-	.actual-badge {
+	.timetable-actions button {
 		display: flex;
 		align-items: center;
 	}
 	.timetable-toolbar {
-		justify-content: space-between;
 		gap: 0.8rem;
-		border: var(--control-border-width) solid var(--gray-border);
-		border-radius: 0.8rem;
-		background: var(--white);
-		padding: 0.6rem;
+		padding: 0.6rem 1rem;
 	}
 	.timetable-title {
 		flex: 1;
 		gap: 0.4rem;
 		min-width: 13rem;
-	}
-	.timetable-title h2 {
-		margin: 0;
-		font-size: 0.9rem;
-	}
-	.timetable-title form {
-		flex: 1;
-		flex-wrap: wrap;
-		gap: 0.4rem;
-	}
-	.timetable-title input {
-		min-width: 7rem;
-		max-width: 13rem;
-	}
-	.rename-error {
-		flex-basis: 100%;
-		margin: 0;
-		color: var(--error-text);
-		font-size: 0.7rem;
-	}
-	.edit-name {
-		padding: 0.2rem;
-		color: var(--gray-text);
-	}
-	.confirmed-badge,
-	.actual-badge {
-		flex-shrink: 0;
-		font-size: 0.6rem;
 	}
 	.timetable-stats {
 		gap: 0.6rem;
@@ -215,14 +162,7 @@
 		border-left: var(--divider-border-width) solid var(--gray-border);
 		padding-left: 0.4rem;
 	}
-	.timetable-actions button {
-		gap: 0.2rem;
-	}
-	.timetable-utilities .ui-button {
-		width: 2rem;
-		height: 2rem;
-	}
-	@media (max-width: 760px) {
+	@media (width <= 760px) {
 		.timetable-toolbar {
 			display: grid;
 			grid-template-columns: minmax(0, 1fr) auto;
@@ -233,23 +173,6 @@
 			grid-row: 1;
 			grid-column: 1 / -1;
 			min-width: 0;
-		}
-		.timetable-title h2 {
-			overflow: hidden;
-			text-overflow: ellipsis;
-			white-space: nowrap;
-		}
-		.timetable-title form {
-			display: grid;
-			grid-template-columns: minmax(0, 1fr) auto auto;
-			width: 100%;
-		}
-		.timetable-title input {
-			min-width: 0;
-			max-width: none;
-		}
-		.rename-error {
-			grid-column: 1 / -1;
 		}
 		.timetable-stats {
 			grid-row: 2;
@@ -266,7 +189,7 @@
 			grid-column: 1 / -1;
 		}
 	}
-	@media (max-width: 480px) {
+	@media (width <= 480px) {
 		.timetable-stats {
 			grid-column: 1 / -1;
 		}

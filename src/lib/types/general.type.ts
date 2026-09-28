@@ -22,9 +22,6 @@ export type Capability =
 	| 'feedback.delete.any'
 	| 'feedback.manage'
 	| 'feedback.respond'
-	| 'audit.write'
-	| 'audit.read'
-	| 'audit.manage'
 	| 'course.manage'
 	| 'professor.manage'
 	| 'user.manage'
@@ -70,7 +67,7 @@ export type FlashMessage = {
 	message: string;
 };
 
-export type CommonFormPolicy =
+export type ActionFormPolicy =
 	| 'inline'
 	| 'reload'
 	| {

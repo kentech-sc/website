@@ -12,8 +12,24 @@ export function canCreateFeedback(user: User): RuleResult {
 }
 
 export function canDeleteFeedback(submission: SubmissionEntity, user: User): RuleResult {
-	if (isOwner(user, submission.authorId) || hasCapability(user, 'feedback.delete.any')) return ok();
-	return ruleFail(APP_ERROR.FORBIDDEN, '문의·건의를 삭제할 권한이 없습니다.');
+	if (hasCapability(user, 'feedback.delete.any')) return ok();
+	if (!isOwner(user, submission.authorId)) {
+		return ruleFail(APP_ERROR.FORBIDDEN, '문의·건의를 삭제할 권한이 없습니다.');
+	}
+	if (submission.status !== SubmissionStatus.Ongoing || submission.supporterIds.length > 0) {
+		return ruleFail(APP_ERROR.INVALID_STATE, '반응이 없는 미답변 글만 삭제할 수 있습니다.');
+	}
+	return ok();
+}
+
+export function canEditFeedback(submission: SubmissionEntity, user: User): RuleResult {
+	if (!isOwner(user, submission.authorId)) {
+		return ruleFail(APP_ERROR.FORBIDDEN, '본인이 작성한 문의·건의만 수정할 수 있습니다.');
+	}
+	if (submission.status !== SubmissionStatus.Ongoing || submission.supporterIds.length > 0) {
+		return ruleFail(APP_ERROR.INVALID_STATE, '반응이 없는 접수 상태의 글만 수정할 수 있습니다.');
+	}
+	return ok();
 }
 
 export function canSupportFeedback(submission: SubmissionEntity, user: User): RuleResult {
@@ -45,32 +61,17 @@ export function canCancelFeedbackSupport(submission: SubmissionEntity, user: Use
 	return ok();
 }
 
-export function canReviewFeedback(submission: SubmissionEntity, user: User): RuleResult {
-	if (!hasCapability(user, 'feedback.manage')) {
-		return ruleFail(APP_ERROR.FORBIDDEN, '문의·건의를 검토할 권한이 없습니다.');
-	}
-	if (submission.status !== SubmissionStatus.Ongoing) {
-		return ruleFail(APP_ERROR.INVALID_STATE, '접수 상태의 글만 검토할 수 있습니다.');
-	}
-	return ok();
-}
-
-export function canCancelFeedbackReview(submission: SubmissionEntity, user: User): RuleResult {
-	if (!hasCapability(user, 'feedback.manage')) {
-		return ruleFail(APP_ERROR.FORBIDDEN, '검토를 취소할 권한이 없습니다.');
-	}
-	if (submission.status !== SubmissionStatus.Reviewing) {
-		return ruleFail(APP_ERROR.INVALID_STATE, '검토 중인 글만 접수 상태로 되돌릴 수 있습니다.');
-	}
-	return ok();
-}
-
 export function canRespondToFeedback(submission: SubmissionEntity, user: User): RuleResult {
 	if (!hasCapability(user, 'feedback.respond')) {
 		return ruleFail(APP_ERROR.FORBIDDEN, '문의·건의에 답변할 권한이 없습니다.');
 	}
-	if (submission.status !== SubmissionStatus.Reviewing || submission.responderId !== null) {
-		return ruleFail(APP_ERROR.INVALID_STATE, '검토 중이며 답변이 없는 글에만 답변할 수 있습니다.');
+	if (
+		!([SubmissionStatus.Ongoing, SubmissionStatus.Reviewing] as SubmissionStatus[]).includes(
+			submission.status
+		) ||
+		submission.responderId !== null
+	) {
+		return ruleFail(APP_ERROR.INVALID_STATE, '미답변 글에만 답변할 수 있습니다.');
 	}
 	return ok();
 }

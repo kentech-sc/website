@@ -26,7 +26,7 @@
 <style lang="scss">
 	.choice-tabs {
 		border: 0.1rem solid var(--gray-border);
-		border-radius: 0.2rem;
+		border-radius: 2rem;
 		background-color: var(--white);
 		width: fit-content;
 		overflow: hidden;
@@ -36,10 +36,9 @@
 		}
 
 		label {
-			transition: all 0.2s ease-in-out;
 			cursor: pointer;
 			padding: 0.2rem 0.6rem;
-			font-size: 0.8rem;
+			font-size: 0.7rem;
 			text-align: center;
 			word-break: keep-all;
 

@@ -12,18 +12,18 @@ import {
 const MON = 1;
 const TUE = 2;
 
-function block(startsAt) {
-	const result = COURSE_SLOTS.find((item) => item.startsAt === startsAt);
+function block(startMinute) {
+	const result = COURSE_SLOTS.find((item) => item.startMinute === startMinute);
 	assert.ok(result);
 	return result;
 }
 
-function slot(weekday, startsAt) {
-	return { kind: 'slot', weekday, ...block(startsAt) };
+function slot(weekday, startMinute) {
+	return { kind: 'slot', weekday, ...block(startMinute) };
 }
 
-function meeting(weekday, startsAt, endsAt) {
-	return { weekday, startsAt, endsAt };
+function meeting(weekday, startMinute, endMinute) {
+	return { weekday, startMinute, endMinute };
 }
 
 function offering(id, courseId, meetings, options = {}) {
@@ -41,13 +41,13 @@ function offering(id, courseId, meetings, options = {}) {
 
 test('정규 시간대와 점심시간을 추가 버튼 블록으로 정의한다', () => {
 	assert.deepEqual(COURSE_SLOTS, [
-		{ startsAt: 9 * 60, endsAt: 11 * 60 },
-		{ startsAt: 11 * 60, endsAt: 12 * 60 },
-		{ startsAt: 12 * 60, endsAt: 14 * 60 },
-		{ startsAt: 14 * 60, endsAt: 16 * 60 },
-		{ startsAt: 16 * 60, endsAt: 18 * 60 },
-		{ startsAt: 18 * 60, endsAt: 20 * 60 },
-		{ startsAt: 20 * 60, endsAt: 21 * 60 }
+		{ startMinute: 9 * 60, endMinute: 11 * 60 },
+		{ startMinute: 11 * 60, endMinute: 12 * 60 },
+		{ startMinute: 12 * 60, endMinute: 14 * 60 },
+		{ startMinute: 14 * 60, endMinute: 16 * 60 },
+		{ startMinute: 16 * 60, endMinute: 18 * 60 },
+		{ startMinute: 18 * 60, endMinute: 20 * 60 },
+		{ startMinute: 20 * 60, endMinute: 21 * 60 }
 	]);
 });
 
@@ -81,10 +81,10 @@ test('경계만 맞닿은 시간은 겹치지 않는다', () => {
 
 test('부분 점유 블록에서는 강의 앞뒤의 연속된 빈 구간만 반환한다', () => {
 	assert.deepEqual(getFreeTimeRanges(MON, block(12 * 60), [meeting(MON, 13 * 60 + 30, 15 * 60)]), [
-		{ startsAt: 12 * 60, endsAt: 13 * 60 + 30 }
+		{ startMinute: 12 * 60, endMinute: 13 * 60 + 30 }
 	]);
 	assert.deepEqual(getFreeTimeRanges(MON, block(14 * 60), [meeting(MON, 13 * 60 + 30, 15 * 60)]), [
-		{ startsAt: 15 * 60, endsAt: 16 * 60 }
+		{ startMinute: 15 * 60, endMinute: 16 * 60 }
 	]);
 });
 
@@ -94,7 +94,7 @@ test('겹치거나 이어진 여러 강의 시간은 하나의 점유 구간처�
 			meeting(MON, 12 * 60 + 30, 13 * 60 + 30),
 			meeting(MON, 13 * 60, 14 * 60)
 		]),
-		[{ startsAt: 12 * 60, endsAt: 12 * 60 + 30 }]
+		[{ startMinute: 12 * 60, endMinute: 12 * 60 + 30 }]
 	);
 });
 
@@ -108,8 +108,8 @@ test('교체 기준은 선택한 강의의 실제 시간 전체를 사용한다'
 		sourceOfferingId: 'source',
 		meetingId: 'meeting',
 		weekday: MON,
-		startsAt: 16 * 60 + 30,
-		endsAt: 18 * 60
+		startMinute: 16 * 60 + 30,
+		endMinute: 18 * 60
 	};
 	assert.equal(
 		matchesCourseSearchFilter([meeting(MON, 16 * 60, 17 * 60 + 30)], replacementFilter),
@@ -151,8 +151,8 @@ test('교체 검색 결과를 같은 과목의 다른 분반과 같은 시간대
 			sourceOfferingId: source.id,
 			meetingId: 'source-meeting',
 			weekday: MON,
-			startsAt: 9 * 60,
-			endsAt: 11 * 60
+			startMinute: 9 * 60,
+			endMinute: 11 * 60
 		},
 		query: '',
 		category: 'all'

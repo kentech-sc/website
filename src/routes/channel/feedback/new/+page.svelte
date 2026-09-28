@@ -5,5 +5,7 @@
 	let { data } = $props();
 </script>
 
-<SubmissionHeader mode="feedback" pageType="new" />
-<SubmissionForm user={data.user} mode="feedback" />
+<section class="page">
+	<SubmissionHeader mode="feedback" pageType="new" />
+	<SubmissionForm user={data.user} mode="feedback" />
+</section>

@@ -60,11 +60,6 @@ export function getWeekOfMonth(dayKey: string): number {
 	return Math.floor((getDayOfMonth(dayKey) - 1 + firstWeekday) / 7) + 1;
 }
 
-/** 기준일이 속한 달의 1일. 월 단위로 이동할 때의 기준점이 된다. */
-export function toMonthStart(dayKey: string): string {
-	return `${toMonthKey(dayKey)}-01`;
-}
-
 /** 달을 옮긴다. 항상 1일로 맞춰 말일 차이(1/31 -> 2/31)를 피한다. */
 export function addMonths(dayKey: string, months: number): string {
 	const year = Number(dayKey.slice(0, 4));

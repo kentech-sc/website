@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, ilike, inArray, or, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, ilike, inArray, notExists, or, sql } from 'drizzle-orm';
 
 import { firstOrNull } from './repository.utils.js';
 
@@ -8,7 +8,8 @@ import type {
 	SubmissionId,
 	SubmissionKind,
 	SubmissionPreview,
-	SubmissionStatus
+	SubmissionStatus,
+	SubmissionUpdate
 } from '$lib/types/submission.type.js';
 import type { UserId } from '$lib/types/user.type.js';
 
@@ -42,7 +43,7 @@ async function hydrate(rows: SubmissionRow[]): Promise<SubmissionEntity[]> {
 		...row,
 		kind: row.kind as SubmissionKind,
 		category: row.category as SubmissionEntity['category'],
-		displayType: row.displayType as SubmissionEntity['displayType'],
+		authorNameMode: row.authorNameMode as SubmissionEntity['authorNameMode'],
 		status: row.status as SubmissionStatus,
 		supporterIds: supporterIdsBySubmission.get(row.id) ?? []
 	}));
@@ -126,9 +127,15 @@ export async function findRecentSubmissionPreviews(
 		.select({
 			id: submissions.id,
 			kind: submissions.kind,
+			category: submissions.category,
 			title: submissions.title,
 			status: submissions.status,
-			createdAt: submissions.createdAt
+			createdAt: submissions.createdAt,
+			supportCount: sql<number>`(
+				select count(*)::int
+				from ${submissionSupports}
+				where ${submissionSupports.submissionId} = ${submissions.id}
+			)`
 		})
 		.from(submissions)
 		.where(kindFilter(kinds))
@@ -138,6 +145,7 @@ export async function findRecentSubmissionPreviews(
 	return rows.map((row) => ({
 		...row,
 		kind: row.kind as SubmissionKind,
+		category: row.category as SubmissionEntity['category'],
 		status: row.status as SubmissionStatus
 	}));
 }
@@ -150,12 +158,58 @@ export async function deleteSubmissionById(submissionId: SubmissionId): Promise<
 	return rows.length > 0;
 }
 
+export async function deleteSubmissionWithoutSupportById(
+	submissionId: SubmissionId
+): Promise<boolean> {
+	const database = getDatabase();
+	const rows = await database
+		.delete(submissions)
+		.where(
+			and(
+				eq(submissions.id, submissionId),
+				eq(submissions.status, 'ongoing'),
+				notExists(
+					database
+						.select({ id: submissionSupports.submissionId })
+						.from(submissionSupports)
+						.where(eq(submissionSupports.submissionId, submissionId))
+				)
+			)
+		)
+		.returning({ id: submissions.id });
+	return rows.length > 0;
+}
+
+export async function updateSubmissionWithoutSupportById(
+	submissionId: SubmissionId,
+	input: SubmissionUpdate
+): Promise<SubmissionEntity | null> {
+	const database = getDatabase();
+	const rows = await database
+		.update(submissions)
+		.set({ ...input, updatedAt: sql`now()` })
+		.where(
+			and(
+				eq(submissions.id, submissionId),
+				eq(submissions.status, 'ongoing'),
+				notExists(
+					database
+						.select({ id: submissionSupports.submissionId })
+						.from(submissionSupports)
+						.where(eq(submissionSupports.submissionId, submissionId))
+				)
+			)
+		)
+		.returning();
+	return firstOrNull(await hydrate(rows));
+}
+
 export async function viewSubmissionById(
 	submissionId: SubmissionId
 ): Promise<SubmissionEntity | null> {
 	const rows = await getDatabase()
 		.update(submissions)
-		.set({ viewCnt: sql`${submissions.viewCnt} + 1`, updatedAt: sql`now()` })
+		.set({ viewCount: sql`${submissions.viewCount} + 1`, updatedAt: sql`now()` })
 		.where(eq(submissions.id, submissionId))
 		.returning();
 	return firstOrNull(await hydrate(rows));

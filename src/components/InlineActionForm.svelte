@@ -1,8 +1,8 @@
 <script lang="ts">
-	import type { ActionSimpleCallback, CommonFormPolicy } from '$lib/types/general.type.js';
+	import type { ActionSimpleCallback, ActionFormPolicy } from '$lib/types/general.type.js';
 	import type { Snippet } from 'svelte';
 
-	import CommonForm from '$components/CommonForm.svelte';
+	import ActionForm from '$components/ActionForm.svelte';
 
 	let {
 		actionName,
@@ -10,6 +10,7 @@
 		policy = 'inline',
 		hiddenFields = [],
 		buttonClass = '',
+		buttonLabel,
 		confirmMessage,
 		afterSuccess,
 		afterConflict,
@@ -17,9 +18,10 @@
 	}: {
 		actionName: string;
 		formName?: string;
-		policy?: CommonFormPolicy;
+		policy?: ActionFormPolicy;
 		hiddenFields?: Array<{ name: string; value: string | number }>;
 		buttonClass?: string;
+		buttonLabel?: string;
 		confirmMessage?: string;
 		afterSuccess?: ActionSimpleCallback;
 		afterConflict?: ActionSimpleCallback;
@@ -38,7 +40,7 @@
 	}
 </script>
 
-<CommonForm {actionName} {formName} {policy} {afterSuccess} {afterConflict} bind:loading>
+<ActionForm {actionName} {formName} {policy} {afterSuccess} {afterConflict} bind:loading>
 	{#each hiddenFields as hiddenField (`${hiddenField.name}-${hiddenField.value}`)}
 		<input type="hidden" name={hiddenField.name} value={String(hiddenField.value)} />
 	{/each}
@@ -46,6 +48,7 @@
 	<button
 		type={confirmMessage ? 'button' : 'submit'}
 		class={buttonClass}
+		aria-label={buttonLabel}
 		disabled={loading}
 		data-busy={loading ? 'true' : 'false'}
 		aria-busy={loading ? 'true' : 'false'}
@@ -57,4 +60,4 @@
 	{#if confirmMessage}
 		<button hidden type="submit" bind:this={confirmSubmitButton} disabled={loading}>submit</button>
 	{/if}
-</CommonForm>
+</ActionForm>

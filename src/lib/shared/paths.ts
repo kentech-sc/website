@@ -12,24 +12,24 @@ export const resolveInternalPath = resolve as unknown as (pathname: string) => R
 
 export function boardListPath(boardId: BoardIdType): ResolvedPathname {
 	return boardId === BoardId.Bylaw
-		? resolve('/bylaw')
-		: resolve('/board/[boardId=board]', { boardId });
+		? resolve('/bylaws')
+		: resolve('/boards/[boardId=board]', { boardId });
 }
 
 export function boardNewPath(boardId: BoardIdType): ResolvedPathname {
 	return boardId === BoardId.Bylaw
-		? resolve('/bylaw/new')
-		: resolve('/board/[boardId=board]/new', { boardId });
+		? resolve('/bylaws/new')
+		: resolve('/boards/[boardId=board]/new', { boardId });
 }
 
 export function boardPostPath(boardId: BoardIdType, postId: string): ResolvedPathname {
 	return boardId === BoardId.Bylaw
-		? resolve('/bylaw/[postId]', { postId })
-		: resolve('/board/[boardId=board]/[postId]', { boardId, postId });
+		? resolve('/bylaws/[postId]', { postId })
+		: resolve('/boards/[boardId=board]/[postId]', { boardId, postId });
 }
 
 export function boardEditPath(boardId: BoardIdType, postId: string): ResolvedPathname {
 	return boardId === BoardId.Bylaw
-		? resolve('/bylaw/[postId]/edit', { postId })
-		: resolve('/board/[boardId=board]/[postId]/edit', { boardId, postId });
+		? resolve('/bylaws/[postId]/edit', { postId })
+		: resolve('/boards/[boardId=board]/[postId]/edit', { boardId, postId });
 }

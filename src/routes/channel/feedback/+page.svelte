@@ -5,9 +5,11 @@
 	let { data } = $props();
 </script>
 
-<SubmissionHeader mode="feedback" pageType="list" canCreate={data.canCreateFeedback} />
-<SubmissionList
-	submissionPage={data.submissionPage}
-	filePresence={data.filePresence}
-	emptyMessage="작성된 문의·건의가 없습니다."
-/>
+<section class="page">
+	<SubmissionHeader mode="feedback" pageType="list" canCreate={data.canCreateFeedback} />
+	<SubmissionList
+		submissionPage={data.submissionPage}
+		filePresence={data.filePresence}
+		emptyMessage="작성된 문의·건의가 없습니다."
+	/>
+</section>

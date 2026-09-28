@@ -1,4 +1,5 @@
-import { translatedStatus } from '$lib/shared/view.js';
+import { SUBMISSION_STATUS_LABELS } from '$lib/shared/view.js';
+export { SUBMISSION_STATUS_COLORS } from '$lib/shared/view.js';
 import {
 	SubmissionCategory,
 	SubmissionKind,
@@ -7,12 +8,9 @@ import {
 	type SubmissionStatus
 } from '$lib/types/submission.type.js';
 
-export const FEEDBACK_KINDS = [SubmissionKind.Inquiry, SubmissionKind.Suggestion] as const;
-
 export const SUBMISSION_KIND_LABELS: Record<SubmissionKindType, string> = {
 	[SubmissionKind.Petition]: '청원',
-	[SubmissionKind.Inquiry]: '문의',
-	[SubmissionKind.Suggestion]: '건의'
+	[SubmissionKind.Feedback]: '문의·건의'
 };
 
 export const SUBMISSION_CATEGORY_LABELS: Record<SubmissionCategoryType, string> = {
@@ -25,10 +23,6 @@ export const SUBMISSION_CATEGORY_LABELS: Record<SubmissionCategoryType, string> 
 	[SubmissionCategory.Other]: '기타'
 };
 
-export function isFeedbackKind(value: string): value is (typeof FEEDBACK_KINDS)[number] {
-	return FEEDBACK_KINDS.includes(value as (typeof FEEDBACK_KINDS)[number]);
-}
-
 export function isSubmissionCategory(value: string): value is SubmissionCategoryType {
 	return Object.hasOwn(SUBMISSION_CATEGORY_LABELS, value);
 }
@@ -38,5 +32,5 @@ export function getSubmissionStatusLabel(
 	status: SubmissionStatus
 ): string {
 	if (kind !== SubmissionKind.Petition && status === 'ongoing') return '접수';
-	return translatedStatus[status];
+	return SUBMISSION_STATUS_LABELS[status];
 }

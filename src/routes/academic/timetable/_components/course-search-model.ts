@@ -49,8 +49,8 @@ export const buildCourseSearchModel = ({
 					selectedOffering.meetings.some(
 						(meeting) =>
 							meeting.weekday === candidate.weekday &&
-							meeting.startsAt < candidate.endsAt &&
-							candidate.startsAt < meeting.endsAt
+							meeting.startMinute < candidate.endMinute &&
+							candidate.startMinute < meeting.endMinute
 					)
 			)
 		);
@@ -94,8 +94,8 @@ export const buildCourseSearchModel = ({
 			offering.meetings.some(
 				(meeting) =>
 					meeting.weekday === filter.weekday &&
-					meeting.startsAt >= filter.startsAt &&
-					meeting.endsAt <= filter.endsAt
+					meeting.startMinute >= filter.startMinute &&
+					meeting.endMinute <= filter.endMinute
 			)
 				? 0
 				: 1;
@@ -119,13 +119,13 @@ export const buildCourseSearchModel = ({
 
 	const contextLabel =
 		filter.kind === 'slot' || filter.kind === 'replace'
-			? `${weekdays[filter.weekday - 1]} ${formatTime(filter.startsAt)}–${formatTime(filter.endsAt)} 기준`
+			? `${weekdays[filter.weekday - 1]} ${formatTime(filter.startMinute)}–${formatTime(filter.endMinute)} 기준`
 			: null;
 	const filterLabel =
 		filter.kind === 'unscheduled'
 			? '시간 미정'
 			: filter.kind === 'slot'
-				? `${weekdays[filter.weekday - 1]} ${formatTime(filter.startsAt)}`
+				? `${weekdays[filter.weekday - 1]} ${formatTime(filter.startMinute)}`
 				: null;
 
 	return {

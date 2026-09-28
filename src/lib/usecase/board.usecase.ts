@@ -15,7 +15,7 @@ import type {
 	PostId,
 	PostPermissions
 } from '$lib/types/post.type.js';
-import type { DisplayType, User } from '$lib/types/user.type.js';
+import type { AuthorNameMode, User } from '$lib/types/user.type.js';
 
 import * as PostRule from '$lib/rules/post.rule.js';
 import { transaction } from '$lib/server/db.js';
@@ -107,7 +107,7 @@ export async function createPost(
 	title: string,
 	content: string,
 	user: User,
-	displayType: DisplayType,
+	authorNameMode: AuthorNameMode,
 	fileIds: FileId[]
 ): Promise<PostEntity> {
 	return await transaction(async () => {
@@ -118,7 +118,7 @@ export async function createPost(
 			title,
 			content,
 			userId: user.id,
-			displayType
+			authorNameMode
 		};
 
 		const post = await PostService.createPostByBoardId(postCreate, user);
@@ -144,7 +144,7 @@ export async function editPost(
 	title: string,
 	content: string,
 	user: User,
-	displayType: DisplayType,
+	authorNameMode: AuthorNameMode,
 	fileIds: FileId[]
 ): Promise<PostEntity> {
 	return await transaction(async () => {
@@ -156,7 +156,7 @@ export async function editPost(
 			{
 				title,
 				content,
-				displayType
+				authorNameMode
 			},
 			user
 		);
@@ -228,7 +228,7 @@ export async function createCommentAndUpdatePost(
 	postId: PostId,
 	content: string,
 	user: User,
-	displayType: DisplayType
+	authorNameMode: AuthorNameMode
 ) {
 	return await transaction(async () => {
 		await ThrottleService.reserve(user.id, 'comment');
@@ -237,7 +237,7 @@ export async function createCommentAndUpdatePost(
 			postId,
 			content,
 			userId: user.id,
-			displayType
+			authorNameMode
 		};
 		const comment = await CommentService.createCommentByPostId(commentCreate, user);
 		await ActivityLogService.create({

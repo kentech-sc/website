@@ -15,7 +15,7 @@
 
 - `app`: 사용자, 파일, 운영 데이터
 - `private`: 외부 인증 식별자처럼 브라우저에 노출하면 안 되는 데이터
-- `community`: 게시판, 공개 소통 글, 감사원 비공개 제보
+- `community`: 게시판, 공개 소통 글, 과거 감사원 제보 보존 테이블
 - `academic`: 강의, 시간표, 졸업 데이터
 - `points`: 포인트 원장과 집계 데이터
 
@@ -30,9 +30,11 @@
 - `community.post_files`
 - `community.submission_files`
 
-청원·문의·건의는 `community.submissions`를 함께 사용하고 `kind`로 구분한다. 감사원 제보는
-공개 소통 글과 분리한 `community.audit_reports`에 제목·내용·처리 상태만 저장하며 작성자
-식별자는 저장하지 않는다.
+청원·문의·건의는 `community.submissions`를 함께 사용하고 `kind`로 구분한다.
+현재 감사원 익명 제보는 외부 Google Form으로 연결하며 사이트 DB에 새 제보를 저장하지 않는다.
+기존 `community.audit_reports`와 Drizzle의 `anonymousReports` 정의는 과거 데이터 보존을 위해
+유지한다. 이 테이블에는 제목·내용·처리 상태가 있으며 작성자 식별자는 없다. 내부 기능 제거는
+테이블 삭제를 의미하지 않으며, 데이터 정리는 별도 검토 없이 수행하지 않는다.
 
 모든 테이블에는 RLS가 켜져 있지만 현재 정책은 의도적으로 없다. 애플리케이션은
 브라우저에서 Data API에 직접 접근하지 않고 SvelteKit 서버에서 권한을 검사한다. 런타임
@@ -40,7 +42,14 @@
 
 ## 스키마 변경 절차
 
-1. `src/lib/server/database/schema.ts`를 수정한다.
+1. `src/lib/server/database/`의 해당 도메인 스키마 파일을 수정한다.
+   - `user.schema.ts`: 사용자·인증 연결
+   - `community.schema.ts`: 게시판·소통
+   - `academic.schema.ts`: 강의·성적·시간표
+   - `app.schema.ts`: 파일·배너·푸시 등 운영 데이터
+   - `points.schema.ts`: 포인트 데이터
+   - `schema-core.ts`: 공통 PostgreSQL schema 정의
+   - `schema.ts`: 재수출과 RLS 활성화 진입점. 새 테이블은 여기에도 반영한다.
 2. `npm run db:generate -- --name=<변경_이름>`으로 SQL을 생성한다.
 3. 생성된 SQL과 `drizzle/meta` 변경을 함께 검토한다.
 4. preview DB의 `DIRECT_DATABASE_URL`을 설정하고 `npm run db:migrate`를 실행한다.

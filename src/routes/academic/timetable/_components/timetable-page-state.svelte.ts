@@ -32,7 +32,7 @@ export class TimetablePageState {
 		return this.data.timetables.find((item) => item.id === this.selectedId) ?? null;
 	}
 	get actualSelected() {
-		return this.selectedId === this.actualId && this.data.actualSchedule.completions.length > 0;
+		return this.selectedId === this.actualId && this.data.actualSchedule.records.length > 0;
 	}
 	get displayOfferings(): Offering[] {
 		return this.actualSelected
@@ -68,9 +68,9 @@ export class TimetablePageState {
 	}
 	get totalCredits() {
 		return this.actualSelected
-			? this.data.actualSchedule.completions
-					.filter((completion) => completion.status === 'passed')
-					.reduce((sum, completion) => sum + completion.credits, 0)
+			? this.data.actualSchedule.records
+					.filter((record) => record.status === 'passed')
+					.reduce((sum, record) => sum + record.credits, 0)
 			: this.activeDisplayOfferings.reduce((sum, offering) => sum + offering.credits, 0);
 	}
 	get totalHours() {
@@ -79,7 +79,7 @@ export class TimetablePageState {
 				(sum, offering) =>
 					sum +
 					offering.meetings.reduce(
-						(meetingSum, meeting) => meetingSum + meeting.endsAt - meeting.startsAt,
+						(meetingSum, meeting) => meetingSum + meeting.endMinute - meeting.startMinute,
 						0
 					),
 				0
@@ -89,10 +89,10 @@ export class TimetablePageState {
 
 	ensureValidSelection = () => {
 		const validSelection =
-			(this.selectedId === this.actualId && this.data.actualSchedule.completions.length > 0) ||
+			(this.selectedId === this.actualId && this.data.actualSchedule.records.length > 0) ||
 			this.data.timetables.some((item) => item.id === this.selectedId);
 		if (!validSelection) {
-			this.selectedId = this.data.actualSchedule.completions.length
+			this.selectedId = this.data.actualSchedule.records.length
 				? this.actualId
 				: (this.data.timetables[0]?.id ?? null);
 		}
@@ -115,7 +115,12 @@ export class TimetablePageState {
 	};
 
 	openSlotPicker = (weekday: number, block: TimeBlock) => {
-		this.openSearch({ kind: 'slot', weekday, startsAt: block.startsAt, endsAt: block.endsAt });
+		this.openSearch({
+			kind: 'slot',
+			weekday,
+			startMinute: block.startMinute,
+			endMinute: block.endMinute
+		});
 	};
 
 	openReplacementPicker = (offeringId: string, meeting: Meeting) => {
@@ -124,8 +129,8 @@ export class TimetablePageState {
 			sourceOfferingId: offeringId,
 			meetingId: meeting.id,
 			weekday: meeting.weekday,
-			startsAt: meeting.startsAt,
-			endsAt: meeting.endsAt
+			startMinute: meeting.startMinute,
+			endMinute: meeting.endMinute
 		});
 	};
 

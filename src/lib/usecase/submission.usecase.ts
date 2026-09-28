@@ -7,7 +7,7 @@ import * as ActivityLogService from '$lib/services/activity-log.service.js';
 import * as FileMetaService from '$lib/services/file-meta.service.js';
 import * as UserService from '$lib/services/user.service.js';
 import { createDisplayName } from '$lib/shared/utils.js';
-import { DisplayType } from '$lib/types/user.type.js';
+import { AuthorNameMode } from '$lib/types/user.type.js';
 
 function collectUserIds(submissions: SubmissionEntity[], extraUserIds: UserId[]): UserId[] {
 	return [
@@ -36,8 +36,8 @@ export function attachSubmissionNames(
 
 		return {
 			...submission,
-			authorName: author ? createDisplayName(author, submission.displayType) : null,
-			responderName: responder ? createDisplayName(responder, DisplayType.RealName) : null
+			authorName: author ? createDisplayName(author, submission.authorNameMode) : null,
+			responderName: responder ? createDisplayName(responder, AuthorNameMode.RealName) : null
 		};
 	});
 }
@@ -49,7 +49,7 @@ export function getSupporterNames(
 	return submission.supporterIds
 		.map((userId) => {
 			const user = userIdToUser.get(userId);
-			return user ? createDisplayName(user, DisplayType.RealName) : null;
+			return user ? createDisplayName(user, AuthorNameMode.RealName) : null;
 		})
 		.filter((name): name is string => name !== null);
 }
@@ -94,6 +94,23 @@ export async function recordSubmissionDelete(
 		cause: 'direct',
 		beforeSnapshot: snapshot,
 		afterSnapshot: null
+	};
+	await ActivityLogService.create(activityLog);
+}
+
+export async function recordSubmissionEdit(
+	actorId: UserId,
+	before: Awaited<ReturnType<typeof getSubmissionLogSnapshot>>,
+	after: Awaited<ReturnType<typeof getSubmissionLogSnapshot>>
+) {
+	const activityLog: ActivityLogCreate = {
+		actorId,
+		action: 'edit',
+		targetType: 'submission',
+		targetId: after.id,
+		cause: 'direct',
+		beforeSnapshot: before,
+		afterSnapshot: after
 	};
 	await ActivityLogService.create(activityLog);
 }

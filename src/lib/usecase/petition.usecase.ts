@@ -10,7 +10,7 @@ import * as PointService from '$lib/services/point.service.js';
 import * as ThrottleService from '$lib/services/throttle.service.js';
 import { hasCapability } from '$lib/shared/permission.js';
 import { SubmissionKind } from '$lib/types/submission.type.js';
-import { DisplayType, type User } from '$lib/types/user.type.js';
+import { AuthorNameMode, type User } from '$lib/types/user.type.js';
 import {
 	attachSubmissionNames,
 	findSubmissionUserMap,
@@ -20,7 +20,8 @@ import {
 	recordResponseDelete,
 	recordResponseEdit,
 	recordSubmissionCreate,
-	recordSubmissionDelete
+	recordSubmissionDelete,
+	recordSubmissionEdit
 } from '$lib/usecase/submission.usecase.js';
 
 export async function getPetitionPage(page: number, user: User) {
@@ -77,7 +78,7 @@ export async function createPetition(
 			{
 				kind: SubmissionKind.Petition,
 				category: null,
-				displayType: DisplayType.RealName,
+				authorNameMode: AuthorNameMode.RealName,
 				title,
 				content,
 				authorId: petitioner.id
@@ -101,46 +102,63 @@ export async function deletePetitionById(petitionId: SubmissionId, user: User) {
 	});
 }
 
-export async function signPetition(petitionId: SubmissionId, user: User) {
+export async function editPetition(
+	petitionId: SubmissionId,
+	title: string,
+	content: string,
+	user: User,
+	fileIds: FileId[]
+) {
 	return await transaction(async () => {
-		const petition = await PetitionService.signPetitionById(petitionId, user);
+		const before = await PetitionService.getPetitionById(petitionId);
+		const beforeSnapshot = await getSubmissionLogSnapshot(before);
+		const petition = await PetitionService.editPetitionById(petitionId, { title, content }, user);
+		await FileMetaService.linkArticleToFiles(fileIds, petitionId);
+		await recordSubmissionEdit(user.id, beforeSnapshot, await getSubmissionLogSnapshot(petition));
+		return petition;
+	});
+}
+
+export async function supportPetition(petitionId: SubmissionId, user: User) {
+	return await transaction(async () => {
+		const petition = await PetitionService.supportPetitionById(petitionId, user);
 		await PointService.applyPetitionSignDelta(petition.authorId, petitionId, user.id, 2);
 		return petition;
 	});
 }
 
-export async function unsignPetition(petitionId: SubmissionId, user: User) {
+export async function cancelPetitionSupport(petitionId: SubmissionId, user: User) {
 	return await transaction(async () => {
-		const petition = await PetitionService.unsignPetitionById(petitionId, user);
+		const petition = await PetitionService.cancelPetitionSupportById(petitionId, user);
 		await PointService.applyPetitionSignDelta(petition.authorId, petitionId, user.id, -2);
 		return petition;
 	});
 }
 
-export async function reviewPetition(petitionId: SubmissionId, user: User) {
-	return await PetitionService.reviewPetitionById(petitionId, user);
+export async function startPetitionReview(petitionId: SubmissionId, user: User) {
+	return await PetitionService.startPetitionReviewById(petitionId, user);
 }
 
-export async function unreviewPetition(petitionId: SubmissionId, user: User) {
-	return await PetitionService.unreviewPetitionById(petitionId, user);
+export async function cancelPetitionReview(petitionId: SubmissionId, user: User) {
+	return await PetitionService.cancelPetitionReviewById(petitionId, user);
 }
 
 export async function respondToPetition(submissionId: SubmissionId, user: User, response: string) {
 	return await transaction(async () => {
-		const petition = await PetitionService.responseToPetitionById(submissionId, user, response);
+		const petition = await PetitionService.respondToPetitionById(submissionId, user, response);
 		await recordResponseCreate(user.id, petition);
 		return petition;
 	});
 }
 
-export async function editPetitionResponse(
+export async function updatePetitionResponse(
 	submissionId: SubmissionId,
 	user: User,
 	response: string
 ) {
 	return await transaction(async () => {
 		const beforePetition = await PetitionService.getPetitionById(submissionId);
-		const petition = await PetitionService.reviseResponseById(submissionId, user, response);
+		const petition = await PetitionService.updatePetitionResponseById(submissionId, user, response);
 		await recordResponseEdit(user.id, beforePetition, petition);
 		return petition;
 	});

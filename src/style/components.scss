@@ -1,44 +1,46 @@
-@use 'base';
-
-.container {
+.page {
 	display: flex;
-	justify-content: center;
-	align-items: center;
+	flex-direction: column;
+	gap: 1rem;
+	width: 100%;
+	min-width: 0;
 }
 
+.container,
 .container-col {
 	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+.container-col {
 	flex-direction: column;
-	justify-content: center;
-	align-items: center;
 }
 
-.inline-container {
-	display: inline-flex;
-	justify-content: center;
-	align-items: center;
-}
-
-.inline-container-col {
-	display: inline-flex;
+.settings-form {
+	display: flex;
 	flex-direction: column;
-	justify-content: center;
-	align-items: center;
+	gap: 0.4rem;
 }
-
-@mixin module-frame {
-	border-width: var(--control-border-width);
-	border-style: solid;
-	width: 100%;
+.settings-form > h4 {
+	display: flex;
+	align-items: center;
+	gap: 0.2rem;
+	font-weight: 600;
+	font-size: 0.9rem;
+}
+.settings-form > button {
+	align-self: flex-end;
+	margin-top: 0.2rem;
 }
 
 .module {
-	@include module-frame;
 	box-shadow: 0 0.2rem 0.4rem var(--shadow-color);
-	border-color: var(--gray-border);
-	border-radius: 0.6rem;
-	background-color: var(--white);
-	padding: 1rem 1rem;
+	border: var(--control-border-width) solid var(--gray-border);
+	border-radius: 1.4rem;
+	background: var(--white);
+	padding: 0.8rem 1.1rem;
+	width: 100%;
+	min-width: 0;
 }
 
 .ellipsis {
@@ -52,36 +54,44 @@
 	overflow: hidden;
 }
 
-.ui-button,
-button.action-btn,
-.error-btn,
-.warn-btn,
-.success-btn,
-.info-btn {
+.ui-button {
+	--ui-button-border: var(--gray-border);
 	display: inline-flex;
 	justify-content: center;
 	align-items: center;
-	gap: 0.2rem;
-	transition:
-		background-color 0.2s ease,
-		border-color 0.2s ease,
-		color 0.2s ease,
-		opacity 0.2s ease;
-	border-color: var(--ui-button-border, transparent);
+	gap: 0.3rem;
+
+	border: var(--control-border-width) solid var(--ui-button-border, var(--gray-border));
+	border-radius: 5rem;
 	background: var(--ui-button-bg, var(--white));
+	padding: 0.2rem 0.6rem;
 	color: var(--ui-button-color, var(--text));
-	font-weight: 650;
+	font-weight: 400;
+	font-size: 0.9rem;
+	line-height: 1.2rem;
+	text-decoration: none;
 
 	&:hover:not(:disabled),
 	&:focus-visible {
+		cursor: pointer;
 		border-color: var(--ui-button-hover-border, var(--ui-button-border, transparent));
 		background: var(--ui-button-hover-bg, var(--gray-bg));
 		color: var(--ui-button-hover-color, var(--ui-button-color, var(--text)));
+		text-decoration: none;
 	}
 
 	&:disabled {
 		opacity: 0.55;
 		cursor: not-allowed;
+	}
+
+	&.is-compact {
+		font-size: 0.7rem;
+	}
+
+	&.is-primary,
+	&.is-danger {
+		--ui-button-hover-border: var(--ui-button-hover-bg);
 	}
 
 	&.is-primary {
@@ -113,41 +123,36 @@ button.action-btn,
 		--ui-button-hover-border: var(--error-text);
 	}
 
-	&.is-compact {
-		padding: 0.4rem 0.6rem;
-		font-size: 0.7rem;
-	}
-
 	&.is-icon {
-		display: grid;
-		place-items: center;
-		padding: 0;
-	}
-
-	&.is-icon:not(.is-danger) {
 		--ui-button-bg: transparent;
 		--ui-button-border: transparent;
 		--ui-button-color: var(--gray-text);
 		--ui-button-hover-bg: var(--gray-bg);
-		--ui-button-hover-border: var(--gray-border);
-		--ui-button-hover-color: var(--secondary);
-	}
-}
+		--ui-button-hover-border: transparent;
+		--ui-button-hover-color: var(--ui-button-color);
 
-button.action-btn,
-.error-btn,
-.warn-btn,
-.success-btn,
-.info-btn {
-	padding: 0.2rem 0.6rem;
-	font-size: 0.9rem;
+		flex: none;
+		padding: 0.4rem;
+
+		&.is-primary {
+			--ui-button-color: var(--secondary);
+		}
+
+		&.is-danger {
+			--ui-button-color: var(--error-text);
+		}
+
+		&.is-compact {
+			padding: 0.2rem;
+		}
+	}
 }
 
 .status-badge {
 	display: inline-flex;
 	align-items: center;
 	gap: 0.2rem;
-	border-radius: 999px;
+	border-radius: 999rem;
 	background: var(--success-bg);
 	padding: 0.2rem 0.4rem;
 	color: var(--success-text);
@@ -158,7 +163,7 @@ button.action-btn,
 .progress-track {
 	display: block;
 	position: relative;
-	border-radius: 999px;
+	border-radius: 999rem;
 	background: var(--gray-bg);
 	overflow: hidden;
 }
@@ -175,6 +180,7 @@ button.action-btn,
 	flex: 0 0 auto;
 	place-items: center;
 	transition: transform 0.2s ease;
+
 	color: var(--gray-text);
 }
 
@@ -182,115 +188,181 @@ details[open] > summary .disclosure-icon {
 	transform: rotate(180deg);
 }
 
-button.action-btn {
-	--ui-button-bg: var(--secondary);
-	--ui-button-border: var(--secondary);
-	--ui-button-color: var(--white);
-	--ui-button-hover-bg: var(--secondary-strong-hover);
-
-	&:disabled {
-		--ui-button-bg: var(--gray-border);
-		--ui-button-color: var(--gray-text);
-	}
-}
-
-a.link-btn {
-	display: inline-flex;
-	justify-content: center;
-	align-items: center;
-
-	gap: 0.2rem;
-	border-radius: 0.2rem;
-
-	background-color: var(--secondary);
-
-	padding: 0.2rem 0.6rem;
-	color: var(--white);
-
-	font-size: 0.9rem;
-	// font-weight: 600;
-	word-break: keep-all;
-
-	&:hover {
-		background-color: var(--secondary-strong-hover);
-		text-decoration: none;
-	}
-}
-
-label.input-label {
-	position: absolute;
-	top: -1.2rem;
-	left: 0.2rem;
-	z-index: 90;
-	color: var(--gray);
-	font-size: 0.8rem;
-}
-
-@mixin flash-frame {
+.error,
+.warn,
+.success,
+.info {
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	border-radius: 0.4rem;
+	border: var(--control-border-width) solid;
+	border-radius: 1.4rem;
 	padding: 0.4rem 0.6rem;
-	font-size: 0.8rem;
+	width: 100%;
+	font-size: 0.7rem;
 }
 
 .error {
-	@include module-frame;
-	@include flash-frame;
 	border-color: var(--error);
 	background-color: var(--error-bg);
 	color: var(--error-text);
 }
 
-.error-btn {
-	--ui-button-bg: var(--error);
-	--ui-button-border: var(--error);
-	--ui-button-color: var(--tertiary-text);
-	--ui-button-hover-bg: var(--error-strong-hover);
-}
-
 .warn {
-	@include module-frame;
-	@include flash-frame;
 	border-color: var(--warn);
 	background-color: var(--warn-bg);
 	color: var(--warn-text);
 }
 
-.warn-btn {
-	--ui-button-bg: var(--warn);
-	--ui-button-border: var(--warn);
-	--ui-button-color: var(--tertiary-text);
-	--ui-button-hover-bg: var(--warn-strong-hover);
-}
-
 .success {
-	@include module-frame;
-	@include flash-frame;
 	border-color: var(--success);
 	background-color: var(--success-bg);
 	color: var(--success-text);
 }
 
-.success-btn {
-	--ui-button-bg: var(--success);
-	--ui-button-border: var(--success);
-	--ui-button-color: var(--tertiary-text);
-	--ui-button-hover-bg: var(--success-strong-hover);
-}
-
 .info {
-	@include module-frame;
-	@include flash-frame;
 	border-color: var(--info);
 	background-color: var(--info-bg);
 	color: var(--info-text);
 }
 
-.info-btn {
-	--ui-button-bg: var(--info);
-	--ui-button-border: var(--info);
-	--ui-button-color: var(--tertiary-text);
-	--ui-button-hover-bg: var(--info-strong-hover);
+.content-list-item {
+	display: flex;
+	flex-direction: column;
+	gap: 0.2rem;
+	border-bottom: solid var(--divider-border-width) var(--gray-border);
+	padding: 0.6rem 0.8rem;
+	width: 100%;
+	color: var(--text);
+	text-decoration: none;
+	&:hover {
+		background-color: var(--gray-bg);
+		text-decoration: none;
+	}
+
+	> header,
+	> footer {
+		display: flex;
+		align-items: center;
+		gap: 0.2rem;
+		min-width: 0;
+	}
+
+	> header > strong {
+		flex: 1;
+		overflow: hidden;
+		font-weight: 600;
+		font-size: 0.9rem;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	> footer {
+		justify-content: space-between;
+		color: var(--gray-text);
+		font-size: 0.7rem;
+	}
+
+	> footer > span {
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	> footer > time {
+		flex-shrink: 0;
+	}
+}
+
+/* Labelled input fields: native labels and FormField share the same design. */
+.form-field {
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+	min-width: 0;
+}
+.form-field > label,
+label.form-field > span {
+	padding-left: 0.2rem;
+	color: var(--gray-text);
+	font-weight: 400;
+	font-size: 0.7rem;
+}
+.form-field > input,
+.form-field > select,
+.form-field > textarea {
+	width: 100%;
+	min-width: 0;
+	font-size: 0.9rem;
+}
+
+/* Checkbox options: consistent selected, hover, focus and disabled states. */
+label.choice-option {
+	display: flex;
+	align-items: center;
+	gap: 0.4rem;
+	cursor: pointer;
+	border: var(--control-border-width) solid var(--gray-border);
+	border-radius: 1.4rem;
+	background: var(--white);
+	padding: 0.4rem 0.6rem;
+	font-size: 0.7rem;
+}
+label.choice-option:hover:not(:has(input:disabled)) {
+	background: var(--gray-bg);
+}
+label.choice-option:has(input:checked) {
+	border-color: var(--secondary);
+}
+label.choice-option:has(input:focus-visible) {
+	outline: 0.1rem solid var(--secondary);
+	outline-offset: 0.1rem;
+}
+label.choice-option:has(input:disabled) {
+	opacity: 0.55;
+	cursor: not-allowed;
+}
+label.choice-option > input {
+	flex: 0 0 auto;
+}
+
+.content-list > ul {
+	list-style: none;
+}
+.content-list > ul > li {
+	min-width: 0;
+}
+.content-list > p {
+	padding: 0.8rem 1rem;
+}
+.content-list > footer {
+	display: flex;
+	justify-content: center;
+}
+
+.module:has(> .panel-header) {
+	display: flex;
+	flex-direction: column;
+}
+
+/* Content editors share the same fields, attachment note and submit placement. */
+.content-form {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+}
+.content-form > .module {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 0.6rem;
+}
+.content-form > p {
+	color: var(--gray);
+	font-size: 0.7rem;
+}
+.content-form > footer {
+	display: flex;
+	justify-content: flex-end;
+	gap: 0.4rem;
 }

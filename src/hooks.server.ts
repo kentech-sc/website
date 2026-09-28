@@ -90,13 +90,13 @@ const authorizationHandle: Handle = async ({ event, resolve }) => {
 	}
 
 	if (
-		event.url.pathname.startsWith('/channel/petition') ||
+		event.url.pathname.startsWith('/channel/petitions') ||
 		event.url.pathname === '/channel/feedback/new' ||
-		event.url.pathname.startsWith('/channel/audit') ||
 		event.url.pathname.startsWith('/academic') ||
+		event.url.pathname.startsWith('/admin') ||
 		event.url.pathname.startsWith('/profile') ||
-		/^\/board\/(?:free|notice)\/(?:new|[^/]+\/edit)\/?$/.test(event.url.pathname) ||
-		/^\/bylaw\/(?:new|[^/]+\/edit)\/?$/.test(event.url.pathname)
+		/^\/boards\/(?:free|notice)\/(?:new|[^/]+\/edit)\/?$/.test(event.url.pathname) ||
+		/^\/bylaws\/(?:new|[^/]+\/edit)\/?$/.test(event.url.pathname)
 	) {
 		throw redirect(303, '/signin');
 	}
@@ -111,7 +111,9 @@ const authorizationHandle: Handle = async ({ event, resolve }) => {
 		id: '00000000-0000-0000-0000-000000000000',
 		createdAt: new Date().toISOString(),
 		updatedAt: new Date().toISOString(),
-		points: 0
+		points: 0,
+		gender: null,
+		house: null
 	};
 
 	return await resolve(event);

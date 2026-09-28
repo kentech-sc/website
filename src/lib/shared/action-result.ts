@@ -1,9 +1,9 @@
-import type { CommonFormPolicy } from '$lib/types/general.type.js';
+import type { ActionFormPolicy } from '$lib/types/general.type.js';
 import type { ActionResult } from '@sveltejs/kit';
 
 export function isDetailPolicy(
-	policy: CommonFormPolicy
-): policy is Extract<CommonFormPolicy, { kind: 'detail' }> {
+	policy: ActionFormPolicy
+): policy is Extract<ActionFormPolicy, { kind: 'detail' }> {
 	return typeof policy === 'object' && policy.kind === 'detail';
 }
 

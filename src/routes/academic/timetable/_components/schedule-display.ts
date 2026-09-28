@@ -36,6 +36,14 @@ export const formatOfferingSchedule = (
 	offering.meetings
 		.map(
 			(meeting) =>
-				`${weekdays[meeting.weekday - 1] ?? meeting.weekday} ${formatScheduleTime(meeting.startsAt)}–${formatScheduleTime(meeting.endsAt)}${meeting.room ? ` · ${formatRoomName(meeting.room)}` : ''}`
+				`${weekdays[meeting.weekday - 1] ?? meeting.weekday} ${formatScheduleTime(meeting.startMinute)}–${formatScheduleTime(meeting.endMinute)}${meeting.room ? ` · ${formatRoomName(meeting.room)}` : ''}`
 		)
 		.join(' / ');
+
+/** Grid dimensions are in rem; time values are minutes since midnight. */
+export function schedulePosition(minute: number, gridStartMinute: number) {
+	return 0.65 + ((minute - gridStartMinute) / 30) * 1.35;
+}
+export function scheduleHeight(startMinute: number, endMinute: number) {
+	return ((endMinute - startMinute) / 30) * 1.35;
+}

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { resolveCompletionStatus } from './completion-status.js';
+import { resolveCourseRecordStatus } from './course-record-status.js';
 import {
 	calculateDegreeProgress,
 	getCourseSequenceProgress,
@@ -59,7 +59,7 @@ const course = (code, category, credits, extra = {}) => ({
 	subcategory: null,
 	level: null,
 	credits,
-	gradExcluded: false,
+	excludedFromGraduation: false,
 	...extra
 });
 
@@ -80,7 +80,7 @@ test('duplicate and explicitly excluded courses do not add graduation credit', (
 		[
 			course('HA1001', 'HASS', 4),
 			course('HA1001', 'HASS', 4),
-			course('GR1001', 'FR', 10, { gradExcluded: true })
+			course('GR1001', 'FR', 10, { excludedFromGraduation: true })
 		],
 		policy()
 	);
@@ -93,7 +93,7 @@ test('graduate courses always count as free electives', () => {
 		[
 			course('EE5304', 'EE', 3, {
 				academicCareer: 'graduate',
-				gradExcluded: true
+				excludedFromGraduation: true
 			}),
 			course('GS5101', 'EL', 3, { academicCareer: 'graduate' })
 		],
@@ -206,24 +206,24 @@ test('ESP waived foundation students still complete intermediate before advanced
 });
 
 test('failed and withdrawn grade codes override a selected passed status', () => {
-	assert.equal(resolveCompletionStatus('F', 'passed'), 'failed');
-	assert.equal(resolveCompletionStatus('u', 'passed'), 'failed');
-	assert.equal(resolveCompletionStatus('W', 'passed'), 'withdrawn');
-	assert.equal(resolveCompletionStatus(null, 'failed'), 'failed');
+	assert.equal(resolveCourseRecordStatus('F', 'passed'), 'failed');
+	assert.equal(resolveCourseRecordStatus('u', 'passed'), 'failed');
+	assert.equal(resolveCourseRecordStatus('W', 'passed'), 'withdrawn');
+	assert.equal(resolveCourseRecordStatus(null, 'failed'), 'failed');
 });
 
 test('meeting conflict uses half-open time ranges', () => {
 	assert.equal(
 		hasMeetingConflict(
-			{ weekday: 1, startsAt: 600, endsAt: 660 },
-			{ weekday: 1, startsAt: 650, endsAt: 700 }
+			{ weekday: 1, startMinute: 600, endMinute: 660 },
+			{ weekday: 1, startMinute: 650, endMinute: 700 }
 		),
 		true
 	);
 	assert.equal(
 		hasMeetingConflict(
-			{ weekday: 1, startsAt: 600, endsAt: 660 },
-			{ weekday: 1, startsAt: 660, endsAt: 700 }
+			{ weekday: 1, startMinute: 600, endMinute: 660 },
+			{ weekday: 1, startMinute: 660, endMinute: 700 }
 		),
 		false
 	);

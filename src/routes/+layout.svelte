@@ -1,11 +1,10 @@
 <script lang="ts">
 	import 'nprogress/nprogress.css';
 	import NProgress from 'nprogress';
+	import { MediaQuery } from 'svelte/reactivity';
 
 	import Footer from './_components/Footer.svelte';
-	import NavBar from './_components/NavBar.svelte';
-	// 메인 화면 개편으로 잠시 내려둔 슬라이드쇼. 아래 렌더 블록과 함께 되살리면 된다.
-	// import Slideshow from './_components/Slideshow.svelte';
+	import SiteHeader from './_components/SiteHeader.svelte';
 
 	import type { FlashMessage } from '$lib/types/general.type.js';
 
@@ -17,7 +16,21 @@
 
 	import '$style/main.scss';
 
+	const reducedMotion = new MediaQuery('(prefers-reduced-motion: reduce)', false);
+
 	let { children, data } = $props();
+
+	$effect(() => {
+		NProgress.configure({
+			showSpinner: false,
+			speed: reducedMotion.current ? 0 : 200,
+			trickle: !reducedMotion.current
+		});
+	});
+	$effect(() => {
+		if (navigating.to) NProgress.start();
+		else NProgress.done();
+	});
 
 	let flash = $state<FlashMessage | null>(null);
 	let navigationKey = $derived(`${page.url.pathname}${page.url.search}`);
@@ -25,19 +38,19 @@
 
 	function titleForPath(pathname: string): string {
 		const boardId = pathname.split('/')[2];
-		if (pathname.startsWith('/board/') && isBoardId(boardId)) {
+		if (pathname.startsWith('/boards/') && isBoardId(boardId)) {
 			return `${BOARD_DEFINITIONS[boardId].title} | 켄텍 총학생회`;
 		}
 
 		const sections: Array<[string, string]> = [
-			['/academic/credits', '학점·졸업'],
+			['/academic/records', '성적·졸업'],
 			['/academic/timetable', '시간표'],
-			['/academic/review', '강의평가'],
-			['/academic/courses', '강의 관리'],
-			['/channel/petition', '청원'],
+			['/academic/reviews', '강의평가'],
+			['/academic/offerings', '개설 강의 관리'],
+			['/channel/petitions', '청원'],
 			['/channel/feedback', '문의·건의'],
-			['/channel/audit', '감사원 익명 제보'],
-			['/bylaw', '회칙·세칙'],
+			['/bylaws', '회칙·세칙'],
+			['/admin', '사이트 관리'],
 			['/profile', '내 정보'],
 			['/search', '검색'],
 			['/signin', '로그인'],
@@ -47,16 +60,6 @@
 		const section = sections.find(([prefix]) => pathname.startsWith(prefix));
 		return section ? `${section[1]} | 켄텍 총학생회` : '켄텍 총학생회';
 	}
-
-	NProgress.configure({
-		showSpinner: false
-	});
-
-	$effect(() => {
-		if (navigating.to) {
-			NProgress.start();
-		} else NProgress.done();
-	});
 
 	$effect(() => {
 		void navigationKey;
@@ -70,10 +73,6 @@
 			flash = clientFlash;
 		}
 	});
-
-	$effect(() => {
-		if (!browser || !flash) return;
-	});
 </script>
 
 <svelte:head><title>{pageTitle}</title></svelte:head>
@@ -83,7 +82,7 @@
 		<div class={`flash-banner ${flash.kind}`} role="status" aria-live="polite">
 			<p>{flash.message}</p>
 			<button
-				class="{flash.kind}-btn"
+				class="ui-button is-secondary"
 				type="button"
 				aria-label="메시지 닫기"
 				onclick={() => (flash = null)}>닫기</button
@@ -92,17 +91,11 @@
 	{/if}
 {/snippet}
 
-<NavBar />
+<SiteHeader />
 {@render Flash()}
 
-<!-- 메인 화면 개편으로 배너가 대체. 되살릴 수 있게 컴포넌트는 남겨둔다.
-{#if page.route.id === '/'}
-	<Slideshow />
-{/if}
--->
-
-<div class="layout-shell container">
-	<main class="container-col">
+<div class="layout-shell">
+	<main>
 		{@render children?.()}
 	</main>
 </div>
@@ -113,10 +106,15 @@
 	@use 'media';
 
 	.layout-shell {
+		display: flex;
+		justify-content: center;
 		align-items: flex-start;
 
 		main {
+			display: flex;
 			flex: 1;
+			flex-direction: column;
+			align-items: center;
 			margin-top: 1rem;
 			padding: 1rem;
 			max-width: 80vw;
@@ -139,10 +137,6 @@
 		padding-right: 0.6rem;
 		width: fit-content;
 		min-width: 40vw;
-
-		p {
-			margin: 0;
-		}
 
 		button {
 			flex-shrink: 0;

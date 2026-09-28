@@ -3,9 +3,14 @@ import type { Profile, User, UserAdminOption, UserId, UserUpdate } from '$lib/ty
 import * as UserRepository from '$lib/repositories/user.repository.js';
 import * as UserRule from '$lib/rules/user.rule.js';
 import { AppError, assertRule } from '$lib/server/errors.js';
+import { isUserGender, isUserHouse } from '$lib/shared/laundry.js';
 import { APP_ERROR } from '$lib/shared/rule.js';
 import { createDisplayName } from '$lib/shared/utils.js';
-import { DisplayType, UserGroup, type UserGroup as UserGroupType } from '$lib/types/user.type.js';
+import {
+	AuthorNameMode,
+	UserGroup,
+	type UserGroup as UserGroupType
+} from '$lib/types/user.type.js';
 
 export async function findUserById(userId: UserId): Promise<User | null> {
 	return await UserRepository.findUserById(userId);
@@ -110,6 +115,20 @@ export async function changeNicknameById(
 	return await updateUserById(target.id, { nickname: normalizedNickname });
 }
 
+export async function changeResidence(
+	gender: string,
+	house: string,
+	operator: User
+): Promise<User> {
+	if (operator.group === UserGroup.Guest || operator.deletedAt) {
+		throw new AppError(APP_ERROR.UNAUTHORIZED, '로그인이 필요합니다.');
+	}
+	if (!isUserGender(gender) || !isUserHouse(house)) {
+		throw new AppError(APP_ERROR.BAD_REQUEST, '성별과 하우스를 선택해 주세요.');
+	}
+	return await updateUserById(operator.id, { gender, house });
+}
+
 export async function changeGroupById(
 	userId: UserId,
 	group: UserGroupType,
@@ -163,7 +182,7 @@ function createUserIdToIdx<T extends { userId: UserId }>(
 	return userIdToIdx;
 }
 
-export function attachDisplayNames<T extends { userId: UserId; displayType: DisplayType }>(
+export function attachDisplayNames<T extends { userId: UserId; authorNameMode: AuthorNameMode }>(
 	items: T[],
 	userIdToUser: Map<string, User>,
 	options: { noIdxForAnon?: boolean } = {}
@@ -176,15 +195,14 @@ export function attachDisplayNames<T extends { userId: UserId; displayType: Disp
 
 		return {
 			...item,
-			displayName: createDisplayName(user, item.displayType, userIdToIdx)
+			displayName: createDisplayName(user, item.authorNameMode, userIdToIdx)
 		};
 	});
 }
 
-export async function fillDisplayNames<T extends { userId: UserId; displayType: DisplayType }>(
-	items: T[],
-	noIdxForAnon = false
-): Promise<Array<T & { displayName: string | null }>> {
+export async function fillDisplayNames<
+	T extends { userId: UserId; authorNameMode: AuthorNameMode }
+>(items: T[], noIdxForAnon = false): Promise<Array<T & { displayName: string | null }>> {
 	const userIdToUser = await findUserMapByIds(items.map((item) => item.userId));
 	return attachDisplayNames(items, userIdToUser, { noIdxForAnon });
 }

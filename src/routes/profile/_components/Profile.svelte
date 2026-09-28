@@ -55,7 +55,7 @@
 	</div>
 
 	<button
-		class="error-btn"
+		class="ui-button is-danger"
 		disabled={logoutLoading}
 		aria-busy={logoutLoading ? 'true' : 'false'}
 		onclick={handleSignOut}
@@ -93,7 +93,7 @@
 			h2 {
 				color: var(--text);
 				font-weight: 600;
-				font-size: 1rem;
+				font-size: 0.9rem;
 			}
 
 			.user-id {
@@ -124,7 +124,7 @@
 			.value {
 				color: var(--text);
 				font-weight: 500;
-				font-size: 0.8rem;
+				font-size: 0.7rem;
 
 				&.badge {
 					border-radius: 0.4rem;

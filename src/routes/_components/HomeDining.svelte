@@ -172,13 +172,14 @@
 		button {
 			display: flex;
 			align-items: center;
-			padding: 0.1rem 0.3rem;
+			padding: 0rem 0.2rem;
 		}
 	}
 
 	.date {
-		min-width: 5.5rem;
-		font-size: 0.8rem;
+		min-width: 5rem;
+		font-weight: 600;
+		font-size: 0.7rem;
 		text-align: center;
 	}
 
@@ -190,7 +191,7 @@
 			border-radius: 0;
 			// 학사일정의 요일 줄과 높이·글자를 맞춘다. (버튼 테두리만큼 여백을 덜 준다)
 			padding: 0.15rem 0;
-			font-weight: bold;
+			font-weight: 600;
 			font-size: 0.7rem;
 
 			// 버튼마다 테두리가 있어 맞닿는 자리가 두 겹으로 보인다.
@@ -229,7 +230,8 @@
 	h3 {
 		margin-top: 0.4rem;
 		color: var(--secondary-text);
-		font-size: 0.75rem;
+		font-weight: 600;
+		font-size: 0.7rem;
 	}
 
 	ul {
@@ -248,7 +250,7 @@
 		// 불릿 자리를 글자 영역에서 미리 빼둬야 불릿에 닿기 전에 줄이 바뀐다.
 		padding-left: 0.7rem;
 		// 카드 폭이 애매할 때 메뉴 이름이 넘쳐 배치가 깨져서 한 단계 줄였다.
-		font-size: 0.8rem;
+		font-size: 0.7rem;
 		// 한국어는 단어 단위로 끊고, 한 낱말이 칸보다 길 때만 강제로 자른다.
 		word-break: keep-all;
 		overflow-wrap: anywhere;

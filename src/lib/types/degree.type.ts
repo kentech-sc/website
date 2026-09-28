@@ -21,7 +21,7 @@ export interface DegreeCourseInput {
 	subcategory: string | null;
 	level: number | null;
 	credits: number;
-	gradExcluded: boolean;
+	excludedFromGraduation: boolean;
 }
 
 export interface DegreeCourseSequence {

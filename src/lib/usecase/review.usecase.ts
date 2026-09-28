@@ -11,7 +11,7 @@ import type {
 } from '$lib/types/review.type.js';
 import type { User } from '$lib/types/user.type.js';
 
-import * as AcademicRepository from '$lib/repositories/academic.repository.js';
+import * as OfferingRepository from '$lib/repositories/offering.repository.js';
 import * as ReviewRepository from '$lib/repositories/review.repository.js';
 import { transaction } from '$lib/server/db.js';
 import * as ActivityLogService from '$lib/services/activity-log.service.js';
@@ -23,7 +23,7 @@ import * as ThrottleService from '$lib/services/throttle.service.js';
 import { hasCapability } from '$lib/shared/permission.js';
 
 export async function fillReviews(reviews: ReviewEntity[]): Promise<Review[]> {
-	const offeringMap = await AcademicRepository.findOfferingMapByIds(
+	const offeringMap = await OfferingRepository.findOfferingMapByIds(
 		reviews.map((review) => review.offeringId)
 	);
 	return reviews.map((review) => {
@@ -46,14 +46,14 @@ export async function getReviewFilterOptions() {
 	const [courses, professors, courseIdsByProfessor] = await Promise.all([
 		CourseService.findInstructionalCourses(),
 		ProfessorService.findProfessors(),
-		AcademicRepository.findCourseIdsByProfessor()
+		OfferingRepository.findCourseIdsByProfessor()
 	]);
 	return { courses, professors, courseIdsByProfessor };
 }
 
 export async function getReviewFormOptions(user: User) {
 	const [reviewableOfferings, reviewedOfferingIds] = await Promise.all([
-		AcademicRepository.findAllReviewableOfferings(),
+		OfferingRepository.findAllReviewableOfferings(),
 		ReviewRepository.findReviewedOfferingIds(user.id)
 	]);
 

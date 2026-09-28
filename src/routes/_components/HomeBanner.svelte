@@ -1,18 +1,18 @@
 <script lang="ts">
 	import ChevronLeft from '@lucide/svelte/icons/chevron-left';
 	import ChevronRight from '@lucide/svelte/icons/chevron-right';
+	import { MediaQuery } from 'svelte/reactivity';
 
 	import type { Banner } from '$lib/types/banner.type.js';
+
+	const reducedMotion = new MediaQuery('(prefers-reduced-motion: reduce)', false);
 
 	let { banners }: { banners: Banner[] } = $props();
 
 	const INTERVAL_MS = 5000;
-
 	let current = $state(0);
-	// 마우스를 올렸거나 키보드 포커스가 안에 있으면 멈춘다. 읽는 도중에 넘어가지 않게.
 	let hovered = $state(false);
 	let focused = $state(false);
-	// 수동으로 넘기면 값을 바꿔 타이머를 처음부터 다시 센다.
 	let restartKey = $state(0);
 
 	const isSlider = $derived(banners.length > 1);
@@ -26,19 +26,12 @@
 	}
 
 	$effect(() => {
-		// 의존성으로 읽어 두어야 수동 이동 때 타이머가 다시 걸린다.
 		void restartKey;
 		if (!isSlider || hovered || focused) return;
-
-		const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-		if (reducedMotion) return;
-
+		if (reducedMotion.current) return;
 		const timer = setInterval(() => {
-			// 다른 탭에 가 있는 동안에는 넘기지 않는다. 돌아왔을 때 보던 배너가 그대로 있게.
-			if (document.hidden) return;
-			current = (index + 1) % banners.length;
+			if (!document.hidden) current = (index + 1) % banners.length;
 		}, INTERVAL_MS);
-
 		return () => clearInterval(timer);
 	});
 </script>
@@ -106,15 +99,6 @@
 			</div>
 		{/if}
 	</section>
-{:else}
-	<!--
-		배너를 올리기 전까지 자리를 확인하기 위한 임시 표시.
-		실제 운영에서는 배너가 없으면 아무것도 그리지 않아야 하므로 이 블록은 지운다.
-	-->
-	<section class="banner placeholder module is-flush container-col">
-		<span class="placeholder-label">배너</span>
-		<p>등록된 배너가 없습니다</p>
-	</section>
 {/if}
 
 <style lang="scss">
@@ -141,16 +125,16 @@
 	}
 
 	.track {
-		display: flex;
 		transition: transform 0.5s ease-in-out;
+		@media (prefers-reduced-motion: reduce) {
+			transition: none;
+		}
+		display: flex;
+
 		margin: 0;
 		padding: 0;
 		height: 100%;
 		list-style: none;
-
-		@media (prefers-reduced-motion: reduce) {
-			transition: none;
-		}
 	}
 
 	.slide {
@@ -179,6 +163,7 @@
 		transform: translateY(-50%);
 		opacity: 0;
 		transition: opacity 0.2s;
+
 		border: none;
 		border-radius: 50%;
 		background-color: var(--white);
@@ -230,25 +215,5 @@
 				width: 1.2rem;
 			}
 		}
-	}
-
-	// 임시 자리표시자. 실제 배너를 올리면 위 블록과 함께 지운다.
-	.placeholder {
-		justify-content: center;
-		gap: 0.3rem;
-		border-color: var(--tertiary);
-		background: linear-gradient(100deg, var(--tertiary), var(--secondary));
-		color: var(--tertiary-text);
-	}
-
-	.placeholder-label {
-		opacity: 0.75;
-		font-size: 0.75rem;
-		letter-spacing: 0.1em;
-	}
-
-	.placeholder p {
-		margin: 0;
-		font-size: 1.1rem;
 	}
 </style>

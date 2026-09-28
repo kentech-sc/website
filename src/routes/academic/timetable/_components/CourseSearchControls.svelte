@@ -88,7 +88,7 @@
 		background: var(--white);
 		padding: 0.2rem 0.4rem;
 		color: var(--gray-text);
-		font-size: 0.6rem;
+		font-size: 0.7rem;
 		white-space: nowrap;
 	}
 	.filter-chip.is-active {

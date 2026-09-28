@@ -1,9 +1,11 @@
 <script lang="ts">
+	import SubmissionListItem from './SubmissionListItem.svelte';
+
 	import type { FilePresence } from '$lib/types/general.type';
 	import type { Page } from '$lib/types/general.type';
 	import type { Submission } from '$lib/types/submission.type.js';
 
-	import CommonList from '$components/CommonList.svelte';
+	import PaginatedList from '$components/PaginatedList.svelte';
 
 	const {
 		submissionPage,
@@ -13,21 +15,8 @@
 		$props();
 </script>
 
-<section class="container-col module">
-	{#if submissionPage.items.length === 0}
-		<p>{emptyMessage}</p>
-	{:else}
-		<CommonList page={submissionPage} {filePresence} />
-	{/if}
-</section>
-
-<style lang="scss">
-	section {
-		padding: 0;
-	}
-
-	p {
-		padding: 0.8rem 1rem;
-		width: 100%;
-	}
-</style>
+<PaginatedList page={submissionPage} {emptyMessage}>
+	{#snippet item(submission)}
+		<SubmissionListItem {submission} attachment={filePresence[submission.id]} />
+	{/snippet}
+</PaginatedList>

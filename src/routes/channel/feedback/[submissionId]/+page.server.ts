@@ -34,15 +34,7 @@ export const actions = {
 		const submissionId = readSubmissionId(await request.formData());
 		return { submission: await FeedbackUsecase.cancelFeedbackSupport(submissionId, locals.user) };
 	}),
-	reviewSubmission: withActionErrorHandling(async ({ request, locals }) => {
-		const submissionId = readSubmissionId(await request.formData());
-		return { submission: await FeedbackUsecase.reviewFeedback(submissionId, locals.user) };
-	}),
-	cancelReview: withActionErrorHandling(async ({ request, locals }) => {
-		const submissionId = readSubmissionId(await request.formData());
-		return { submission: await FeedbackUsecase.cancelFeedbackReview(submissionId, locals.user) };
-	}),
-	respondToSubmission: withActionErrorHandling(async ({ request, locals }) => {
+	respond: withActionErrorHandling(async ({ request, locals }) => {
 		const formData = await request.formData();
 		const submissionId = readSubmissionId(formData);
 		const response = (formData.get('response') ?? '').toString();
@@ -51,13 +43,13 @@ export const actions = {
 			submission: await FeedbackUsecase.respondToFeedback(submissionId, locals.user, response)
 		};
 	}),
-	editResponse: withActionErrorHandling(async ({ request, locals }) => {
+	updateResponse: withActionErrorHandling(async ({ request, locals }) => {
 		const formData = await request.formData();
 		const submissionId = readSubmissionId(formData);
 		const response = (formData.get('response') ?? '').toString();
 		if (!response || !submissionId) return fail(400, { message: '답변 내용은 필수입니다.' });
 		return {
-			submission: await FeedbackUsecase.reviseFeedbackResponse(submissionId, locals.user, response)
+			submission: await FeedbackUsecase.updateFeedbackResponse(submissionId, locals.user, response)
 		};
 	}),
 	deleteResponse: withActionErrorHandling(async ({ request, locals }) => {

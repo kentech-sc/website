@@ -104,7 +104,7 @@
 	}
 	.result-group-heading small {
 		color: var(--gray-text);
-		font-size: 0.6rem;
+		font-size: 0.7rem;
 	}
 	.empty-group {
 		margin: 0;

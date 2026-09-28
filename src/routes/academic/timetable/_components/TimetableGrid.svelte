@@ -3,7 +3,13 @@
 	import X from '@lucide/svelte/icons/x';
 
 	import { COURSE_SLOTS, getFreeTimeRanges } from './course-search.js';
-	import { courseColor, formatRoomName, formatScheduleTime } from './schedule-display.js';
+	import {
+		courseColor,
+		formatRoomName,
+		formatScheduleTime,
+		schedulePosition,
+		scheduleHeight
+	} from './schedule-display.js';
 
 	import type { CourseSearchFilter, TimeBlock } from './course-search.js';
 	import type { PageData } from '../$types.js';
@@ -42,38 +48,39 @@
 		removeOfferingEnhance: SubmitFunction;
 	} = $props();
 
-	const gridStep = 1.35;
-	const gridPadding = 0.65;
 	const scheduleGuides = [9, 11, 12, 14, 16, 18, 20, 21].map((hour) => hour * 60);
 	const selectedMeetings = $derived(displayOfferings.flatMap((offering) => offering.meetings));
 	const rangeMeetings = $derived(
 		selected ? allOfferings.flatMap((offering) => offering.meetings) : selectedMeetings
 	);
-	const startMinute = $derived(
+	const gridStartMinute = $derived(
 		rangeMeetings.length
 			? Math.min(
 					9 * 60,
-					Math.floor(Math.min(...rangeMeetings.map((meeting) => meeting.startsAt)) / 60) * 60
+					Math.floor(Math.min(...rangeMeetings.map((meeting) => meeting.startMinute)) / 60) * 60
 				)
 			: 9 * 60
 	);
 	const selectedEndMinute = $derived(
 		selectedMeetings.length
-			? Math.ceil(Math.max(...selectedMeetings.map((meeting) => meeting.endsAt)) / 30) * 30
+			? Math.ceil(Math.max(...selectedMeetings.map((meeting) => meeting.endMinute)) / 30) * 30
 			: 21 * 60
 	);
-	const endMinute = $derived(
+	const gridEndMinute = $derived(
 		savingImage && selectedMeetings.length
-			? Math.max(startMinute + 60, selectedEndMinute)
+			? Math.max(gridStartMinute + 60, selectedEndMinute)
 			: Math.max(21 * 60, selectedEndMinute)
 	);
 	const timeLabels = $derived(
 		Array.from(
-			{ length: Math.floor((endMinute - startMinute) / 60) + 1 },
-			(_, index) => startMinute + index * 60
+			{ length: Math.floor((gridEndMinute - gridStartMinute) / 60) + 1 },
+			(_, index) => gridStartMinute + index * 60
 		)
 	);
-	const gridHeight = $derived(((endMinute - startMinute) / 30) * gridStep + gridPadding * 2);
+	const gridHeight = $derived(
+		schedulePosition(gridEndMinute, gridStartMinute) +
+			schedulePosition(gridStartMinute, gridStartMinute)
+	);
 
 	const meetingsForDay = (day: number) =>
 		displayOfferings.flatMap((offering) =>
@@ -81,19 +88,18 @@
 				.filter((meeting) => meeting.weekday === day)
 				.map((meeting) => ({ offering, meeting }))
 		);
-	const meetingStyle = (category: string | null, startsAt: number, endsAt: number) => {
-		const top = gridPadding + ((startsAt - startMinute) / 30) * gridStep;
-		const height = Math.max(1.15, ((endsAt - startsAt) / 30) * gridStep);
+	const meetingStyle = (category: string | null, startMinute: number, endMinute: number) => {
+		const top = schedulePosition(startMinute, gridStartMinute);
+		const height = Math.max(1.15, scheduleHeight(startMinute, endMinute));
 		return `--course-color: ${courseColor(category)}; top: ${top}rem; height: ${height}rem`;
 	};
 	const freeSlotRanges = (weekday: number, block: TimeBlock) =>
 		getFreeTimeRanges(weekday, block, selectedMeetings);
-	const gridSlotStyle = (startsAt: number, endsAt: number) => {
+	const gridSlotStyle = (startMinute: number, endMinute: number) => {
 		const inset = 0.08;
-		return `top: ${gridPadding + ((startsAt - startMinute) / 30) * gridStep + inset}rem; height: ${((endsAt - startsAt) / 30) * gridStep - inset * 2}rem`;
+		return `top: ${schedulePosition(startMinute, gridStartMinute) + inset}rem; height: ${scheduleHeight(startMinute, endMinute) - inset * 2}rem`;
 	};
-	const guideStyle = (minute: number) =>
-		`top: ${gridPadding + ((minute - startMinute) / 30) * gridStep}rem`;
+	const guideStyle = (minute: number) => `top: ${schedulePosition(minute, gridStartMinute)}rem`;
 </script>
 
 <div class="schedule-scroll">
@@ -102,7 +108,7 @@
 		{#each weekdays as weekday (weekday)}<div class="day-header">{weekday}</div>{/each}
 		<div class="time-axis" style={`height: ${gridHeight}rem`}>
 			{#each timeLabels as minute (minute)}
-				<span style={`top: ${gridPadding + ((minute - startMinute) / 30) * gridStep}rem`}>
+				<span style={`top: ${schedulePosition(minute, gridStartMinute)}rem`}>
 					{formatScheduleTime(minute)}
 				</span>
 			{/each}
@@ -110,22 +116,22 @@
 
 		{#each weekdays as weekday, day (weekday)}
 			<div class="day-lane" style={`height: ${gridHeight}rem`}>
-				{#each scheduleGuides.filter((minute) => minute <= endMinute) as minute (minute)}
+				{#each scheduleGuides.filter((minute) => minute <= gridEndMinute) as minute (minute)}
 					<span class="schedule-guide" style={guideStyle(minute)} aria-hidden="true"></span>
 				{/each}
 				<!-- 수요일은 정규 강의가 열리지 않아 블록 버튼을 두지 않는다. -->
 				{#if selected && day !== 2}
-					{#each COURSE_SLOTS as slot (slot.startsAt)}
-						{#each freeSlotRanges(day + 1, slot) as freeRange (`${freeRange.startsAt}-${freeRange.endsAt}`)}
+					{#each COURSE_SLOTS as slot (slot.startMinute)}
+						{#each freeSlotRanges(day + 1, slot) as freeRange (`${freeRange.startMinute}-${freeRange.endMinute}`)}
 							<button
 								type="button"
 								class="grid-slot"
 								data-image-exclude
-								style={gridSlotStyle(freeRange.startsAt, freeRange.endsAt)}
+								style={gridSlotStyle(freeRange.startMinute, freeRange.endMinute)}
 								disabled={busy}
 								onclick={() => onPickSlot(day + 1, freeRange)}
-								aria-label={`${weekday} ${formatScheduleTime(freeRange.startsAt)}에 강의 추가`}
-								title={`${weekday} ${formatScheduleTime(freeRange.startsAt)}–${formatScheduleTime(freeRange.endsAt)} 강의 찾기`}
+								aria-label={`${weekday} ${formatScheduleTime(freeRange.startMinute)}에 강의 추가`}
+								title={`${weekday} ${formatScheduleTime(freeRange.startMinute)}–${formatScheduleTime(freeRange.endMinute)} 강의 찾기`}
 							>
 								<Plus size="0.8rem" aria-hidden="true" />
 							</button>
@@ -139,7 +145,7 @@
 						class:is-cancelled={offering.archivedAt !== null}
 						class:has-change={changeReasons[offering.id] !== undefined}
 						class:has-conflict={conflictingOfferingIds.has(offering.id)}
-						style={meetingStyle(offering.category, meeting.startsAt, meeting.endsAt)}
+						style={meetingStyle(offering.category, meeting.startMinute, meeting.endMinute)}
 					>
 						<button
 							type="button"
@@ -165,7 +171,7 @@
 							{#if meeting.room}<small class="course-room">{formatRoomName(meeting.room)}</small
 								>{/if}
 							<small class="course-time">
-								{formatScheduleTime(meeting.startsAt)}–{formatScheduleTime(meeting.endsAt)}
+								{formatScheduleTime(meeting.startMinute)}–{formatScheduleTime(meeting.endMinute)}
 							</small>
 						</button>
 						{#if selected}
@@ -195,5 +201,5 @@
 </div>
 
 <style lang="scss">
-	@use '../_styles/timetable-grid.scss';
+	@use './timetable-grid.scss';
 </style>

@@ -14,20 +14,35 @@ import * as PetitionRule from '$lib/rules/petition.rule.js';
 import { AppError, assertRule } from '$lib/server/errors.js';
 import { assertUuid } from '$lib/server/id.js';
 import { createPage } from '$lib/shared/paginate.js';
+import { hasCapability } from '$lib/shared/permission.js';
 import { APP_ERROR } from '$lib/shared/rule.js';
 import { SubmissionKind } from '$lib/types/submission.type.js';
 
 export function getPetitionPermissions(petition: SubmissionEntity, user: User) {
 	return {
+		canEdit: PetitionRule.canEditPetition(petition, user).ok,
 		canDelete: PetitionRule.canDeletePetition(petition, user).ok,
-		canSupport: PetitionRule.canSignPetition(petition, user).ok,
-		canCancelSupport: PetitionRule.canUnsignPetition(petition, user).ok,
+		canSupport: PetitionRule.canSupportPetition(petition, user).ok,
+		canCancelSupport: PetitionRule.canCancelPetitionSupport(petition, user).ok,
 		canReview: PetitionRule.canReviewPetition(petition, user).ok,
-		canCancelReview: PetitionRule.canUnreviewPetition(petition, user).ok,
+		canCancelReview: PetitionRule.canCancelPetitionReview(petition, user).ok,
 		canRespond: PetitionRule.canRespondToPetition(petition, user).ok,
 		canEditResponse: PetitionRule.canReviseResponse(petition, user).ok,
 		canDeleteResponse: PetitionRule.canDeleteResponse(petition, user).ok
 	};
+}
+
+export async function editPetitionById(
+	petitionId: SubmissionId,
+	input: Pick<SubmissionEntity, 'title' | 'content'>,
+	user: User
+): Promise<SubmissionEntity> {
+	const petition = await getPetitionById(petitionId);
+	assertRule(PetitionRule.canEditPetition(petition, user));
+	const updated = await SubmissionRepository.updateSubmissionWithoutSupportById(petitionId, input);
+	if (!updated)
+		throw new AppError(APP_ERROR.INVALID_STATE, '청원 상태가 변경되어 수정할 수 없습니다.');
+	return updated;
 }
 
 export async function createPetition(
@@ -66,8 +81,12 @@ export async function deletePetitionById(
 	const petition = await getPetitionById(petitionId);
 	assertRule(PetitionRule.canDeletePetition(petition, user));
 
-	const isDeleted = await SubmissionRepository.deleteSubmissionById(petitionId);
-	if (!isDeleted) throw new AppError(APP_ERROR.NOT_FOUND, '이미 삭제된 청원입니다.');
+	const isDeleted = hasCapability(user, 'petition.delete.any')
+		? await SubmissionRepository.deleteSubmissionById(petitionId)
+		: await SubmissionRepository.deleteSubmissionWithoutSupportById(petitionId);
+	if (!isDeleted) {
+		throw new AppError(APP_ERROR.INVALID_STATE, '청원 상태가 변경되어 삭제할 수 없습니다.');
+	}
 
 	return petition;
 }
@@ -81,12 +100,12 @@ export async function viewPetitionById(petitionId: SubmissionId): Promise<Submis
 	return await refreshStatusByPetition(petition);
 }
 
-export async function signPetitionById(
+export async function supportPetitionById(
 	petitionId: SubmissionId,
 	user: User
 ): Promise<SubmissionEntity> {
 	const petition = await getPetitionById(petitionId);
-	assertRule(PetitionRule.canSignPetition(petition, user));
+	assertRule(PetitionRule.canSupportPetition(petition, user));
 
 	const updatedPetition = await SubmissionSupportRepository.supportSubmissionById(
 		petitionId,
@@ -99,12 +118,12 @@ export async function signPetitionById(
 	return updatedPetition;
 }
 
-export async function unsignPetitionById(
+export async function cancelPetitionSupportById(
 	petitionId: SubmissionId,
 	user: User
 ): Promise<SubmissionEntity> {
 	const petition = await getPetitionById(petitionId);
-	assertRule(PetitionRule.canUnsignPetition(petition, user));
+	assertRule(PetitionRule.canCancelPetitionSupport(petition, user));
 
 	const updatedPetition = await SubmissionSupportRepository.cancelSubmissionSupportById(
 		petitionId,
@@ -117,7 +136,7 @@ export async function unsignPetitionById(
 	return updatedPetition;
 }
 
-export async function reviewPetitionById(
+export async function startPetitionReviewById(
 	petitionId: SubmissionId,
 	user: User
 ): Promise<SubmissionEntity> {
@@ -136,12 +155,12 @@ export async function reviewPetitionById(
 	return updatedPetition;
 }
 
-export async function unreviewPetitionById(
+export async function cancelPetitionReviewById(
 	petitionId: SubmissionId,
 	user: User
 ): Promise<SubmissionEntity> {
 	const petition = await getPetitionById(petitionId);
-	assertRule(PetitionRule.canUnreviewPetition(petition, user));
+	assertRule(PetitionRule.canCancelPetitionReview(petition, user));
 
 	const updatedPetition = await SubmissionResponseRepository.updateSubmissionStatusById(
 		petitionId,
@@ -155,7 +174,7 @@ export async function unreviewPetitionById(
 	return updatedPetition;
 }
 
-export async function responseToPetitionById(
+export async function respondToPetitionById(
 	petitionId: SubmissionId,
 	responder: User,
 	response: string
@@ -176,7 +195,7 @@ export async function responseToPetitionById(
 	return updatedPetition;
 }
 
-export async function reviseResponseById(
+export async function updatePetitionResponseById(
 	petitionId: SubmissionId,
 	responder: User,
 	response: string

@@ -1,9 +1,8 @@
-import type { DisplayType, UserId } from './user.type.js';
+import type { AuthorNameMode, UserId } from './user.type.js';
 
 export const SubmissionKind = {
 	Petition: 'petition',
-	Inquiry: 'inquiry',
-	Suggestion: 'suggestion'
+	Feedback: 'feedback'
 } as const;
 
 export type SubmissionKind = (typeof SubmissionKind)[keyof typeof SubmissionKind];
@@ -34,7 +33,7 @@ export type SubmissionId = string;
 export interface SubmissionCreate {
 	kind: SubmissionKind;
 	category: SubmissionCategory | null;
-	displayType: DisplayType;
+	authorNameMode: AuthorNameMode;
 	title: string;
 	content: string;
 	authorId: UserId;
@@ -45,17 +44,21 @@ export interface SubmissionEntity extends SubmissionCreate {
 	createdAt: string;
 	updatedAt: string;
 	status: SubmissionStatus;
-	viewCnt: number;
+	viewCount: number;
 	supporterIds: UserId[];
 	responderId: UserId | null;
 	response: string | null;
 	answeredAt: string | null;
 }
 
+export type SubmissionUpdate = Partial<
+	Pick<SubmissionEntity, 'kind' | 'category' | 'authorNameMode' | 'title' | 'content'>
+>;
+
 export type SubmissionPreview = Pick<
 	SubmissionEntity,
-	'id' | 'kind' | 'title' | 'status' | 'createdAt'
->;
+	'id' | 'kind' | 'category' | 'title' | 'status' | 'createdAt'
+> & { supportCount: number };
 
 export type Submission = SubmissionEntity & {
 	authorName: string | null;
@@ -63,6 +66,7 @@ export type Submission = SubmissionEntity & {
 };
 
 export interface SubmissionPermissions {
+	canEdit: boolean;
 	canDelete: boolean;
 	canSupport: boolean;
 	canCancelSupport: boolean;

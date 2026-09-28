@@ -151,11 +151,11 @@
 		min-width: 0;
 	}
 	header b {
-		font-size: 0.82rem;
+		font-size: 0.9rem;
 	}
 	header small {
 		color: var(--gray-text);
-		font-size: 0.65rem;
+		font-size: 0.7rem;
 	}
 	header button {
 		display: grid;
@@ -177,7 +177,7 @@
 		min-height: 0;
 		overflow: hidden;
 	}
-	@media (max-width: 900px) {
+	@media (width <= 900px) {
 		.course-search-panel {
 			position: fixed;
 			top: 4.5rem;

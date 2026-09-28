@@ -100,7 +100,10 @@ export function calculateDegreeProgress(
 	const seen = new Set<string>();
 
 	for (const course of courses) {
-		if (seen.has(course.code) || (course.gradExcluded && course.academicCareer !== 'graduate'))
+		if (
+			seen.has(course.code) ||
+			(course.excludedFromGraduation && course.academicCareer !== 'graduate')
+		)
 			continue;
 		seen.add(course.code);
 		const category = categoryOf(course);
@@ -194,8 +197,8 @@ export function calculateDegreeProgress(
 }
 
 export function hasMeetingConflict(
-	a: { weekday: number; startsAt: number; endsAt: number },
-	b: { weekday: number; startsAt: number; endsAt: number }
+	a: { weekday: number; startMinute: number; endMinute: number },
+	b: { weekday: number; startMinute: number; endMinute: number }
 ): boolean {
-	return a.weekday === b.weekday && a.startsAt < b.endsAt && b.startsAt < a.endsAt;
+	return a.weekday === b.weekday && a.startMinute < b.endMinute && b.startMinute < a.endMinute;
 }

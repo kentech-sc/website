@@ -40,7 +40,7 @@
 	<h2>{title}</h2>
 	<p>{description}</p>
 	<p class="status-code">오류 코드 {page.status}</p>
-	<a class="link-btn" href={resolve('/')}>메인 페이지로 돌아가기</a>
+	<a class="ui-button is-primary" href={resolve('/')}>메인 페이지로 돌아가기</a>
 </section>
 
 <style lang="scss">
@@ -59,7 +59,7 @@
 
 	p {
 		color: var(--gray);
-		font-size: 0.8rem;
+		font-size: 0.7rem;
 	}
 
 	.status-code {

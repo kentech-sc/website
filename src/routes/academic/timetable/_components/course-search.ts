@@ -1,46 +1,46 @@
 export type CourseSearchFilter =
 	| { kind: 'all' }
-	| { kind: 'slot'; weekday: number; startsAt: number; endsAt: number }
+	| { kind: 'slot'; weekday: number; startMinute: number; endMinute: number }
 	| {
 			kind: 'replace';
 			sourceOfferingId: string;
 			meetingId: string;
 			weekday: number;
-			startsAt: number;
-			endsAt: number;
+			startMinute: number;
+			endMinute: number;
 	  }
 	| { kind: 'unscheduled' };
 
 export interface SearchableMeeting {
 	weekday: number;
-	startsAt: number;
-	endsAt: number;
+	startMinute: number;
+	endMinute: number;
 }
 
 export interface TimeBlock {
-	startsAt: number;
-	endsAt: number;
+	startMinute: number;
+	endMinute: number;
 }
 
 /** 기본 강의 추가 시간대. 점심시간을 포함하며, 실제로 비어 있는 구간에 버튼을 표시한다. */
 export const COURSE_SLOTS: readonly TimeBlock[] = [
-	{ startsAt: 9 * 60, endsAt: 11 * 60 },
-	{ startsAt: 11 * 60, endsAt: 12 * 60 },
-	{ startsAt: 12 * 60, endsAt: 14 * 60 },
-	{ startsAt: 14 * 60, endsAt: 16 * 60 },
-	{ startsAt: 16 * 60, endsAt: 18 * 60 },
-	{ startsAt: 18 * 60, endsAt: 20 * 60 },
-	{ startsAt: 20 * 60, endsAt: 21 * 60 }
+	{ startMinute: 9 * 60, endMinute: 11 * 60 },
+	{ startMinute: 11 * 60, endMinute: 12 * 60 },
+	{ startMinute: 12 * 60, endMinute: 14 * 60 },
+	{ startMinute: 14 * 60, endMinute: 16 * 60 },
+	{ startMinute: 16 * 60, endMinute: 18 * 60 },
+	{ startMinute: 18 * 60, endMinute: 20 * 60 },
+	{ startMinute: 20 * 60, endMinute: 21 * 60 }
 ];
 
 export function overlapsTimeRange(
 	meeting: SearchableMeeting,
-	range: { weekday: number; startsAt: number; endsAt: number }
+	range: { weekday: number; startMinute: number; endMinute: number }
 ): boolean {
 	return (
 		meeting.weekday === range.weekday &&
-		meeting.startsAt < range.endsAt &&
-		range.startsAt < meeting.endsAt
+		meeting.startMinute < range.endMinute &&
+		range.startMinute < meeting.endMinute
 	);
 }
 
@@ -53,19 +53,20 @@ export function getFreeTimeRanges(
 	const occupied = meetings
 		.filter((meeting) => overlapsTimeRange(meeting, { weekday, ...block }))
 		.map((meeting) => ({
-			startsAt: Math.max(block.startsAt, meeting.startsAt),
-			endsAt: Math.min(block.endsAt, meeting.endsAt)
+			startMinute: Math.max(block.startMinute, meeting.startMinute),
+			endMinute: Math.min(block.endMinute, meeting.endMinute)
 		}))
-		.sort((a, b) => a.startsAt - b.startsAt || a.endsAt - b.endsAt);
+		.sort((a, b) => a.startMinute - b.startMinute || a.endMinute - b.endMinute);
 
 	const free: TimeBlock[] = [];
-	let cursor = block.startsAt;
+	let cursor = block.startMinute;
 	for (const range of occupied) {
-		if (range.startsAt > cursor) free.push({ startsAt: cursor, endsAt: range.startsAt });
-		cursor = Math.max(cursor, range.endsAt);
-		if (cursor >= block.endsAt) break;
+		if (range.startMinute > cursor)
+			free.push({ startMinute: cursor, endMinute: range.startMinute });
+		cursor = Math.max(cursor, range.endMinute);
+		if (cursor >= block.endMinute) break;
 	}
-	if (cursor < block.endsAt) free.push({ startsAt: cursor, endsAt: block.endsAt });
+	if (cursor < block.endMinute) free.push({ startMinute: cursor, endMinute: block.endMinute });
 	return free;
 }
 

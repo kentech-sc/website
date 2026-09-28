@@ -64,8 +64,8 @@ test('KENTECH course workbook rows are normalized for offering import', () => {
 	assert.equal(result.passCreditCount, 1);
 	assert.equal(result.multipleProfessorCount, 1);
 	assert.deepEqual(result.offerings[0].meetings, [
-		{ weekday: 1, startsAt: 510, endsAt: 630, room: '행정강의동(A Zone)_A-205' },
-		{ weekday: 4, startsAt: 510, endsAt: 630, room: '행정강의동(A Zone)_A-205' }
+		{ weekday: 1, startMinute: 510, endMinute: 630, room: '행정강의동(A Zone)_A-205' },
+		{ weekday: 4, startMinute: 510, endMinute: 630, room: '행정강의동(A Zone)_A-205' }
 	]);
 	assert.equal(result.offerings[0].subcategory, 'math');
 	assert.equal(result.offerings[0].academicCareer, 'undergraduate');
@@ -168,7 +168,7 @@ test('graduate workbook rows are detected and normalized into the common offerin
 		category: 'EE',
 		subcategory: null,
 		level: 5,
-		gradExcluded: false,
+		excludedFromGraduation: false,
 		professorNames: ['배기호'],
 		year: 2024,
 		term: 2,
@@ -178,8 +178,8 @@ test('graduate workbook rows are detected and normalized into the common offerin
 		creditType: 'numeric',
 		capacity: 0,
 		meetings: [
-			{ weekday: 1, startsAt: 810, endsAt: 900, room: null },
-			{ weekday: 4, startsAt: 810, endsAt: 900, room: null }
+			{ weekday: 1, startMinute: 810, endMinute: 900, room: null },
+			{ weekday: 4, startMinute: 810, endMinute: 900, room: null }
 		]
 	});
 });
@@ -193,7 +193,7 @@ function offering(overrides = {}) {
 		category: 'EF',
 		subcategory: 'math',
 		level: 1,
-		gradExcluded: false,
+		excludedFromGraduation: false,
 		professors: [{ id: 'professor-1', name: '김교수' }],
 		year: 2026,
 		term: 2,
@@ -208,8 +208,8 @@ function offering(overrides = {}) {
 				id: 'meeting-1',
 				offeringId: 'offering-1',
 				weekday: 1,
-				startsAt: 540,
-				endsAt: 660,
+				startMinute: 540,
+				endMinute: 660,
 				room: 'A-205'
 			}
 		],
@@ -225,7 +225,7 @@ function incoming(overrides = {}) {
 		category: 'EF',
 		subcategory: 'math',
 		level: 1,
-		gradExcluded: false,
+		excludedFromGraduation: false,
 		professorNames: ['김교수'],
 		year: 2026,
 		term: 2,
@@ -234,7 +234,7 @@ function incoming(overrides = {}) {
 		credits: 4,
 		creditType: 'numeric',
 		capacity: 30,
-		meetings: [{ weekday: 1, startsAt: 540, endsAt: 660, room: 'A-205' }],
+		meetings: [{ weekday: 1, startMinute: 540, endMinute: 660, room: 'A-205' }],
 		...overrides
 	};
 }
@@ -259,7 +259,7 @@ test('offering comparison separates schedule and detail changes', () => {
 			offering(),
 			incoming({
 				professorNames: ['이교수'],
-				meetings: [{ weekday: 2, startsAt: 840, endsAt: 960, room: 'A-205' }]
+				meetings: [{ weekday: 2, startMinute: 840, endMinute: 960, room: 'A-205' }]
 			})
 		),
 		{ reason: 'schedule_changed', professorsChanged: true }
@@ -271,7 +271,7 @@ test('offering comparison separates schedule and detail changes', () => {
 	assert.equal(
 		compareOfferingImport(
 			offering(),
-			incoming({ meetings: [{ weekday: 1, startsAt: 540, endsAt: 660, room: 'C-303' }] })
+			incoming({ meetings: [{ weekday: 1, startMinute: 540, endMinute: 660, room: 'C-303' }] })
 		).reason,
 		'details_changed'
 	);

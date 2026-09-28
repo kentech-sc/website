@@ -1,13 +1,13 @@
 $mobile-max: 768px;
 
 @mixin mobile {
-	@media (max-width: $mobile-max) {
+	@media (width <= $mobile-max) {
 		@content;
 	}
 }
 
 @mixin pc {
-	@media (min-width: calc(#{$mobile-max} + 0.01rem)) {
+	@media (width > $mobile-max) {
 		@content;
 	}
 }

@@ -6,7 +6,7 @@ import type {
 	SubmissionId,
 	SubmissionKind
 } from '$lib/types/submission.type.js';
-import type { DisplayType, User } from '$lib/types/user.type.js';
+import type { AuthorNameMode, User } from '$lib/types/user.type.js';
 
 import { transaction } from '$lib/server/db.js';
 import * as FeedbackService from '$lib/services/feedback.service.js';
@@ -21,7 +21,8 @@ import {
 	recordResponseDelete,
 	recordResponseEdit,
 	recordSubmissionCreate,
-	recordSubmissionDelete
+	recordSubmissionDelete,
+	recordSubmissionEdit
 } from '$lib/usecase/submission.usecase.js';
 
 export async function getFeedbackPage(page: number, user: User) {
@@ -64,7 +65,7 @@ export async function getFeedbackDetail(
 export async function createFeedback(
 	kind: SubmissionKind,
 	category: SubmissionCategory,
-	displayType: DisplayType,
+	authorNameMode: AuthorNameMode,
 	title: string,
 	content: string,
 	author: User,
@@ -73,7 +74,7 @@ export async function createFeedback(
 	return await transaction(async () => {
 		await ThrottleService.reserve(author.id, 'article');
 		const submission = await FeedbackService.createFeedback(
-			{ kind, category, displayType, title, content, authorId: author.id },
+			{ kind, category, authorNameMode, title, content, authorId: author.id },
 			author
 		);
 		await FileMetaService.linkArticleToFiles(fileIds, submission.id);
@@ -92,10 +93,31 @@ export async function deleteFeedback(submissionId: SubmissionId, user: User) {
 	});
 }
 
+export async function editFeedback(
+	submissionId: SubmissionId,
+	category: SubmissionCategory,
+	authorNameMode: AuthorNameMode,
+	title: string,
+	content: string,
+	user: User,
+	fileIds: FileId[]
+) {
+	return await transaction(async () => {
+		const before = await FeedbackService.getFeedbackById(submissionId);
+		const beforeSnapshot = await getSubmissionLogSnapshot(before);
+		const submission = await FeedbackService.editFeedbackById(
+			submissionId,
+			{ category, authorNameMode, title, content },
+			user
+		);
+		await FileMetaService.linkArticleToFiles(fileIds, submissionId);
+		await recordSubmissionEdit(user.id, beforeSnapshot, await getSubmissionLogSnapshot(submission));
+		return submission;
+	});
+}
+
 export const supportFeedback = FeedbackService.supportFeedbackById;
 export const cancelFeedbackSupport = FeedbackService.cancelFeedbackSupportById;
-export const reviewFeedback = FeedbackService.reviewFeedbackById;
-export const cancelFeedbackReview = FeedbackService.cancelFeedbackReviewById;
 
 export async function respondToFeedback(submissionId: SubmissionId, user: User, response: string) {
 	return await transaction(async () => {
@@ -105,14 +127,14 @@ export async function respondToFeedback(submissionId: SubmissionId, user: User, 
 	});
 }
 
-export async function reviseFeedbackResponse(
+export async function updateFeedbackResponse(
 	submissionId: SubmissionId,
 	user: User,
 	response: string
 ) {
 	return await transaction(async () => {
 		const before = await FeedbackService.getFeedbackById(submissionId);
-		const submission = await FeedbackService.reviseFeedbackResponseById(
+		const submission = await FeedbackService.updateFeedbackResponseById(
 			submissionId,
 			user,
 			response

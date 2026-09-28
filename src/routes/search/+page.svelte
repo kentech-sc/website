@@ -7,6 +7,8 @@
 	const searchPage = $derived(data.searchPage);
 </script>
 
-<SearchHeader />
-<SearchForm />
-<SearchList {searchPage} />
+<section class="page">
+	<SearchHeader />
+	<SearchForm />
+	<SearchList {searchPage} />
+</section>
