@@ -11,7 +11,7 @@
 	box-sizing: border-box;
 	font-family: 'Pretendard', sans-serif;
 	word-break: keep-all;
-	corner-shape: squircle;
+	corner-shape: var(--corner-shape, squircle);
 }
 
 html {

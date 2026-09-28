@@ -107,7 +107,7 @@
 		cursor: pointer;
 		border: solid 0.1rem var(--gray-border);
 		border-radius: 1rem;
-		corner-shape: round;
+		--corner-shape: round;
 		background: var(--gray-bg);
 		padding: 0.1rem;
 		width: 100%;

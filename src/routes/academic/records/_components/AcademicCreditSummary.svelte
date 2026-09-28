@@ -89,13 +89,12 @@
 		background: conic-gradient(var(--secondary) var(--progress), var(--gray-bg) 0);
 		width: 5.7rem;
 		height: 5.7rem;
-		corner-shape: round;
+		--corner-shape: round;
 	}
 	.progress-ring.is-complete {
 		background: var(--success-text);
 	}
 	.progress-ring::before {
-		corner-shape: round;
 		grid-area: 1/1;
 		border-radius: 50%;
 		background: var(--white);
