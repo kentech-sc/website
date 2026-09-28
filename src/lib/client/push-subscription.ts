@@ -49,6 +49,9 @@ export function isSupported(): boolean {
 }
 
 export async function subscribe() {
+	const publicKey = env.PUBLIC_VAPID_PUBLIC_KEY;
+	if (!publicKey) throw new Error(ENABLE_FAILED_MESSAGE);
+
 	const permissionResult = await withTimeout(
 		Notification.requestPermission(),
 		'알림 권한 요청이 응답하지 않습니다. 브라우저 또는 기기 설정에서 알림 권한을 확인해 주세요.'
@@ -62,7 +65,7 @@ export async function subscribe() {
 		navigator.serviceWorker.ready,
 		'서비스 워커가 준비되지 않았습니다. 페이지를 새로고침한 뒤 다시 시도해 주세요.'
 	);
-	const applicationServerKey = base64UrlToUint8Array(env.PUBLIC_VAPID_PUBLIC_KEY);
+	const applicationServerKey = base64UrlToUint8Array(publicKey);
 	let existingSubscription = await registration.pushManager.getSubscription();
 
 	if (
