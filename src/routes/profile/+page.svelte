@@ -70,5 +70,9 @@
 		@include media.pc {
 			grid-template-columns: minmax(0, 0.8fr) minmax(0, 1fr);
 		}
+
+		& > section {
+			gap: 0.4rem;
+		}
 	}
 </style>

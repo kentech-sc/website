@@ -17,6 +17,7 @@
 html {
 	background-color: var(--white);
 	min-height: 100%;
+	overflow-y: scroll;
 	font-size: 20px;
 }
 
@@ -72,7 +73,8 @@ blockquote {
 	margin: 0;
 }
 
-p {
+p,
+pre {
 	font-size: 0.9rem;
 }
 
@@ -140,7 +142,7 @@ td {
 button,
 label.button {
 	border: solid var(--control-border-width) var(--gray-border);
-	border-radius: 0.4rem;
+	border-radius: 1.4rem;
 	background-color: var(--white);
 	padding: 0.2rem 0.8rem;
 

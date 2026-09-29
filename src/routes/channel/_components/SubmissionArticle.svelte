@@ -160,6 +160,7 @@
 	}
 
 	footer {
+		display: flex;
 		margin: 0.6rem 0 0.2rem;
 	}
 

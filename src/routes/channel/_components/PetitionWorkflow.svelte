@@ -17,11 +17,11 @@
 </script>
 
 {#if status === SubmissionStatus.Pending && permissions.canReview}
-	<section class="module">
+	<section class="module workflow-action">
 		<InlineActionForm actionName="startReview" {hiddenFields} {policy}>검토 시작</InlineActionForm>
 	</section>
 {:else if status === SubmissionStatus.Reviewing && permissions.canCancelReview}
-	<section class="module">
+	<section class="module workflow-action">
 		<InlineActionForm actionName="cancelReview" {hiddenFields} {policy}>검토 취소</InlineActionForm>
 	</section>
 {:else if status === SubmissionStatus.Ongoing}
@@ -31,6 +31,10 @@
 {/if}
 
 <style lang="scss">
+	.workflow-action {
+		display: flex;
+	}
+
 	p {
 		font-size: 0.9rem;
 	}

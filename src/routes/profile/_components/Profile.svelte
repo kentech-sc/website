@@ -112,7 +112,7 @@
 			display: flex;
 			justify-content: space-between;
 			align-items: center;
-			border-radius: 0.4rem;
+			border-radius: 1.4rem;
 			background: var(--gray-bg);
 			padding: 0.4rem 0.6rem;
 
@@ -127,7 +127,7 @@
 				font-size: 0.7rem;
 
 				&.badge {
-					border-radius: 0.4rem;
+					border-radius: 1.4rem;
 					background: var(--secondary-bg);
 					padding: 0.2rem 0.4rem;
 					color: var(--tertiary);

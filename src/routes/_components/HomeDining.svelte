@@ -167,12 +167,12 @@
 	.date-nav {
 		display: flex;
 		align-items: center;
-		gap: 0.3rem;
 
 		button {
 			display: flex;
 			align-items: center;
-			padding: 0rem 0.2rem;
+			border: none;
+			padding: 0.1rem 0.3rem;
 		}
 	}
 
@@ -201,13 +201,13 @@
 			}
 
 			&:first-child {
-				border-start-start-radius: 0.4rem;
-				border-end-start-radius: 0.4rem;
+				border-start-start-radius: 0.7rem;
+				border-end-start-radius: 0.7rem;
 			}
 
 			&:last-child {
-				border-start-end-radius: 0.4rem;
-				border-end-end-radius: 0.4rem;
+				border-start-end-radius: 0.7rem;
+				border-end-end-radius: 0.7rem;
 			}
 
 			&.selected {
