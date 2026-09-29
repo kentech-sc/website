@@ -24,7 +24,6 @@
 		gap: 0.8rem;
 		margin-bottom: 0.4rem;
 		border-bottom: var(--control-border-width) solid var(--gray-border);
-		padding-bottom: 0.2rem;
 	}
 	header > div {
 		min-width: 0;

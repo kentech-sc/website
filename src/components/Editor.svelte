@@ -54,6 +54,12 @@
 		}, 4000);
 	}
 
+	function focusEditorFromPadding(event: PointerEvent) {
+		if (disabled || event.target !== event.currentTarget) return;
+		event.preventDefault();
+		editorInstance?.commands.focus();
+	}
+
 	function capturePendingImageInsertSelection() {
 		if (editorInstance?.isFocused) {
 			const selection = editorInstance.state.selection;
@@ -191,7 +197,12 @@
 		<p class="editor-notice" role="alert">{editorNotice}</p>
 	{/if}
 
-	<div class="module input-div">
+	<div
+		class="module input-div"
+		role="group"
+		aria-label="본문 편집 영역"
+		onpointerdown={focusEditorFromPadding}
+	>
 		<div class="nmu" data-disabled={disabled ? 'true' : 'false'} bind:this={element}></div>
 	</div>
 </section>
@@ -202,8 +213,21 @@
 	}
 
 	.input-div {
+		display: flex;
+		flex-direction: column;
 		border-top: none;
-		border-radius: 0 0 0.4rem 0.4rem;
+		border-radius: 0 0 1.4rem 1.4rem;
+		min-height: 30vh;
+	}
+
+	.input-div > .nmu {
+		display: flex;
+		flex: 1;
+		flex-direction: column;
+	}
+
+	.input-div > .nmu :global(.tiptap) {
+		flex: 1;
 	}
 
 	.nmu[data-disabled='true'] {

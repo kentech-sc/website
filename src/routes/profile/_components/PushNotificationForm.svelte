@@ -187,19 +187,12 @@
 
 	h4 {
 		color: var(--secondary);
-		font-weight: 500;
-		font-size: 0.9rem;
 	}
 
 	p {
 		margin-top: 0.2rem;
 		color: var(--gray);
 		font-size: 0.7rem;
-	}
-
-	button {
-		margin-top: 0.6rem;
-		margin-inline-start: auto;
 	}
 
 	.error {

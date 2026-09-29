@@ -165,7 +165,7 @@
 		transition: opacity 0.2s;
 
 		border: none;
-		border-radius: 50%;
+		border-radius: 1.4rem;
 		background-color: var(--white);
 		padding: 0;
 		width: 2rem;

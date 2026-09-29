@@ -70,7 +70,7 @@
 	});
 </script>
 
-<section class="container-col settings-form">
+<section class="settings-form">
 	<h4>
 		<Download size="0.8rem" />
 		<span>앱 설치</span>
@@ -101,20 +101,12 @@
 	}
 
 	h4 {
-		width: 100%;
 		color: var(--secondary);
-		font-weight: 500;
-		font-size: 0.9rem;
 	}
 
 	p {
 		width: 100%;
 		color: var(--gray);
 		font-size: 0.7rem;
-	}
-
-	button {
-		margin-top: 0.6rem;
-		margin-left: auto;
 	}
 </style>
