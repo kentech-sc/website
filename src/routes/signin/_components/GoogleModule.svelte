@@ -1,8 +1,16 @@
 <script lang="ts">
 	import { signIn } from '@auth/sveltekit/client';
+
+	import { page } from '$app/state';
+
+	// 같은 사이트 경로로만 돌려보낸다. ('//다른사이트', '/\다른사이트' 같은 외부 이동은 막는다)
+	const redirectTo = $derived.by(() => {
+		const path = page.url.searchParams.get('redirectTo');
+		return path && /^\/(?![/\\])/.test(path) ? path : undefined;
+	});
 </script>
 
-<button class="gsi-material-button" onclick={() => signIn('google')}>
+<button class="gsi-material-button" onclick={() => signIn('google', { redirectTo })}>
 	<div class="gsi-material-button-state"></div>
 	<div class="gsi-material-button-content-wrapper">
 		<div class="gsi-material-button-icon">

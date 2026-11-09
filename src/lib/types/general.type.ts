@@ -27,6 +27,7 @@ export type Capability =
 	| 'user.manage'
 	| 'push.send'
 	| 'banner.manage'
+	| 'meetup.use'
 	| 'system.cleanup';
 
 export type AppErrorCode =

@@ -11,7 +11,15 @@ import {
 	timetableItems,
 	timetables
 } from './academic.schema.js';
-import { activityLogs, banners, fileMetas, pushSubscriptions, throttles } from './app.schema.js';
+import {
+	activityLogs,
+	banners,
+	fileMetas,
+	meetupResponses,
+	meetups,
+	pushSubscriptions,
+	throttles
+} from './app.schema.js';
 import {
 	anonymousReports,
 	comments,
@@ -65,6 +73,8 @@ export * from './user.schema.js';
 	pointDailyEventCounts,
 	throttles,
 	pushSubscriptions,
+	meetups,
+	meetupResponses,
 	activityLogs,
 	gameRecords,
 	gameSessions

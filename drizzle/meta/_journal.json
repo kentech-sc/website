@@ -162,6 +162,13 @@
 			"when": 1793701796636,
 			"tag": "0022_minigames",
 			"breakpoints": true
+		},
+		{
+			"idx": 23,
+			"version": "7",
+			"when": 1793701796637,
+			"tag": "0023_meetups",
+			"breakpoints": true
 		}
 	]
 }
