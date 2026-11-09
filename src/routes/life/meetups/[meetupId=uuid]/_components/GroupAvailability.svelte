@@ -10,14 +10,12 @@
 		findEveryoneSlots,
 		formatMeetupDay,
 		formatTimeRange,
-		getOutlineEdges,
 		getSlotsPerDay,
 		groupSlotRanges
 	} from '$lib/shared/meetup.js';
 
 	let { meetup, responses }: { meetup: Meetup; responses: MeetupResponse[] } = $props();
 
-	const OUTLINE = '0.1rem';
 	/** 한 명이라도 되는 칸이 빈칸과 구분되도록 이 농도부터 시작한다. */
 	const MIN_LEVEL = 0.2;
 
@@ -35,23 +33,6 @@
 	);
 
 	const getLevel = (count: number) => (count ? MIN_LEVEL + (1 - MIN_LEVEL) * (count / total) : 0);
-
-	/** 모두 되는 칸 묶음의 바깥 변에만 선을 긋는다. 맞닿은 변은 비워 둔다. */
-	const getOutline = (dayIndex: number, slot: number) => {
-		const edges = getOutlineEdges(
-			everyoneSlots,
-			{ day: dayIndex, slot },
-			slotsPerDay,
-			meetup.days.length
-		);
-		const shadows = [
-			edges.top && `inset 0 ${OUTLINE} 0 0 var(--tertiary)`,
-			edges.right && `inset -${OUTLINE} 0 0 0 var(--tertiary)`,
-			edges.bottom && `inset 0 -${OUTLINE} 0 0 var(--tertiary)`,
-			edges.left && `inset ${OUTLINE} 0 0 0 var(--tertiary)`
-		].filter(Boolean);
-		return shadows.length ? shadows.join(', ') : undefined;
-	};
 
 	const POPUP_GAP_PX = 12;
 	const POPUP_MARGIN_PX = 8;
@@ -155,13 +136,12 @@
 				class:is-hour={isHourStart}
 				class:is-last-day={isLastDay}
 				class:is-last-slot={isLastSlot}
-				class:has-outline={everyoneSlots.has(index)}
+				class:is-everyone={everyoneSlots.has(index)}
 				class:is-focused={focused?.index === index}
 				data-index={index}
 				data-day={dayIndex}
 				data-slot={slot}
 				style:--level={getLevel(counts[index])}
-				style:--outline={everyoneSlots.has(index) ? getOutline(dayIndex, slot) : undefined}
 			></span>
 		{/snippet}
 	</SlotTable>
@@ -251,14 +231,10 @@
 		border-bottom: var(--divider-border-width) solid var(--gray-border);
 	}
 
-	/* 칸 자신의 위·왼쪽 테두리까지만 덮어, 선이 칸 밖으로 튀어나오지 않으면서 점선·실선에 끊기지 않게 한다. */
-	.slot.has-outline::after {
-		position: absolute;
-		z-index: 1;
-		inset: calc(-1 * var(--divider-border-width)) 0 0 calc(-1 * var(--divider-border-width));
-		box-shadow: var(--outline);
-		pointer-events: none;
-		content: '';
+	/* 모두 가능한 칸은 인원 농도 대신 파스텔 초록으로 칠한다. */
+	.slot.is-everyone,
+	.everyone {
+		background: color-mix(in oklab, var(--success) 30%, var(--white));
 	}
 
 	.slot.is-focused {
@@ -318,7 +294,6 @@
 		flex-direction: column;
 		gap: 0.2rem;
 		border-radius: 0.8rem;
-		background: var(--secondary-bg);
 		padding: 0.6rem 0.8rem;
 		font-size: 0.7rem;
 	}

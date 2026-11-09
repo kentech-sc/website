@@ -109,34 +109,6 @@ export function findEveryoneSlots(counts: number[], total: number): Set<number> 
 	return slots;
 }
 
-export interface SlotEdges {
-	top: boolean;
-	right: boolean;
-	bottom: boolean;
-	left: boolean;
-}
-
-/** 묶음의 바깥쪽 변. 같은 묶음 칸과 맞닿은 변은 false. */
-export function getOutlineEdges(
-	slots: ReadonlySet<number>,
-	cell: SlotCell,
-	slotsPerDay: number,
-	dayCount: number
-): SlotEdges {
-	const has = (day: number, slot: number) =>
-		day >= 0 &&
-		day < dayCount &&
-		slot >= 0 &&
-		slot < slotsPerDay &&
-		slots.has(getSlotIndex({ day, slot }, slotsPerDay));
-	return {
-		top: !has(cell.day, cell.slot - 1),
-		right: !has(cell.day + 1, cell.slot),
-		bottom: !has(cell.day, cell.slot + 1),
-		left: !has(cell.day - 1, cell.slot)
-	};
-}
-
 export interface SlotRange {
 	dayIndex: number;
 	startMinute: number;

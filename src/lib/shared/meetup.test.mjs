@@ -10,7 +10,6 @@ import {
 	formatMeetupDays,
 	formatTimeRange,
 	getDayWeekday,
-	getOutlineEdges,
 	groupSlotRanges,
 	isPastMeetup,
 	normalizeMeetupDays,
@@ -74,29 +73,6 @@ test('칸마다 가능한 사람 수를 센다', () => {
 test('두 명 이상 응답했을 때 모두 되는 칸만 고른다', () => {
 	assert.deepEqual(sorted(findEveryoneSlots([2, 1, 2, 0], 2)), [0, 2]);
 	assert.equal(findEveryoneSlots([1, 1], 1).size, 0);
-});
-
-test('묶음과 맞닿은 변에는 외곽선을 그리지 않는다', () => {
-	// 하루 3칸 × 2일. 0일차 0·1칸과 1일차 0칸이 한 묶음.
-	const slots = new Set([0, 1, 3]);
-	assert.deepEqual(getOutlineEdges(slots, { day: 0, slot: 0 }, 3, 2), {
-		top: true,
-		right: false,
-		bottom: false,
-		left: true
-	});
-	assert.deepEqual(getOutlineEdges(slots, { day: 0, slot: 1 }, 3, 2), {
-		top: false,
-		right: true,
-		bottom: true,
-		left: true
-	});
-	assert.deepEqual(getOutlineEdges(slots, { day: 1, slot: 0 }, 3, 2), {
-		top: true,
-		right: true,
-		bottom: true,
-		left: false
-	});
 });
 
 test('이어진 칸을 하루 단위 시간 범위로 묶는다', () => {
