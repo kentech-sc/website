@@ -45,6 +45,7 @@ export function getMainNavigation(options: {
 		{
 			label: '생활',
 			children: [
+				{ label: '미니게임', href: resolve('/games') },
 				{
 					label: '세탁실 현황',
 					href: options.laundryUrl ?? `${resolve('/profile')}#personal-info`,

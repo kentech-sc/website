@@ -48,6 +48,7 @@
    - `academic.schema.ts`: 강의·성적·시간표
    - `app.schema.ts`: 파일·배너·푸시 등 운영 데이터
    - `points.schema.ts`: 포인트 데이터
+   - `game.schema.ts`: 미니게임 세션·종목별 주간 최고 기록
    - `schema-core.ts`: 공통 PostgreSQL schema 정의
    - `schema.ts`: 재수출과 RLS 활성화 진입점. 새 테이블은 여기에도 반영한다.
 2. `npm run db:generate -- --name=<변경_이름>`으로 SQL을 생성한다.

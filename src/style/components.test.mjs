@@ -55,8 +55,10 @@ test('일반 페이지는 같은 부모 안에 헤더와 본문을 배치한다'
 		const source = readFileSync(path, 'utf8');
 		if (!/<(?:Page|Board|Review|Search|Submission)Header\b/.test(source)) continue;
 		const { fragment } = parse(source, { modern: true });
+		// Head metadata and window/document listeners do not create page DOM siblings.
 		const elements = fragment.nodes.filter(
-			(node) => node.type !== 'Text' && node.type !== 'Comment'
+			(node) =>
+				!['Text', 'Comment', 'SvelteHead', 'SvelteWindow', 'SvelteDocument'].includes(node.type)
 		);
 		assert.equal(elements.length, 1, path);
 		const [section] = elements;
