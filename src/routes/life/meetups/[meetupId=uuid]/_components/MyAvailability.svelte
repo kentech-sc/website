@@ -278,6 +278,11 @@
 		background: var(--gray-border);
 	}
 
+	/* 칸 선이 배경과 같은 회색이라 묻히므로 수업 칸 안에서는 흰색으로 그린다. */
+	span.is-class:not(.is-selected) {
+		border-color: var(--white);
+	}
+
 	span.is-selected {
 		background: var(--secondary);
 	}

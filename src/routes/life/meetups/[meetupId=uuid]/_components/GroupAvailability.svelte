@@ -251,11 +251,11 @@
 		border-bottom: var(--divider-border-width) solid var(--gray-border);
 	}
 
-	/* 칸 테두리와 옆 칸 테두리까지 덮도록 테두리 두께만큼 밖으로 넓혀, 모두 가능한 시간 선이 끊기지 않게 한다. */
+	/* 칸 자신의 위·왼쪽 테두리까지만 덮어, 선이 칸 밖으로 튀어나오지 않으면서 점선·실선에 끊기지 않게 한다. */
 	.slot.has-outline::after {
 		position: absolute;
 		z-index: 1;
-		inset: calc(-1 * var(--divider-border-width));
+		inset: calc(-1 * var(--divider-border-width)) 0 0 calc(-1 * var(--divider-border-width));
 		box-shadow: var(--outline);
 		pointer-events: none;
 		content: '';
