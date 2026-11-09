@@ -70,6 +70,10 @@
 		grid-template-columns: 2.6rem repeat(var(--day-count), minmax(1.8rem, 1fr));
 		grid-auto-rows: 0.8rem;
 		overflow-x: auto;
+		/* 모바일 브라우저는 누를 때마다 표 전체를 탭 강조색으로 덮고, 길게 누르면 선택·메뉴를 띄운다. */
+		-webkit-tap-highlight-color: transparent;
+		-webkit-touch-callout: none;
+		-webkit-user-select: none;
 		user-select: none;
 	}
 
