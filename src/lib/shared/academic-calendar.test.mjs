@@ -14,6 +14,7 @@ import {
 	addMonths,
 	getKstDayKey,
 	getMonthDayKeys,
+	getTermOfDay,
 	getTwoWeekDayKeys,
 	getWeekdayIndex,
 	toCompactDayKey,
@@ -141,4 +142,15 @@ test('달을 옮길 때 해가 넘어가도 맞게 계산한다', () => {
 test('달 이동은 항상 1일로 맞춰 말일 차이를 피한다', () => {
 	// 1/31 에서 한 달 뒤를 그대로 더하면 2/31 이 되어 3월로 튄다.
 	assert.equal(addMonths('2026-01-31', 1), '2026-02-01');
+});
+
+test('달로 학기를 나누고 동계는 시작한 해로 센다', () => {
+	assert.deepEqual(getTermOfDay('2027-01-15'), { year: 2026, term: 4 });
+	assert.deepEqual(getTermOfDay('2027-02-28'), { year: 2026, term: 4 });
+	assert.deepEqual(getTermOfDay('2027-03-01'), { year: 2027, term: 1 });
+	assert.deepEqual(getTermOfDay('2027-06-30'), { year: 2027, term: 1 });
+	assert.deepEqual(getTermOfDay('2027-07-01'), { year: 2027, term: 3 });
+	assert.deepEqual(getTermOfDay('2027-08-31'), { year: 2027, term: 3 });
+	assert.deepEqual(getTermOfDay('2027-09-01'), { year: 2027, term: 2 });
+	assert.deepEqual(getTermOfDay('2027-12-31'), { year: 2027, term: 2 });
 });

@@ -84,3 +84,20 @@ export function getMonthDayKeys(todayKey: string): string[] {
 	}
 	return days;
 }
+
+/**
+ * 그 날짜가 속한 학기. term 은 1=1학기, 2=2학기, 3=하계, 4=동계.
+ * 3~6월 1학기, 7~8월 하계, 9~12월 2학기, 1~2월 동계로 달로만 나눈다.
+ * 동계는 해를 넘겨도 시작한 해의 학기로 본다. (2027-01 은 2026년 동계)
+ *
+ * 학사일정 API 로 실제 기간을 받아올 수도 있지만, 응답 양식이 바뀌면 함께 고쳐야 하는
+ * 유지보수 부담이 있어 일반적인 달 기준으로 끊었다.
+ */
+export function getTermOfDay(dayKey: string): { year: number; term: number } {
+	const year = Number(dayKey.slice(0, 4));
+	const month = getMonthOfDay(dayKey);
+	if (month <= 2) return { year: year - 1, term: 4 };
+	if (month <= 6) return { year, term: 1 };
+	if (month <= 8) return { year, term: 3 };
+	return { year, term: 2 };
+}
