@@ -29,13 +29,9 @@
 		`${formatMeetupDays(meetup.mode, meetup.days)}, ${formatTimeRange(meetup.startMinute, meetup.endMinute)}`
 	);
 
-	/** 내 선택. 저장 전에도 전체 현황에 미리 반영한다. */
+	/** 내 선택. 자동 저장이 끝나기 전에도 전체 현황에 바로 반영한다. */
 	let selected = $derived(new Set(savedSlots));
-	const isPreview = $derived(
-		selected.size !== savedSlots.length || savedSlots.some((slot) => !selected.has(slot))
-	);
-	const previewResponses = $derived.by(() => {
-		if (!isPreview) return data.responses;
+	const responses = $derived.by(() => {
 		const mine = {
 			userId: data.user.id,
 			nickname: data.user.nickname,
@@ -43,10 +39,10 @@
 			updatedAt: new Date().toISOString()
 		};
 		const hasSaved = data.responses.some((response) => response.userId === data.user.id);
-		const responses = hasSaved
+		const merged = hasSaved
 			? data.responses.map((response) => (response.userId === data.user.id ? mine : response))
 			: [...data.responses, mine];
-		return responses.filter((response) => response.slots.length);
+		return merged.filter((response) => response.slots.length);
 	});
 
 	/** 모바일에서 한 번에 보여줄 표. */
@@ -104,7 +100,7 @@
 			/>
 		</div>
 		<div class="panel" class:is-active={panel === 'group'}>
-			<GroupAvailability {meetup} responses={previewResponses} {isPreview} />
+			<GroupAvailability {meetup} {responses} />
 		</div>
 	</div>
 </section>
