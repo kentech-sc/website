@@ -54,7 +54,7 @@
 	const slotsValue = $derived(toSlotsValue(selected));
 	const isDirty = $derived(slotsValue !== savedValue);
 	const termLabel = $derived(`${timetableTerm.year}년 ${TERM_LABELS[timetableTerm.term]}학기`);
-	/** 확정 시간표의 수업과 겹치는 칸. 칠하지는 않고 연한 빨강으로 보여주기만 한다. */
+	/** 확정 시간표의 수업과 겹치는 칸. 칠하지는 않고 회색으로 보여주기만 한다. */
 	const classSlots = $derived.by(() => {
 		if (!classMeetings.length) return new Set<number>();
 		const free = findFreeSlots(
@@ -204,13 +204,15 @@
 		onpointerup={endDrag}
 		onpointercancel={endDrag}
 	>
-		{#snippet cell({ index, dayIndex, slot, isHourStart })}
+		{#snippet cell({ index, dayIndex, slot, isHourStart, isLastDay, isLastSlot })}
 			<span
 				role="gridcell"
 				aria-selected={shown.has(index)}
 				data-day={dayIndex}
 				data-slot={slot}
 				class:is-hour={isHourStart}
+				class:is-last-day={isLastDay}
+				class:is-last-slot={isLastSlot}
 				class:is-selected={shown.has(index)}
 				class:is-class={classSlots.has(index)}
 			></span>
@@ -262,10 +264,18 @@
 		border-top-style: solid;
 	}
 
+	span.is-last-day {
+		border-right: var(--divider-border-width) solid var(--gray-border);
+	}
+
+	span.is-last-slot {
+		border-bottom: var(--divider-border-width) solid var(--gray-border);
+	}
+
 	/* 수업 칸. 선택한 칸은 선택 색이 이긴다. */
 	span.is-class,
 	.class-legend > span {
-		background: color-mix(in oklab, var(--error) 25%, var(--white));
+		background: var(--gray-border);
 	}
 
 	span.is-selected {

@@ -5,6 +5,9 @@
 		slot: number;
 		/** 정시에 시작하는 칸. 위쪽 선을 진하게 그린다. */
 		isHourStart: boolean;
+		/** 마지막 열·행. 표 오른쪽·아래 테두리를 닫는다. */
+		isLastDay: boolean;
+		isLastSlot: boolean;
 	}
 </script>
 
@@ -58,7 +61,9 @@
 				index: getSlotIndex({ day: dayIndex, slot }, slotsPerDay),
 				dayIndex,
 				slot,
-				isHourStart
+				isHourStart,
+				isLastDay: dayIndex === days.length - 1,
+				isLastSlot: slot === slotsPerDay - 1
 			})}
 		{/each}
 	{/each}

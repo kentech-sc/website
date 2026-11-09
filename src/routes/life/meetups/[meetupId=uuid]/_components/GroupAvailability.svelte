@@ -147,18 +147,21 @@
 		onpointerleave={leaveTable}
 		onclick={tapCell}
 	>
-		{#snippet cell({ index, dayIndex, slot, isHourStart })}
+		{#snippet cell({ index, dayIndex, slot, isHourStart, isLastDay, isLastSlot })}
 			<span
 				role="gridcell"
 				tabindex="-1"
 				class="slot"
 				class:is-hour={isHourStart}
+				class:is-last-day={isLastDay}
+				class:is-last-slot={isLastSlot}
+				class:has-outline={everyoneSlots.has(index)}
 				class:is-focused={focused?.index === index}
 				data-index={index}
 				data-day={dayIndex}
 				data-slot={slot}
 				style:--level={getLevel(counts[index])}
-				style:box-shadow={everyoneSlots.has(index) ? getOutline(dayIndex, slot) : undefined}
+				style:--outline={everyoneSlots.has(index) ? getOutline(dayIndex, slot) : undefined}
 			></span>
 		{/snippet}
 	</SlotTable>
@@ -229,6 +232,7 @@
 	}
 
 	.slot {
+		position: relative;
 		border-top: var(--divider-border-width) dashed var(--gray-border);
 		border-left: var(--divider-border-width) solid var(--gray-border);
 		/* oklch 로 섞으면 무채색과 섞일 때 색상이 돌아 보라빛이 된다. */
@@ -239,7 +243,26 @@
 		border-top-style: solid;
 	}
 
+	.slot.is-last-day {
+		border-right: var(--divider-border-width) solid var(--gray-border);
+	}
+
+	.slot.is-last-slot {
+		border-bottom: var(--divider-border-width) solid var(--gray-border);
+	}
+
+	/* 칸 테두리와 옆 칸 테두리까지 덮도록 테두리 두께만큼 밖으로 넓혀, 모두 가능한 시간 선이 끊기지 않게 한다. */
+	.slot.has-outline::after {
+		position: absolute;
+		z-index: 1;
+		inset: calc(-1 * var(--divider-border-width));
+		box-shadow: var(--outline);
+		pointer-events: none;
+		content: '';
+	}
+
 	.slot.is-focused {
+		z-index: 2;
 		outline: 0.1rem solid var(--text);
 		outline-offset: -0.1rem;
 	}
