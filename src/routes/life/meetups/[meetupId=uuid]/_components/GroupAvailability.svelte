@@ -16,8 +16,8 @@
 
 	let { meetup, responses }: { meetup: Meetup; responses: MeetupResponse[] } = $props();
 
-	/** 응답자가 아주 많아도 한 명 되는 칸이 빈칸과 구분되도록 이 농도 아래로 내리지 않는다. */
-	const MIN_LEVEL = 0.1;
+	/** 한 명이라도 되는 칸이 빈칸과 구분되도록 이 농도부터 시작한다. */
+	const MIN_LEVEL = 0.2;
 
 	const slotsPerDay = $derived(getSlotsPerDay(meetup.startMinute, meetup.endMinute));
 	const counts = $derived(countAvailability(responses, meetup.days.length * slotsPerDay));
@@ -32,36 +32,7 @@
 			.join(', ')
 	);
 
-	/**
-	 * 흰색 → primary → secondary → tertiary 로 이어지는 색 띠. 각 색의 자리는 OKLab 에서
-	 * 앞 색까지의 거리(명도·채도·색상 차이를 모두 합친 색 차이 ΔE) 누적에 비례하게 둬서,
-	 * 인원이 한 명 늘 때마다 색 차이가 고르게 난다. (구간 ΔE 0.295 → 0.176 → 0.254)
-	 * 색 토큰을 바꾸면 이 자리도 다시 계산해 맞춘다.
-	 */
-	const PALETTE = [
-		{ at: 0, color: 'var(--white)' },
-		{ at: 0.41, color: 'var(--primary)' },
-		{ at: 0.65, color: 'var(--secondary)' },
-		{ at: 1, color: 'var(--tertiary)' }
-	];
-
-	const getLevel = (count: number) => (count ? Math.max(count / total, MIN_LEVEL) : 0);
-
-	/**
-	 * 색 띠에서 그 인원 자리의 색. 흰색 토큰은 색상각이 0으로 잡혀 있어 oklch 로 섞으면
-	 * 보라빛을 거치므로 oklab 으로 섞는다. 명도(L)는 oklab 과 oklch 가 같다.
-	 */
-	const getSlotColor = (count: number) => {
-		const level = getLevel(count);
-		const end = PALETTE.findIndex((stop) => stop.at >= level);
-		if (end === 0) return PALETTE[0].color;
-		// 부동소수 오차로 1을 살짝 넘어도 가장 진한 색으로 둔다.
-		if (end === -1) return PALETTE[PALETTE.length - 1].color;
-		const from = PALETTE[end - 1];
-		const to = PALETTE[end];
-		const ratio = ((level - from.at) / (to.at - from.at)) * 100;
-		return `color-mix(in oklab, ${to.color} ${ratio.toFixed(1)}%, ${from.color})`;
-	};
+	const getLevel = (count: number) => (count ? MIN_LEVEL + (1 - MIN_LEVEL) * (count / total) : 0);
 
 	const POPUP_GAP_PX = 12;
 	const POPUP_MARGIN_PX = 8;
@@ -169,7 +140,7 @@
 				data-index={index}
 				data-day={dayIndex}
 				data-slot={slot}
-				style:background={getSlotColor(counts[index])}
+				style:--level={getLevel(counts[index])}
 			></span>
 		{/snippet}
 	</SlotTable>
@@ -229,13 +200,11 @@
 	.legend {
 		border: var(--divider-border-width) solid var(--gray-border);
 		border-radius: 999rem;
-		/* 칸 색과 같은 띠. 자리는 스크립트의 PALETTE 와 맞춘다. */
 		background: linear-gradient(
-			to right in oklab,
-			var(--white),
-			var(--primary) 41%,
-			var(--secondary) 65%,
-			var(--tertiary)
+			to right,
+			var(--gray-bg),
+			color-mix(in oklab, var(--secondary) 20%, var(--gray-bg)),
+			var(--secondary)
 		);
 		width: 4rem;
 		height: 0.6rem;
@@ -245,6 +214,8 @@
 		position: relative;
 		border-top: var(--divider-border-width) dashed var(--gray-border);
 		border-left: var(--divider-border-width) solid var(--gray-border);
+		/* oklch 로 섞으면 무채색과 섞일 때 색상이 돌아 보라빛이 된다. */
+		background: color-mix(in oklab, var(--secondary) calc(var(--level) * 100%), var(--gray-bg));
 	}
 
 	.slot.is-hour {
@@ -261,8 +232,7 @@
 
 	.slot.is-focused {
 		z-index: 2;
-		/* 칸이 흰색부터 남색까지 모두 파랑 계열이라, 어느 칸에서도 보이는 다른 색상으로 그린다. */
-		outline: 0.1rem solid var(--warn);
+		outline: 0.1rem solid var(--text);
 		outline-offset: -0.1rem;
 	}
 
