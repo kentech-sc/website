@@ -89,6 +89,11 @@ const authorizationHandle: Handle = async ({ event, resolve }) => {
 		return await resolve(event);
 	}
 
+	// 일정 조율은 단톡방에 공유된 링크로 들어오므로, 로그인 뒤 그 링크로 돌려보낸다.
+	if (event.url.pathname.startsWith('/life/meetups')) {
+		throw redirect(303, `/signin?redirectTo=${encodeURIComponent(event.url.pathname)}`);
+	}
+
 	if (
 		event.url.pathname.startsWith('/channel/petitions') ||
 		event.url.pathname === '/channel/feedback/new' ||

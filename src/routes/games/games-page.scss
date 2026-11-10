@@ -1,0 +1,221 @@
+.games-page {
+	max-width: 64rem;
+}
+.game-cards {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 1rem;
+}
+.game-card {
+	display: flex;
+	align-items: center;
+	gap: 0.8rem;
+	border: var(--control-border-width) solid var(--gray-border);
+	border-radius: 1.2rem;
+	background: var(--white);
+	padding: 1rem;
+	text-align: left;
+}
+.game-card.is-selected {
+	border-color: var(--secondary);
+	background: var(--secondary-bg);
+}
+.game-card.is-selected:hover:not(:disabled) {
+	background: var(--secondary-bg);
+}
+.card-icon {
+	display: flex;
+	flex-shrink: 0;
+	justify-content: center;
+	align-items: center;
+	border-radius: 0.8rem;
+	background: var(--gray-bg);
+	width: 3rem;
+	height: 3rem;
+	color: var(--secondary);
+}
+.card-copy {
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	gap: 0.2rem;
+}
+.card-copy strong {
+	font-size: 1rem;
+}
+.card-copy > span {
+	color: var(--gray-text);
+	font-size: 0.7rem;
+}
+.card-copy small {
+	margin-top: 0.4rem;
+	color: var(--secondary);
+	font-size: 0.6rem;
+}
+.games-layout {
+	display: grid;
+	grid-template-columns: minmax(0, 1.5fr) minmax(17rem, 1fr);
+	align-items: start;
+	gap: 1rem;
+}
+.games-layout :global(.game-panel > .game-instruction) {
+	color: var(--gray-text);
+	font-size: 0.7rem;
+}
+.games-layout :global(.cancel-game) {
+	align-self: center;
+	min-width: 3.2rem;
+	min-height: max(32px, 1.65rem);
+}
+.leaderboard {
+	display: flex;
+	flex-direction: column;
+	gap: 0.8rem;
+	padding: 1.2rem;
+}
+.leaderboard > header {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+	align-items: center;
+	gap: 0.6rem;
+}
+.leaderboard h2 {
+	display: flex;
+	align-items: center;
+	gap: 0.4rem;
+	font-size: 1rem;
+}
+.period-tabs {
+	display: flex;
+	gap: 0.15rem;
+	border-radius: 0.5rem;
+	background: var(--gray-bg);
+	padding: 0.15rem;
+}
+.period-tabs button {
+	border: none;
+	border-radius: 0.35rem;
+	background: transparent;
+	padding: 0.25rem 0.55rem;
+	min-height: 24px;
+	color: var(--gray-text);
+	font-size: 0.7rem;
+	white-space: nowrap;
+}
+.period-tabs button.is-selected {
+	background: var(--secondary-bg);
+	color: var(--secondary);
+	font-weight: 600;
+}
+.ranking-list,
+.empty-ranking {
+	border-radius: 0.6rem;
+}
+.ranking-list {
+	padding: 0;
+	overflow: hidden;
+	list-style: none;
+}
+.ranking-list li {
+	display: flex;
+	align-items: center;
+	gap: 0.6rem;
+	border: var(--divider-border-width) solid var(--gray-border);
+	border-bottom-width: 0;
+	padding: 0.6rem 0.75rem;
+	font-size: 0.8rem;
+}
+.ranking-list li:first-child {
+	border-top-right-radius: inherit;
+	border-top-left-radius: inherit;
+}
+.ranking-list li:last-child {
+	border-bottom-width: var(--divider-border-width);
+	border-bottom-right-radius: inherit;
+	border-bottom-left-radius: inherit;
+}
+.ranking-list li.is-outside-list {
+	border-top-width: var(--control-border-width);
+}
+.ranking-list li.is-me {
+	border-bottom-width: var(--divider-border-width);
+	border-color: color-mix(in srgb, var(--secondary) 58%, var(--white));
+	background: var(--white);
+}
+.ranking-list li.is-me + li {
+	border-top-width: 0;
+}
+.rank-number {
+	flex-shrink: 0;
+	min-width: 1.5rem;
+	color: var(--gray-text);
+	font-size: 0.7rem;
+	font-variant-numeric: tabular-nums;
+}
+.rank-name {
+	flex: 1;
+	overflow-wrap: anywhere;
+}
+.rank-name small {
+	margin-left: 0.35rem;
+	color: var(--secondary);
+}
+.rank-house {
+	margin-inline-end: 0.25rem;
+	padding: 0.15rem 0.35rem;
+	font-size: 0.65rem;
+	line-height: 1.2;
+	white-space: nowrap;
+}
+.rank-house[data-house='tesla'] {
+	background: #fff1b8;
+	color: #604500;
+}
+.rank-house[data-house='edison'] {
+	background: #ffe2e2;
+	color: #912223;
+}
+.ranking-list strong {
+	flex-shrink: 0;
+	font-variant-numeric: tabular-nums;
+	white-space: nowrap;
+}
+.empty-ranking {
+	border: var(--divider-border-width) solid var(--gray-border);
+	padding: 2rem 0.4rem;
+	color: var(--gray-text);
+	font-size: 0.7rem;
+	text-align: center;
+}
+.ranking-note {
+	color: var(--gray-text);
+	font-size: 0.65rem;
+}
+@media (width <= 1100px) {
+	.games-layout {
+		grid-template-columns: minmax(0, 1fr);
+	}
+}
+
+@media (width <= 768px) {
+	.game-cards {
+		gap: 0.6rem;
+	}
+	.game-card {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 0.6rem;
+		padding: 0.8rem;
+	}
+	.game-card > :global(svg) {
+		display: none;
+	}
+	.card-icon {
+		width: 2.4rem;
+		height: 2.4rem;
+	}
+	.card-copy {
+		gap: 0.4rem;
+	}
+}

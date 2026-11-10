@@ -1,15 +1,11 @@
 import { redirect } from '@sveltejs/kit';
 
 import { withActionErrorHandling, withLoadErrorHandling } from '$lib/server/errors.js';
+import { getKstDayKey, getTermOfDay } from '$lib/shared/day-key.js';
 import * as TimetableUsecase from '$lib/usecase/timetable.usecase.js';
 
-function currentTerm() {
-	const now = new Date();
-	return { year: now.getFullYear(), term: now.getMonth() < 6 ? 1 : 2 };
-}
-
 export const load = withLoadErrorHandling(async ({ url, locals }) => {
-	const fallback = currentTerm();
+	const fallback = getTermOfDay(getKstDayKey());
 	const year = Number(url.searchParams.get('year')) || fallback.year;
 	const term = Number(url.searchParams.get('term')) || fallback.term;
 	return { ...(await TimetableUsecase.getPage(year, term, locals.user)), year, term };

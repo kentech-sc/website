@@ -9,7 +9,12 @@ import type {
 } from '$lib/types/timetable.type.js';
 import type { UserId } from '$lib/types/user.type.js';
 
-import { courseOfferings, timetableItems, timetables } from '$lib/server/database/schema.js';
+import {
+	courseMeetings,
+	courseOfferings,
+	timetableItems,
+	timetables
+} from '$lib/server/database/schema.js';
 import { getDatabase } from '$lib/server/db.js';
 import { isDuplicateKeyError } from '$lib/server/errors.js';
 
@@ -279,6 +284,33 @@ export async function clearAcknowledgedChangeReasons(timetableId: string): Promi
 			and(
 				eq(timetableItems.timetableId, timetableId),
 				inArray(timetableItems.changeReason, ['schedule_changed', 'details_changed'])
+			)
+		);
+}
+
+/** 그 학기 확정 시간표의 수업 시간. 폐강(보관)된 강의는 뺀다. */
+export async function findConfirmedMeetings(
+	userId: UserId,
+	year: number,
+	term: number
+): Promise<Array<{ weekday: number; startMinute: number; endMinute: number }>> {
+	return await getDatabase()
+		.select({
+			weekday: courseMeetings.weekday,
+			startMinute: courseMeetings.startMinute,
+			endMinute: courseMeetings.endMinute
+		})
+		.from(timetables)
+		.innerJoin(timetableItems, eq(timetableItems.timetableId, timetables.id))
+		.innerJoin(courseOfferings, eq(courseOfferings.id, timetableItems.offeringId))
+		.innerJoin(courseMeetings, eq(courseMeetings.offeringId, courseOfferings.id))
+		.where(
+			and(
+				eq(timetables.userId, userId),
+				eq(timetables.year, year),
+				eq(timetables.term, term),
+				eq(timetables.isConfirmed, true),
+				isNull(courseOfferings.archivedAt)
 			)
 		);
 }

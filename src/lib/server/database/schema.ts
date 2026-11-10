@@ -11,7 +11,15 @@ import {
 	timetableItems,
 	timetables
 } from './academic.schema.js';
-import { activityLogs, banners, fileMetas, pushSubscriptions, throttles } from './app.schema.js';
+import {
+	activityLogs,
+	banners,
+	fileMetas,
+	meetupResponses,
+	meetups,
+	pushSubscriptions,
+	throttles
+} from './app.schema.js';
 import {
 	anonymousReports,
 	comments,
@@ -22,12 +30,14 @@ import {
 	submissionSupports,
 	submissions
 } from './community.schema.js';
+import { gameRecords, gameSessions } from './game.schema.js';
 import { pointAccounts, pointDailyEventCounts, pointLedgerEntries } from './points.schema.js';
 import { userIdentities, userProfiles, users } from './user.schema.js';
 
 export * from './academic.schema.js';
 export * from './app.schema.js';
 export * from './community.schema.js';
+export * from './game.schema.js';
 export * from './points.schema.js';
 export * from './schema-core.js';
 export * from './user.schema.js';
@@ -63,5 +73,9 @@ export * from './user.schema.js';
 	pointDailyEventCounts,
 	throttles,
 	pushSubscriptions,
-	activityLogs
+	meetups,
+	meetupResponses,
+	activityLogs,
+	gameRecords,
+	gameSessions
 ].forEach((table) => table.enableRLS());

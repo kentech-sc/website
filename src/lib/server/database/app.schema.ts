@@ -7,6 +7,7 @@ import {
 	index,
 	integer,
 	jsonb,
+	primaryKey,
 	text,
 	unique,
 	uuid
@@ -79,6 +80,58 @@ export const pushSubscriptions = appSchema.table(
 	(table) => [
 		unique('push_subscriptions_user_endpoint_unique').on(table.userId, table.endpoint),
 		index('push_subscriptions_endpoint_idx').on(table.endpoint)
+	]
+);
+
+/**
+ * 팀원끼리 가능한 시간을 모아 겹치는 시간을 찾는 일정 조율.
+ * 응답의 칸 번호가 days·시간 범위를 기준으로 하므로 만든 뒤에는 둘을 바꾸지 않는다.
+ */
+export const meetups = appSchema.table(
+	'meetups',
+	{
+		id: uuid().defaultRandom().primaryKey(),
+		creatorId: uuid('creator_id')
+			.notNull()
+			.references(() => users.id, { onDelete: 'cascade' }),
+		title: text().notNull(),
+		mode: text().notNull(),
+		/** 날짜 모드는 'YYYY-MM-DD', 요일 모드는 '1'(월)~'7'(일). */
+		days: text().array().notNull(),
+		startMinute: integer('start_minute').notNull(),
+		endMinute: integer('end_minute').notNull(),
+		...timestamps
+	},
+	(table) => [
+		index('meetups_creator_idx').on(table.creatorId),
+		check('meetups_mode_check', sql`${table.mode} in ('dates', 'weekdays')`),
+		check('meetups_days_check', sql`cardinality(${table.days}) between 1 and 14`),
+		check(
+			'meetups_time_check',
+			sql`${table.startMinute} >= 0 and ${table.endMinute} <= 1440 and ${table.startMinute} < ${table.endMinute} and ${table.startMinute} % 30 = 0 and ${table.endMinute} % 30 = 0`
+		)
+	]
+);
+
+/** 참여자 한 명의 가능한 칸 번호 목록. 저장할 때마다 통째로 바꾼다. */
+export const meetupResponses = appSchema.table(
+	'meetup_responses',
+	{
+		meetupId: uuid('meetup_id')
+			.notNull()
+			.references(() => meetups.id, { onDelete: 'cascade' }),
+		userId: uuid('user_id')
+			.notNull()
+			.references(() => users.id, { onDelete: 'cascade' }),
+		slots: integer()
+			.array()
+			.notNull()
+			.default(sql`'{}'::integer[]`),
+		...timestamps
+	},
+	(table) => [
+		primaryKey({ columns: [table.meetupId, table.userId] }),
+		index('meetup_responses_user_idx').on(table.userId)
 	]
 );
 

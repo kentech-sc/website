@@ -13,7 +13,8 @@ const ROLE_CAPABILITIES: Record<UserGroupType, Capability[]> = {
 		'petition.write',
 		'petition.sign',
 		'feedback.write',
-		'feedback.support'
+		'feedback.support',
+		'meetup.use'
 	],
 	[UserGroup.Moderator]: [
 		'board.free.write',
@@ -28,7 +29,8 @@ const ROLE_CAPABILITIES: Record<UserGroupType, Capability[]> = {
 		'petition.write',
 		'petition.sign',
 		'feedback.write',
-		'feedback.support'
+		'feedback.support',
+		'meetup.use'
 	],
 	[UserGroup.Manager]: [
 		'board.free.write',
@@ -47,6 +49,7 @@ const ROLE_CAPABILITIES: Record<UserGroupType, Capability[]> = {
 		'petition.respond',
 		'feedback.write',
 		'feedback.support',
+		'meetup.use',
 		'feedback.delete.any',
 		'feedback.manage',
 		'feedback.respond',
@@ -71,6 +74,7 @@ const ROLE_CAPABILITIES: Record<UserGroupType, Capability[]> = {
 		'petition.delete.any',
 		'feedback.write',
 		'feedback.support',
+		'meetup.use',
 		'feedback.delete.any',
 		'feedback.manage',
 		'feedback.respond',
@@ -89,7 +93,8 @@ const ROLE_CAPABILITIES: Record<UserGroupType, Capability[]> = {
 		'petition.write',
 		'petition.sign',
 		'feedback.write',
-		'feedback.support'
+		'feedback.support',
+		'meetup.use'
 	]
 };
 

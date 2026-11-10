@@ -133,6 +133,22 @@
 {/snippet}
 <!-- eslint-enable svelte/no-navigation-without-resolve -->
 
+{#snippet PortalLink(isMobile: boolean)}
+	<a
+		href="https://my.kentech.ac.kr/"
+		class="portal-link"
+		class:nav-link={isMobile}
+		class:only-pc={!isMobile}
+		target="_blank"
+		rel="noopener noreferrer"
+		aria-label="학교 포털 (외부 사이트, 새 탭에서 열림)"
+		onclick={() => isMobile && closeDrawer()}
+	>
+		<span>학교 포털</span>
+		<ExternalLink size="0.7rem" aria-hidden="true" />
+	</a>
+{/snippet}
+
 {#snippet ProfileBtn()}
 	<div class="container profile-btn">
 		{#if user.group !== 'guest'}
@@ -141,9 +157,7 @@
 				<span class="only-pc">{user.nickname}</span>
 			</a>
 		{:else}
-			<a href={resolve('/signin')}>
-				<p>로그인</p>
-			</a>
+			<a href={resolve('/signin')}>로그인</a>
 		{/if}
 	</div>
 {/snippet}
@@ -190,6 +204,7 @@
 	>
 		{@render NavItems(true)}
 		<hr />
+		{@render PortalLink(true)}
 		{#if user.group !== 'guest'}
 			<a class="nav-link" href={resolve('/profile')} onclick={closeDrawer}>내 정보</a>
 		{:else}
@@ -204,6 +219,7 @@
 		<nav class="desktop-nav only-pc" aria-label="주 메뉴">{@render NavItems(false)}</nav>
 	</div>
 	<div class="nav-right container">
+		{@render PortalLink(false)}
 		{@render SearchBtn()}
 		{@render ProfileBtn()}
 		{@render DrawerBtn()}

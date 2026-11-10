@@ -1,0 +1,83 @@
+.game-panel {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+	padding: 1.2rem;
+}
+
+.game-heading-title,
+.play-meta {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 0.6rem;
+}
+
+.game-heading-title {
+	justify-content: flex-start;
+}
+.game-symbol {
+	display: flex;
+	border-radius: 0.8rem;
+	background: var(--secondary-bg);
+	padding: 0.6rem;
+	color: var(--secondary);
+}
+h2 {
+	font-size: 1.1rem;
+}
+.game-heading-title p {
+	color: var(--gray-text);
+	font-size: 0.7rem;
+}
+.game-start {
+	min-width: 4.6rem;
+	min-height: max(32px, 1.65rem);
+	font-weight: 600;
+	white-space: nowrap;
+}
+.practice-option {
+	display: flex;
+	align-items: center;
+	gap: 0.4rem;
+	color: var(--gray-text);
+	font-size: 0.7rem;
+}
+.signin-note {
+	font-size: 0.7rem;
+}
+.play-timer {
+	display: grid;
+	gap: 0.35rem;
+}
+.play-meta {
+	font-size: 0.8rem;
+}
+.play-meta strong {
+	color: var(--secondary);
+	font-variant-numeric: tabular-nums;
+}
+.game-progress {
+	border-radius: 1rem;
+	background: var(--gray-border);
+	height: 0.3rem;
+	overflow: hidden;
+}
+.game-progress span {
+	display: block;
+	background: var(--secondary);
+	height: 100%;
+}
+
+.result-actions {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: 0.6rem;
+}
+
+@media (width <= 768px) {
+	.game-panel {
+		padding: 1rem;
+	}
+}

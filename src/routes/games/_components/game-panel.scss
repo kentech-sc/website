@@ -1,0 +1,119 @@
+@use './game-panel-common.scss';
+
+.color-start-controls,
+.color-board {
+	align-self: center;
+	width: 100%;
+	max-width: 15rem;
+}
+.color-start-controls {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto;
+	align-items: center;
+	gap: 0.8rem;
+}
+.game-stopped,
+.game-result {
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	gap: 0.8rem;
+	text-align: center;
+}
+.game-stopped,
+.game-result {
+	padding: 1.6rem 0.4rem;
+}
+.game-stopped {
+	min-height: 14rem;
+}
+.game-result {
+	min-height: 21rem;
+}
+.game-result > p {
+	max-width: 24rem;
+	color: var(--gray-text);
+	font-size: 0.8rem;
+}
+.game-result h3 {
+	font-size: 1.2rem;
+}
+.color-board {
+	display: grid;
+	gap: 0.4rem;
+	aspect-ratio: 1;
+}
+.color-tile {
+	border: none;
+	border-radius: 0.6rem;
+	background: var(--tile-base);
+	padding: 0;
+	min-width: 0;
+	min-height: 0;
+	touch-action: manipulation;
+}
+.color-tile:hover:not(:disabled) {
+	background: var(--tile-base);
+}
+.color-tile.is-different,
+.color-tile.is-different:hover:not(:disabled) {
+	background: var(--tile-accent);
+}
+.color-tile:disabled {
+	opacity: 1;
+	filter: none;
+	cursor: default;
+}
+.eyebrow {
+	color: var(--secondary);
+	font-size: 0.8rem;
+}
+.result-score {
+	font-size: 3.6rem;
+	line-height: 1.1;
+	font-variant-numeric: tabular-nums;
+}
+.result-score small {
+	margin-left: 0.4rem;
+	color: var(--gray-text);
+	font-size: 1rem;
+}
+.course-results {
+	display: flex;
+	flex-direction: column;
+	align-self: stretch;
+	border: var(--divider-border-width) solid var(--gray-border);
+	border-radius: 0.6rem;
+	overflow: hidden;
+}
+.course-results > div {
+	display: flex;
+	justify-content: space-between;
+	gap: 0.8rem;
+	border-bottom: var(--divider-border-width) solid var(--gray-border);
+	background: var(--gray-bg);
+	padding: 0.6rem 0.8rem;
+	font-size: 0.7rem;
+	text-align: left;
+}
+.course-results > div:last-child {
+	border-bottom: none;
+}
+.course-results dd {
+	flex: none;
+	color: var(--secondary);
+	font-weight: 600;
+	font-variant-numeric: tabular-nums;
+}
+.personal-best b {
+	margin-left: 0.4rem;
+	color: var(--text);
+}
+@media (width <= 768px) {
+	.game-stopped,
+	.game-result {
+		padding: 1rem 0;
+	}
+}
