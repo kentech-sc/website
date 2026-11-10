@@ -136,7 +136,6 @@
 				class:is-hour={isHourStart}
 				class:is-last-day={isLastDay}
 				class:is-last-slot={isLastSlot}
-				class:is-everyone={everyoneSlots.has(index)}
 				class:is-focused={focused?.index === index}
 				data-index={index}
 				data-day={dayIndex}
@@ -203,9 +202,9 @@
 		border-radius: 999rem;
 		background: linear-gradient(
 			to right,
-			var(--gray-bg),
-			color-mix(in oklab, var(--secondary) 20%, var(--gray-bg)),
-			var(--secondary)
+			var(--white),
+			color-mix(in oklab, var(--primary) 20%, var(--white)),
+			var(--primary)
 		);
 		width: 4rem;
 		height: 0.6rem;
@@ -216,7 +215,7 @@
 		border-top: var(--divider-border-width) dashed var(--gray-border);
 		border-left: var(--divider-border-width) solid var(--gray-border);
 		/* oklch 로 섞으면 무채색과 섞일 때 색상이 돌아 보라빛이 된다. */
-		background: color-mix(in oklab, var(--secondary) calc(var(--level) * 100%), var(--gray-bg));
+		background: color-mix(in oklab, var(--primary) calc(var(--level) * 100%), var(--white));
 	}
 
 	.slot.is-hour {
@@ -229,12 +228,6 @@
 
 	.slot.is-last-slot {
 		border-bottom: var(--divider-border-width) solid var(--gray-border);
-	}
-
-	/* 모두 가능한 칸은 인원 농도 대신 파스텔 초록으로 칠한다. */
-	.slot.is-everyone,
-	.everyone {
-		background: color-mix(in oklab, var(--success) 30%, var(--white));
 	}
 
 	.slot.is-focused {
@@ -294,6 +287,7 @@
 		flex-direction: column;
 		gap: 0.2rem;
 		border-radius: 0.8rem;
+		background: var(--secondary-bg);
 		padding: 0.6rem 0.8rem;
 		font-size: 0.7rem;
 	}
