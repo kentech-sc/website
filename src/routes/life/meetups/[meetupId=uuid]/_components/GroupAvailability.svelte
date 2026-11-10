@@ -16,8 +16,8 @@
 
 	let { meetup, responses }: { meetup: Meetup; responses: MeetupResponse[] } = $props();
 
-	/** 한 명이라도 되는 칸이 빈칸과 구분되도록 이 농도부터 시작한다. */
-	const MIN_LEVEL = 0.2;
+	/** 응답자가 아주 많아도 한 명 되는 칸이 빈칸과 구분되도록 이 농도 아래로 내리지 않는다. */
+	const MIN_LEVEL = 0.1;
 
 	const slotsPerDay = $derived(getSlotsPerDay(meetup.startMinute, meetup.endMinute));
 	const counts = $derived(countAvailability(responses, meetup.days.length * slotsPerDay));
@@ -33,18 +33,19 @@
 	);
 
 	/**
-	 * 흰색 → primary → secondary → tertiary 로 이어지는 색 띠. 각 색의 자리는 OKLCH 명도
-	 * (1 → 0.74 → 0.57 → 0.32)에 비례하게 둬서, 인원이 늘 때마다 밝기가 고르게 어두워진다.
-	 * 색 토큰의 명도를 바꾸면 이 자리도 같이 맞춘다.
+	 * 흰색 → primary → secondary → tertiary 로 이어지는 색 띠. 각 색의 자리는 OKLab 에서
+	 * 앞 색까지의 거리(명도·채도·색상 차이를 모두 합친 색 차이 ΔE) 누적에 비례하게 둬서,
+	 * 인원이 한 명 늘 때마다 색 차이가 고르게 난다. (구간 ΔE 0.295 → 0.176 → 0.254)
+	 * 색 토큰을 바꾸면 이 자리도 다시 계산해 맞춘다.
 	 */
 	const PALETTE = [
 		{ at: 0, color: 'var(--white)' },
-		{ at: 0.38, color: 'var(--primary)' },
-		{ at: 0.63, color: 'var(--secondary)' },
+		{ at: 0.41, color: 'var(--primary)' },
+		{ at: 0.65, color: 'var(--secondary)' },
 		{ at: 1, color: 'var(--tertiary)' }
 	];
 
-	const getLevel = (count: number) => (count ? MIN_LEVEL + (1 - MIN_LEVEL) * (count / total) : 0);
+	const getLevel = (count: number) => (count ? Math.max(count / total, MIN_LEVEL) : 0);
 
 	/**
 	 * 색 띠에서 그 인원 자리의 색. 흰색 토큰은 색상각이 0으로 잡혀 있어 oklch 로 섞으면
@@ -232,8 +233,8 @@
 		background: linear-gradient(
 			to right in oklab,
 			var(--white),
-			var(--primary) 38%,
-			var(--secondary) 63%,
+			var(--primary) 41%,
+			var(--secondary) 65%,
 			var(--tertiary)
 		);
 		width: 4rem;
