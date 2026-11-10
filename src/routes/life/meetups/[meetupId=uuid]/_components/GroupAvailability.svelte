@@ -32,7 +32,35 @@
 			.join(', ')
 	);
 
+	/**
+	 * 흰색 → primary → secondary → tertiary 로 이어지는 색 띠. 각 색의 자리는 OKLCH 명도
+	 * (1 → 0.74 → 0.57 → 0.32)에 비례하게 둬서, 인원이 늘 때마다 밝기가 고르게 어두워진다.
+	 * 색 토큰의 명도를 바꾸면 이 자리도 같이 맞춘다.
+	 */
+	const PALETTE = [
+		{ at: 0, color: 'var(--white)' },
+		{ at: 0.38, color: 'var(--primary)' },
+		{ at: 0.63, color: 'var(--secondary)' },
+		{ at: 1, color: 'var(--tertiary)' }
+	];
+
 	const getLevel = (count: number) => (count ? MIN_LEVEL + (1 - MIN_LEVEL) * (count / total) : 0);
+
+	/**
+	 * 색 띠에서 그 인원 자리의 색. 흰색 토큰은 색상각이 0으로 잡혀 있어 oklch 로 섞으면
+	 * 보라빛을 거치므로 oklab 으로 섞는다. 명도(L)는 oklab 과 oklch 가 같다.
+	 */
+	const getSlotColor = (count: number) => {
+		const level = getLevel(count);
+		const end = PALETTE.findIndex((stop) => stop.at >= level);
+		if (end === 0) return PALETTE[0].color;
+		// 부동소수 오차로 1을 살짝 넘어도 가장 진한 색으로 둔다.
+		if (end === -1) return PALETTE[PALETTE.length - 1].color;
+		const from = PALETTE[end - 1];
+		const to = PALETTE[end];
+		const ratio = ((level - from.at) / (to.at - from.at)) * 100;
+		return `color-mix(in oklab, ${to.color} ${ratio.toFixed(1)}%, ${from.color})`;
+	};
 
 	const POPUP_GAP_PX = 12;
 	const POPUP_MARGIN_PX = 8;
@@ -140,7 +168,7 @@
 				data-index={index}
 				data-day={dayIndex}
 				data-slot={slot}
-				style:--level={getLevel(counts[index])}
+				style:background={getSlotColor(counts[index])}
 			></span>
 		{/snippet}
 	</SlotTable>
@@ -200,10 +228,12 @@
 	.legend {
 		border: var(--divider-border-width) solid var(--gray-border);
 		border-radius: 999rem;
+		/* 칸 색과 같은 띠. 자리는 스크립트의 PALETTE 와 맞춘다. */
 		background: linear-gradient(
-			to right,
+			to right in oklab,
 			var(--white),
-			color-mix(in oklab, var(--tertiary) 20%, var(--white)),
+			var(--primary) 38%,
+			var(--secondary) 63%,
 			var(--tertiary)
 		);
 		width: 4rem;
@@ -214,8 +244,6 @@
 		position: relative;
 		border-top: var(--divider-border-width) dashed var(--gray-border);
 		border-left: var(--divider-border-width) solid var(--gray-border);
-		/* oklch 로 섞으면 무채색과 섞일 때 색상이 돌아 보라빛이 된다. */
-		background: color-mix(in oklab, var(--tertiary) calc(var(--level) * 100%), var(--white));
 	}
 
 	.slot.is-hour {
@@ -232,7 +260,8 @@
 
 	.slot.is-focused {
 		z-index: 2;
-		outline: 0.1rem solid var(--primary);
+		/* 칸이 흰색부터 남색까지 모두 파랑 계열이라, 어느 칸에서도 보이는 다른 색상으로 그린다. */
+		outline: 0.1rem solid var(--warn);
 		outline-offset: -0.1rem;
 	}
 
