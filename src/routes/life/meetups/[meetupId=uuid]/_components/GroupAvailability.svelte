@@ -203,8 +203,8 @@
 		background: linear-gradient(
 			to right,
 			var(--white),
-			color-mix(in oklab, var(--primary) 20%, var(--white)),
-			var(--primary)
+			color-mix(in oklab, var(--tertiary) 20%, var(--white)),
+			var(--tertiary)
 		);
 		width: 4rem;
 		height: 0.6rem;
@@ -215,7 +215,7 @@
 		border-top: var(--divider-border-width) dashed var(--gray-border);
 		border-left: var(--divider-border-width) solid var(--gray-border);
 		/* oklch 로 섞으면 무채색과 섞일 때 색상이 돌아 보라빛이 된다. */
-		background: color-mix(in oklab, var(--primary) calc(var(--level) * 100%), var(--white));
+		background: color-mix(in oklab, var(--tertiary) calc(var(--level) * 100%), var(--white));
 	}
 
 	.slot.is-hour {
@@ -232,7 +232,7 @@
 
 	.slot.is-focused {
 		z-index: 2;
-		outline: 0.1rem solid var(--text);
+		outline: 0.1rem solid var(--primary);
 		outline-offset: -0.1rem;
 	}
 
