@@ -44,7 +44,7 @@
 			organs: [
 				{ name: '총학생회장단' },
 				{ name: '중앙집행위원회' },
-				{ name: '비상대책위원회', note: '필요 시 설치' }
+				{ name: '비상대책위원회', note: '회장단 궐위 등 발생 시 중앙집행위원회 대체' }
 			]
 		},
 		{
@@ -53,7 +53,7 @@
 		},
 		{
 			name: '독립기구',
-			organs: [{ name: '감사원' }, { name: '중앙선거관리위원회', note: '회칙에 따라 설치' }]
+			organs: [{ name: '감사원' }, { name: '중앙선거관리위원회', note: '선거·투표 시 구성' }]
 		},
 		{
 			name: '전문기구',
@@ -86,8 +86,8 @@
 					<section class="committee-roles" aria-label="총학생회 회원">
 						<div class="organ-heading"><strong>총학생회 회원</strong></div>
 						<ul class="positions member-types" aria-label="총학생회 회원 구분">
-							<li><b>정회원</b><span>회비 납부 의무를 다한 재학생</span></li>
-							<li><b>준회원</b><span>휴학생 · 회비 납부 의무를 다하지 않은 재학생</span></li>
+							<li><b>정회원</b><span>회비 납부를 완료한 재학생</span></li>
+							<li><b>준회원</b><span>휴학생 · 회비 납부를 완료하지 않은 재학생</span></li>
 						</ul>
 					</section>
 				</div>
@@ -102,7 +102,7 @@
 									class="organs"
 									class:decision-organs={group.name === '의결기구'}
 									aria-label={group.name === '의결기구'
-										? '학생총회와 학생총투표, 일부 권한을 위임받은 중앙운영위원회'
+										? '학생총회와 학생총투표, 학생총회에서 일부 권한을 위임받은 중앙운영위원회'
 										: undefined}
 								>
 									{#each group.organs as organ (organ.name)}
@@ -110,6 +110,9 @@
 											class:direct-choice={organ.name === '학생총회' || organ.name === '학생총투표'}
 											class:delegated-organ={organ.name === '중앙운영위원회'}
 										>
+											{#if organ.name === '중앙운영위원회'}
+												<p class="delegation-label">학생총회 권한 일부 위임</p>
+											{/if}
 											<div
 												class="organ"
 												class:direct-decision={organ.name === '학생총회' ||
@@ -202,16 +205,6 @@
 														</section>
 													</li>
 													<li>
-														<section class="organ" aria-label="동아리연합본부">
-															<div class="organ-heading"><strong>동아리연합본부</strong></div>
-															<ul class="positions" aria-label="동아리연합본부 직책">
-																<li>연합본부장 (원칙적으로 연합회장)</li>
-																<li>국장</li>
-																<li>국원</li>
-															</ul>
-														</section>
-													</li>
-													<li>
 														<section class="organ" aria-label="동아리연합회 등록 동아리">
 															<div class="organ-heading"><strong>등록 동아리</strong></div>
 															<section class="committee-roles" aria-label="동아리원 구성">
@@ -248,10 +241,15 @@
 				</ul>
 			</li>
 		</ul>
-		<p class="note">
-			총학생회칙 2026년 3월 17일 · 학생교육위원회세칙 2026년 3월 10일 · 동아리연합회칙 2026년 8월
-			14일 개정 기준 · 감사원세칙 2026년 6월 3일 개정안 기준
-		</p>
+		<div class="note">
+			<p>일부 세부 구성은 생략됨.</p>
+			<ul aria-label="구조도 기준 회칙과 세칙">
+				<li>총학생회칙 · 2026년 3월 17일 개정</li>
+				<li>학생교육위원회세칙 · 2026년 3월 10일 개정</li>
+				<li>동아리연합회칙 · 2026년 8월 14일 개정</li>
+				<li>감사원세칙 · 2026년 6월 3일 개정</li>
+			</ul>
+		</div>
 	</section>
 </section>
 
@@ -363,7 +361,7 @@
 		padding: 0;
 	}
 	.decision-organs > .direct-choice {
-		padding: 0.6rem 0 0.8rem;
+		padding: 0.6rem 0 0.4rem;
 	}
 	.decision-organs > .direct-choice .organ {
 		height: 100%;
@@ -375,35 +373,41 @@
 		border: 0;
 		border-left: var(--control-border-width) solid var(--gray-border);
 		width: 0;
-		height: 0.8rem;
+		height: 0.4rem;
 	}
-	.decision-organs > .direct-choice::after {
-		position: absolute;
-		bottom: 0;
-		border-top: var(--control-border-width) solid var(--gray-border);
-		width: calc(50% + 0.25rem);
-		content: '';
-	}
-	.decision-organs > .direct-choice:first-child::after {
-		left: 50%;
-	}
+	.decision-organs > .direct-choice:nth-child(2)::before,
 	.decision-organs > .direct-choice:nth-child(2)::after {
-		right: 50%;
+		content: none;
 	}
 	.decision-organs > .delegated-organ {
 		grid-column: 1 / -1;
-		padding-top: 0.65rem;
+		padding-top: 0.35rem;
 	}
 	.decision-organs > .delegated-organ::before {
 		top: 0;
-		left: 50%;
+		left: calc(25% - 0.125rem);
 		border: 0;
 		border-left: var(--control-border-width) solid var(--gray-border);
 		width: 0;
-		height: 0.65rem;
+		height: 0.35rem;
 	}
 	.decision-organs > .delegated-organ:last-child::after {
 		content: none;
+	}
+	.delegation-label {
+		position: relative;
+		margin-bottom: 0.2rem;
+		padding-left: calc(25% + 0.375rem);
+		color: var(--gray-text);
+		font-size: 0.7rem;
+	}
+	.delegation-label::before {
+		position: absolute;
+		top: 0;
+		bottom: -0.2rem;
+		left: calc(25% - 0.125rem);
+		border-left: var(--control-border-width) solid var(--gray-border);
+		content: '';
 	}
 	.group li span {
 		color: var(--gray-text);
@@ -516,6 +520,13 @@
 	}
 	.note {
 		margin-top: 0.75rem;
+	}
+	.note p {
+		font-size: inherit;
+	}
+	.note ul {
+		margin-top: 0.35rem;
+		list-style: none;
 	}
 	@media (width <= 768px) {
 		.organization {
