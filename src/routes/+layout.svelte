@@ -49,6 +49,7 @@
 			['/academic/offerings', '개설 강의 관리'],
 			['/channel/petitions', '청원'],
 			['/channel/feedback', '문의·건의'],
+			['/council', '조직도'],
 			['/bylaws', '회칙·세칙'],
 			['/admin', '사이트 관리'],
 			['/profile', '내 정보'],

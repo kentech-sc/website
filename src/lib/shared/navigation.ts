@@ -36,6 +36,7 @@ export function getMainNavigation(options: {
 		{
 			label: '총학',
 			children: [
+				{ label: '조직도', href: resolve('/council') },
 				{ label: BOARD_DEFINITIONS[BoardId.Bylaw].title, href: resolve('/bylaws') },
 				{ label: '청원', href: resolve('/channel/petitions') },
 				{ label: '문의·건의', href: resolve('/channel/feedback') },
